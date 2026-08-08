@@ -1,5 +1,8 @@
 import type { MenuItem, OrderMode } from "@/data/menu";
 
+/** Chosen option per modifier group: `{ [groupId]: choiceId }`. */
+export type LineSelections = Record<string, string>;
+
 export interface CartLine {
   lineId: string;
   itemId: string;
@@ -8,6 +11,8 @@ export interface CartLine {
   instructions: string;
   /** Snapshot of the price at add time. null when the item has no published price. */
   unitPrice: number | null;
+  /** Published option choices. Never carries a price: none is published. */
+  selections: LineSelections;
 }
 
 export interface CartTotals {
@@ -18,14 +23,30 @@ export interface CartTotals {
   itemCount: number;
 }
 
-export function newLine(item: MenuItem, quantity: number, instructions: string): CartLine {
+export function newLine(
+  item: MenuItem,
+  quantity: number,
+  instructions: string,
+  selections: LineSelections = {},
+): CartLine {
   return {
     lineId: `${item.id}:${Date.now().toString(36)}:${Math.random().toString(36).slice(2, 7)}`,
     itemId: item.id,
     quantity,
     instructions,
     unitPrice: item.price,
+    selections,
   };
+}
+
+/** Human-readable summary of a line's chosen options, in the active language. */
+export function selectionLabels(item: MenuItem | null, selections: LineSelections, fr: boolean) {
+  if (!item?.modifierGroups) return [];
+  return item.modifierGroups.flatMap((group) => {
+    const choice = group.choices.find((c) => c.id === selections[group.id]);
+    if (!choice) return [];
+    return [`${fr ? group.labelFr : group.labelEn}: ${fr ? choice.labelFr : choice.labelEn}`];
+  });
 }
 
 /**
