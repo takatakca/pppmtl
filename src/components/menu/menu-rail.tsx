@@ -107,7 +107,7 @@ export function MenuRail({
         <ul
           ref={ref}
           onScroll={measure}
-          className="no-scrollbar snap-rail mx-auto flex max-w-[110rem] gap-2 overflow-x-auto px-3 pb-2 pt-1 sm:px-6"
+          className="no-scrollbar snap-rail mx-auto flex max-w-[110rem] scroll-pl-3 gap-2 overflow-x-auto px-3 pb-2 pt-1 sm:scroll-pl-6 sm:px-6"
         >
           {children}
         </ul>
