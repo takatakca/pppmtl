@@ -10,6 +10,7 @@ import menuRotisserie from "@/assets/menu-rotisserie.jpg";
 
 import { pppBusiness } from "@/config/business";
 import { generatedCategories, generatedItems } from "@/data/catalog.generated";
+import { mostOrderedItemIds } from "@/data/collections.generated";
 import type { ModifierChoice, ModifierGroup } from "@/data/catalog-types";
 
 export type { ModifierChoice, ModifierGroup };
@@ -107,11 +108,16 @@ export const categories: MenuCategory[] = generatedCategories.map((c) => ({ ...c
  * live ordering menu. Facts (names, prices, promos, option groups) are real;
  * customer-facing wording is PPP's own.
  */
+const popularSet = new Set(mostOrderedItemIds);
+
 export const menuItems: MenuItem[] = generatedItems.map((i) => ({
   ...i,
   compareAtPrice: i.compareAtPrice,
   isAvailable: true,
-  badges: (i.compareAtPrice ? ["deal"] : []) as MenuItem["badges"],
+  badges: [
+    ...(popularSet.has(i.id) ? (["popular"] as const) : []),
+    ...(i.compareAtPrice ? (["deal"] as const) : []),
+  ] as MenuItem["badges"],
   locationIds: [NDG],
 }));
 
