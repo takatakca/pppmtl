@@ -20,7 +20,7 @@ import { pppBusiness } from "@/config/business";
 export const Route = createFileRoute("/order")({
   validateSearch: (
     search: Record<string, unknown>,
-  ): { category?: string; item?: string; q?: string } => {
+  ): { category?: string | undefined; item?: string | undefined; q?: string | undefined } => {
     const pick = (key: string) =>
       typeof search[key] === "string" && search[key] ? (search[key] as string) : undefined;
     return { category: pick("category"), item: pick("item"), q: pick("q") };
