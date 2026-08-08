@@ -142,19 +142,26 @@ export function ItemSheet({
             className="mt-2 w-full resize-none border border-border bg-background px-3 py-2 text-sm focus-ppp"
           />
 
-          {onSelectItem && pairings.length > 0 && (
+          {pairings.length > 0 && (
             <div className="mt-7">
               <h3 className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
-                {t("Goes well with", "Se marie bien avec")}
+                {t("Complete your order", "Complétez votre commande")}
               </h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t(
+                  "One tap adds it to the same order.",
+                  "Un seul geste l'ajoute à la même commande.",
+                )}
+              </p>
               <ul className="no-scrollbar mt-2 flex gap-2 overflow-x-auto pb-1">
                 {pairings.map((p) => (
                   <li key={p.id} className="shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => onSelectItem(p)}
-                      className="w-36 border border-border text-left transition-colors hover:border-primary focus-ppp"
-                    >
+                    <div className="card-lift w-36 border border-border transition-colors hover:border-primary">
+                      <button
+                        type="button"
+                        onClick={() => onSelectItem?.(p)}
+                        className="block w-full text-left focus-ppp"
+                      >
                       <MenuImage
                         src={p.image}
                         alt={lang === "fr" ? p.nameFr : p.nameEn}
@@ -171,7 +178,24 @@ export function ItemSheet({
                             : t("See price", "Voir le prix")}
                         </span>
                       </span>
-                    </button>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if ((p.modifierGroups ?? []).some((g) => g.required)) {
+                            onSelectItem?.(p);
+                            return;
+                          }
+                          addToCart(p.id, 1, "", {});
+                        }}
+                        className="press-tap flex w-full items-center justify-center gap-1 border-t border-border bg-primary py-1.5 font-display text-xs uppercase leading-none text-primary-foreground focus-ppp"
+                      >
+                        <Plus className="h-3 w-3" />
+                        {(p.modifierGroups ?? []).some((g) => g.required)
+                          ? t("Choose", "Choisir")
+                          : t("Add", "Ajouter")}
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>

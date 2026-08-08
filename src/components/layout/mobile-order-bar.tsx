@@ -10,7 +10,7 @@ export function MobileOrderBar() {
   const { mode, t } = usePPP();
 
   const tabs = [
-    { to: "/order", label: t("Menu", "Menu"), icon: Utensils },
+    { to: "/menu", label: t("Menu", "Menu"), icon: Utensils },
     { to: "/offers", label: t("Offers", "Offres"), icon: BadgePercent },
     { to: "/account", label: t("Account", "Compte"), icon: User },
   ] as const;
