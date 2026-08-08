@@ -1,0 +1,32 @@
+{
+  "name": "PPP Pizzeria Montreal NDG",
+  "short_name": "PPP NDG",
+  "description": "Order chicken, pizza and poutine from PPP Pizzeria Montreal, Notre-Dame-de-Grâce.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "lang": "en-CA",
+  "categories": ["food", "shopping"],
+  "icons": [
+    {
+      "src": "/icons/ppp-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/ppp-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "Order now", "url": "/order" },
+    { "name": "Full menu", "url": "/menu" },
+    { "name": "Deals", "url": "/offers" }
+  ]
+}
