@@ -10,6 +10,8 @@ import { OffersGrid } from "@/components/home/offers-grid";
 import { CategoryGrid } from "@/components/home/category-grid";
 import { Rewards } from "@/components/home/rewards";
 import { PromoExperience } from "@/components/marketing/promo-experience";
+import { DealBanner } from "@/components/marketing/deal-banner";
+import { StickyOrderCTA } from "@/components/layout/sticky-order-cta";
 import { AccountModule } from "@/components/home/account-module";
 import { LocationsSection } from "@/components/home/locations-section";
 import { FranchiseCareers } from "@/components/home/franchise-careers";
@@ -50,6 +52,7 @@ function Index() {
         <Hero />
         <MostOrdered />
         <OffersGrid />
+        <DealBanner />
         <CategoryGrid />
         <Rewards />
         <LocationsSection />
@@ -58,6 +61,7 @@ function Index() {
       </main>
       <PPPFooter />
       <MobileOrderBar />
+      <StickyOrderCTA />
       <SearchOverlay />
       <LocationSheet />
       <OrderSheet />

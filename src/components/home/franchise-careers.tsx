@@ -1,6 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import crew from "@/assets/team-crew.jpg";
 import { usePPP } from "@/context/ppp-store";
+import { Reveal } from "@/components/motion/reveal";
 
 export function FranchiseCareers() {
   const { t } = usePPP();
@@ -8,8 +9,13 @@ export function FranchiseCareers() {
   return (
     <section id="franchise" className="mx-auto max-w-[110rem] px-3 py-10 sm:px-6 lg:py-14">
       <div className="grid gap-2 lg:grid-cols-2">
-        <div className="relative overflow-hidden border border-border">
-          <img src={crew} alt="" loading="lazy" className="h-72 w-full object-cover lg:h-full" />
+        <Reveal clip className="relative overflow-hidden border border-border">
+          <img
+            src={crew}
+            alt=""
+            loading="lazy"
+            className="ken-burns h-72 w-full object-cover lg:h-full"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-5 lg:p-8">
             <h2 className="font-display text-5xl uppercase leading-none lg:text-6xl">
@@ -23,15 +29,15 @@ export function FranchiseCareers() {
             </p>
             <a
               href="#franchise"
-              className="mt-4 inline-flex items-center gap-2 bg-primary px-5 py-3 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
+              className="cta-motion mt-4 inline-flex items-center gap-2 bg-primary px-5 py-3 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
             >
               {t("Apply now", "Postuler")}
-              <ArrowUpRight className="h-4 w-4" />
+              <ArrowUpRight className="cta-arrow h-4 w-4" />
             </a>
           </div>
-        </div>
+        </Reveal>
 
-        <div className="flex flex-col justify-between border border-border bg-card p-6 lg:p-10">
+        <Reveal delay={90} className="flex flex-col justify-between border border-border bg-card p-6 lg:p-10">
           <div>
             <p className="font-display text-xs uppercase tracking-[0.35em] text-accent">
               {t("Franchise", "Franchise")}
@@ -51,18 +57,18 @@ export function FranchiseCareers() {
           <div className="mt-6 grid gap-2 sm:grid-cols-2">
             <a
               href="#franchise"
-              className="bg-primary px-5 py-3.5 text-center font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
+              className="cta-motion bg-primary px-5 py-3.5 text-center font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
             >
               {t("Request info", "Demander l'info")}
             </a>
             <a
               href="#locations"
-              className="border border-border px-5 py-3.5 text-center font-display text-lg uppercase leading-none focus-ppp"
+              className="border border-border px-5 py-3.5 text-center font-display text-lg uppercase leading-none transition-colors hover:border-primary focus-ppp"
             >
               {t("Talk to us", "Nous parler")}
             </a>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
