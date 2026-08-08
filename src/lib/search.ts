@@ -97,10 +97,51 @@ function haystack(parts: Array<string | string[]>) {
     .join(" | ");
 }
 
+/**
+ * The catalog is static, so every searchable string is normalized once at
+ * module load. Keystroke-time search then only scans short lowercase strings —
+ * no per-render normalization of 175 items.
+ */
+interface ItemIndex {
+  names: string;
+  aliases: string;
+  desc: string;
+  options: string;
+}
+
+const CATEGORY_INDEX = new Map<string, { names: string; aliases: string; desc: string }>(
+  categories.map((c) => [
+    c.id,
+    {
+      names: haystack([c.nameEn, c.nameFr]),
+      aliases: haystack([c.aliasesEn, c.aliasesFr]),
+      desc: haystack([c.descriptionEn, c.descriptionFr]),
+    },
+  ]),
+);
+
+const ITEM_INDEX = new Map<string, ItemIndex>(
+  menuItems.map((i) => [
+    i.id,
+    {
+      names: haystack([i.nameEn, i.nameFr]),
+      aliases: haystack([i.aliasesEn, i.aliasesFr]),
+      desc: haystack([i.descriptionEn, i.descriptionFr]),
+      options: haystack(
+        (i.modifierGroups ?? []).flatMap((g) => [
+          g.labelEn,
+          g.labelFr,
+          ...g.choices.flatMap((c) => [c.labelEn, c.labelFr]),
+        ]),
+      ),
+    },
+  ]),
+);
+
 function scoreCategory(cat: MenuCategory, terms: string[]) {
-  const names = haystack([cat.nameEn, cat.nameFr]);
-  const aliases = haystack([cat.aliasesEn, cat.aliasesFr]);
-  const desc = haystack([cat.descriptionEn, cat.descriptionFr]);
+  const idx = CATEGORY_INDEX.get(cat.id);
+  if (!idx) return 0;
+  const { names, aliases, desc } = idx;
   let score = 0;
   for (const term of terms) {
     if (names === term) score += 12;
@@ -112,15 +153,15 @@ function scoreCategory(cat: MenuCategory, terms: string[]) {
 }
 
 function scoreItem(item: MenuItem, terms: string[]) {
-  const names = haystack([item.nameEn, item.nameFr]);
-  const aliases = haystack([item.aliasesEn, item.aliasesFr]);
-  const desc = haystack([item.descriptionEn, item.descriptionFr]);
+  const idx = ITEM_INDEX.get(item.id);
+  if (!idx) return 0;
   let score = 0;
   for (const term of terms) {
-    if (names.startsWith(term)) score += 10;
-    else if (names.includes(term)) score += 7;
-    if (aliases.includes(term)) score += 5;
-    if (desc.includes(term)) score += 2;
+    if (idx.names.startsWith(term)) score += 10;
+    else if (idx.names.includes(term)) score += 7;
+    if (idx.aliases.includes(term)) score += 5;
+    if (idx.desc.includes(term)) score += 2;
+    if (idx.options.includes(term)) score += 3;
   }
   return score;
 }
