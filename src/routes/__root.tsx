@@ -77,16 +77,29 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "PPP MTL-Nord | Poulet, Pizza & Poutine à Montréal" },
+      {
+        name: "description",
+        content:
+          "Order PPP MTL-Nord for pickup or delivery. Rotisserie chicken, pizza, poutine, shawarma combos, PPP Rewards and gift cards in Montréal-Nord.",
+      },
+      { name: "author", content: "PPP MTL-Nord" },
+      { property: "og:title", content: "PPP MTL-Nord | Poulet, Pizza & Poutine" },
+      {
+        property: "og:description",
+        content: "Order pickup or delivery, earn PPP Rewards, and taste Montréal-Nord's favourite combos.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700;800&display=swap",
+      },
       {
         rel: "stylesheet",
         href: appCss,
