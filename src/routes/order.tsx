@@ -65,10 +65,7 @@ function OrderPage() {
   }, [query, lang, locationId, activeCategory]);
 
   const activeName = categories.find((c) => c.id === activeCategory);
-  const popular = useMemo(
-    () => menuRepository.getPopularItems(locationId, 10),
-    [locationId],
-  );
+  const popular = useMemo(() => menuRepository.getPopularItems(locationId, 10), [locationId]);
 
   return (
     <div className="min-h-dvh bg-background pb-28 lg:pb-0">

@@ -89,8 +89,7 @@ export const staticMenuRepository: MenuRepository = {
   getItemsInCategory: (categoryId, locationId) =>
     availableItems(locationId).filter((i) => i.categoryId === categoryId),
   getItem: (itemId) => staticItems.find((i) => i.id === itemId) ?? null,
-  getModifierGroups: (itemId) =>
-    staticItems.find((i) => i.id === itemId)?.modifierGroups ?? [],
+  getModifierGroups: (itemId) => staticItems.find((i) => i.id === itemId)?.modifierGroups ?? [],
   getCollections: () => [
     {
       id: "most-ordered",

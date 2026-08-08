@@ -48,7 +48,11 @@ function MenuAuditPage() {
         <Row label="Promo / featured duplicates" value={a.promoDuplicates} />
         <Row label="Variant placements" value={a.variantPlacements} />
         <Row label="Cross-category placements" value={a.crossCategoryPlacements} />
-        <Row label="Unclassified placements" value={a.unclassifiedPlacements} bad={a.unclassifiedPlacements > 0} />
+        <Row
+          label="Unclassified placements"
+          value={a.unclassifiedPlacements}
+          bad={a.unclassifiedPlacements > 0}
+        />
         <Row label="Excluded placements" value={a.excludedPlacements} />
         <Row
           label="Category counts match source"
@@ -70,7 +74,11 @@ function MenuAuditPage() {
         <Row label="Modifiers partial (no published deltas)" value={a.modifiersPartial} />
         <Row label="Modifiers unavailable" value={a.modifiersUnavailable} />
         <Row label="Orphan products" value={a.orphanItems} bad={a.orphanItems > 0} />
-        <Row label="Uncategorized products" value={a.uncategorizedItems} bad={a.uncategorizedItems > 0} />
+        <Row
+          label="Uncategorized products"
+          value={a.uncategorizedItems}
+          bad={a.uncategorizedItems > 0}
+        />
         <Row label="Broken product ids" value={a.brokenIds} bad={a.brokenIds > 0} />
         <Row label="Duplicate ids" value={a.duplicateIds} bad={a.duplicateIds > 0} />
         <Row label="Search index count" value={a.searchIndexCount} />
