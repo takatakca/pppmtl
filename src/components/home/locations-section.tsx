@@ -12,6 +12,7 @@ import {
 import storefront from "@/assets/storefront-night.jpg";
 import { usePPP } from "@/context/ppp-store";
 import { pppBusiness } from "@/config/business";
+import { Reveal } from "@/components/motion/reveal";
 
 const serviceIcons: Record<string, typeof Wifi> = {
   pickup: ShoppingBag,
@@ -33,7 +34,7 @@ export function LocationsSection() {
     <section id="locations" className="relative border-y border-border">
       <div className="mx-auto grid max-w-[110rem] gap-0 lg:grid-cols-[1.1fr_0.9fr]">
         {/* Store visual + map */}
-        <div className="relative">
+        <Reveal className="relative">
           <div className="relative h-56 overflow-hidden lg:h-[22rem]">
             <img
               src={storefront}
@@ -42,7 +43,7 @@ export function LocationsSection() {
                 "PPP Pizzeria sur l'avenue Somerled à Notre-Dame-de-Grâce, le soir",
               )}
               loading="lazy"
-              className="h-full w-full object-cover"
+              className="ken-burns h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/25 to-transparent" />
             <p className="absolute bottom-3 left-4 font-display text-4xl uppercase leading-[0.85] lg:text-6xl">
@@ -63,10 +64,10 @@ export function LocationsSection() {
               className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-border"
             />
           </div>
-        </div>
+        </Reveal>
 
         {/* Store record */}
-        <div className="p-5 lg:p-8">
+        <Reveal delay={110} className="p-5 lg:p-8">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="font-display text-3xl uppercase leading-none lg:text-5xl">
@@ -147,7 +148,7 @@ export function LocationsSection() {
           <div className="mt-6 grid gap-2 sm:grid-cols-3">
             <button
               onClick={openOrderSheet}
-              className="bg-primary px-5 py-3.5 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
+              className="cta-motion bg-primary px-5 py-3.5 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
               style={{ boxShadow: "var(--shadow-glow)" }}
             >
               {t("Order", "Commander")}
@@ -183,7 +184,7 @@ export function LocationsSection() {
               className="h-56 w-full border-t border-border grayscale-[0.35]"
             />
           </details>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
