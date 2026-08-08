@@ -77,8 +77,8 @@ function AccountPage() {
         </h1>
         <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
           {t(
-            "Accounts open soon. Until then you can order without signing in — pickup or delivery, straight from the NDG kitchen.",
-            "Les comptes arrivent bientôt. D'ici là, commandez sans compte — cueillette ou livraison, directement de la cuisine NDG.",
+            "Create your PPP account to reorder in one tap, keep your rewards and save your favourites — or keep ordering as a guest.",
+            "Créez votre compte PPP pour recommander en une touche, conserver vos points et enregistrer vos favoris — ou commandez sans compte.",
           )}
         </p>
 
