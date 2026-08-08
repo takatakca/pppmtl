@@ -92,7 +92,7 @@ function GiftCards() {
                     ${value.toFixed(2)}
                   </p>
                   <p className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">
-                    {to ? t(`For ${to}`, `Pour ${to}`) : pppBusiness.address.street}
+                    {to ? t(`For ${to}`, `Pour ${to}`) : pppBusiness.address.line1}
                   </p>
                 </div>
               </div>
