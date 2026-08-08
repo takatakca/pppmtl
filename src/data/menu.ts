@@ -377,8 +377,10 @@ export const menuItems: MenuItem[] = [
     categoryId: "cat-mexican",
     nameEn: "Beef Quesadillas",
     nameFr: "Quesadillas Bœuf",
-    descriptionEn: "Beef quesadilla with your choice of included toppings and sauces. Extra sauce available.",
-    descriptionFr: "Quesadilla bœuf avec garnitures et sauces incluses au choix. Extra sauce disponible.",
+    descriptionEn:
+      "Beef quesadilla with your choice of included toppings and sauces. Extra sauce available.",
+    descriptionFr:
+      "Quesadilla bœuf avec garnitures et sauces incluses au choix. Extra sauce disponible.",
     aliasesEn: ["quesadilla", "quesadillas", "beef", "mexican"],
     aliasesFr: ["quesadilla", "quesadillas", "boeuf", "bœuf", "mexicain"],
     image: foodBurger,
@@ -392,8 +394,10 @@ export const menuItems: MenuItem[] = [
     categoryId: "cat-pizza",
     nameEn: "Pizza",
     nameFr: "Pizza",
-    descriptionEn: "Pizza, double 2x pizza and promo pizza — sizes and toppings chosen at checkout.",
-    descriptionFr: "Pizza, double 2x pizza et promo pizza — formats et garnitures choisis à la commande.",
+    descriptionEn:
+      "Pizza, double 2x pizza and promo pizza — sizes and toppings chosen at checkout.",
+    descriptionFr:
+      "Pizza, double 2x pizza et promo pizza — formats et garnitures choisis à la commande.",
     aliasesEn: ["pizza", "pizzas", "double pizza", "promo pizza"],
     aliasesFr: ["pizza", "pizzas", "double pizza", "promo pizza"],
     image: foodPizza,

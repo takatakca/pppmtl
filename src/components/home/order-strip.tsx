@@ -33,7 +33,11 @@ export function OrderStrip() {
                     mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                   }`}
                 >
-                  {m === "pickup" ? <ShoppingBag className="h-3.5 w-3.5" /> : <Bike className="h-3.5 w-3.5" />}
+                  {m === "pickup" ? (
+                    <ShoppingBag className="h-3.5 w-3.5" />
+                  ) : (
+                    <Bike className="h-3.5 w-3.5" />
+                  )}
                   {m === "pickup" ? t("Pickup", "Cueillette") : t("Delivery", "Livraison")}
                 </button>
               ))}

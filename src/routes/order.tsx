@@ -28,7 +28,8 @@ export const Route = createFileRoute("/order")({
       { property: "og:title", content: "Order Online | PPP Pizzeria NDG" },
       {
         property: "og:description",
-        content: "Search the PPP NDG menu by text or voice, build your order and continue by phone or app.",
+        content:
+          "Search the PPP NDG menu by text or voice, build your order and continue by phone or app.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/order" },
@@ -51,7 +52,8 @@ function OrderPage() {
 
   const voice = useVoiceSearch(lang, (text: string) => setQuery(text));
   const listening = voice.status === "listening";
-  const voiceUnavailable = voice.status === "denied" || voice.status === "unsupported" || voice.status === "error";
+  const voiceUnavailable =
+    voice.status === "denied" || voice.status === "unsupported" || voice.status === "error";
 
   const results = useMemo(() => {
     if (query.trim().length > 0) {
@@ -84,7 +86,11 @@ function OrderPage() {
                     mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                   }`}
                 >
-                  {m === "pickup" ? <ShoppingBag className="h-3.5 w-3.5" /> : <Bike className="h-3.5 w-3.5" />}
+                  {m === "pickup" ? (
+                    <ShoppingBag className="h-3.5 w-3.5" />
+                  ) : (
+                    <Bike className="h-3.5 w-3.5" />
+                  )}
                   {m === "pickup" ? t("Pickup", "Cueillette") : t("Delivery", "Livraison")}
                 </button>
               ))}
@@ -98,11 +104,18 @@ function OrderPage() {
                 onChange={(e) => setQuery(e.target.value)}
                 enterKeyHint="search"
                 aria-label={t("Search the menu", "Rechercher au menu")}
-                placeholder={t("Search chicken, poutine, subs…", "Chercher poulet, poutine, sous-marins…")}
+                placeholder={t(
+                  "Search chicken, poutine, subs…",
+                  "Chercher poulet, poutine, sous-marins…",
+                )}
                 className="h-11 min-w-0 flex-1 bg-transparent text-sm outline-none"
               />
               {query && (
-                <button onClick={() => setQuery("")} aria-label={t("Clear search", "Effacer")} className="p-1 focus-ppp">
+                <button
+                  onClick={() => setQuery("")}
+                  aria-label={t("Clear search", "Effacer")}
+                  className="p-1 focus-ppp"
+                >
                   <X className="h-4 w-4" />
                 </button>
               )}
@@ -126,8 +139,14 @@ function OrderPage() {
           </div>
 
           {voiceUnavailable && (
-            <p role="status" className="mt-2 text-[0.65rem] uppercase tracking-widest text-muted-foreground">
-              {t("Voice unavailable — type your search instead.", "Voix indisponible — tapez votre recherche.")}
+            <p
+              role="status"
+              className="mt-2 text-[0.65rem] uppercase tracking-widest text-muted-foreground"
+            >
+              {t(
+                "Voice unavailable — type your search instead.",
+                "Voix indisponible — tapez votre recherche.",
+              )}
             </p>
           )}
 
@@ -192,7 +211,9 @@ function OrderPage() {
                     </span>
                     <span className="mt-2 flex items-baseline gap-2">
                       <span className="font-display text-xl leading-none text-accent">
-                        {item.price !== null ? `$${item.price.toFixed(2)}` : t("See price", "Voir le prix")}
+                        {item.price !== null
+                          ? `$${item.price.toFixed(2)}`
+                          : t("See price", "Voir le prix")}
                       </span>
                       {item.compareAtPrice != null && (
                         <span className="text-xs text-muted-foreground line-through">

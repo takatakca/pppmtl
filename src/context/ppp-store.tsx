@@ -106,7 +106,10 @@ export function PPPProvider({ children }: { children: ReactNode }) {
       addRecentSearch: (q) => {
         const clean = q.trim();
         if (!clean) return;
-        const recentSearches = [clean, ...state.recentSearches.filter((r) => r !== clean)].slice(0, 6);
+        const recentSearches = [clean, ...state.recentSearches.filter((r) => r !== clean)].slice(
+          0,
+          6,
+        );
         persist({ ...state, recentSearches });
       },
       clearRecentSearches: () => persist({ ...state, recentSearches: [] }),

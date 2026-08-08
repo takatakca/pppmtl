@@ -40,7 +40,10 @@ export function PPPHeader() {
       {/* Utility strip — location + mode always visible, marketplaces secondary */}
       <div className="hidden border-b border-border bg-background lg:block">
         <div className="mx-auto flex h-8 max-w-[110rem] items-center gap-4 px-4 text-[0.65rem] font-bold uppercase tracking-[0.22em] text-muted-foreground sm:px-6">
-          <button onClick={openLocationSheet} className="flex items-center gap-1.5 hover:text-foreground focus-ppp">
+          <button
+            onClick={openLocationSheet}
+            className="flex items-center gap-1.5 hover:text-foreground focus-ppp"
+          >
             <MapPin className="h-3 w-3 text-primary" />
             {location?.name ?? t("Choose a location", "Choisir un emplacement")}
             <ChevronDown className="h-3 w-3" />
@@ -72,7 +75,9 @@ export function PPPHeader() {
 
       <div
         className={`transition-colors duration-200 ${
-          scrolled ? "border-b border-border bg-background/95 backdrop-blur-xl" : "bg-background/70 backdrop-blur-md"
+          scrolled
+            ? "border-b border-border bg-background/95 backdrop-blur-xl"
+            : "bg-background/70 backdrop-blur-md"
         }`}
       >
         <div className="mx-auto grid h-14 max-w-[110rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-6 lg:h-16 lg:gap-4">
@@ -80,7 +85,9 @@ export function PPPHeader() {
             <span className="bg-primary px-1.5 py-1 font-display text-lg leading-none text-primary-foreground">
               PPP
             </span>
-            <span className="hidden font-display text-lg leading-none tracking-wide sm:inline">NDG MTL</span>
+            <span className="hidden font-display text-lg leading-none tracking-wide sm:inline">
+              NDG MTL
+            </span>
           </Link>
 
           <nav className="hidden min-w-0 items-center gap-5 lg:flex">

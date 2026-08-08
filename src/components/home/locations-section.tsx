@@ -1,4 +1,14 @@
-import { Clock, ExternalLink, MapPin, Music4, Phone, ShoppingBag, Star, Tv, Wifi } from "lucide-react";
+import {
+  Clock,
+  ExternalLink,
+  MapPin,
+  Music4,
+  Phone,
+  ShoppingBag,
+  Star,
+  Tv,
+  Wifi,
+} from "lucide-react";
 import storefront from "@/assets/storefront-night.jpg";
 import { usePPP } from "@/context/ppp-store";
 import { pppBusiness } from "@/config/business";
@@ -48,7 +58,10 @@ export function LocationsSection() {
               referrerPolicy="no-referrer-when-downgrade"
               className="h-[16rem] w-full grayscale-[0.35] contrast-[1.1]"
             />
-            <div aria-hidden className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-border" />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-border"
+            />
           </div>
         </div>
 
@@ -111,8 +124,8 @@ export function LocationsSection() {
           </p>
           {googleProfile.priceRange && (
             <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
-              {t("Typically", "Environ")} {googleProfile.priceRange} {t("per person", "par personne")} ·{" "}
-              {t("Google", "Google")}
+              {t("Typically", "Environ")} {googleProfile.priceRange}{" "}
+              {t("per person", "par personne")} · {t("Google", "Google")}
             </p>
           )}
 
@@ -162,13 +175,13 @@ export function LocationsSection() {
             <summary className="cursor-pointer list-none px-4 py-3 text-[0.65rem] font-bold uppercase tracking-[0.25em] text-muted-foreground focus-ppp">
               {t("Show map", "Voir la carte")}
             </summary>
-              <iframe
-                title={t("Map to PPP NDG", "Carte vers PPP NDG")}
-                src={google.embedUrl}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="h-56 w-full border-t border-border grayscale-[0.35]"
-              />
+            <iframe
+              title={t("Map to PPP NDG", "Carte vers PPP NDG")}
+              src={google.embedUrl}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="h-56 w-full border-t border-border grayscale-[0.35]"
+            />
           </details>
         </div>
       </div>

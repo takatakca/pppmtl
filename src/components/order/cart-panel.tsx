@@ -31,7 +31,11 @@ export function CartPanel() {
             {t("Your order", "Votre commande")}
             <span className="ml-2 text-accent">{totals.itemCount}</span>
           </h2>
-          <button onClick={closeCart} aria-label={t("Close", "Fermer")} className="border border-border p-2 focus-ppp">
+          <button
+            onClick={closeCart}
+            aria-label={t("Close", "Fermer")}
+            className="border border-border p-2 focus-ppp"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -61,7 +65,9 @@ export function CartPanel() {
                       <div className="min-w-0">
                         <p className="font-display text-lg uppercase leading-tight">{name}</p>
                         {line.instructions && (
-                          <p className="mt-1 text-xs text-muted-foreground">“{line.instructions}”</p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            “{line.instructions}”
+                          </p>
                         )}
                       </div>
                       <span className="shrink-0 font-display text-lg leading-none text-accent">

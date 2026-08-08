@@ -61,7 +61,11 @@ export function OrderSheet() {
                   mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                 }`}
               >
-                {m === "pickup" ? <ShoppingBag className="h-4 w-4" /> : <Bike className="h-4 w-4" />}
+                {m === "pickup" ? (
+                  <ShoppingBag className="h-4 w-4" />
+                ) : (
+                  <Bike className="h-4 w-4" />
+                )}
                 {m === "pickup" ? t("Pickup", "Cueillette") : t("Delivery", "Livraison")}
               </button>
             ))}

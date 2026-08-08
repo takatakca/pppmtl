@@ -19,8 +19,7 @@ function getRecognitionCtor(): (new () => SpeechRecognitionLike) | null {
   if (typeof window === "undefined") return null;
   const w = window as unknown as Record<string, unknown>;
   return (w["SpeechRecognition"] ?? w["webkitSpeechRecognition"]) as
-    | (new () => SpeechRecognitionLike)
-    | null;
+    (new () => SpeechRecognitionLike) | null;
 }
 
 export function useVoiceSearch(lang: Lang, onTranscript: (text: string) => void) {
@@ -62,7 +61,11 @@ export function useVoiceSearch(lang: Lang, onTranscript: (text: string) => void)
         }
       };
       recognition.onerror = (event: any) => {
-        setStatus(event?.error === "not-allowed" || event?.error === "service-not-allowed" ? "denied" : "error");
+        setStatus(
+          event?.error === "not-allowed" || event?.error === "service-not-allowed"
+            ? "denied"
+            : "error",
+        );
       };
       recognition.onend = () => {
         setStatus((s) => (s === "listening" ? "idle" : s));

@@ -11,8 +11,7 @@ export interface StartOrderInput {
 }
 
 export type StartOrderResult =
-  | { status: "needs-location" }
-  | { status: "ready"; input: StartOrderInput };
+  { status: "needs-location" } | { status: "ready"; input: StartOrderInput };
 
 /**
  * Single entry point for every order CTA in the UI. Production can replace the

@@ -60,7 +60,9 @@ export function MenuExplorer() {
           ))}
         </div>
 
-        <p className="mt-4 max-w-xl text-sm text-muted-foreground">{localizedDescription(active, lang)}</p>
+        <p className="mt-4 max-w-xl text-sm text-muted-foreground">
+          {localizedDescription(active, lang)}
+        </p>
 
         <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
           {items.map((item) => (
@@ -88,7 +90,9 @@ export function MenuExplorer() {
                   {localizedDescription(item, lang)}
                 </span>
                 <span className="mt-1 block font-display text-base leading-none text-accent">
-                  {item.price !== null ? `$${item.price.toFixed(2)}` : t("See price", "Voir le prix")}
+                  {item.price !== null
+                    ? `$${item.price.toFixed(2)}`
+                    : t("See price", "Voir le prix")}
                 </span>
               </span>
               <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center bg-primary text-primary-foreground">
