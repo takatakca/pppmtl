@@ -59,7 +59,10 @@ function ForgotPasswordPage() {
         <div className="rise-in border border-border bg-card p-5">
           <MailCheck className="h-6 w-6 text-accent" />
           <p className="mt-3 text-sm text-muted-foreground">
-            {t("If that account exists, a reset link was sent to:", "Si ce compte existe, un lien a été envoyé à :")}
+            {t(
+              "If that account exists, a reset link was sent to:",
+              "Si ce compte existe, un lien a été envoyé à :",
+            )}
           </p>
           <p className="mt-1 font-display text-2xl uppercase">{maskEmail(sentTo)}</p>
         </div>

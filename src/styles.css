@@ -425,6 +425,43 @@
   animation: ppp-float 13s ease-in-out infinite reverse;
 }
 
+/* App preview device — gentle float + screen crossfade. */
+@keyframes ppp-phone-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -4px, 0) rotate(-0.6deg);
+  }
+}
+
+@utility phone-float {
+  animation: ppp-phone-float 7s ease-in-out infinite;
+}
+
+@keyframes ppp-screen-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@utility screen-in {
+  animation: ppp-screen-in 420ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phone-float,
+  .screen-in {
+    animation: none;
+  }
+}
+
 /* Food imagery motion — hover lift, tap compress. */
 @utility food-motion {
   & img {

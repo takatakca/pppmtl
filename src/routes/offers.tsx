@@ -71,11 +71,7 @@ function OffersPage() {
                   search={orderSearch({ item: item.id })}
                   className="press-tap flex h-full items-stretch gap-3 border border-border bg-card transition-colors hover:border-primary focus-ppp"
                 >
-                  <MenuImage
-                    src={item.image}
-                    alt={localizedName(item, lang)}
-                    variant="list"
-                  />
+                  <MenuImage src={item.image} alt={localizedName(item, lang)} variant="list" />
                   <span className="min-w-0 flex-1 py-3 pr-3">
                     <span className="inline-block bg-primary px-1.5 py-0.5 text-[0.55rem] font-bold uppercase tracking-widest text-primary-foreground">
                       −{percent}% · {t("save", "économisez")} ${save.toFixed(2)}

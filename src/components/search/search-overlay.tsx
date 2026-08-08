@@ -96,10 +96,7 @@ export function SearchOverlay() {
 
   return (
     <div className="dim-in fixed inset-0 z-[70] flex flex-col bg-background/95 backdrop-blur-xl">
-      <span
-        aria-hidden
-        className="night-grain pointer-events-none absolute inset-0 opacity-60"
-      />
+      <span aria-hidden className="night-grain pointer-events-none absolute inset-0 opacity-60" />
       <span
         aria-hidden
         className="red-light pointer-events-none absolute left-1/2 top-0 h-72 w-[36rem] -translate-x-1/2"
@@ -300,7 +297,7 @@ export function SearchOverlay() {
                   <h2 className="font-display text-sm uppercase tracking-widest text-accent">
                     {t("Items", "Articles")}
                   </h2>
-                   <ul className="mt-3 space-y-2">
+                  <ul className="mt-3 space-y-2">
                     {results.items.map((item, i) => (
                       <li
                         key={item.id}

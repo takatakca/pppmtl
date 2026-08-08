@@ -44,8 +44,7 @@ export function PromoExperience() {
       setOpen(true);
     };
     const onScroll = () => {
-      const depth =
-        window.scrollY / Math.max(document.body.scrollHeight - window.innerHeight, 1);
+      const depth = window.scrollY / Math.max(document.body.scrollHeight - window.innerHeight, 1);
       if (depth > 0.35) show();
     };
     const timer = window.setTimeout(show, 8000);
@@ -68,8 +67,7 @@ export function PromoExperience() {
 
   if (!open) return null;
 
-  const hero =
-    campaign === "deal" ? deal!.item : campaign === "popular" ? popular! : null;
+  const hero = campaign === "deal" ? deal!.item : campaign === "popular" ? popular! : null;
 
   const eyebrow =
     campaign === "deal"

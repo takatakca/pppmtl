@@ -34,14 +34,18 @@ export function ProductCard({
       <button
         type="button"
         onClick={() => onOpen(item)}
-        className="press-tap card-lift group flex h-full w-full flex-col border border-border bg-card text-left transition-colors hover:border-primary focus-ppp"
+        className="press-tap group flex h-full w-full flex-col border border-border bg-card text-left transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-1.5 hover:border-primary hover:shadow-[0_18px_40px_-18px_hsl(0_0%_0%/0.9)] focus-ppp"
       >
         <span className="relative block overflow-hidden">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-0.5 origin-left scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100"
+          />
           <MenuImage
             src={item.image}
             alt={name}
             variant="hero"
-            className="h-32 w-full transition-transform duration-500 ease-out group-hover:scale-[1.09] sm:h-36"
+            className="h-32 w-full transition-transform duration-500 ease-out group-hover:-translate-y-1.5 group-hover:scale-[1.10] sm:h-36"
           />
           {(discount ?? badge) && (
             <span className="absolute left-0 top-0 flex flex-col items-start gap-0.5">
@@ -73,7 +77,7 @@ export function ProductCard({
               </span>
             )}
           </span>
-          <span className="mt-2 inline-flex items-center justify-center gap-1 bg-primary py-1.5 font-display text-xs uppercase leading-none text-primary-foreground transition-transform duration-200 group-hover:scale-[1.02]">
+          <span className="mt-2 inline-flex items-center justify-center gap-1 bg-primary py-1.5 font-display text-xs uppercase leading-none text-primary-foreground transition-all duration-200 group-hover:brightness-110 group-hover:shadow-[0_0_18px_-2px_hsl(var(--primary)/0.7)]">
             <Plus className="h-3 w-3" />
             {t("Add", "Ajouter")}
           </span>
