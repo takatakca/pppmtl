@@ -1,0 +1,179 @@
+import {
+  categories,
+  menuItems,
+  type Lang,
+  type MenuCategory,
+  type MenuItem,
+} from "@/data/menu";
+
+export function normalize(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Words that carry no food meaning in either language. */
+const STOP_WORDS = new Set([
+  "i", "im", "a", "an", "the", "want", "would", "like", "looking", "for", "show", "me", "some",
+  "please", "get", "give", "of", "my", "with", "and", "to", "do", "you", "have", "any",
+  "je", "veux", "moi", "montre", "montrez", "des", "du", "de", "la", "le", "les", "un", "une",
+  "cherche", "voudrais", "avez", "vous", "svp", "sil", "plait",
+]);
+
+export function tokenize(query: string) {
+  return normalize(query)
+    .split(" ")
+    .filter((w) => w.length > 1 && !STOP_WORDS.has(w));
+}
+
+export interface SearchContext {
+  lang: Lang;
+  locationId?: string | null;
+}
+
+export interface SearchResults {
+  query: string;
+  terms: string[];
+  categories: MenuCategory[];
+  items: MenuItem[];
+  related: MenuCategory[];
+  isEmpty: boolean;
+}
+
+/** Deterministic pairing rules — replaceable by a server-side semantic service later. */
+const RELATED_CATEGORIES: Record<string, string[]> = {
+  "cat-pizza": ["cat-sides", "cat-combos"],
+  "cat-chicken": ["cat-pita", "cat-combos"],
+  "cat-pita": ["cat-sides", "cat-combos"],
+  "cat-burgers": ["cat-sides", "cat-combos"],
+  "cat-sides": ["cat-combos", "cat-burgers"],
+  "cat-combos": ["cat-sides", "cat-dessert"],
+  "cat-dessert": ["cat-combos"],
+};
+
+function haystack(parts: Array<string | string[]>) {
+  return parts
+    .flat()
+    .map((p) => normalize(p))
+    .join(" | ");
+}
+
+function scoreCategory(cat: MenuCategory, terms: string[]) {
+  const names = haystack([cat.nameEn, cat.nameFr]);
+  const aliases = haystack([cat.aliasesEn, cat.aliasesFr]);
+  const desc = haystack([cat.descriptionEn, cat.descriptionFr]);
+  let score = 0;
+  for (const term of terms) {
+    if (names === term) score += 12;
+    else if (names.includes(term)) score += 8;
+    if (aliases.includes(term)) score += 6;
+    if (desc.includes(term)) score += 2;
+  }
+  return score;
+}
+
+function scoreItem(item: MenuItem, terms: string[]) {
+  const names = haystack([item.nameEn, item.nameFr]);
+  const aliases = haystack([item.aliasesEn, item.aliasesFr]);
+  const desc = haystack([item.descriptionEn, item.descriptionFr]);
+  let score = 0;
+  for (const term of terms) {
+    if (names.startsWith(term)) score += 10;
+    else if (names.includes(term)) score += 7;
+    if (aliases.includes(term)) score += 5;
+    if (desc.includes(term)) score += 2;
+  }
+  return score;
+}
+
+/**
+ * Single search pipeline shared by typed input, voice input and craving chips.
+ * Later this signature can be backed by an HTTP/semantic service without UI changes.
+ */
+export function searchMenu(query: string, context: SearchContext): SearchResults {
+  const terms = tokenize(query);
+  if (terms.length === 0) {
+    return { query, terms, categories: [], items: [], related: [], isEmpty: true };
+  }
+
+  const available = menuItems.filter(
+    (i) => i.isAvailable && (!context.locationId || i.locationIds.includes(context.locationId)),
+  );
+
+  const scoredCats = categories
+    .map((c) => ({ c, s: scoreCategory(c, terms) }))
+    .filter((x) => x.s > 0)
+    .sort((a, b) => b.s - a.s);
+
+  const matchedCatIds = new Set(scoredCats.map((x) => x.c.id));
+
+  const scoredItems = available
+    .map((i) => ({
+      i,
+      s: scoreItem(i, terms) + (matchedCatIds.has(i.categoryId) ? 3 : 0),
+    }))
+    .filter((x) => x.s > 0)
+    .sort((a, b) => b.s - a.s);
+
+  const resultCats = scoredCats.map((x) => x.c);
+  const relatedIds = new Set<string>();
+  for (const c of resultCats.slice(0, 2)) {
+    for (const r of RELATED_CATEGORIES[c.id] ?? []) {
+      if (!matchedCatIds.has(r)) relatedIds.add(r);
+    }
+  }
+
+  return {
+    query,
+    terms,
+    categories: resultCats,
+    items: scoredItems.map((x) => x.i),
+    related: categories.filter((c) => relatedIds.has(c.id)),
+    isEmpty: resultCats.length === 0 && scoredItems.length === 0,
+  };
+}
+
+export function localizedName(entity: { nameEn: string; nameFr: string }, lang: Lang) {
+  return lang === "fr" ? entity.nameFr : entity.nameEn;
+}
+
+export function localizedDescription(
+  entity: { descriptionEn: string; descriptionFr: string },
+  lang: Lang,
+) {
+  return lang === "fr" ? entity.descriptionFr : entity.descriptionEn;
+}
+
+/** Splits a label so matched search terms can be emphasized without garish highlighting. */
+export function highlightParts(label: string, terms: string[]) {
+  if (terms.length === 0) return [{ text: label, match: false }];
+  const normalizedLabel = normalize(label);
+  const flags = new Array(label.length).fill(false);
+  for (const term of terms) {
+    let from = 0;
+    while (from <= normalizedLabel.length) {
+      const idx = normalizedLabel.indexOf(term, from);
+      if (idx === -1) break;
+      for (let k = idx; k < idx + term.length && k < flags.length; k++) flags[k] = true;
+      from = idx + term.length;
+    }
+  }
+  const parts: Array<{ text: string; match: boolean }> = [];
+  let current = "";
+  let currentFlag = flags[0] ?? false;
+  for (let i = 0; i < label.length; i++) {
+    const f = flags[i] ?? false;
+    if (f !== currentFlag) {
+      parts.push({ text: current, match: currentFlag });
+      current = "";
+      currentFlag = f;
+    }
+    current += label[i];
+  }
+  if (current) parts.push({ text: current, match: currentFlag });
+  return parts;
+}
