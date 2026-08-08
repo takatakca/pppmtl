@@ -55,8 +55,8 @@ export function Hero() {
 
             {/* Order terminal — search, voice, mode and location on first screen */}
             <div className="mt-5 max-w-2xl border border-border bg-background/85 p-2.5 backdrop-blur-xl">
-              <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 sm:flex sm:items-stretch">
-                <div className="grid grid-cols-2 border border-border">
+              <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2 sm:flex sm:items-stretch">
+                <div className="grid shrink-0 grid-cols-2 border border-border">
                   {(["pickup", "delivery"] as const).map((m) => (
                     <button
                       key={m}
