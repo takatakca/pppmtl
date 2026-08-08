@@ -10,7 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AccountRouteImport } from './routes/account'
+import { Route as OffersRouteImport } from './routes/offers'
 import { Route as OrderRouteImport } from './routes/order'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as DevMenuAuditRouteImport } from './routes/dev.menu-audit'
 
 const IndexRoute = IndexRouteImport.update({
@@ -18,9 +21,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OffersRoute = OffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrderRoute = OrderRouteImport.update({
   id: '/order',
   path: '/order',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DevMenuAuditRoute = DevMenuAuditRouteImport.update({
@@ -31,31 +49,52 @@ const DevMenuAuditRoute = DevMenuAuditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/order' | '/dev/menu-audit'
+  fullPaths:
+    '/' | '/account' | '/offers' | '/order' | '/sitemap.xml' | '/dev/menu-audit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/order' | '/dev/menu-audit'
-  id: '__root__' | '/' | '/order' | '/dev/menu-audit'
+  to:
+    '/' | '/account' | '/offers' | '/order' | '/sitemap.xml' | '/dev/menu-audit'
+  id:
+    | '__root__'
+    | '/'
+    | '/account'
+    | '/offers'
+    | '/order'
+    | '/sitemap.xml'
+    | '/dev/menu-audit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
+  OffersRoute: typeof OffersRoute
   OrderRoute: typeof OrderRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   DevMenuAuditRoute: typeof DevMenuAuditRoute
 }
 
@@ -68,11 +107,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/offers': {
+      id: '/offers'
+      path: '/offers'
+      fullPath: '/offers'
+      preLoaderRoute: typeof OffersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/order': {
       id: '/order'
       path: '/order'
       fullPath: '/order'
       preLoaderRoute: typeof OrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dev/menu-audit': {
@@ -87,7 +147,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
+  OffersRoute: OffersRoute,
   OrderRoute: OrderRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   DevMenuAuditRoute: DevMenuAuditRoute,
 }
 export const routeTree = rootRouteImport

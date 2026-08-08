@@ -5,10 +5,12 @@ import { MobileOrderBar } from "@/components/layout/mobile-order-bar";
 import { LocationSheet } from "@/components/layout/location-sheet";
 import { SearchOverlay } from "@/components/search/search-overlay";
 import { Hero } from "@/components/home/hero";
-import { OrderStrip } from "@/components/home/order-strip";
-import { Deals } from "@/components/home/deals";
-import { MenuExplorer } from "@/components/home/menu-explorer";
+import { MostOrdered } from "@/components/home/most-ordered";
+import { OffersGrid } from "@/components/home/offers-grid";
+import { CategoryGrid } from "@/components/home/category-grid";
 import { Rewards } from "@/components/home/rewards";
+import { PromoExperience } from "@/components/marketing/promo-experience";
+import { Link } from "@tanstack/react-router";
 import { LocationsSection } from "@/components/home/locations-section";
 import { FranchiseCareers } from "@/components/home/franchise-careers";
 import { OrderSheet } from "@/components/layout/order-sheet";
@@ -55,18 +57,18 @@ function AccountTeaser() {
           )}
         </p>
         <div className="mt-6 flex flex-wrap gap-2">
-          <a
-            href="#account"
-            className="bg-primary px-6 py-3.5 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
+          <Link
+            to="/account"
+            className="press-tap bg-primary px-6 py-3.5 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
           >
-            {t("Create account", "Créer un compte")}
-          </a>
-          <a
-            href="#account"
-            className="border border-border px-6 py-3.5 font-display text-lg uppercase leading-none focus-ppp"
+            {t("Open my account", "Ouvrir mon compte")}
+          </Link>
+          <Link
+            to="/order"
+            className="press-tap border border-border px-6 py-3.5 font-display text-lg uppercase leading-none focus-ppp"
           >
-            {t("Sign in", "Se connecter")}
-          </a>
+            {t("Start an order", "Commencer une commande")}
+          </Link>
         </div>
       </div>
     </section>
@@ -79,9 +81,9 @@ function Index() {
       <PPPHeader />
       <main>
         <Hero />
-        <Deals />
-        <MenuExplorer />
-        <OrderStrip />
+        <MostOrdered />
+        <OffersGrid />
+        <CategoryGrid />
         <Rewards />
         <LocationsSection />
         <FranchiseCareers />
@@ -92,6 +94,7 @@ function Index() {
       <SearchOverlay />
       <LocationSheet />
       <OrderSheet />
+      <PromoExperience />
     </div>
   );
 }

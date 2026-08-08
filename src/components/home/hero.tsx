@@ -1,9 +1,13 @@
-import { useEffect, useState } from "react";
-import { Bike, MapPin, Mic, Search, ShoppingBag } from "lucide-react";
-import heroImg from "@/assets/hero-montreal.jpg";
+import { Link } from "@tanstack/react-router";
+import { Bike, MapPin, Mic, Search, ShoppingBag, Star } from "lucide-react";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { menuRepository } from "@/lib/menu-repository";
+import { getDiscountedItems } from "@/lib/promotions";
+import { localizedName } from "@/lib/search";
+import { ProductImage } from "@/components/order/product-image";
+import { orderSearch } from "@/lib/order-links";
 import { track } from "@/lib/analytics";
+import { pppBusiness } from "@/config/business";
 
 const cravings = [
   { en: "Poutine", fr: "Poutine" },
@@ -15,45 +19,38 @@ const cravings = [
 ];
 
 export function Hero() {
-  const { lang, mode, setMode, openSearch, openLocationSheet, openOrderSheet, locationId, t } =
-    usePPP();
+  const { lang, mode, setMode, openSearch, openLocationSheet, locationId, t } = usePPP();
   const location = useSelectedLocation();
-  const offers = menuRepository.getOffers(locationId, mode);
-  const [promo, setPromo] = useState(0);
-
-  useEffect(() => {
-    if (offers.length < 2) return undefined;
-    const id = window.setInterval(() => setPromo((p) => (p + 1) % offers.length), 4200);
-    return () => window.clearInterval(id);
-  }, [offers.length]);
-
-  const active = offers[promo % Math.max(offers.length, 1)];
+  const showcase = menuRepository.getPopularItems(locationId, 4);
+  const topDeal = getDiscountedItems(locationId, 1)[0];
+  const itemCount = menuRepository.getItems(locationId).length;
 
   return (
-    <section className="relative isolate overflow-hidden pt-14 lg:pt-24">
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <img
-          src={heroImg}
-          alt=""
-          width={1920}
-          height={1080}
-          className="ken-burns h-full w-full object-cover"
-        />
-      </div>
-      <div className="absolute inset-0 -z-10" style={{ background: "var(--gradient-hero)" }} />
-
-      <div className="mx-auto max-w-[110rem] px-3 pb-6 pt-6 sm:px-6 lg:pb-10 lg:pt-12">
-        <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+    <section className="relative isolate overflow-hidden border-b border-border pt-14 lg:pt-24">
+      <div className="mx-auto max-w-[110rem] px-3 pb-5 pt-5 sm:px-6 lg:pb-8 lg:pt-8">
+        <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="min-w-0">
-            <p className="font-display text-[0.7rem] uppercase tracking-[0.42em] text-accent">
-              Notre-Dame-de-Grâce · 6280 Somerled · Montréal
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-display text-[0.65rem] uppercase tracking-[0.35em] text-accent">
+              <span>{pppBusiness.neighbourhood} · 6280 Somerled</span>
+              {pppBusiness.googleProfile.rating != null && (
+                <span className="inline-flex items-center gap-1 text-muted-foreground">
+                  <Star className="h-3 w-3 fill-current text-accent" />
+                  {pppBusiness.googleProfile.rating.toFixed(1)}
+                </span>
+              )}
             </p>
-            <h1 className="mt-2 font-display text-[2.6rem] uppercase leading-[0.86] sm:text-6xl lg:text-[6.5rem]">
-              {t("Order what", "Commandez ce")}
+            <h1 className="mt-2 font-display text-[2.9rem] uppercase leading-[0.84] sm:text-7xl lg:text-[6rem]">
+              {t("Chicken. Pizza.", "Poulet. Pizza.")}
               <br />
-              {t("you're", "dont vous avez")}{" "}
-              <span className="text-flame">{t("craving", "envie")}</span>
+              <span className="text-flame">{t("Poutine.", "Poutine.")}</span>{" "}
+              {t("Ready fast.", "Prêt vite.")}
             </h1>
+            <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+              {t(
+                `Order pickup or delivery from our Notre-Dame-de-Grâce kitchen — ${itemCount} items on the menu.`,
+                `Commandez en cueillette ou en livraison de notre cuisine de Notre-Dame-de-Grâce — ${itemCount} articles au menu.`,
+              )}
+            </p>
 
             {/* Order terminal — search, voice, mode and location on first screen */}
             <div className="mt-5 max-w-2xl border border-border bg-background/85 p-2.5 backdrop-blur-xl">
@@ -118,55 +115,62 @@ export function Hero() {
                 ))}
               </div>
 
-              <button
-                onClick={openOrderSheet}
-                className="cta-glow mt-2 hidden w-full items-center justify-center bg-primary py-3.5 font-display text-2xl uppercase leading-none text-primary-foreground focus-ppp lg:flex"
+              <Link
+                to="/order"
+                className="cta-glow press-tap mt-2 flex w-full items-center justify-center bg-primary py-3.5 font-display text-2xl uppercase leading-none text-primary-foreground focus-ppp"
               >
                 {mode === "pickup"
                   ? t("Start pickup order", "Commander en cueillette")
                   : t("Start delivery order", "Commander en livraison")}
-              </button>
+              </Link>
             </div>
           </div>
 
-          {/* Rotating promo panel */}
-          {active && (
-            <button
-              onClick={() => openSearch(lang === "fr" ? active.titleFr : active.titleEn)}
-              key={active.id}
-              className="promo-in group relative hidden overflow-hidden border border-border text-left focus-ppp lg:block"
-            >
-              <img
-                src={active.image}
-                alt=""
-                loading="lazy"
-                className="h-64 w-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/85 to-transparent p-4">
-                <p className="font-display text-xs uppercase tracking-[0.3em] text-accent">
-                  {t("Featured", "En vedette")}
-                </p>
-                <p className="font-display text-3xl uppercase leading-none">
-                  {lang === "fr" ? active.titleFr : active.titleEn}
-                </p>
-                {active.price !== null && (
-                  <p className="mt-1 font-display text-2xl leading-none text-flame">
-                    ${active.price.toFixed(2)}
-                  </p>
-                )}
-              </div>
-            </button>
-          )}
+          {/* Food-first showcase — real menu items, real prices */}
+          <div className="grid grid-cols-2 gap-2">
+            {showcase.map((item, i) => (
+              <Link
+                key={item.id}
+                to="/order"
+                search={orderSearch({ item: item.id })}
+                className={`press-tap group relative block overflow-hidden border border-border focus-ppp ${
+                  i === 0 ? "col-span-2" : ""
+                }`}
+              >
+                <ProductImage
+                  src={item.image}
+                  alt={localizedName(item, lang)}
+                  className={i === 0 ? "h-40 w-full lg:h-56" : "h-28 w-full lg:h-36"}
+                />
+                <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                <span className="absolute inset-x-0 bottom-0 p-3">
+                  <span className="line-clamp-2 block font-display text-lg uppercase leading-tight lg:text-2xl">
+                    {localizedName(item, lang)}
+                  </span>
+                  {item.price !== null && (
+                    <span className="mt-0.5 block font-display text-xl leading-none text-flame">
+                      ${item.price.toFixed(2)}
+                    </span>
+                  )}
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Promo ticker */}
-      <div className="overflow-hidden border-y border-border bg-primary">
+      <div className="overflow-hidden border-t border-border bg-primary">
         <div className="marquee-track flex w-max gap-10 py-1.5">
           {Array.from({ length: 2 }).map((_, dup) => (
             <div key={dup} className="flex gap-10">
               {[
-                t("$15.99 combos every day", "Combos à 15,99 $ tous les jours"),
+                topDeal
+                  ? t(
+                      `${localizedName(topDeal.item, "en")} — ${topDeal.percent}% off`,
+                      `${localizedName(topDeal.item, "fr")} — ${topDeal.percent} % de rabais`,
+                    )
+                  : t("Fresh every day", "Frais tous les jours"),
                 t("Order ahead · skip the line", "Commandez à l'avance · évitez la file"),
                 t("Rotisserie · Pizza · Poutine", "Rôtisserie · Pizza · Poutine"),
                 t("Points on every direct order", "Des points sur chaque commande directe"),
