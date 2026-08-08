@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Bike, Mic, Phone, Search, ShoppingBag, X } from "lucide-react";
 import { PPPHeader } from "@/components/layout/ppp-header";
 import { PPPFooter } from "@/components/layout/ppp-footer";
@@ -18,6 +18,13 @@ import type { MenuItem } from "@/data/menu";
 import { pppBusiness } from "@/config/business";
 
 export const Route = createFileRoute("/order")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { category?: string; item?: string; q?: string } => ({
+    category: typeof search.category === "string" ? search.category : undefined,
+    item: typeof search.item === "string" ? search.item : undefined,
+    q: typeof search.q === "string" ? search.q : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Order Online | PPP Pizzeria NDG — Pickup & Delivery" },
@@ -43,14 +50,38 @@ export const Route = createFileRoute("/order")({
 
 function OrderPage() {
   const { locationId, mode, setMode, lang, t, openLocationSheet, openCart, cart } = usePPP();
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: "/order" });
   const location = useSelectedLocation();
   const categories = menuRepository.getCategories(locationId);
-  const [activeCategory, setActiveCategory] = useState(categories[0]?.id ?? "");
-  const [query, setQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState(
+    search.category ?? categories[0]?.id ?? "",
+  );
+  const [query, setQuery] = useState(search.q ?? "");
+  const [filter, setFilter] = useState<"all" | "popular" | "deals">("all");
   const [selected, setSelected] = useState<MenuItem | null>(null);
   const [allCategoriesOpen, setAllCategoriesOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const totals = cartTotals(cart);
+
+  /* Deep links: /order?item=… opens the item, /order?category=… jumps to it. */
+  useEffect(() => {
+    if (search.category) setActiveCategory(search.category);
+    if (search.q !== undefined) setQuery(search.q);
+    if (search.item) {
+      const item = menuRepository.getItem(search.item);
+      if (item) {
+        setSelected(item);
+        setActiveCategory(item.categoryId);
+      }
+    }
+  }, [search.category, search.item, search.q]);
+
+  const clearDeepLink = () => {
+    if (search.item || search.category || search.q) {
+      void navigate({ search: {}, replace: true });
+    }
+  };
 
   const voice = useVoiceSearch(lang, (text: string) => setQuery(text));
   const listening = voice.status === "listening";
@@ -58,11 +89,14 @@ function OrderPage() {
     voice.status === "denied" || voice.status === "unsupported" || voice.status === "error";
 
   const results = useMemo(() => {
-    if (query.trim().length > 0) {
-      return menuRepository.search({ query, language: lang, locationId }).items;
-    }
-    return menuRepository.getItemsInCategory(activeCategory, locationId);
-  }, [query, lang, locationId, activeCategory]);
+    const base =
+      query.trim().length > 0
+        ? menuRepository.search({ query, language: lang, locationId }).items
+        : menuRepository.getItemsInCategory(activeCategory, locationId);
+    if (filter === "popular") return base.filter((i) => i.badges.includes("popular"));
+    if (filter === "deals") return base.filter((i) => i.compareAtPrice != null);
+    return base;
+  }, [query, lang, locationId, activeCategory, filter]);
 
   const activeName = categories.find((c) => c.id === activeCategory);
   const popular = useMemo(() => menuRepository.getPopularItems(locationId, 10), [locationId]);
@@ -104,7 +138,10 @@ function OrderPage() {
               <input
                 ref={inputRef}
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  clearDeepLink();
+                }}
                 enterKeyHint="search"
                 aria-label={t("Search the menu", "Rechercher au menu")}
                 placeholder={t(
@@ -167,6 +204,7 @@ function OrderPage() {
                 onClick={() => {
                   setQuery("");
                   setActiveCategory(c.id);
+                  clearDeepLink();
                 }}
                 aria-pressed={!query && activeCategory === c.id}
                 className={`shrink-0 border px-3 py-2 text-[0.65rem] font-bold uppercase tracking-widest transition-colors focus-ppp ${
@@ -215,15 +253,43 @@ function OrderPage() {
           </section>
         )}
 
-        <h2 className="mt-6 font-display text-2xl uppercase leading-none text-muted-foreground">
-          {query
-            ? t(`Results for “${query}”`, `Résultats pour « ${query} »`)
-            : activeName
-              ? lang === "fr"
-                ? activeName.nameFr
-                : activeName.nameEn
-              : t("Menu", "Menu")}
-        </h2>
+        <div className="mt-6 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+          <h2 className="min-w-0 truncate font-display text-2xl uppercase leading-none text-muted-foreground">
+            {query
+              ? t(`Results for “${query}”`, `Résultats pour « ${query} »`)
+              : activeName
+                ? lang === "fr"
+                  ? activeName.nameFr
+                  : activeName.nameEn
+                : t("Menu", "Menu")}
+          </h2>
+          <p className="shrink-0 text-[0.65rem] font-bold uppercase tracking-widest text-muted-foreground">
+            {results.length} {t("items", "articles")}
+          </p>
+        </div>
+
+        <div className="mt-2 flex gap-1.5">
+          {(
+            [
+              ["all", t("All", "Tout")],
+              ["popular", t("Most ordered", "Plus commandés")],
+              ["deals", t("On sale", "En rabais")],
+            ] as const
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              onClick={() => setFilter(id)}
+              aria-pressed={filter === id}
+              className={`border px-3 py-1.5 text-[0.6rem] font-bold uppercase tracking-widest transition-colors focus-ppp ${
+                filter === id
+                  ? "border-accent text-accent"
+                  : "border-border text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
         {results.length === 0 ? (
           <p className="mt-6 border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
@@ -341,7 +407,10 @@ function OrderPage() {
       />
       <ItemSheet
         item={selected}
-        onClose={() => setSelected(null)}
+        onClose={() => {
+          setSelected(null);
+          clearDeepLink();
+        }}
         onSelectItem={(next) => setSelected(next)}
       />
       <CartPanel />
