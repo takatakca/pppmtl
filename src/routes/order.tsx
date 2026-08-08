@@ -8,6 +8,7 @@ import { OrderSheet } from "@/components/layout/order-sheet";
 import { SearchOverlay } from "@/components/search/search-overlay";
 import { ItemSheet } from "@/components/order/item-sheet";
 import { CartPanel } from "@/components/order/cart-panel";
+import { AllCategoriesSheet } from "@/components/order/all-categories-sheet";
 import { ProductImage } from "@/components/order/product-image";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { menuRepository } from "@/lib/menu-repository";
@@ -47,6 +48,7 @@ function OrderPage() {
   const [activeCategory, setActiveCategory] = useState(categories[0]?.id ?? "");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<MenuItem | null>(null);
+  const [allCategoriesOpen, setAllCategoriesOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const totals = cartTotals(cart);
 
@@ -151,7 +153,13 @@ function OrderPage() {
           )}
 
           {/* Sticky category rail */}
-          <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1">
+          <div className="no-scrollbar mt-3 flex gap-1.5 overflow-x-auto pb-1">
+            <button
+              onClick={() => setAllCategoriesOpen(true)}
+              className="sticky left-0 z-10 shrink-0 border border-primary bg-background px-3 py-2 text-[0.65rem] font-bold uppercase tracking-widest text-primary focus-ppp"
+            >
+              {t("All", "Tout")} · {categories.length}
+            </button>
             {categories.map((c) => (
               <button
                 key={c.id}
@@ -274,6 +282,14 @@ function OrderPage() {
         </span>
       </button>
 
+      <AllCategoriesSheet
+        open={allCategoriesOpen}
+        onClose={() => setAllCategoriesOpen(false)}
+        onSelect={(id) => {
+          setQuery("");
+          setActiveCategory(id);
+        }}
+      />
       <ItemSheet item={selected} onClose={() => setSelected(null)} />
       <CartPanel />
       <SearchOverlay />

@@ -1,7 +1,7 @@
 import { Minus, Phone, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { menuRepository } from "@/lib/menu-repository";
-import { cartTotals } from "@/lib/cart";
+import { cartTotals, selectionLabels } from "@/lib/cart";
 import { marketplaceChannels } from "@/lib/channels";
 import { track } from "@/lib/analytics";
 
@@ -59,11 +59,17 @@ export function CartPanel() {
               {cart.map((line) => {
                 const item = menuRepository.getItem(line.itemId);
                 const name = item ? (lang === "fr" ? item.nameFr : item.nameEn) : line.itemId;
+                const options = selectionLabels(item, line.selections ?? {}, lang === "fr");
                 return (
                   <li key={line.lineId} className="border border-border p-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="font-display text-lg uppercase leading-tight">{name}</p>
+                        {options.length > 0 && (
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {options.join(" · ")}
+                          </p>
+                        )}
                         {line.instructions && (
                           <p className="mt-1 text-xs text-muted-foreground">
                             “{line.instructions}”
