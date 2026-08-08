@@ -322,7 +322,7 @@ function OrderPage() {
                   onClick={() => setSelected(item)}
                   className="press-tap food-motion flex w-full items-stretch gap-3 border-b border-border bg-card text-left transition-colors hover:border-primary focus-ppp sm:border"
                 >
-                  <span className="order-1 min-w-0 flex-1 py-2.5 pl-3 sm:pl-0 sm:pr-3">
+                  <span className="order-1 min-w-0 flex-1 py-2.5 pl-3 sm:order-last sm:pl-0 sm:pr-3">
                     {item.badges && item.badges.length > 0 && (
                       <span className="mb-1 flex flex-wrap gap-1">
                         {item.badges.includes("popular") && (
@@ -361,7 +361,7 @@ function OrderPage() {
                     src={item.image}
                     alt={lang === "fr" ? item.nameFr : item.nameEn}
                     variant="list"
-                    className="order-2 self-center sm:order-none sm:self-stretch"
+                    className="order-2 self-center sm:order-first sm:self-stretch"
                   />
                 </button>
               </li>
