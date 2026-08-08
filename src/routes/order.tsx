@@ -49,10 +49,9 @@ function OrderPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const totals = cartTotals(cart);
 
-  const voice = useVoiceSearch({
-    lang,
-    onResult: (transcript) => setQuery(transcript),
-  });
+  const voice = useVoiceSearch(lang, (text: string) => setQuery(text));
+  const listening = voice.status === "listening";
+  const voiceUnavailable = voice.status === "denied" || voice.status === "unsupported" || voice.status === "error";
 
   const results = useMemo(() => {
     if (query.trim().length > 0) {
@@ -109,9 +108,9 @@ function OrderPage() {
               )}
               {voice.supported && (
                 <button
-                  onClick={voice.listening ? voice.stop : voice.start}
+                  onClick={listening ? voice.stop : voice.start}
                   aria-label={t("Search by voice", "Rechercher par la voix")}
-                  className={`p-1.5 focus-ppp ${voice.listening ? "listening-ring text-primary" : "text-primary"}`}
+                  className={`p-1.5 focus-ppp ${listening ? "listening-ring text-primary" : "text-primary"}`}
                 >
                   <Mic className="h-4 w-4" />
                 </button>
@@ -126,7 +125,7 @@ function OrderPage() {
             </button>
           </div>
 
-          {voice.error && (
+          {voiceUnavailable && (
             <p role="status" className="mt-2 text-[0.65rem] uppercase tracking-widest text-muted-foreground">
               {t("Voice unavailable — type your search instead.", "Voix indisponible — tapez votre recherche.")}
             </p>
