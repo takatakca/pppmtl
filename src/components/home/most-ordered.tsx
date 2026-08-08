@@ -4,6 +4,7 @@ import { usePPP } from "@/context/ppp-store";
 import { menuRepository } from "@/lib/menu-repository";
 import { localizedName } from "@/lib/search";
 import { ProductImage } from "@/components/order/product-image";
+import { orderSearch } from "@/lib/order-links";
 
 /** Ordering-first discovery rail built from the real "most ordered" placements. */
 export function MostOrdered() {
@@ -36,7 +37,7 @@ export function MostOrdered() {
           <li key={item.id} className="w-48 shrink-0 sm:w-56">
             <Link
               to="/order"
-              search={{ item: item.id }}
+              search={orderSearch({ item: item.id })}
               className="press-tap group block h-full border border-border bg-card transition-colors hover:border-primary focus-ppp"
             >
               <ProductImage

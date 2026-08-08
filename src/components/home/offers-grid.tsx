@@ -4,6 +4,7 @@ import { usePPP } from "@/context/ppp-store";
 import { getDiscountedItems } from "@/lib/promotions";
 import { localizedDescription, localizedName } from "@/lib/search";
 import { ProductImage } from "@/components/order/product-image";
+import { orderSearch } from "@/lib/order-links";
 
 /** Only real catalog discounts (compare-at price published) are shown. */
 export function OffersGrid({ limit = 6 }: { limit?: number }) {
@@ -39,7 +40,7 @@ export function OffersGrid({ limit = 6 }: { limit?: number }) {
           {lead && (
             <Link
               to="/order"
-              search={{ item: lead.item.id }}
+              search={orderSearch({ item: lead.item.id })}
               className="press-tap group relative block overflow-hidden border border-border focus-ppp"
             >
               <ProductImage
@@ -75,7 +76,7 @@ export function OffersGrid({ limit = 6 }: { limit?: number }) {
               <li key={item.id}>
                 <Link
                   to="/order"
-                  search={{ item: item.id }}
+                  search={orderSearch({ item: item.id })}
                   className="press-tap flex h-full items-stretch gap-3 border border-border bg-background transition-colors hover:border-primary focus-ppp"
                 >
                   <ProductImage

@@ -5,6 +5,7 @@ import { menuRepository } from "@/lib/menu-repository";
 import { getDiscountedItems } from "@/lib/promotions";
 import { localizedName } from "@/lib/search";
 import { ProductImage } from "@/components/order/product-image";
+import { orderSearch } from "@/lib/order-links";
 import { track } from "@/lib/analytics";
 import { pppBusiness } from "@/config/business";
 
@@ -131,7 +132,7 @@ export function Hero() {
               <Link
                 key={item.id}
                 to="/order"
-                search={{ item: item.id }}
+                search={orderSearch({ item: item.id })}
                 className={`press-tap group relative block overflow-hidden border border-border focus-ppp ${
                   i === 0 ? "col-span-2" : ""
                 }`}

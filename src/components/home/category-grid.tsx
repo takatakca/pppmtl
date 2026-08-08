@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { usePPP } from "@/context/ppp-store";
 import { menuRepository } from "@/lib/menu-repository";
 import { localizedName } from "@/lib/search";
+import { orderSearch } from "@/lib/order-links";
 
 /** Every published category, each a direct entry point into /order. */
 export function CategoryGrid() {
@@ -39,7 +40,7 @@ export function CategoryGrid() {
             <li key={c.id}>
               <Link
                 to="/order"
-                search={{ category: c.id }}
+                search={orderSearch({ category: c.id })}
                 className="press-tap group relative block h-32 overflow-hidden border border-border transition-colors hover:border-primary focus-ppp sm:h-36"
               >
                 <img

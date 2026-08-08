@@ -5,6 +5,7 @@ import { usePPP } from "@/context/ppp-store";
 import { getDiscountedItems } from "@/lib/promotions";
 import { localizedName } from "@/lib/search";
 import { ProductImage } from "@/components/order/product-image";
+import { orderSearch } from "@/lib/order-links";
 
 const SEEN_KEY = "ppp.promo.seen.v1";
 
@@ -106,7 +107,7 @@ export function PromoExperience() {
           </p>
           <Link
             to="/order"
-            search={{ item: deal.item.id }}
+            search={orderSearch({ item: deal.item.id })}
             onClick={() => setOpen(false)}
             className="press-tap mt-4 block bg-primary py-3.5 text-center font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
           >
