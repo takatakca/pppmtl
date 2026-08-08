@@ -295,6 +295,17 @@
   animation: ppp-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+@utility press-tap {
+  transition:
+    transform 0.12s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+
+  &:active {
+    transform: scale(0.985);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
