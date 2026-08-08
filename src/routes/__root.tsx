@@ -78,17 +78,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "PPP MTL-Nord | Poulet, Pizza & Poutine à Montréal" },
+      { title: "PPP Pizzeria Montreal NDG | Poulet, Pizza & Poutine" },
       {
         name: "description",
         content:
-          "Order PPP MTL-Nord for pickup or delivery. Rotisserie chicken, pizza, poutine, shawarma combos, PPP Rewards and gift cards in Montréal-Nord.",
+          "Order PPP Pizzeria Montreal (Notre-Dame-de-Grâce) for pickup or delivery. Rotisserie chicken, pizza, poutine, shawarma combos, PPP Rewards and gift cards.",
       },
-      { name: "author", content: "PPP MTL-Nord" },
-      { property: "og:title", content: "PPP MTL-Nord | Poulet, Pizza & Poutine" },
+      { name: "author", content: "PPP Pizzeria Montreal" },
+      { property: "og:title", content: "PPP Pizzeria Montreal NDG | Poulet, Pizza & Poutine" },
       {
         property: "og:description",
-        content: "Order pickup or delivery, earn PPP Rewards, and taste Montréal-Nord's favourite combos.",
+        content: "Order pickup or delivery from 6280 Av. Somerled, Notre-Dame-de-Grâce, and earn PPP Rewards.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
