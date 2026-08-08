@@ -9,6 +9,8 @@ import {
 } from "react";
 import { locations, type Lang, type OrderMode } from "@/data/menu";
 import { track } from "@/lib/analytics";
+import { newLine, type CartLine } from "@/lib/cart";
+import { menuRepository } from "@/lib/menu-repository";
 
 const KEY = "ppp.session.v1";
 
@@ -17,6 +19,7 @@ interface Persisted {
   locationId: string | null;
   mode: OrderMode;
   recentSearches: string[];
+  cart: CartLine[];
 }
 
 interface Store extends Persisted {
@@ -35,6 +38,13 @@ interface Store extends Persisted {
   orderSheetOpen: boolean;
   openOrderSheet: () => void;
   closeOrderSheet: () => void;
+  addToCart: (itemId: string, quantity: number, instructions: string) => void;
+  setLineQuantity: (lineId: string, quantity: number) => void;
+  removeLine: (lineId: string) => void;
+  clearCart: () => void;
+  cartOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
   t: (en: string, fr: string) => string;
 }
 
@@ -43,6 +53,7 @@ const defaults: Persisted = {
   locationId: locations[0]?.id ?? null,
   mode: "pickup",
   recentSearches: [],
+  cart: [],
 };
 
 const PPPContext = createContext<Store | null>(null);
@@ -53,6 +64,7 @@ export function PPPProvider({ children }: { children: ReactNode }) {
   const [searchSeed, setSearchSeed] = useState("");
   const [locationSheetOpen, setLocationSheetOpen] = useState(false);
   const [orderSheetOpen, setOrderSheetOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -98,6 +110,27 @@ export function PPPProvider({ children }: { children: ReactNode }) {
         persist({ ...state, recentSearches });
       },
       clearRecentSearches: () => persist({ ...state, recentSearches: [] }),
+      addToCart: (itemId, quantity, instructions) => {
+        const item = menuRepository.getItem(itemId);
+        if (!item) return;
+        track("cart_item_added", { itemId, quantity });
+        persist({ ...state, cart: [...state.cart, newLine(item, quantity, instructions)] });
+        setCartOpen(true);
+      },
+      setLineQuantity: (lineId, quantity) =>
+        persist({
+          ...state,
+          cart:
+            quantity <= 0
+              ? state.cart.filter((l) => l.lineId !== lineId)
+              : state.cart.map((l) => (l.lineId === lineId ? { ...l, quantity } : l)),
+        }),
+      removeLine: (lineId) =>
+        persist({ ...state, cart: state.cart.filter((l) => l.lineId !== lineId) }),
+      clearCart: () => persist({ ...state, cart: [] }),
+      cartOpen,
+      openCart: () => setCartOpen(true),
+      closeCart: () => setCartOpen(false),
       searchOpen,
       searchSeed,
       openSearch: (seed = "") => {
@@ -114,7 +147,7 @@ export function PPPProvider({ children }: { children: ReactNode }) {
       closeOrderSheet: () => setOrderSheetOpen(false),
       t: (en, fr) => (state.lang === "fr" ? fr : en),
     };
-  }, [state, persist, searchOpen, searchSeed, locationSheetOpen, orderSheetOpen]);
+  }, [state, persist, searchOpen, searchSeed, locationSheetOpen, orderSheetOpen, cartOpen]);
 
   return <PPPContext.Provider value={value}>{children}</PPPContext.Provider>;
 }
