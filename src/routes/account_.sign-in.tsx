@@ -6,7 +6,7 @@ import { usePPP } from "@/context/ppp-store";
 import { authRepository } from "@/lib/customer/repositories";
 import { emailError, safeReturnTo } from "@/lib/customer/validation";
 
-export const Route = createFileRoute("/account/sign-in")({
+export const Route = createFileRoute("/account_/sign-in")({
   validateSearch: (search: Record<string, unknown>): { returnTo?: string | undefined } => ({
     returnTo: typeof search["returnTo"] === "string" ? (search["returnTo"] as string) : undefined,
   }),

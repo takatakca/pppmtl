@@ -14,7 +14,7 @@ import {
   usernameError,
 } from "@/lib/customer/validation";
 
-export const Route = createFileRoute("/account/sign-up")({
+export const Route = createFileRoute("/account_/sign-up")({
   head: () => ({
     meta: [
       { title: "Create your PPP account | PPP Pizzeria NDG" },

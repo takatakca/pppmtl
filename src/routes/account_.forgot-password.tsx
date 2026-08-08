@@ -7,7 +7,7 @@ import { usePPP } from "@/context/ppp-store";
 import { authRepository } from "@/lib/customer/repositories";
 import { emailError, maskEmail } from "@/lib/customer/validation";
 
-export const Route = createFileRoute("/account/forgot-password")({
+export const Route = createFileRoute("/account_/forgot-password")({
   head: () => ({
     meta: [
       { title: "Reset your PPP password | PPP Pizzeria NDG" },
