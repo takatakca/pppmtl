@@ -235,27 +235,28 @@ function OrderPage() {
         </div>
 
         {!query && popular.length > 0 && (
-          <section className="mt-6">
-            <h2 className="font-display text-2xl uppercase leading-none text-muted-foreground">
+          <section className="mt-4">
+            <h2 className="font-display text-xl uppercase leading-none text-muted-foreground sm:text-2xl">
               {t("Most ordered at NDG", "Les plus commandés à NDG")}
             </h2>
-            <ul className="no-scrollbar mt-3 flex gap-2 overflow-x-auto pb-1">
+            <ul className="no-scrollbar mt-2 flex gap-2 overflow-x-auto pb-1">
               {popular.map((item) => (
                 <li key={item.id} className="shrink-0">
                   <button
                     onClick={() => setSelected(item)}
-                    className="w-44 border border-border text-left transition-colors hover:border-primary focus-ppp"
+                    className="press-tap food-motion w-40 border border-border text-left transition-colors hover:border-primary focus-ppp sm:w-44"
                   >
-                    <ProductImage
+                    <MenuImage
                       src={item.image}
                       alt={lang === "fr" ? item.nameFr : item.nameEn}
+                      variant="hero"
                       className="h-24 w-full"
                     />
-                    <span className="block px-3 py-2">
-                      <span className="line-clamp-2 block font-display text-base uppercase leading-tight">
+                    <span className="block px-2.5 py-2">
+                      <span className="line-clamp-1 block font-display text-base uppercase leading-tight">
                         {lang === "fr" ? item.nameFr : item.nameEn}
                       </span>
-                      <span className="mt-1 block font-display text-lg leading-none text-accent">
+                      <span className="mt-1 block font-display text-lg leading-none text-flame">
                         {item.price !== null
                           ? `$${item.price.toFixed(2)}`
                           : t("See price", "Voir le prix")}
@@ -314,19 +315,14 @@ function OrderPage() {
             )}
           </p>
         ) : (
-          <ul className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+          <ul className="mt-3 grid gap-1.5 sm:grid-cols-2 sm:gap-2 xl:grid-cols-3">
             {results.map((item) => (
               <li key={item.id}>
                 <button
                   onClick={() => setSelected(item)}
-                  className="flex w-full items-stretch gap-3 border border-border text-left transition-colors hover:border-primary focus-ppp"
+                  className="press-tap food-motion flex w-full items-stretch gap-3 border-b border-border bg-card text-left transition-colors hover:border-primary focus-ppp sm:border"
                 >
-                  <ProductImage
-                    src={item.image}
-                    alt={lang === "fr" ? item.nameFr : item.nameEn}
-                    className="h-28 w-28 shrink-0"
-                  />
-                  <span className="min-w-0 flex-1 py-3 pr-3">
+                  <span className="order-1 min-w-0 flex-1 py-2.5 pl-3 sm:pl-0 sm:pr-3">
                     {item.badges && item.badges.length > 0 && (
                       <span className="mb-1 flex flex-wrap gap-1">
                         {item.badges.includes("popular") && (
@@ -341,25 +337,32 @@ function OrderPage() {
                         )}
                       </span>
                     )}
-                    <span className="block font-display text-lg uppercase leading-tight">
+                    <span className="line-clamp-2 block font-display text-base uppercase leading-tight sm:text-lg">
                       {lang === "fr" ? item.nameFr : item.nameEn}
                     </span>
-                    <span className="mt-1 line-clamp-2 block text-xs text-muted-foreground">
+                    <span className="mt-0.5 line-clamp-2 block text-[0.7rem] leading-snug text-muted-foreground">
                       {lang === "fr" ? item.descriptionFr : item.descriptionEn}
                     </span>
-                    <span className="mt-2 flex items-baseline gap-2">
-                      <span className="font-display text-xl leading-none text-accent">
+                    <span className="mt-1.5 flex items-baseline gap-2">
+                      <span className="font-display text-xl leading-none text-flame">
                         {item.price !== null
                           ? `$${item.price.toFixed(2)}`
                           : t("See price", "Voir le prix")}
                       </span>
                       {item.compareAtPrice != null && (
-                        <span className="text-xs text-muted-foreground line-through">
+                        <span className="text-[0.7rem] text-muted-foreground line-through">
                           ${item.compareAtPrice.toFixed(2)}
                         </span>
                       )}
                     </span>
                   </span>
+                  {/* Image sits right on mobile so names and prices scan first */}
+                  <MenuImage
+                    src={item.image}
+                    alt={lang === "fr" ? item.nameFr : item.nameEn}
+                    variant="list"
+                    className="order-2 self-center sm:order-none sm:self-stretch"
+                  />
                 </button>
               </li>
             ))}
