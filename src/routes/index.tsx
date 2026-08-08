@@ -5,12 +5,13 @@ import { MobileOrderBar } from "@/components/layout/mobile-order-bar";
 import { LocationSheet } from "@/components/layout/location-sheet";
 import { SearchOverlay } from "@/components/search/search-overlay";
 import { Hero } from "@/components/home/hero";
-import { OrderChannels } from "@/components/home/order-channels";
+import { OrderStrip } from "@/components/home/order-strip";
 import { Deals } from "@/components/home/deals";
-import { CategoryRail } from "@/components/home/category-rail";
+import { MenuExplorer } from "@/components/home/menu-explorer";
 import { Rewards } from "@/components/home/rewards";
 import { LocationsSection } from "@/components/home/locations-section";
 import { FranchiseCareers } from "@/components/home/franchise-careers";
+import { OrderSheet } from "@/components/layout/order-sheet";
 import { usePPP } from "@/context/ppp-store";
 
 export const Route = createFileRoute("/")({
@@ -38,25 +39,27 @@ export const Route = createFileRoute("/")({
 function AccountTeaser() {
   const { t } = usePPP();
   return (
-    <section id="account" className="mx-auto max-w-7xl px-4 pb-24 sm:px-6">
-      <div className="surface-panel p-8 sm:p-12">
-        <h2 className="font-display text-4xl uppercase">{t("Your PPP account", "Votre compte PPP")}</h2>
+    <section id="account" className="mx-auto max-w-[110rem] px-3 pb-14 sm:px-6">
+      <div className="border border-border bg-card p-6 sm:p-10">
+        <h2 className="font-display text-4xl uppercase leading-none sm:text-6xl">
+          {t("Your PPP account", "Votre compte PPP")}
+        </h2>
         <p className="mt-3 max-w-2xl text-muted-foreground">
           {t(
             "Sign in to see recent orders, reorder in one tap, track your points balance, manage gift cards and save your favourites.",
             "Connectez-vous pour voir vos commandes récentes, recommander en une touche, suivre vos points, gérer vos cartes-cadeaux et enregistrer vos favoris.",
           )}
         </p>
-        <div className="mt-6 flex flex-wrap gap-3">
+        <div className="mt-6 flex flex-wrap gap-2">
           <a
             href="#account"
-            className="rounded-xl bg-primary px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-primary-foreground focus-ppp"
+            className="bg-primary px-6 py-3.5 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
           >
             {t("Create account", "Créer un compte")}
           </a>
           <a
             href="#account"
-            className="rounded-xl border border-border px-6 py-3.5 text-xs font-bold uppercase tracking-widest focus-ppp"
+            className="border border-border px-6 py-3.5 font-display text-lg uppercase leading-none focus-ppp"
           >
             {t("Sign in", "Se connecter")}
           </a>
@@ -68,13 +71,13 @@ function AccountTeaser() {
 
 function Index() {
   return (
-    <div id="top" className="min-h-screen bg-background pb-20 lg:pb-0">
+    <div id="top" className="min-h-screen bg-background pb-16 lg:pb-0">
       <PPPHeader />
       <main>
         <Hero />
-        <OrderChannels />
         <Deals />
-        <CategoryRail />
+        <MenuExplorer />
+        <OrderStrip />
         <Rewards />
         <LocationsSection />
         <FranchiseCareers />
@@ -84,6 +87,7 @@ function Index() {
       <MobileOrderBar />
       <SearchOverlay />
       <LocationSheet />
+      <OrderSheet />
     </div>
   );
 }
