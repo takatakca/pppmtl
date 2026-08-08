@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Minus, Plus, X } from "lucide-react";
 import type { MenuItem } from "@/data/menu";
 import { usePPP } from "@/context/ppp-store";
-import { ProductImage } from "@/components/order/product-image";
+import { MenuImage } from "@/components/menu/menu-item-image";
 import type { LineSelections } from "@/lib/cart";
 import { menuRepository } from "@/lib/menu-repository";
 
@@ -57,7 +57,7 @@ export function ItemSheet({
         className="flex max-h-[92dvh] w-full max-w-2xl flex-col border border-border bg-card promo-in"
       >
         <div className="relative">
-          <ProductImage src={item.image} alt={name} className="h-40 w-full sm:h-56" />
+          <MenuImage src={item.image} alt={name} variant="promo" priority />
           <button
             onClick={onClose}
             aria-label={t("Close", "Fermer")}
@@ -155,9 +155,10 @@ export function ItemSheet({
                       onClick={() => onSelectItem(p)}
                       className="w-36 border border-border text-left transition-colors hover:border-primary focus-ppp"
                     >
-                      <ProductImage
+                      <MenuImage
                         src={p.image}
                         alt={lang === "fr" ? p.nameFr : p.nameEn}
+                        variant="hero"
                         className="h-20 w-full"
                       />
                       <span className="block px-2 py-2">

@@ -9,7 +9,8 @@ import { SearchOverlay } from "@/components/search/search-overlay";
 import { ItemSheet } from "@/components/order/item-sheet";
 import { CartPanel } from "@/components/order/cart-panel";
 import { AllCategoriesSheet } from "@/components/order/all-categories-sheet";
-import { ProductImage } from "@/components/order/product-image";
+import { MenuImage } from "@/components/menu/menu-item-image";
+import { DeliveryAddressSheet } from "@/components/order/delivery-address-sheet";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { menuRepository } from "@/lib/menu-repository";
 import { cartTotals } from "@/lib/cart";
@@ -59,6 +60,8 @@ function OrderPage() {
   const [filter, setFilter] = useState<"all" | "popular" | "deals">("all");
   const [selected, setSelected] = useState<MenuItem | null>(null);
   const [allCategoriesOpen, setAllCategoriesOpen] = useState(false);
+  const [addressOpen, setAddressOpen] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const totals = cartTotals(cart);
 
@@ -102,22 +105,25 @@ function OrderPage() {
   return (
     <div className="min-h-dvh bg-background pb-28 lg:pb-0">
       <PPPHeader />
-      <main className="mx-auto max-w-[110rem] px-3 pt-24 sm:px-6 lg:pt-28">
-        <h1 className="font-display text-5xl uppercase leading-[0.85] sm:text-7xl">
-          {t("Build your order", "Composez votre commande")}
-          <span className="block text-flame">{pppBusiness.shortLocationName}</span>
+      <main className="mx-auto max-w-[110rem] px-3 pt-16 sm:px-6 lg:pt-28">
+        <h1 className="font-display text-xl uppercase leading-none sm:text-4xl">
+          {t("Order", "Commander")}{" "}
+          <span className="text-flame">{pppBusiness.shortLocationName}</span>
         </h1>
 
         {/* Order terminal: mode + location + search + voice, always reachable */}
-        <div className="sticky top-14 z-40 -mx-3 mt-5 border-y border-border bg-background/95 px-3 py-3 backdrop-blur-xl sm:-mx-6 sm:px-6 lg:top-24">
-          <div className="grid gap-2 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center">
-            <div className="grid grid-cols-2 gap-1 border border-border p-1 lg:w-56">
+        <div className="sticky top-14 z-40 -mx-3 mt-2 border-y border-border bg-background/95 px-3 py-2 backdrop-blur-xl sm:-mx-6 sm:px-6 lg:top-24">
+          <div className="grid gap-1.5 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center">
+            <div className="grid grid-cols-2 border border-border lg:w-56">
               {(["pickup", "delivery"] as const).map((m) => (
                 <button
                   key={m}
-                  onClick={() => setMode(m)}
+                  onClick={() => {
+                    setMode(m);
+                    if (m === "delivery") setAddressOpen(true);
+                  }}
                   aria-pressed={mode === m}
-                  className={`inline-flex items-center justify-center gap-2 py-2 text-[0.65rem] font-bold uppercase tracking-widest transition-colors focus-ppp ${
+                  className={`press-tap inline-flex items-center justify-center gap-2 py-2 text-[0.65rem] font-bold uppercase tracking-widest transition-colors focus-ppp ${
                     mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                   }`}
                 >
@@ -146,7 +152,7 @@ function OrderPage() {
                   "Search chicken, poutine, subs…",
                   "Chercher poulet, poutine, sous-marins…",
                 )}
-                className="h-11 min-w-0 flex-1 bg-transparent text-sm outline-none"
+                className="h-12 min-w-0 flex-1 bg-transparent text-sm outline-none"
               />
               {query && (
                 <button
@@ -188,11 +194,22 @@ function OrderPage() {
             </p>
           )}
 
+          {mode === "delivery" && (
+            <button
+              onClick={() => setAddressOpen(true)}
+              className="mt-1.5 block w-full truncate border border-dashed border-border px-3 py-1.5 text-left text-[0.62rem] font-bold uppercase tracking-widest text-muted-foreground focus-ppp"
+            >
+              {deliveryAddress
+                ? `${t("Delivering to", "Livraison à")} · ${deliveryAddress}`
+                : t("Add a delivery address", "Ajouter une adresse de livraison")}
+            </button>
+          )}
+
           {/* Sticky category rail */}
-          <div className="no-scrollbar mt-3 flex gap-1.5 overflow-x-auto pb-1">
+          <div className="no-scrollbar mt-1.5 flex gap-1.5 overflow-x-auto pb-1">
             <button
               onClick={() => setAllCategoriesOpen(true)}
-              className="sticky left-0 z-10 shrink-0 border border-primary bg-background px-3 py-2 text-[0.65rem] font-bold uppercase tracking-widest text-primary focus-ppp"
+              className="sticky left-0 z-10 shrink-0 border border-primary bg-background px-3 py-1.5 text-[0.62rem] font-bold uppercase tracking-widest text-primary focus-ppp"
             >
               {t("All", "Tout")} · {categories.length}
             </button>
@@ -205,7 +222,7 @@ function OrderPage() {
                   clearDeepLink();
                 }}
                 aria-pressed={!query && activeCategory === c.id}
-                className={`shrink-0 border px-3 py-2 text-[0.65rem] font-bold uppercase tracking-widest transition-colors focus-ppp ${
+                className={`shrink-0 border px-3 py-1.5 text-[0.62rem] font-bold uppercase tracking-widest transition-colors focus-ppp ${
                   !query && activeCategory === c.id
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border text-muted-foreground hover:text-foreground"
@@ -218,27 +235,28 @@ function OrderPage() {
         </div>
 
         {!query && popular.length > 0 && (
-          <section className="mt-6">
-            <h2 className="font-display text-2xl uppercase leading-none text-muted-foreground">
+          <section className="mt-4">
+            <h2 className="font-display text-xl uppercase leading-none text-muted-foreground sm:text-2xl">
               {t("Most ordered at NDG", "Les plus commandés à NDG")}
             </h2>
-            <ul className="no-scrollbar mt-3 flex gap-2 overflow-x-auto pb-1">
+            <ul className="no-scrollbar mt-2 flex gap-2 overflow-x-auto pb-1">
               {popular.map((item) => (
                 <li key={item.id} className="shrink-0">
                   <button
                     onClick={() => setSelected(item)}
-                    className="w-44 border border-border text-left transition-colors hover:border-primary focus-ppp"
+                    className="press-tap food-motion w-40 border border-border text-left transition-colors hover:border-primary focus-ppp sm:w-44"
                   >
-                    <ProductImage
+                    <MenuImage
                       src={item.image}
                       alt={lang === "fr" ? item.nameFr : item.nameEn}
+                      variant="hero"
                       className="h-24 w-full"
                     />
-                    <span className="block px-3 py-2">
-                      <span className="line-clamp-2 block font-display text-base uppercase leading-tight">
+                    <span className="block px-2.5 py-2">
+                      <span className="line-clamp-1 block font-display text-base uppercase leading-tight">
                         {lang === "fr" ? item.nameFr : item.nameEn}
                       </span>
-                      <span className="mt-1 block font-display text-lg leading-none text-accent">
+                      <span className="mt-1 block font-display text-lg leading-none text-flame">
                         {item.price !== null
                           ? `$${item.price.toFixed(2)}`
                           : t("See price", "Voir le prix")}
@@ -297,19 +315,14 @@ function OrderPage() {
             )}
           </p>
         ) : (
-          <ul className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+          <ul className="mt-3 grid gap-1.5 sm:grid-cols-2 sm:gap-2 xl:grid-cols-3">
             {results.map((item) => (
               <li key={item.id}>
                 <button
                   onClick={() => setSelected(item)}
-                  className="flex w-full items-stretch gap-3 border border-border text-left transition-colors hover:border-primary focus-ppp"
+                  className="press-tap food-motion flex w-full items-stretch gap-3 border-b border-border bg-card text-left transition-colors hover:border-primary focus-ppp sm:border"
                 >
-                  <ProductImage
-                    src={item.image}
-                    alt={lang === "fr" ? item.nameFr : item.nameEn}
-                    className="h-28 w-28 shrink-0"
-                  />
-                  <span className="min-w-0 flex-1 py-3 pr-3">
+                  <span className="order-1 min-w-0 flex-1 py-2.5 pl-3 sm:order-last sm:pl-0 sm:pr-3">
                     {item.badges && item.badges.length > 0 && (
                       <span className="mb-1 flex flex-wrap gap-1">
                         {item.badges.includes("popular") && (
@@ -324,25 +337,32 @@ function OrderPage() {
                         )}
                       </span>
                     )}
-                    <span className="block font-display text-lg uppercase leading-tight">
+                    <span className="line-clamp-2 block font-display text-base uppercase leading-tight sm:text-lg">
                       {lang === "fr" ? item.nameFr : item.nameEn}
                     </span>
-                    <span className="mt-1 line-clamp-2 block text-xs text-muted-foreground">
+                    <span className="mt-0.5 line-clamp-2 block text-[0.7rem] leading-snug text-muted-foreground">
                       {lang === "fr" ? item.descriptionFr : item.descriptionEn}
                     </span>
-                    <span className="mt-2 flex items-baseline gap-2">
-                      <span className="font-display text-xl leading-none text-accent">
+                    <span className="mt-1.5 flex items-baseline gap-2">
+                      <span className="font-display text-xl leading-none text-flame">
                         {item.price !== null
                           ? `$${item.price.toFixed(2)}`
                           : t("See price", "Voir le prix")}
                       </span>
                       {item.compareAtPrice != null && (
-                        <span className="text-xs text-muted-foreground line-through">
+                        <span className="text-[0.7rem] text-muted-foreground line-through">
                           ${item.compareAtPrice.toFixed(2)}
                         </span>
                       )}
                     </span>
                   </span>
+                  {/* Image sits right on mobile so names and prices scan first */}
+                  <MenuImage
+                    src={item.image}
+                    alt={lang === "fr" ? item.nameFr : item.nameEn}
+                    variant="list"
+                    className="order-2 self-center sm:order-first sm:self-stretch"
+                  />
                 </button>
               </li>
             ))}
@@ -412,6 +432,11 @@ function OrderPage() {
         onSelectItem={(next) => setSelected(next)}
       />
       <CartPanel />
+      <DeliveryAddressSheet
+        open={addressOpen}
+        onClose={() => setAddressOpen(false)}
+        onConfirm={setDeliveryAddress}
+      />
       <SearchOverlay />
       <LocationSheet />
       <OrderSheet />
