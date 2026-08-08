@@ -1,0 +1,133 @@
+import { Bike, Phone, ShoppingBag, Sparkles, X } from "lucide-react";
+import { usePPP, useSelectedLocation } from "@/context/ppp-store";
+import { orderChannels } from "@/lib/channels";
+import { startOrder } from "@/lib/order";
+
+/**
+ * "Order your way" — one place that ranks direct ordering above every
+ * marketplace, with phone ordering kept as a first-class fallback.
+ */
+export function OrderSheet() {
+  const { orderSheetOpen, closeOrderSheet, mode, setMode, openSearch, openLocationSheet, locationId, t } =
+    usePPP();
+  const location = useSelectedLocation();
+  if (!orderSheetOpen) return null;
+
+  const channels = orderChannels(location, mode);
+  const direct = channels.find((c) => c.id === "direct");
+  const phone = channels.find((c) => c.id === "phone");
+  const marketplaces = channels.filter((c) => c.kind === "marketplace" || c.kind === "surplus");
+
+  const beginDirect = () => {
+    const result = startOrder({ locationId, mode, channel: "direct" });
+    if (result.status === "needs-location") {
+      closeOrderSheet();
+      openLocationSheet();
+      return;
+    }
+    closeOrderSheet();
+    openSearch();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[85] flex items-end justify-center bg-background/85 backdrop-blur-sm sm:items-center">
+      <div
+        role="dialog"
+        aria-label={t("Order your way", "Commandez à votre façon")}
+        className="w-full max-w-xl border border-border bg-card promo-in"
+      >
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <h2 className="font-display text-2xl uppercase leading-none">
+            {t("Order your way", "Commandez à votre façon")}
+          </h2>
+          <button
+            onClick={closeOrderSheet}
+            aria-label={t("Close", "Fermer")}
+            className="border border-border p-2 focus-ppp"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="px-5 py-5">
+          <div className="grid grid-cols-2 gap-1 border border-border p-1">
+            {(["pickup", "delivery"] as const).map((m) => (
+              <button
+                key={m}
+                onClick={() => setMode(m)}
+                className={`inline-flex items-center justify-center gap-2 py-2.5 text-xs font-bold uppercase tracking-widest transition-colors focus-ppp ${
+                  mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                }`}
+              >
+                {m === "pickup" ? <ShoppingBag className="h-4 w-4" /> : <Bike className="h-4 w-4" />}
+                {m === "pickup" ? t("Pickup", "Cueillette") : t("Delivery", "Livraison")}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={beginDirect}
+            className="mt-4 flex w-full items-center justify-between bg-primary px-5 py-4 text-left focus-ppp"
+            style={{ boxShadow: "var(--shadow-glow)" }}
+          >
+            <span>
+              <span className="block font-display text-2xl uppercase leading-none text-primary-foreground">
+                {t("Order direct with PPP", "Commander direct avec PPP")}
+              </span>
+              <span className="mt-1 block text-xs uppercase tracking-widest text-primary-foreground/80">
+                {t("Best price · earn points", "Meilleur prix · gagnez des points")}
+              </span>
+            </span>
+            <Sparkles className="h-5 w-5 shrink-0 text-primary-foreground" />
+          </button>
+          {direct?.href === null && (
+            <p className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">
+              {t(
+                "Direct checkout opens in the PPP menu below.",
+                "La commande directe s'ouvre dans le menu PPP ci-dessous.",
+              )}
+            </p>
+          )}
+
+          {phone?.href && (
+            <a
+              href={phone.href}
+              className="mt-3 flex items-center gap-3 border border-border px-5 py-3.5 focus-ppp hover:border-primary"
+            >
+              <Phone className="h-4 w-4 text-primary" />
+              <span className="font-display text-lg uppercase leading-none">
+                {t("Call the restaurant", "Appeler le restaurant")}
+              </span>
+            </a>
+          )}
+
+          <p className="mt-6 text-[0.65rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
+            {t("Also available on", "Aussi disponible sur")}
+          </p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {marketplaces.map((c) =>
+              c.href ? (
+                <a
+                  key={c.id}
+                  href={c.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="border border-border px-4 py-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp"
+                >
+                  {c.label}
+                </a>
+              ) : (
+                <span
+                  key={c.id}
+                  className="border border-dashed border-border px-4 py-3 text-xs font-bold uppercase tracking-widest text-muted-foreground/60"
+                >
+                  {c.label}
+                </span>
+              ),
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

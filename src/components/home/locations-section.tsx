@@ -1,78 +1,64 @@
-import { Clock, MapPin, Phone, Store } from "lucide-react";
+import { Clock, MapPin, Phone } from "lucide-react";
 import storefront from "@/assets/storefront-night.jpg";
-import { locations } from "@/data/menu";
 import { usePPP } from "@/context/ppp-store";
+import { menuRepository } from "@/lib/menu-repository";
 
 export function LocationsSection() {
-  const { locationId, setLocationId, t } = usePPP();
+  const { t, setLocationId, openOrderSheet } = usePPP();
+  const locations = menuRepository.getLocations();
 
   return (
-    <section id="locations" className="border-t border-border bg-secondary/40 py-20">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[1.1fr_1fr]">
-        <div>
-          <h2 className="font-display text-4xl uppercase sm:text-5xl">{t("Locations", "Emplacements")}</h2>
-          <div className="mt-6 space-y-4">
-            {locations.map((l) => (
-              <article
-                key={l.id}
-                className={`rounded-2xl border bg-card p-6 ${
-                  locationId === l.id ? "border-primary" : "border-border"
-                }`}
-              >
-                <h3 className="font-display text-2xl uppercase">{l.name}</h3>
-                <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4 text-primary" /> {l.address}, {l.city} ({l.province})
-                </p>
-                {l.phone && (
-                  <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-                    <Phone className="h-4 w-4 text-primary" /> {l.phone}
-                  </p>
-                )}
-                <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4 text-primary" />{" "}
-                  {l.hours ?? t("Hours not confirmed", "Heures non confirmées")}
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2 text-xs uppercase tracking-widest text-muted-foreground">
-                  {l.channels.map((c) => (
-                    <span key={c.id} className="rounded-full border border-border px-3 py-1">
-                      {c.label}
-                    </span>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setLocationId(l.id)}
-                  className="mt-5 rounded-xl bg-primary px-5 py-3 text-xs font-bold uppercase tracking-widest text-primary-foreground focus-ppp"
-                >
-                  {locationId === l.id
-                    ? t("Selected", "Sélectionné")
-                    : t("Order from here", "Commander d'ici")}
-                </button>
-              </article>
-            ))}
-            <article className="flex items-start gap-4 rounded-2xl border border-dashed border-border p-6">
-              <Store className="h-7 w-7 shrink-0 text-accent" />
-              <div>
-                <h3 className="font-display text-xl uppercase">
-                  {t("More PPP coming", "D'autres PPP arrivent")}
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {t(
-                    "We're expanding across Greater Montréal.",
-                    "Nous nous étendons dans le Grand Montréal.",
-                  )}
-                </p>
-              </div>
-            </article>
-          </div>
+    <section id="locations" className="border-y border-border">
+      <div className="mx-auto grid max-w-[110rem] gap-0 lg:grid-cols-2">
+        <div className="relative min-h-[18rem] overflow-hidden">
+          <img src={storefront} alt="" loading="lazy" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/70 to-transparent" />
+          <p className="absolute bottom-4 left-4 font-display text-5xl uppercase leading-none lg:text-7xl">
+            {t("Find PPP", "Trouver PPP")}
+          </p>
         </div>
-
-        <div className="overflow-hidden rounded-2xl border border-border">
-          <img
-            src={storefront}
-            alt={t("PPP storefront at night", "Devanture PPP le soir")}
-            loading="lazy"
-            className="h-full min-h-[22rem] w-full object-cover"
-          />
+        <div className="divide-y divide-border">
+          {locations.map((l) => (
+            <div key={l.id} className="p-5 lg:p-8">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+                <h3 className="min-w-0 font-display text-3xl uppercase leading-none lg:text-4xl">{l.name}</h3>
+                <span className="shrink-0 border border-border px-2 py-1 text-[0.6rem] font-bold uppercase tracking-widest text-accent">
+                  {l.status === "open" ? t("Open", "Ouvert") : t("Coming soon", "Bientôt")}
+                </span>
+              </div>
+              <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4 shrink-0 text-primary" />
+                {l.address}, {l.city} ({l.province})
+              </p>
+              {l.phone && (
+                <a
+                  href={`tel:${l.phone.replace(/\s/g, "")}`}
+                  className="mt-1 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground focus-ppp"
+                >
+                  <Phone className="h-4 w-4 shrink-0 text-primary" />
+                  {l.phone}
+                </a>
+              )}
+              <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+                <Clock className="h-4 w-4 shrink-0 text-primary" />
+                {l.hours ?? t("Hours not confirmed", "Heures non confirmées")}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  onClick={() => {
+                    setLocationId(l.id);
+                    openOrderSheet();
+                  }}
+                  className="bg-primary px-5 py-3 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
+                >
+                  {t("Order from here", "Commander d'ici")}
+                </button>
+                <span className="border border-border px-4 py-3 text-[0.65rem] font-bold uppercase tracking-widest text-muted-foreground">
+                  {l.services.join(" · ")}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

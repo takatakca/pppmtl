@@ -32,6 +32,9 @@ interface Store extends Persisted {
   locationSheetOpen: boolean;
   openLocationSheet: () => void;
   closeLocationSheet: () => void;
+  orderSheetOpen: boolean;
+  openOrderSheet: () => void;
+  closeOrderSheet: () => void;
   t: (en: string, fr: string) => string;
 }
 
@@ -49,6 +52,7 @@ export function PPPProvider({ children }: { children: ReactNode }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchSeed, setSearchSeed] = useState("");
   const [locationSheetOpen, setLocationSheetOpen] = useState(false);
+  const [orderSheetOpen, setOrderSheetOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -98,9 +102,12 @@ export function PPPProvider({ children }: { children: ReactNode }) {
       locationSheetOpen,
       openLocationSheet: () => setLocationSheetOpen(true),
       closeLocationSheet: () => setLocationSheetOpen(false),
+      orderSheetOpen,
+      openOrderSheet: () => setOrderSheetOpen(true),
+      closeOrderSheet: () => setOrderSheetOpen(false),
       t: (en, fr) => (state.lang === "fr" ? fr : en),
     };
-  }, [state, persist, searchOpen, searchSeed, locationSheetOpen]);
+  }, [state, persist, searchOpen, searchSeed, locationSheetOpen, orderSheetOpen]);
 
   return <PPPContext.Provider value={value}>{children}</PPPContext.Provider>;
 }

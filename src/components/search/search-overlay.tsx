@@ -93,7 +93,7 @@ export function SearchOverlay() {
     <div className="fixed inset-0 z-[70] flex flex-col bg-background/95 backdrop-blur-xl rise-in">
       <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden px-4 pb-8 pt-6 sm:px-6">
         <div className="flex items-center gap-3">
-          <div className="flex flex-1 items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3">
+          <div className="flex flex-1 items-center gap-3 border border-border bg-card px-4 py-3">
             <Search className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
             <input
               ref={inputRef}
@@ -129,7 +129,7 @@ export function SearchOverlay() {
               }}
               disabled={!voice.supported}
               aria-label={t("Search by voice", "Recherche vocale")}
-              className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors focus-ppp ${
+              className={`inline-flex h-10 w-10 shrink-0 items-center justify-center transition-colors focus-ppp ${
                 voice.status === "listening"
                   ? "listening-ring bg-primary text-primary-foreground"
                   : "bg-secondary text-foreground disabled:opacity-40"
@@ -146,7 +146,7 @@ export function SearchOverlay() {
           </div>
           <button
             onClick={closeSearch}
-            className="rounded-xl border border-border px-4 py-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp"
+            className="border border-border px-4 py-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp"
           >
             {t("Close", "Fermer")}
           </button>
@@ -166,7 +166,7 @@ export function SearchOverlay() {
                   setQuery(label);
                   track("quick_craving_selected", { craving: c.en });
                 }}
-                className="rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold capitalize transition-colors hover:border-primary focus-ppp"
+                className="border border border-border bg-card px-4 py-2 text-sm font-semibold capitalize transition-colors hover:border-primary focus-ppp"
               >
                 {label}
               </button>
@@ -213,13 +213,13 @@ export function SearchOverlay() {
                   <button
                     key={c.id}
                     onClick={() => setQuery(localizedName(c, lang))}
-                    className="flex items-center gap-4 rounded-2xl border border-border bg-card p-3 text-left transition-colors hover:border-primary focus-ppp"
+                    className="flex items-center gap-4 border border-border bg-card p-3 text-left transition-colors hover:border-primary focus-ppp"
                   >
                     <img
                       src={c.image}
                       alt=""
                       loading="lazy"
-                      className="h-14 w-14 rounded-xl object-cover"
+                      className="h-14 w-14 object-cover"
                     />
                     <span>
                       <span className="block font-display text-lg uppercase">
@@ -236,7 +236,7 @@ export function SearchOverlay() {
           )}
 
           {hasQuery && results.isEmpty && (
-            <div className="rounded-2xl border border-dashed border-border p-8 text-center">
+            <div className="border border-dashed border-border p-8 text-center">
               <p className="font-display text-2xl uppercase">
                 {t("Nothing matched that", "Aucun résultat")}
               </p>
@@ -261,7 +261,7 @@ export function SearchOverlay() {
                       <button
                         key={c.id}
                         onClick={() => track("search_category_selected", { categoryId: c.id, query })}
-                        className="rounded-full border border-primary/60 bg-card px-4 py-2 text-sm font-semibold focus-ppp"
+                        className="border border border-primary/60 bg-card px-4 py-2 text-sm font-semibold focus-ppp"
                       >
                         <Highlighted label={localizedName(c, lang)} terms={results.terms} />
                       </button>
@@ -283,13 +283,13 @@ export function SearchOverlay() {
                             addRecentSearch(query);
                             track("search_product_selected", { itemId: item.id, query });
                           }}
-                          className="flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-3 text-left transition-colors hover:border-primary focus-ppp"
+                          className="flex w-full items-center gap-4 border border-border bg-card p-3 text-left transition-colors hover:border-primary focus-ppp"
                         >
                           <img
                             src={item.image}
                             alt=""
                             loading="lazy"
-                            className="h-16 w-16 rounded-xl object-cover"
+                            className="h-16 w-16 object-cover"
                           />
                           <span className="min-w-0 flex-1">
                             <span className="block font-display text-lg uppercase leading-tight">
@@ -322,7 +322,7 @@ export function SearchOverlay() {
                       <button
                         key={c.id}
                         onClick={() => setQuery(localizedName(c, lang))}
-                        className="rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold focus-ppp"
+                        className="border border border-border bg-secondary px-4 py-2 text-sm font-semibold focus-ppp"
                       >
                         {localizedName(c, lang)}
                       </button>

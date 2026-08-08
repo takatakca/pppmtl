@@ -44,27 +44,27 @@ const columns = [
 ];
 
 export function PPPFooter() {
-  const { lang, t } = usePPP();
+  const { lang, t, openOrderSheet } = usePPP();
 
   return (
     <footer className="border-t border-border bg-background">
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-        <div className="grid gap-12 md:grid-cols-[1.1fr_2fr]">
+      <div className="mx-auto max-w-[110rem] px-3 pt-12 sm:px-6">
+        <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="rounded-md bg-primary px-2 py-1 font-display text-xl leading-none text-primary-foreground">
-                PPP
-              </span>
-              <span className="font-display text-xl tracking-wide">MTL-NORD</span>
-            </div>
-            <p className="mt-4 max-w-sm text-sm text-muted-foreground">
+            <p className="max-w-sm text-sm text-muted-foreground">
               {t(
                 "Poulet · Pizza · Poutine. Rotisserie, grill and late-night comfort food in Montréal-Nord.",
                 "Poulet · Pizza · Poutine. Rôtisserie, grillades et réconfort tard le soir à Montréal-Nord.",
               )}
             </p>
+            <button
+              onClick={openOrderSheet}
+              className="mt-4 bg-primary px-6 py-3 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
+            >
+              {t("Order now", "Commander")}
+            </button>
             <form
-              className="mt-6 flex max-w-sm overflow-hidden rounded-xl border border-border"
+              className="mt-6 flex max-w-sm border border-border"
               onSubmit={(e) => e.preventDefault()}
             >
               <input
@@ -80,7 +80,7 @@ export function PPPFooter() {
             </form>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
             {columns.map((c) => (
               <div key={c.titleEn}>
                 <h3 className="font-display text-sm uppercase tracking-widest text-accent">
@@ -103,7 +103,10 @@ export function PPPFooter() {
           </div>
         </div>
 
-        <p className="mt-14 border-t border-border pt-6 text-xs uppercase tracking-widest text-muted-foreground">
+        <p className="mt-10 select-none font-display text-[18vw] uppercase leading-[0.75] text-foreground/8 lg:text-[13vw]">
+          PPP MTL-NORD
+        </p>
+        <p className="border-t border-border py-5 text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
           © {new Date().getFullYear()} PPP Montréal-Nord
         </p>
       </div>

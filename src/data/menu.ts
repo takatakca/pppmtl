@@ -69,6 +69,19 @@ export interface Location {
   services: string[];
   channels: Array<{ id: string; label: string; kind: "direct" | "marketplace" | "surplus" }>;
   status: "open" | "coming-soon";
+  /**
+   * Customer handoff destinations. Every value is per-location and configurable;
+   * `null` means "not configured yet" and the UI hides the shortcut.
+   */
+  links: {
+    directPickupUrl: string | null;
+    directDeliveryUrl: string | null;
+    uberEatsUrl: string | null;
+    doorDashUrl: string | null;
+    skipUrl: string | null;
+    tooGoodToGoUrl: string | null;
+    phoneOrderNumber: string | null;
+  };
 }
 
 export const categories: MenuCategory[] = [
@@ -405,6 +418,15 @@ export const locations: Location[] = [
       { id: "tgtg", label: "Too Good To Go", kind: "surplus" },
     ],
     status: "open",
+    links: {
+      directPickupUrl: null,
+      directDeliveryUrl: null,
+      uberEatsUrl: null,
+      doorDashUrl: null,
+      skipUrl: null,
+      tooGoodToGoUrl: null,
+      phoneOrderNumber: "+15144584587",
+    },
   },
 ];
 
