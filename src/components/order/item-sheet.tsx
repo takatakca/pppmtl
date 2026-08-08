@@ -4,13 +4,23 @@ import type { MenuItem } from "@/data/menu";
 import { usePPP } from "@/context/ppp-store";
 import { ProductImage } from "@/components/order/product-image";
 import type { LineSelections } from "@/lib/cart";
+import { menuRepository } from "@/lib/menu-repository";
 
 /**
  * Mobile: full-height bottom sheet. Desktop: centred panel. No modifier group
  * is invented — options are only described in the item's published text.
  */
-export function ItemSheet({ item, onClose }: { item: MenuItem | null; onClose: () => void }) {
-  const { lang, t, addToCart } = usePPP();
+export function ItemSheet({
+  item,
+  onClose,
+  onSelectItem,
+}: {
+  item: MenuItem | null;
+  onClose: () => void;
+  /** Swap the sheet to a paired item without leaving the flow. */
+  onSelectItem?: (item: MenuItem) => void;
+}) {
+  const { lang, t, addToCart, locationId } = usePPP();
   const [qty, setQty] = useState(1);
   const [notes, setNotes] = useState("");
   const [selections, setSelections] = useState<LineSelections>({});
@@ -30,6 +40,10 @@ export function ItemSheet({ item, onClose }: { item: MenuItem | null; onClose: (
 
   const groups = useMemo(() => item?.modifierGroups ?? [], [item]);
   const missing = groups.filter((g) => g.required && !selections[g.id]);
+  const pairings = useMemo(
+    () => (item ? menuRepository.getRelatedItems(item.id, locationId, 6) : []),
+    [item, locationId],
+  );
 
   if (!item) return null;
   const name = lang === "fr" ? item.nameFr : item.nameEn;
@@ -69,10 +83,7 @@ export function ItemSheet({ item, onClose }: { item: MenuItem | null; onClose: (
           </p>
           {item.price === null && (
             <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
-              {t(
-                "Price is confirmed by the restaurant at checkout.",
-                "Le prix est confirmé par le restaurant à la commande.",
-              )}
+              {t("Price not published for this item.", "Prix non publié pour cet item.")}
             </p>
           )}
 
@@ -82,9 +93,11 @@ export function ItemSheet({ item, onClose }: { item: MenuItem | null; onClose: (
                 <fieldset key={group.id}>
                   <legend className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
                     {lang === "fr" ? group.labelFr : group.labelEn}
-                    {group.required && (
-                      <span className="ml-2 text-primary">{t("Required", "Requis")}</span>
-                    )}
+                    <span className="ml-2 text-primary">
+                      {group.required
+                        ? t("Required · choose 1", "Requis · choisissez 1")
+                        : t("Optional", "Optionnel")}
+                    </span>
                   </legend>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {group.choices.map((choice) => {
@@ -110,8 +123,8 @@ export function ItemSheet({ item, onClose }: { item: MenuItem | null; onClose: (
               ))}
               <p className="text-xs text-muted-foreground">
                 {t(
-                  "Any price difference between options is confirmed by the restaurant — the published menu does not list one.",
-                  "Toute différence de prix entre les options est confirmée par le restaurant — le menu publié n'en indique aucune.",
+                  "Option pricing is not published for this item, so no surcharge is shown or added.",
+                  "Le prix des options n'est pas publié pour cet item : aucun supplément n'est affiché ni ajouté.",
                 )}
               </p>
             </div>
@@ -128,6 +141,41 @@ export function ItemSheet({ item, onClose }: { item: MenuItem | null; onClose: (
             placeholder={t("No pickles, extra sauce…", "Sans cornichons, extra sauce…")}
             className="mt-2 w-full resize-none border border-border bg-background px-3 py-2 text-sm focus-ppp"
           />
+
+          {onSelectItem && pairings.length > 0 && (
+            <div className="mt-7">
+              <h3 className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
+                {t("Goes well with", "Se marie bien avec")}
+              </h3>
+              <ul className="no-scrollbar mt-2 flex gap-2 overflow-x-auto pb-1">
+                {pairings.map((p) => (
+                  <li key={p.id} className="shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => onSelectItem(p)}
+                      className="w-36 border border-border text-left transition-colors hover:border-primary focus-ppp"
+                    >
+                      <ProductImage
+                        src={p.image}
+                        alt={lang === "fr" ? p.nameFr : p.nameEn}
+                        className="h-20 w-full"
+                      />
+                      <span className="block px-2 py-2">
+                        <span className="line-clamp-2 block font-display text-sm uppercase leading-tight">
+                          {lang === "fr" ? p.nameFr : p.nameEn}
+                        </span>
+                        <span className="mt-1 block font-display text-sm leading-none text-accent">
+                          {p.price !== null
+                            ? `$${p.price.toFixed(2)}`
+                            : t("See price", "Voir le prix")}
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-2 border-t border-border p-4">

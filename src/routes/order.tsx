@@ -65,6 +65,7 @@ function OrderPage() {
   }, [query, lang, locationId, activeCategory]);
 
   const activeName = categories.find((c) => c.id === activeCategory);
+  const popular = useMemo(() => menuRepository.getPopularItems(locationId, 10), [locationId]);
 
   return (
     <div className="min-h-dvh bg-background pb-28 lg:pb-0">
@@ -180,6 +181,40 @@ function OrderPage() {
           </div>
         </div>
 
+        {!query && popular.length > 0 && (
+          <section className="mt-6">
+            <h2 className="font-display text-2xl uppercase leading-none text-muted-foreground">
+              {t("Most ordered at NDG", "Les plus commandés à NDG")}
+            </h2>
+            <ul className="no-scrollbar mt-3 flex gap-2 overflow-x-auto pb-1">
+              {popular.map((item) => (
+                <li key={item.id} className="shrink-0">
+                  <button
+                    onClick={() => setSelected(item)}
+                    className="w-44 border border-border text-left transition-colors hover:border-primary focus-ppp"
+                  >
+                    <ProductImage
+                      src={item.image}
+                      alt={lang === "fr" ? item.nameFr : item.nameEn}
+                      className="h-24 w-full"
+                    />
+                    <span className="block px-3 py-2">
+                      <span className="line-clamp-2 block font-display text-base uppercase leading-tight">
+                        {lang === "fr" ? item.nameFr : item.nameEn}
+                      </span>
+                      <span className="mt-1 block font-display text-lg leading-none text-accent">
+                        {item.price !== null
+                          ? `$${item.price.toFixed(2)}`
+                          : t("See price", "Voir le prix")}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         <h2 className="mt-6 font-display text-2xl uppercase leading-none text-muted-foreground">
           {query
             ? t(`Results for “${query}”`, `Résultats pour « ${query} »`)
@@ -211,6 +246,20 @@ function OrderPage() {
                     className="h-28 w-28 shrink-0"
                   />
                   <span className="min-w-0 flex-1 py-3 pr-3">
+                    {item.badges && item.badges.length > 0 && (
+                      <span className="mb-1 flex flex-wrap gap-1">
+                        {item.badges.includes("popular") && (
+                          <span className="border border-accent px-1.5 py-0.5 text-[0.55rem] font-bold uppercase tracking-widest text-accent">
+                            {t("Popular", "Populaire")}
+                          </span>
+                        )}
+                        {item.badges.includes("deal") && (
+                          <span className="bg-primary px-1.5 py-0.5 text-[0.55rem] font-bold uppercase tracking-widest text-primary-foreground">
+                            {t("20% off", "20 % de rabais")}
+                          </span>
+                        )}
+                      </span>
+                    )}
                     <span className="block font-display text-lg uppercase leading-tight">
                       {lang === "fr" ? item.nameFr : item.nameEn}
                     </span>
@@ -290,7 +339,11 @@ function OrderPage() {
           setActiveCategory(id);
         }}
       />
-      <ItemSheet item={selected} onClose={() => setSelected(null)} />
+      <ItemSheet
+        item={selected}
+        onClose={() => setSelected(null)}
+        onSelectItem={(next) => setSelected(next)}
+      />
       <CartPanel />
       <SearchOverlay />
       <LocationSheet />
