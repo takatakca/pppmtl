@@ -80,7 +80,7 @@ export function PPPHeader() {
             <span className="bg-primary px-1.5 py-1 font-display text-lg leading-none text-primary-foreground">
               PPP
             </span>
-            <span className="hidden font-display text-lg leading-none tracking-wide sm:inline">MTL-NORD</span>
+            <span className="hidden font-display text-lg leading-none tracking-wide sm:inline">NDG MTL</span>
           </Link>
 
           <nav className="hidden min-w-0 items-center gap-5 lg:flex">
