@@ -7,7 +7,8 @@ import { SearchOverlay } from "@/components/search/search-overlay";
 import { Hero } from "@/components/home/hero";
 import { MostOrdered } from "@/components/home/most-ordered";
 import { OffersGrid } from "@/components/home/offers-grid";
-import { CategoryGrid } from "@/components/home/category-grid";
+import { CategoryExplorer } from "@/components/home/category-explorer";
+import { CartPanel } from "@/components/order/cart-panel";
 import { Rewards } from "@/components/home/rewards";
 import { PromoExperience } from "@/components/marketing/promo-experience";
 import { DealBanner } from "@/components/marketing/deal-banner";
@@ -53,7 +54,7 @@ function Index() {
         <MostOrdered />
         <OffersGrid />
         <DealBanner />
-        <CategoryGrid />
+        <CategoryExplorer />
         <Rewards />
         <LocationsSection />
         <FranchiseCareers />
@@ -65,6 +66,7 @@ function Index() {
       <SearchOverlay />
       <LocationSheet />
       <OrderSheet />
+      <CartPanel />
       <PromoExperience />
     </div>
   );
