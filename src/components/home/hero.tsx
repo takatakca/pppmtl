@@ -4,7 +4,7 @@ import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { menuRepository } from "@/lib/menu-repository";
 import { getDiscountedItems } from "@/lib/promotions";
 import { localizedName } from "@/lib/search";
-import { ProductImage } from "@/components/order/product-image";
+import { MenuItemImage } from "@/components/menu/menu-item-image";
 import { orderSearch } from "@/lib/order-links";
 import { track } from "@/lib/analytics";
 import { pppBusiness } from "@/config/business";
@@ -21,16 +21,28 @@ const cravings = [
 export function Hero() {
   const { lang, mode, setMode, openSearch, openLocationSheet, locationId, t } = usePPP();
   const location = useSelectedLocation();
-  const showcase = menuRepository.getPopularItems(locationId, 4);
+  const showcase = menuRepository.getPopularItems(locationId, 3);
   const topDeal = getDiscountedItems(locationId, 1)[0];
   const itemCount = menuRepository.getItems(locationId).length;
+  const [starA, starB, starC] = showcase;
 
   return (
     <section className="relative isolate overflow-hidden border-b border-border pt-14 lg:pt-24">
-      <div className="mx-auto max-w-[110rem] px-3 pb-5 pt-5 sm:px-6 lg:pb-8 lg:pt-8">
-        <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+      {/* Campaign plane — angled red field behind the product composition */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 right-0 hidden w-[46%] bg-primary/90 lg:block"
+        style={{ clipPath: "polygon(18% 0, 100% 0, 100% 100%, 0 100%)" }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-14 h-40 bg-primary/25 blur-3xl lg:hidden"
+      />
+
+      <div className="relative mx-auto max-w-[110rem] px-3 pb-4 pt-4 sm:px-6 lg:pb-10 lg:pt-8">
+        <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-8">
           <div className="min-w-0">
-            <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-display text-[0.65rem] uppercase tracking-[0.35em] text-accent">
+            <p className="rise-in flex flex-wrap items-center gap-x-3 gap-y-1 font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
               <span>{pppBusiness.neighbourhood} · 6280 Somerled</span>
               {pppBusiness.googleProfile.rating != null && (
                 <span className="inline-flex items-center gap-1 text-muted-foreground">
@@ -39,28 +51,63 @@ export function Hero() {
                 </span>
               )}
             </p>
-            <h1 className="mt-2 font-display text-[2.9rem] uppercase leading-[0.84] sm:text-7xl lg:text-[6rem]">
+            <h1
+              className="rise-in mt-1.5 font-display text-[2.6rem] uppercase leading-[0.82] sm:text-7xl lg:text-[6rem]"
+              style={{ animationDelay: "60ms" }}
+            >
               {t("Chicken. Pizza.", "Poulet. Pizza.")}
               <br />
               <span className="text-flame">{t("Poutine.", "Poutine.")}</span>{" "}
               {t("Ready fast.", "Prêt vite.")}
             </h1>
-            <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+            <p className="mt-1.5 max-w-xl text-xs text-muted-foreground sm:text-sm">
               {t(
-                `Order pickup or delivery from our Notre-Dame-de-Grâce kitchen — ${itemCount} items on the menu.`,
-                `Commandez en cueillette ou en livraison de notre cuisine de Notre-Dame-de-Grâce — ${itemCount} articles au menu.`,
+                `Pickup or delivery from our NDG kitchen — ${itemCount} items.`,
+                `Cueillette ou livraison de notre cuisine NDG — ${itemCount} articles.`,
               )}
             </p>
 
+            {/* Mobile campaign strip — real product, real price, no wasted height */}
+            {topDeal && (
+              <Link
+                to="/order"
+                search={orderSearch({ item: topDeal.item.id })}
+                className="press-tap food-motion zoom-reveal mt-3 flex items-stretch gap-3 border border-primary/60 bg-card lg:hidden"
+              >
+                <MenuItemImage
+                  src={topDeal.item.image}
+                  alt={localizedName(topDeal.item, lang)}
+                  size="compact"
+                  priority
+                />
+                <span className="min-w-0 flex-1 py-2 pr-3">
+                  <span className="sale-pop inline-block origin-left bg-primary px-1.5 py-0.5 text-[0.55rem] font-bold uppercase tracking-widest text-primary-foreground">
+                    −{topDeal.percent}% {t("off", "de rabais")}
+                  </span>
+                  <span className="mt-1 line-clamp-1 block font-display text-lg uppercase leading-tight">
+                    {localizedName(topDeal.item, lang)}
+                  </span>
+                  <span className="mt-0.5 flex items-baseline gap-2">
+                    <span className="price-in font-display text-2xl leading-none text-flame">
+                      ${(topDeal.item.price as number).toFixed(2)}
+                    </span>
+                    <span className="text-xs text-muted-foreground line-through">
+                      ${(topDeal.item.compareAtPrice as number).toFixed(2)}
+                    </span>
+                  </span>
+                </span>
+              </Link>
+            )}
+
             {/* Order terminal — search, voice, mode and location on first screen */}
-            <div className="mt-5 max-w-2xl border border-border bg-background/85 p-2.5 backdrop-blur-xl">
+            <div className="rise-in mt-3 max-w-2xl border border-border bg-background/85 p-2 backdrop-blur-xl lg:mt-5 lg:p-2.5">
               <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2 sm:flex sm:items-stretch">
                 <div className="grid shrink-0 grid-cols-2 border border-border">
                   {(["pickup", "delivery"] as const).map((m) => (
                     <button
                       key={m}
                       onClick={() => setMode(m)}
-                      className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 text-[0.65rem] font-bold uppercase tracking-widest transition-colors focus-ppp ${
+                      className={`press-tap inline-flex items-center justify-center gap-1.5 px-3 py-2 text-[0.62rem] font-bold uppercase tracking-widest transition-colors focus-ppp ${
                         mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                       }`}
                     >
@@ -86,16 +133,16 @@ export function Hero() {
 
               <button
                 onClick={() => openSearch()}
-                className="mt-2 flex w-full items-center gap-3 border border-border bg-card px-3 py-3.5 text-left transition-colors hover:border-primary focus-ppp"
+                className="press-tap mt-2 flex w-full items-center gap-3 border border-border bg-card px-3 py-3 text-left transition-colors hover:border-primary focus-ppp"
               >
-                <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
-                <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground sm:text-base">
+                <Search className="h-4.5 w-4.5 shrink-0 text-muted-foreground" />
+                <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
                   {t(
                     "Search or say “poutine”, “taouk”…",
                     "Cherchez ou dites « poutine », « taouk »…",
                   )}
                 </span>
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center bg-primary text-primary-foreground">
+                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center bg-primary text-primary-foreground">
                   <Mic className="h-4 w-4" />
                 </span>
               </button>
@@ -117,7 +164,8 @@ export function Hero() {
 
               <Link
                 to="/order"
-                className="cta-glow press-tap mt-2 flex w-full items-center justify-center bg-primary py-3.5 font-display text-2xl uppercase leading-none text-primary-foreground focus-ppp"
+                search={orderSearch()}
+                className="cta-glow press-tap mt-2 flex w-full items-center justify-center bg-primary py-3 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp lg:py-3.5 lg:text-2xl"
               >
                 {mode === "pickup"
                   ? t("Start pickup order", "Commander en cueillette")
@@ -126,35 +174,64 @@ export function Hero() {
             </div>
           </div>
 
-          {/* Food-first showcase — real menu items, real prices */}
-          <div className="grid grid-cols-2 gap-2">
-            {showcase.map((item, i) => (
+          {/* Layered advertising composition — desktop only, real products */}
+          <div className="relative hidden h-[30rem] lg:block">
+            {starA && (
               <Link
-                key={item.id}
                 to="/order"
-                search={orderSearch({ item: item.id })}
-                className={`press-tap group relative block overflow-hidden border border-border focus-ppp ${
-                  i === 0 ? "col-span-2" : ""
-                }`}
+                search={orderSearch({ item: starA.id })}
+                className="press-tap food-motion zoom-reveal hero-float absolute left-2 top-4 block h-64 w-64 overflow-hidden rounded-full border-4 border-background shadow-2xl focus-ppp xl:h-72 xl:w-72"
               >
-                <ProductImage
-                  src={item.image}
-                  alt={localizedName(item, lang)}
-                  className={i === 0 ? "h-40 w-full lg:h-56" : "h-28 w-full lg:h-36"}
+                <MenuItemImage
+                  src={starA.image}
+                  alt={localizedName(starA, lang)}
+                  size="hero"
+                  priority
                 />
-                <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-                <span className="absolute inset-x-0 bottom-0 p-3">
-                  <span className="line-clamp-2 block font-display text-lg uppercase leading-tight lg:text-2xl">
-                    {localizedName(item, lang)}
+              </Link>
+            )}
+            {starB && (
+              <Link
+                to="/order"
+                search={orderSearch({ item: starB.id })}
+                className="press-tap food-motion zoom-reveal hero-float-slow absolute right-4 top-0 z-10 block h-48 w-48 overflow-hidden border-4 border-background shadow-2xl focus-ppp xl:h-56 xl:w-56"
+                style={{ animationDelay: "120ms" }}
+              >
+                <MenuItemImage src={starB.image} alt={localizedName(starB, lang)} size="hero" />
+              </Link>
+            )}
+            {starC && (
+              <Link
+                to="/order"
+                search={orderSearch({ item: starC.id })}
+                className="press-tap food-motion zoom-reveal absolute bottom-4 right-10 z-20 block h-56 w-56 overflow-hidden rounded-full border-4 border-background shadow-2xl focus-ppp"
+                style={{ animationDelay: "200ms" }}
+              >
+                <MenuItemImage src={starC.image} alt={localizedName(starC, lang)} size="hero" />
+              </Link>
+            )}
+            {topDeal && (
+              <Link
+                to="/order"
+                search={orderSearch({ item: topDeal.item.id })}
+                className="press-tap sale-pop absolute bottom-16 left-0 z-30 block max-w-[15rem] border border-border bg-background p-4 shadow-2xl focus-ppp"
+              >
+                <span className="inline-block bg-primary px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-widest text-primary-foreground">
+                  −{topDeal.percent}%
+                </span>
+                <span className="mt-2 line-clamp-2 block font-display text-xl uppercase leading-tight">
+                  {localizedName(topDeal.item, lang)}
+                </span>
+                <span className="mt-1 flex items-baseline gap-2">
+                  <span className="price-in font-display text-3xl leading-none text-flame">
+                    ${(topDeal.item.price as number).toFixed(2)}
                   </span>
-                  {item.price !== null && (
-                    <span className="mt-0.5 block font-display text-xl leading-none text-flame">
-                      ${item.price.toFixed(2)}
-                    </span>
-                  )}
+                  <span className="text-xs text-muted-foreground line-through">
+                    ${(topDeal.item.compareAtPrice as number).toFixed(2)}
+                  </span>
                 </span>
               </Link>
-            ))}
+            )}
           </div>
         </div>
       </div>
