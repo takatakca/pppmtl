@@ -129,14 +129,15 @@ export function PPPHeader() {
               <span className="hidden lg:inline">{t("Search food", "Chercher")}</span>
               <Mic className="hidden h-4 w-4 text-primary lg:inline" />
             </button>
-            <a
-              href="#account"
+            <Link
+              to="/account/sign-in"
+              search={{ returnTo: "/account" }}
               aria-label={t("Sign in", "Connexion")}
               className="hidden h-10 items-center gap-2 border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp lg:inline-flex"
             >
               <User className="h-4 w-4" />
               {t("Sign in", "Connexion")}
-            </a>
+            </Link>
             <button
               onClick={openOrderSheet}
               className="hidden h-10 items-center bg-primary px-5 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp lg:inline-flex"

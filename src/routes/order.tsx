@@ -18,8 +18,11 @@ import type { MenuItem } from "@/data/menu";
 import { pppBusiness } from "@/config/business";
 
 export const Route = createFileRoute("/order")({
-  validateSearch: (search: Record<string, unknown>) => {
-    const pick = (key: string) => (typeof search[key] === "string" ? (search[key] as string) : "");
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { category?: string | undefined; item?: string | undefined; q?: string | undefined } => {
+    const pick = (key: string) =>
+      typeof search[key] === "string" && search[key] ? (search[key] as string) : undefined;
     return { category: pick("category"), item: pick("item"), q: pick("q") };
   },
   head: () => ({
@@ -52,7 +55,7 @@ function OrderPage() {
   const location = useSelectedLocation();
   const categories = menuRepository.getCategories(locationId);
   const [activeCategory, setActiveCategory] = useState(search.category || categories[0]?.id || "");
-  const [query, setQuery] = useState(search.q);
+  const [query, setQuery] = useState(search.q ?? "");
   const [filter, setFilter] = useState<"all" | "popular" | "deals">("all");
   const [selected, setSelected] = useState<MenuItem | null>(null);
   const [allCategoriesOpen, setAllCategoriesOpen] = useState(false);
@@ -74,7 +77,7 @@ function OrderPage() {
 
   const clearDeepLink = () => {
     if (search.item || search.category || search.q) {
-      void navigate({ search: { category: "", item: "", q: "" }, replace: true });
+      void navigate({ search: {}, replace: true });
     }
   };
 

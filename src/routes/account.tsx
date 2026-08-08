@@ -77,8 +77,8 @@ function AccountPage() {
         </h1>
         <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
           {t(
-            "Accounts open soon. Until then you can order without signing in — pickup or delivery, straight from the NDG kitchen.",
-            "Les comptes arrivent bientôt. D'ici là, commandez sans compte — cueillette ou livraison, directement de la cuisine NDG.",
+            "Create your PPP account to reorder in one tap, keep your rewards and save your favourites — or keep ordering as a guest.",
+            "Créez votre compte PPP pour recommander en une touche, conserver vos points et enregistrer vos favoris — ou commandez sans compte.",
           )}
         </p>
 
@@ -94,8 +94,21 @@ function AccountPage() {
 
         <div className="mt-6 flex flex-wrap gap-2">
           <Link
+            to="/account/sign-up"
+            className="press-tap cta-glow bg-primary px-6 py-3.5 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
+          >
+            {t("Create my account", "Créer mon compte")}
+          </Link>
+          <Link
+            to="/account/sign-in"
+            search={{ returnTo: "/account" }}
+            className="press-tap border border-border px-6 py-3.5 font-display text-xl uppercase leading-none focus-ppp"
+          >
+            {t("Sign in", "Se connecter")}
+          </Link>
+          <Link
             to="/order"
-            className="press-tap bg-primary px-6 py-3.5 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
+            className="press-tap border border-border px-6 py-3.5 font-display text-xl uppercase leading-none focus-ppp"
           >
             {t("Order without an account", "Commander sans compte")}
           </Link>

@@ -14,6 +14,9 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as OffersRouteImport } from './routes/offers'
 import { Route as OrderRouteImport } from './routes/order'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as AccountForgotPasswordRouteImport } from './routes/account_.forgot-password'
+import { Route as AccountSignInRouteImport } from './routes/account_.sign-in'
+import { Route as AccountSignUpRouteImport } from './routes/account_.sign-up'
 import { Route as DevMenuAuditRouteImport } from './routes/dev.menu-audit'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,6 +44,21 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountForgotPasswordRoute = AccountForgotPasswordRouteImport.update({
+  id: '/account_/forgot-password',
+  path: '/account/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountSignInRoute = AccountSignInRouteImport.update({
+  id: '/account_/sign-in',
+  path: '/account/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountSignUpRoute = AccountSignUpRouteImport.update({
+  id: '/account_/sign-up',
+  path: '/account/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DevMenuAuditRoute = DevMenuAuditRouteImport.update({
   id: '/dev/menu-audit',
   path: '/dev/menu-audit',
@@ -53,6 +71,9 @@ export interface FileRoutesByFullPath {
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/account/forgot-password': typeof AccountForgotPasswordRoute
+  '/account/sign-in': typeof AccountSignInRoute
+  '/account/sign-up': typeof AccountSignUpRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +82,9 @@ export interface FileRoutesByTo {
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/account/forgot-password': typeof AccountForgotPasswordRoute
+  '/account/sign-in': typeof AccountSignInRoute
+  '/account/sign-up': typeof AccountSignUpRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
 }
 export interface FileRoutesById {
@@ -70,15 +94,34 @@ export interface FileRoutesById {
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/account_/forgot-password': typeof AccountForgotPasswordRoute
+  '/account_/sign-in': typeof AccountSignInRoute
+  '/account_/sign-up': typeof AccountSignUpRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/account' | '/offers' | '/order' | '/sitemap.xml' | '/dev/menu-audit'
+    | '/'
+    | '/account'
+    | '/offers'
+    | '/order'
+    | '/sitemap.xml'
+    | '/account/forgot-password'
+    | '/account/sign-in'
+    | '/account/sign-up'
+    | '/dev/menu-audit'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/account' | '/offers' | '/order' | '/sitemap.xml' | '/dev/menu-audit'
+    | '/'
+    | '/account'
+    | '/offers'
+    | '/order'
+    | '/sitemap.xml'
+    | '/account/forgot-password'
+    | '/account/sign-in'
+    | '/account/sign-up'
+    | '/dev/menu-audit'
   id:
     | '__root__'
     | '/'
@@ -86,6 +129,9 @@ export interface FileRouteTypes {
     | '/offers'
     | '/order'
     | '/sitemap.xml'
+    | '/account_/forgot-password'
+    | '/account_/sign-in'
+    | '/account_/sign-up'
     | '/dev/menu-audit'
   fileRoutesById: FileRoutesById
 }
@@ -95,6 +141,9 @@ export interface RootRouteChildren {
   OffersRoute: typeof OffersRoute
   OrderRoute: typeof OrderRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  AccountForgotPasswordRoute: typeof AccountForgotPasswordRoute
+  AccountSignInRoute: typeof AccountSignInRoute
+  AccountSignUpRoute: typeof AccountSignUpRoute
   DevMenuAuditRoute: typeof DevMenuAuditRoute
 }
 
@@ -135,6 +184,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account_/forgot-password': {
+      id: '/account_/forgot-password'
+      path: '/account/forgot-password'
+      fullPath: '/account/forgot-password'
+      preLoaderRoute: typeof AccountForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account_/sign-in': {
+      id: '/account_/sign-in'
+      path: '/account/sign-in'
+      fullPath: '/account/sign-in'
+      preLoaderRoute: typeof AccountSignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account_/sign-up': {
+      id: '/account_/sign-up'
+      path: '/account/sign-up'
+      fullPath: '/account/sign-up'
+      preLoaderRoute: typeof AccountSignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dev/menu-audit': {
       id: '/dev/menu-audit'
       path: '/dev/menu-audit'
@@ -151,6 +221,9 @@ const rootRouteChildren: RootRouteChildren = {
   OffersRoute: OffersRoute,
   OrderRoute: OrderRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  AccountForgotPasswordRoute: AccountForgotPasswordRoute,
+  AccountSignInRoute: AccountSignInRoute,
+  AccountSignUpRoute: AccountSignUpRoute,
   DevMenuAuditRoute: DevMenuAuditRoute,
 }
 export const routeTree = rootRouteImport
