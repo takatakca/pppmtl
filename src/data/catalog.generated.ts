@@ -329,7 +329,7 @@ export const generatedItems: GeneratedItem[] = [
   {
     id: "poutine-classique",
     categoryId: "cat-fries-poutine",
-    nameEn: "Poutine classic",
+    nameEn: "Classic Poutine",
     nameFr: "Poutine classique",
     descriptionEn: "Choose mini to large. Extras are confirmed and priced by the kitchen.",
     descriptionFr:
@@ -1948,7 +1948,7 @@ export const generatedItems: GeneratedItem[] = [
   {
     id: "frites-michigan",
     categoryId: "cat-fries-poutine",
-    nameEn: "Fries Michigan",
+    nameEn: "Michigan Fries",
     nameFr: "Frites Michigan",
     descriptionEn: "Choose small, medium or large.",
     descriptionFr: "Choisissez petit, moyen ou grand.",
