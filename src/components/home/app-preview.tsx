@@ -90,7 +90,7 @@ export function AppPreview() {
     () =>
       menuRepository
         .getItems(locationId)
-        .find((i) => i.modifierGroups.some((g) => g.choices.length > 1)) ?? items[0],
+        .find((i) => (i.modifierGroups ?? []).some((g) => g.choices.length > 1)) ?? items[0],
     [locationId, items],
   );
   const [screen, setScreen] = useState(0);
@@ -124,10 +124,10 @@ export function AppPreview() {
   }, [paused, reduced]);
 
   if (items.length === 0) return null;
-  const current: Screen = reduced ? "order" : SCREENS[screen];
-  const demo = items[0];
-  const demoTwo = items[1] ?? items[0];
-  const group = modifierItem?.modifierGroups.find((g) => g.choices.length > 1);
+  const current: Screen = reduced ? "order" : (SCREENS[screen] ?? "order");
+  const demo = items[0]!;
+  const demoTwo = items[1] ?? demo;
+  const group = modifierItem?.modifierGroups?.find((g) => g.choices.length > 1);
 
   const benefits = [
     { Icon: Zap, label: t("Fast ordering", "Commande rapide") },
