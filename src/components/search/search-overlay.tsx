@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Mic, MicOff, Search, X, Loader2, ArrowRight } from "lucide-react";
+import { MenuImage } from "@/components/menu/menu-item-image";
 import { usePPP } from "@/context/ppp-store";
 import { useVoiceSearch } from "@/hooks/use-voice-search";
 import { categories } from "@/data/menu";
@@ -220,9 +221,9 @@ export function SearchOverlay() {
                   <button
                     key={c.id}
                     onClick={() => setQuery(localizedName(c, lang))}
-                    className="flex items-center gap-4 border border-border bg-card p-3 text-left transition-colors hover:border-primary focus-ppp"
+                    className="press-tap flex items-center gap-3 border border-border bg-card p-2 text-left transition-colors hover:border-primary focus-ppp"
                   >
-                    <img src={c.image} alt="" loading="lazy" className="h-14 w-14 object-cover" />
+                    <MenuImage src={c.image} alt="" variant="thumbnail" />
                     <span>
                       <span className="block font-display text-lg uppercase">
                         {localizedName(c, lang)}
@@ -287,14 +288,9 @@ export function SearchOverlay() {
                             addRecentSearch(query);
                             track("search_product_selected", { itemId: item.id, query });
                           }}
-                          className="flex w-full items-center gap-4 border border-border bg-card p-3 text-left transition-colors hover:border-primary focus-ppp"
+                          className="press-tap flex w-full items-center gap-3 border border-border bg-card p-2 text-left transition-colors hover:border-primary focus-ppp"
                         >
-                          <img
-                            src={item.image}
-                            alt=""
-                            loading="lazy"
-                            className="h-16 w-16 object-cover"
-                          />
+                          <MenuImage src={item.image} alt="" variant="search" />
                           <span className="min-w-0 flex-1">
                             <span className="block font-display text-lg uppercase leading-tight">
                               <Highlighted
