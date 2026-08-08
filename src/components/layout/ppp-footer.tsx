@@ -76,7 +76,10 @@ export function PPPFooter() {
                   {pppBusiness.address.postalCode}
                 </span>
               </p>
-              <a href={pppBusiness.phone.href} className="flex items-center gap-2 hover:text-foreground focus-ppp">
+              <a
+                href={pppBusiness.phone.href}
+                className="flex items-center gap-2 hover:text-foreground focus-ppp"
+              >
                 <Phone className="h-4 w-4 shrink-0 text-primary" />
                 {pppBusiness.phone.display}
               </a>

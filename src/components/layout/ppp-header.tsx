@@ -5,7 +5,6 @@ import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { marketplaceChannels } from "@/lib/channels";
 
 const navItems = [
-  { en: "Menu", fr: "Menu", href: "#menu" },
   { en: "Deals", fr: "Offres", href: "#deals" },
   { en: "Rewards", fr: "Récompenses", href: "#rewards" },
   { en: "Locations", fr: "Emplacements", href: "#locations" },
@@ -13,8 +12,6 @@ const navItems = [
 ];
 
 const mobileLinks = [
-  { en: "Order online", fr: "Commander en ligne", href: "#order" },
-  { en: "Menu", fr: "Menu", href: "#menu" },
   { en: "Deals", fr: "Offres", href: "#deals" },
   { en: "Rewards", fr: "Récompenses", href: "#rewards" },
   { en: "Gift cards", fr: "Cartes-cadeaux", href: "#rewards" },
@@ -43,7 +40,10 @@ export function PPPHeader() {
       {/* Utility strip — location + mode always visible, marketplaces secondary */}
       <div className="hidden border-b border-border bg-background lg:block">
         <div className="mx-auto flex h-8 max-w-[110rem] items-center gap-4 px-4 text-[0.65rem] font-bold uppercase tracking-[0.22em] text-muted-foreground sm:px-6">
-          <button onClick={openLocationSheet} className="flex items-center gap-1.5 hover:text-foreground focus-ppp">
+          <button
+            onClick={openLocationSheet}
+            className="flex items-center gap-1.5 hover:text-foreground focus-ppp"
+          >
             <MapPin className="h-3 w-3 text-primary" />
             {location?.name ?? t("Choose a location", "Choisir un emplacement")}
             <ChevronDown className="h-3 w-3" />
@@ -75,7 +75,9 @@ export function PPPHeader() {
 
       <div
         className={`transition-colors duration-200 ${
-          scrolled ? "border-b border-border bg-background/95 backdrop-blur-xl" : "bg-background/70 backdrop-blur-md"
+          scrolled
+            ? "border-b border-border bg-background/95 backdrop-blur-xl"
+            : "bg-background/70 backdrop-blur-md"
         }`}
       >
         <div className="mx-auto grid h-14 max-w-[110rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-6 lg:h-16 lg:gap-4">
@@ -83,10 +85,18 @@ export function PPPHeader() {
             <span className="bg-primary px-1.5 py-1 font-display text-lg leading-none text-primary-foreground">
               PPP
             </span>
-            <span className="hidden font-display text-lg leading-none tracking-wide sm:inline">MTL-NORD</span>
+            <span className="hidden font-display text-lg leading-none tracking-wide sm:inline">
+              NDG MTL
+            </span>
           </Link>
 
           <nav className="hidden min-w-0 items-center gap-5 lg:flex">
+            <Link
+              to="/order"
+              className="font-display text-sm uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground focus-ppp"
+            >
+              {lang === "fr" ? "Menu" : "Menu"}
+            </Link>
             {navItems.map((item) => (
               <a
                 key={item.en}
@@ -158,6 +168,13 @@ export function PPPHeader() {
             {t("Order now", "Commander")}
           </button>
           <div className="mt-4 divide-y divide-border border-y border-border">
+            <Link
+              to="/order"
+              onClick={() => setOpen(false)}
+              className="block py-3 font-display text-2xl uppercase leading-none focus-ppp"
+            >
+              {t("Order online", "Commander en ligne")}
+            </Link>
             {mobileLinks.map((item) => (
               <a
                 key={item.en}

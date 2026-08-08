@@ -1,4 +1,5 @@
 import { Gift, Home, Search, ShoppingBag, Utensils } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { usePPP } from "@/context/ppp-store";
 
 /**
@@ -10,13 +11,19 @@ export function MobileOrderBar() {
 
   const tabs = [
     { id: "home", label: t("Home", "Accueil"), icon: Home, href: "#top" },
-    { id: "menu", label: t("Menu", "Menu"), icon: Utensils, href: "#menu" },
     { id: "rewards", label: t("Rewards", "Points"), icon: Gift, href: "#rewards" },
   ];
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[55] border-t border-border bg-background/95 backdrop-blur-xl lg:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-[55] border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
       <div className="flex items-stretch">
+        <Link
+          to="/order"
+          className="flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[0.6rem] font-bold uppercase tracking-widest text-muted-foreground focus-ppp"
+        >
+          <Utensils className="h-4 w-4" />
+          {t("Menu", "Menu")}
+        </Link>
         {tabs.map((tab) => (
           <a
             key={tab.id}

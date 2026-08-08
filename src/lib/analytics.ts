@@ -13,7 +13,10 @@ export type PPPEvent =
   | "quick_craving_selected"
   | "location_selected"
   | "order_mode_selected"
-  | "order_started";
+  | "order_started"
+  | "cart_item_added"
+  | "cart_item_removed"
+  | "cart_checkout_continued";
 
 export function track(event: PPPEvent, payload: Record<string, unknown> = {}) {
   if (import.meta.env.DEV) {

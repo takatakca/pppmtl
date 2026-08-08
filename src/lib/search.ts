@@ -1,10 +1,4 @@
-import {
-  categories,
-  menuItems,
-  type Lang,
-  type MenuCategory,
-  type MenuItem,
-} from "@/data/menu";
+import { categories, menuItems, type Lang, type MenuCategory, type MenuItem } from "@/data/menu";
 
 export function normalize(value: string) {
   return value
@@ -18,10 +12,51 @@ export function normalize(value: string) {
 
 /** Words that carry no food meaning in either language. */
 const STOP_WORDS = new Set([
-  "i", "im", "a", "an", "the", "want", "would", "like", "looking", "for", "show", "me", "some",
-  "please", "get", "give", "of", "my", "with", "and", "to", "do", "you", "have", "any",
-  "je", "veux", "moi", "montre", "montrez", "des", "du", "de", "la", "le", "les", "un", "une",
-  "cherche", "voudrais", "avez", "vous", "svp", "sil", "plait",
+  "i",
+  "im",
+  "a",
+  "an",
+  "the",
+  "want",
+  "would",
+  "like",
+  "looking",
+  "for",
+  "show",
+  "me",
+  "some",
+  "please",
+  "get",
+  "give",
+  "of",
+  "my",
+  "with",
+  "and",
+  "to",
+  "do",
+  "you",
+  "have",
+  "any",
+  "je",
+  "veux",
+  "moi",
+  "montre",
+  "montrez",
+  "des",
+  "du",
+  "de",
+  "la",
+  "le",
+  "les",
+  "un",
+  "une",
+  "cherche",
+  "voudrais",
+  "avez",
+  "vous",
+  "svp",
+  "sil",
+  "plait",
 ]);
 
 export function tokenize(query: string) {

@@ -1,0 +1,284 @@
+import { useMemo, useRef, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Bike, Mic, Phone, Search, ShoppingBag, X } from "lucide-react";
+import { PPPHeader } from "@/components/layout/ppp-header";
+import { PPPFooter } from "@/components/layout/ppp-footer";
+import { LocationSheet } from "@/components/layout/location-sheet";
+import { OrderSheet } from "@/components/layout/order-sheet";
+import { SearchOverlay } from "@/components/search/search-overlay";
+import { ItemSheet } from "@/components/order/item-sheet";
+import { CartPanel } from "@/components/order/cart-panel";
+import { ProductImage } from "@/components/order/product-image";
+import { usePPP, useSelectedLocation } from "@/context/ppp-store";
+import { menuRepository } from "@/lib/menu-repository";
+import { cartTotals } from "@/lib/cart";
+import { useVoiceSearch } from "@/hooks/use-voice-search";
+import type { MenuItem } from "@/data/menu";
+import { pppBusiness } from "@/config/business";
+
+export const Route = createFileRoute("/order")({
+  head: () => ({
+    meta: [
+      { title: "Order Online | PPP Pizzeria NDG — Pickup & Delivery" },
+      {
+        name: "description",
+        content:
+          "Build your PPP order from the Notre-Dame-de-Grâce menu: fried chicken, trios, poutine, subs, pitas and pizza. Pickup or delivery from 6280 Av. Somerled.",
+      },
+      { property: "og:title", content: "Order Online | PPP Pizzeria NDG" },
+      {
+        property: "og:description",
+        content:
+          "Search the PPP NDG menu by text or voice, build your order and continue by phone or app.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/order" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [{ rel: "canonical", href: "/order" }],
+  }),
+  component: OrderPage,
+});
+
+function OrderPage() {
+  const { locationId, mode, setMode, lang, t, openLocationSheet, openCart, cart } = usePPP();
+  const location = useSelectedLocation();
+  const categories = menuRepository.getCategories(locationId);
+  const [activeCategory, setActiveCategory] = useState(categories[0]?.id ?? "");
+  const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<MenuItem | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const totals = cartTotals(cart);
+
+  const voice = useVoiceSearch(lang, (text: string) => setQuery(text));
+  const listening = voice.status === "listening";
+  const voiceUnavailable =
+    voice.status === "denied" || voice.status === "unsupported" || voice.status === "error";
+
+  const results = useMemo(() => {
+    if (query.trim().length > 0) {
+      return menuRepository.search({ query, language: lang, locationId }).items;
+    }
+    return menuRepository.getItemsInCategory(activeCategory, locationId);
+  }, [query, lang, locationId, activeCategory]);
+
+  const activeName = categories.find((c) => c.id === activeCategory);
+
+  return (
+    <div className="min-h-dvh bg-background pb-28 lg:pb-0">
+      <PPPHeader />
+      <main className="mx-auto max-w-[110rem] px-3 pt-24 sm:px-6 lg:pt-28">
+        <h1 className="font-display text-5xl uppercase leading-[0.85] sm:text-7xl">
+          {t("Build your order", "Composez votre commande")}
+          <span className="block text-flame">{pppBusiness.shortLocationName}</span>
+        </h1>
+
+        {/* Order terminal: mode + location + search + voice, always reachable */}
+        <div className="sticky top-14 z-40 -mx-3 mt-5 border-y border-border bg-background/95 px-3 py-3 backdrop-blur-xl sm:-mx-6 sm:px-6 lg:top-24">
+          <div className="grid gap-2 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center">
+            <div className="grid grid-cols-2 gap-1 border border-border p-1 lg:w-56">
+              {(["pickup", "delivery"] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setMode(m)}
+                  aria-pressed={mode === m}
+                  className={`inline-flex items-center justify-center gap-2 py-2 text-[0.65rem] font-bold uppercase tracking-widest transition-colors focus-ppp ${
+                    mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  {m === "pickup" ? (
+                    <ShoppingBag className="h-3.5 w-3.5" />
+                  ) : (
+                    <Bike className="h-3.5 w-3.5" />
+                  )}
+                  {m === "pickup" ? t("Pickup", "Cueillette") : t("Delivery", "Livraison")}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex min-w-0 items-center gap-2 border border-border px-3">
+              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                enterKeyHint="search"
+                aria-label={t("Search the menu", "Rechercher au menu")}
+                placeholder={t(
+                  "Search chicken, poutine, subs…",
+                  "Chercher poulet, poutine, sous-marins…",
+                )}
+                className="h-11 min-w-0 flex-1 bg-transparent text-sm outline-none"
+              />
+              {query && (
+                <button
+                  onClick={() => setQuery("")}
+                  aria-label={t("Clear search", "Effacer")}
+                  className="p-1 focus-ppp"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+              {voice.supported && (
+                <button
+                  onClick={listening ? voice.stop : voice.start}
+                  aria-label={t("Search by voice", "Rechercher par la voix")}
+                  className={`p-1.5 focus-ppp ${listening ? "listening-ring text-primary" : "text-primary"}`}
+                >
+                  <Mic className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
+            <button
+              onClick={openLocationSheet}
+              className="hidden truncate border border-border px-3 py-2.5 text-[0.65rem] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp lg:block"
+            >
+              {location?.name ?? t("Choose a location", "Choisir un emplacement")}
+            </button>
+          </div>
+
+          {voiceUnavailable && (
+            <p
+              role="status"
+              className="mt-2 text-[0.65rem] uppercase tracking-widest text-muted-foreground"
+            >
+              {t(
+                "Voice unavailable — type your search instead.",
+                "Voix indisponible — tapez votre recherche.",
+              )}
+            </p>
+          )}
+
+          {/* Sticky category rail */}
+          <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1">
+            {categories.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => {
+                  setQuery("");
+                  setActiveCategory(c.id);
+                }}
+                aria-pressed={!query && activeCategory === c.id}
+                className={`shrink-0 border px-3 py-2 text-[0.65rem] font-bold uppercase tracking-widest transition-colors focus-ppp ${
+                  !query && activeCategory === c.id
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {lang === "fr" ? c.nameFr : c.nameEn}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <h2 className="mt-6 font-display text-2xl uppercase leading-none text-muted-foreground">
+          {query
+            ? t(`Results for “${query}”`, `Résultats pour « ${query} »`)
+            : activeName
+              ? lang === "fr"
+                ? activeName.nameFr
+                : activeName.nameEn
+              : t("Menu", "Menu")}
+        </h2>
+
+        {results.length === 0 ? (
+          <p className="mt-6 border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+            {t(
+              "Nothing matched that search. Try a category above, or call the restaurant.",
+              "Aucun résultat. Essayez une catégorie ci-dessus ou appelez le restaurant.",
+            )}
+          </p>
+        ) : (
+          <ul className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+            {results.map((item) => (
+              <li key={item.id}>
+                <button
+                  onClick={() => setSelected(item)}
+                  className="flex w-full items-stretch gap-3 border border-border text-left transition-colors hover:border-primary focus-ppp"
+                >
+                  <ProductImage
+                    src={item.image}
+                    alt={lang === "fr" ? item.nameFr : item.nameEn}
+                    className="h-28 w-28 shrink-0"
+                  />
+                  <span className="min-w-0 flex-1 py-3 pr-3">
+                    <span className="block font-display text-lg uppercase leading-tight">
+                      {lang === "fr" ? item.nameFr : item.nameEn}
+                    </span>
+                    <span className="mt-1 line-clamp-2 block text-xs text-muted-foreground">
+                      {lang === "fr" ? item.descriptionFr : item.descriptionEn}
+                    </span>
+                    <span className="mt-2 flex items-baseline gap-2">
+                      <span className="font-display text-xl leading-none text-accent">
+                        {item.price !== null
+                          ? `$${item.price.toFixed(2)}`
+                          : t("See price", "Voir le prix")}
+                      </span>
+                      {item.compareAtPrice != null && (
+                        <span className="text-xs text-muted-foreground line-through">
+                          ${item.compareAtPrice.toFixed(2)}
+                        </span>
+                      )}
+                    </span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div className="mt-10 grid gap-2 border border-border p-5 sm:grid-cols-[1fr_auto] sm:items-center">
+          <p className="text-sm text-muted-foreground">
+            {t(
+              "Prefer to talk it through? The kitchen takes orders by phone.",
+              "Vous préférez parler à quelqu'un ? La cuisine prend les commandes par téléphone.",
+            )}
+          </p>
+          <a
+            href={pppBusiness.phone.href}
+            className="inline-flex items-center justify-center gap-2 border border-border px-5 py-3 font-display text-lg uppercase leading-none focus-ppp hover:border-primary"
+          >
+            <Phone className="h-4 w-4 text-primary" />
+            {t("Call to order", "Appeler pour commander")}
+          </a>
+        </div>
+      </main>
+
+      <PPPFooter />
+
+      {/* Contextual cart CTA replaces the home bottom bar inside the order flow */}
+      <div className="fixed inset-x-0 bottom-0 z-[70] border-t border-border bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden">
+        <button
+          onClick={openCart}
+          className="flex w-full items-center justify-between bg-primary px-4 py-3.5 focus-ppp"
+          style={{ boxShadow: "var(--shadow-glow)" }}
+        >
+          <span className="font-display text-lg uppercase leading-none text-primary-foreground">
+            {t("View order", "Voir la commande")} · {totals.itemCount}
+          </span>
+          <span className="font-display text-lg leading-none text-primary-foreground">
+            ${totals.knownSubtotal.toFixed(2)}
+          </span>
+        </button>
+      </div>
+
+      <button
+        onClick={openCart}
+        className="fixed bottom-6 right-6 z-[70] hidden items-center gap-3 bg-primary px-5 py-4 focus-ppp lg:inline-flex"
+        style={{ boxShadow: "var(--shadow-glow)" }}
+      >
+        <ShoppingBag className="h-5 w-5 text-primary-foreground" />
+        <span className="font-display text-lg uppercase leading-none text-primary-foreground">
+          {totals.itemCount} · ${totals.knownSubtotal.toFixed(2)}
+        </span>
+      </button>
+
+      <ItemSheet item={selected} onClose={() => setSelected(null)} />
+      <CartPanel />
+      <SearchOverlay />
+      <LocationSheet />
+      <OrderSheet />
+    </div>
+  );
+}

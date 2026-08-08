@@ -15,7 +15,8 @@ const cravings = [
 ];
 
 export function Hero() {
-  const { lang, mode, setMode, openSearch, openLocationSheet, openOrderSheet, locationId, t } = usePPP();
+  const { lang, mode, setMode, openSearch, openLocationSheet, openOrderSheet, locationId, t } =
+    usePPP();
   const location = useSelectedLocation();
   const offers = menuRepository.getOffers(locationId, mode);
   const [promo, setPromo] = useState(0);
@@ -50,7 +51,8 @@ export function Hero() {
             <h1 className="mt-2 font-display text-[2.6rem] uppercase leading-[0.86] sm:text-6xl lg:text-[6.5rem]">
               {t("Order what", "Commandez ce")}
               <br />
-              {t("you're", "dont vous avez")} <span className="text-flame">{t("craving", "envie")}</span>
+              {t("you're", "dont vous avez")}{" "}
+              <span className="text-flame">{t("craving", "envie")}</span>
             </h1>
 
             {/* Order terminal — search, voice, mode and location on first screen */}
@@ -65,7 +67,11 @@ export function Hero() {
                         mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                       }`}
                     >
-                      {m === "pickup" ? <ShoppingBag className="h-3.5 w-3.5" /> : <Bike className="h-3.5 w-3.5" />}
+                      {m === "pickup" ? (
+                        <ShoppingBag className="h-3.5 w-3.5" />
+                      ) : (
+                        <Bike className="h-3.5 w-3.5" />
+                      )}
                       {m === "pickup" ? t("Pickup", "Cueillette") : t("Delivery", "Livraison")}
                     </button>
                   ))}
@@ -87,7 +93,10 @@ export function Hero() {
               >
                 <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
                 <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground sm:text-base">
-                  {t("Search or say “poutine”, “taouk”…", "Cherchez ou dites « poutine », « taouk »…")}
+                  {t(
+                    "Search or say “poutine”, “taouk”…",
+                    "Cherchez ou dites « poutine », « taouk »…",
+                  )}
                 </span>
                 <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center bg-primary text-primary-foreground">
                   <Mic className="h-4 w-4" />
@@ -113,7 +122,9 @@ export function Hero() {
                 onClick={openOrderSheet}
                 className="cta-glow mt-2 hidden w-full items-center justify-center bg-primary py-3.5 font-display text-2xl uppercase leading-none text-primary-foreground focus-ppp lg:flex"
               >
-                {mode === "pickup" ? t("Start pickup order", "Commander en cueillette") : t("Start delivery order", "Commander en livraison")}
+                {mode === "pickup"
+                  ? t("Start pickup order", "Commander en cueillette")
+                  : t("Start delivery order", "Commander en livraison")}
               </button>
             </div>
           </div>

@@ -3,7 +3,8 @@ import { locations } from "@/data/menu";
 import { usePPP } from "@/context/ppp-store";
 
 export function LocationSheet() {
-  const { locationSheetOpen, closeLocationSheet, locationId, setLocationId, mode, setMode, t } = usePPP();
+  const { locationSheetOpen, closeLocationSheet, locationId, setLocationId, mode, setMode, t } =
+    usePPP();
   if (!locationSheetOpen) return null;
 
   return (
@@ -55,7 +56,9 @@ export function LocationSheet() {
                   closeLocationSheet();
                 }}
                 className={`w-full rounded-2xl border p-4 text-left transition-colors focus-ppp ${
-                  locationId === l.id ? "border-primary bg-card" : "border-border bg-card hover:border-primary/60"
+                  locationId === l.id
+                    ? "border-primary bg-card"
+                    : "border-border bg-card hover:border-primary/60"
                 }`}
               >
                 <p className="font-display text-xl uppercase">{l.name}</p>

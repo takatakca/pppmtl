@@ -3,12 +3,7 @@ import { Mic, MicOff, Search, X, Loader2, ArrowRight } from "lucide-react";
 import { usePPP } from "@/context/ppp-store";
 import { useVoiceSearch } from "@/hooks/use-voice-search";
 import { categories } from "@/data/menu";
-import {
-  highlightParts,
-  localizedDescription,
-  localizedName,
-  searchMenu,
-} from "@/lib/search";
+import { highlightParts, localizedDescription, localizedName, searchMenu } from "@/lib/search";
 import { track } from "@/lib/analytics";
 
 const CRAVINGS: Array<{ en: string; fr: string }> = [
@@ -37,8 +32,17 @@ function Highlighted({ label, terms }: { label: string; terms: string[] }) {
 }
 
 export function SearchOverlay() {
-  const { searchOpen, searchSeed, closeSearch, lang, locationId, recentSearches, addRecentSearch, clearRecentSearches, t } =
-    usePPP();
+  const {
+    searchOpen,
+    searchSeed,
+    closeSearch,
+    lang,
+    locationId,
+    recentSearches,
+    addRecentSearch,
+    clearRecentSearches,
+    t,
+  } = usePPP();
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -152,7 +156,10 @@ export function SearchOverlay() {
           </button>
         </div>
 
-        <p aria-live="polite" className="mt-3 text-xs uppercase tracking-widest text-muted-foreground">
+        <p
+          aria-live="polite"
+          className="mt-3 text-xs uppercase tracking-widest text-muted-foreground"
+        >
           {voice.status === "listening" && voice.transcript ? `“${voice.transcript}”` : voiceLabel}
         </p>
 
@@ -215,12 +222,7 @@ export function SearchOverlay() {
                     onClick={() => setQuery(localizedName(c, lang))}
                     className="flex items-center gap-4 border border-border bg-card p-3 text-left transition-colors hover:border-primary focus-ppp"
                   >
-                    <img
-                      src={c.image}
-                      alt=""
-                      loading="lazy"
-                      className="h-14 w-14 object-cover"
-                    />
+                    <img src={c.image} alt="" loading="lazy" className="h-14 w-14 object-cover" />
                     <span>
                       <span className="block font-display text-lg uppercase">
                         {localizedName(c, lang)}
@@ -260,7 +262,9 @@ export function SearchOverlay() {
                     {results.categories.map((c) => (
                       <button
                         key={c.id}
-                        onClick={() => track("search_category_selected", { categoryId: c.id, query })}
+                        onClick={() =>
+                          track("search_category_selected", { categoryId: c.id, query })
+                        }
                         className="border border border-primary/60 bg-card px-4 py-2 text-sm font-semibold focus-ppp"
                       >
                         <Highlighted label={localizedName(c, lang)} terms={results.terms} />
@@ -293,7 +297,10 @@ export function SearchOverlay() {
                           />
                           <span className="min-w-0 flex-1">
                             <span className="block font-display text-lg uppercase leading-tight">
-                              <Highlighted label={localizedName(item, lang)} terms={results.terms} />
+                              <Highlighted
+                                label={localizedName(item, lang)}
+                                terms={results.terms}
+                              />
                             </span>
                             <span className="block truncate text-xs text-muted-foreground">
                               {localizedDescription(item, lang)}

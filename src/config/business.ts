@@ -16,13 +16,7 @@ export interface GoogleProfileSnapshot {
 }
 
 export type DayKey =
-  | "monday"
-  | "tuesday"
-  | "wednesday"
-  | "thursday"
-  | "friday"
-  | "saturday"
-  | "sunday";
+  "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
 
 export interface HoursConfig {
   /** null = weekly hours not confirmed yet. Never invent a schedule. */

@@ -88,7 +88,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "PPP Pizzeria Montreal NDG | Poulet, Pizza & Poutine" },
       {
         property: "og:description",
-        content: "Order pickup or delivery from 6280 Av. Somerled, Notre-Dame-de-Grâce, and earn PPP Rewards.",
+        content:
+          "Order pickup or delivery from 6280 Av. Somerled, Notre-Dame-de-Grâce, and earn PPP Rewards.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

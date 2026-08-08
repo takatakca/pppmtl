@@ -35,9 +35,7 @@ export const Route = createFileRoute("/")({
       { property: "og:url", content: "/" },
     ],
     links: [{ rel: "canonical", href: "/" }],
-    scripts: [
-      { type: "application/ld+json", children: JSON.stringify(businessJsonLd()) },
-    ],
+    scripts: [{ type: "application/ld+json", children: JSON.stringify(businessJsonLd()) }],
   }),
   component: Index,
 });
