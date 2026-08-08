@@ -1,4 +1,13 @@
+import { Facebook, Instagram, MapPin, Phone } from "lucide-react";
 import { usePPP } from "@/context/ppp-store";
+import { pppBusiness } from "@/config/business";
+
+const socials = [
+  { id: "instagram", label: "Instagram", href: pppBusiness.social.instagram, Icon: Instagram },
+  { id: "facebook", label: "Facebook", href: pppBusiness.social.facebook, Icon: Facebook },
+  { id: "x", label: "X", href: pppBusiness.social.x, Icon: null },
+  { id: "pinterest", label: "Pinterest", href: pppBusiness.social.pinterest, Icon: null },
+] as const;
 
 const columns = [
   {
@@ -53,10 +62,25 @@ export function PPPFooter() {
           <div>
             <p className="max-w-sm text-sm text-muted-foreground">
               {t(
-                "Poulet · Pizza · Poutine. Rotisserie, grill and late-night comfort food in Montréal-Nord.",
-                "Poulet · Pizza · Poutine. Rôtisserie, grillades et réconfort tard le soir à Montréal-Nord.",
+                "Poulet · Pizza · Poutine. Rotisserie, grill and comfort food on Somerled in Notre-Dame-de-Grâce.",
+                "Poulet · Pizza · Poutine. Rôtisserie, grillades et réconfort sur Somerled, à Notre-Dame-de-Grâce.",
               )}
             </p>
+            <address className="mt-4 space-y-1 not-italic text-sm text-muted-foreground">
+              <p className="flex items-start gap-2">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <span>
+                  {pppBusiness.address.line1}
+                  <br />
+                  {pppBusiness.address.city}, {pppBusiness.address.province}{" "}
+                  {pppBusiness.address.postalCode}
+                </span>
+              </p>
+              <a href={pppBusiness.phone.href} className="flex items-center gap-2 hover:text-foreground focus-ppp">
+                <Phone className="h-4 w-4 shrink-0 text-primary" />
+                {pppBusiness.phone.display}
+              </a>
+            </address>
             <button
               onClick={openOrderSheet}
               className="mt-4 bg-primary px-6 py-3 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
@@ -78,6 +102,22 @@ export function PPPFooter() {
                 {t("Subscribe", "S'abonner")}
               </button>
             </form>
+            <ul className="mt-6 flex flex-wrap gap-2">
+              {socials.map((s) => (
+                <li key={s.id}>
+                  <a
+                    href={s.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`PPP ${s.label}`}
+                    className="inline-flex items-center gap-1.5 border border-border px-3 py-2 text-[0.6rem] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp"
+                  >
+                    {s.Icon ? <s.Icon className="h-3.5 w-3.5 text-primary" aria-hidden /> : null}
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
@@ -104,10 +144,10 @@ export function PPPFooter() {
         </div>
 
         <p className="mt-10 select-none font-display text-[18vw] uppercase leading-[0.75] text-foreground/8 lg:text-[13vw]">
-          PPP MTL-NORD
+          PPP NDG MTL
         </p>
         <p className="border-t border-border py-5 text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
-          © {new Date().getFullYear()} PPP Montréal-Nord
+          © {new Date().getFullYear()} {pppBusiness.displayName}
         </p>
       </div>
     </footer>

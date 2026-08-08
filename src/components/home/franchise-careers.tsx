@@ -17,8 +17,8 @@ export function FranchiseCareers() {
             </h2>
             <p className="mt-2 max-w-sm text-sm text-muted-foreground">
               {t(
-                "Kitchen, counter and delivery roles in Montréal-Nord.",
-                "Postes en cuisine, au comptoir et en livraison à Montréal-Nord.",
+                "Kitchen, counter and delivery roles in NDG, Montréal.",
+                "Postes en cuisine, au comptoir et en livraison à NDG, Montréal.",
               )}
             </p>
             <a

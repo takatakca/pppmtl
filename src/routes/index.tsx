@@ -13,24 +13,30 @@ import { LocationsSection } from "@/components/home/locations-section";
 import { FranchiseCareers } from "@/components/home/franchise-careers";
 import { OrderSheet } from "@/components/layout/order-sheet";
 import { usePPP } from "@/context/ppp-store";
+import { businessJsonLd, pppBusiness } from "@/config/business";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PPP MTL-Nord | Order Chicken, Pizza & Poutine in Montréal" },
+      { title: "PPP Pizzeria NDG | Pizza, Chicken & Poutine on Somerled" },
       {
         name: "description",
         content:
-          "Search or say what you're craving, then order pickup or delivery from PPP Montréal-Nord — rotisserie chicken, pizza, poutine, shawarma and $15.99 combos.",
+          "Order pickup or delivery from PPP Pizzeria Montreal in Notre-Dame-de-Grâce, 6280 Av. Somerled. Pizza, rotisserie chicken, poutine, shawarma and $15.99 combos.",
       },
-      { property: "og:title", content: "PPP MTL-Nord | Poulet · Pizza · Poutine" },
+      { property: "og:title", content: "PPP Pizzeria NDG | Poulet · Pizza · Poutine" },
       {
         property: "og:description",
         content:
-          "Voice and text food search, pickup or delivery, combos and PPP Rewards — Montréal-Nord's neighbourhood kitchen.",
+          "Voice and text food search, pickup or delivery, combos and PPP Rewards — 6280 Av. Somerled, Notre-Dame-de-Grâce.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: "/" },
+    ],
+    links: [{ rel: "canonical", href: "/" }],
+    scripts: [
+      { type: "application/ld+json", children: JSON.stringify(businessJsonLd()) },
     ],
   }),
   component: Index,

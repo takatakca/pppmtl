@@ -8,6 +8,8 @@ import comboPita from "@/assets/combo-pita.jpg";
 import comboBurger from "@/assets/combo-burger.jpg";
 import menuRotisserie from "@/assets/menu-rotisserie.jpg";
 
+import { pppBusiness } from "@/config/business";
+
 export type Lang = "en" | "fr";
 export type OrderMode = "pickup" | "delivery";
 
@@ -171,7 +173,7 @@ export const categories: MenuCategory[] = [
   },
 ];
 
-const MTL_NORD = "loc-mtl-nord";
+const NDG = "loc-ndg";
 
 export const menuItems: MenuItem[] = [
   {
@@ -187,7 +189,7 @@ export const menuItems: MenuItem[] = [
     price: null,
     isAvailable: true,
     badges: ["popular"],
-    locationIds: [MTL_NORD],
+    locationIds: [NDG],
   },
   {
     id: "itm-all-dressed",
@@ -202,7 +204,7 @@ export const menuItems: MenuItem[] = [
     price: null,
     isAvailable: true,
     badges: [],
-    locationIds: [MTL_NORD],
+    locationIds: [NDG],
   },
   {
     id: "itm-cheese",
@@ -217,7 +219,7 @@ export const menuItems: MenuItem[] = [
     price: null,
     isAvailable: true,
     badges: [],
-    locationIds: [MTL_NORD],
+    locationIds: [NDG],
   },
   {
     id: "itm-quarter-chicken",
@@ -232,7 +234,7 @@ export const menuItems: MenuItem[] = [
     price: 18.99,
     isAvailable: true,
     badges: ["popular"],
-    locationIds: [MTL_NORD],
+    locationIds: [NDG],
   },
   {
     id: "itm-chicken-pita",
@@ -247,7 +249,7 @@ export const menuItems: MenuItem[] = [
     price: null,
     isAvailable: true,
     badges: ["popular"],
-    locationIds: [MTL_NORD],
+    locationIds: [NDG],
   },
   {
     id: "itm-shawarma-pita",
@@ -262,7 +264,7 @@ export const menuItems: MenuItem[] = [
     price: null,
     isAvailable: true,
     badges: [],
-    locationIds: [MTL_NORD],
+    locationIds: [NDG],
   },
   {
     id: "itm-burger",
@@ -277,7 +279,7 @@ export const menuItems: MenuItem[] = [
     price: null,
     isAvailable: true,
     badges: [],
-    locationIds: [MTL_NORD],
+    locationIds: [NDG],
   },
   {
     id: "itm-fries",
@@ -292,7 +294,7 @@ export const menuItems: MenuItem[] = [
     price: null,
     isAvailable: true,
     badges: [],
-    locationIds: [MTL_NORD],
+    locationIds: [NDG],
   },
   {
     id: "itm-poutine",
@@ -307,7 +309,7 @@ export const menuItems: MenuItem[] = [
     price: null,
     isAvailable: true,
     badges: ["popular"],
-    locationIds: [MTL_NORD],
+    locationIds: [NDG],
   },
   {
     id: "itm-combo-pita",
@@ -322,7 +324,7 @@ export const menuItems: MenuItem[] = [
     price: 15.99,
     isAvailable: true,
     badges: ["deal"],
-    locationIds: [MTL_NORD],
+    locationIds: [NDG],
   },
   {
     id: "itm-combo-burger",
@@ -337,7 +339,7 @@ export const menuItems: MenuItem[] = [
     price: 15.99,
     isAvailable: true,
     badges: ["deal"],
-    locationIds: [MTL_NORD],
+    locationIds: [NDG],
   },
   {
     id: "itm-sundae",
@@ -352,7 +354,7 @@ export const menuItems: MenuItem[] = [
     price: null,
     isAvailable: true,
     badges: [],
-    locationIds: [MTL_NORD],
+    locationIds: [NDG],
   },
 ];
 
@@ -365,7 +367,7 @@ export const offers: Offer[] = [
     descriptionFr: "Pita shish taouk ou shawarma + frites + boisson.",
     image: comboPita,
     price: 15.99,
-    locationIds: [MTL_NORD],
+    locationIds: [NDG],
     modes: ["pickup", "delivery"],
     startsAt: null,
     endsAt: null,
@@ -378,7 +380,7 @@ export const offers: Offer[] = [
     descriptionFr: "Burger PPP avec une petite poutine.",
     image: comboBurger,
     price: 15.99,
-    locationIds: [MTL_NORD],
+    locationIds: [NDG],
     modes: ["pickup", "delivery"],
     startsAt: null,
     endsAt: null,
@@ -391,7 +393,7 @@ export const offers: Offer[] = [
     descriptionFr: "Poulet rôti, frites, salade de chou, sauce.",
     image: menuRotisserie,
     price: 18.99,
-    locationIds: [MTL_NORD],
+    locationIds: [NDG],
     modes: ["pickup", "delivery"],
     startsAt: null,
     endsAt: null,
@@ -400,16 +402,16 @@ export const offers: Offer[] = [
 
 export const locations: Location[] = [
   {
-    id: MTL_NORD,
-    slug: "montreal-nord",
-    name: "PPP Montréal-Nord",
-    address: "Montréal-Nord",
-    city: "Montréal",
-    province: "QC",
-    postalCode: null,
-    phone: "+1 514 458 4587",
+    id: NDG,
+    slug: "notre-dame-de-grace",
+    name: `PPP ${pppBusiness.shortLocationName}`,
+    address: pppBusiness.address.line1,
+    city: pppBusiness.address.city,
+    province: pppBusiness.address.province,
+    postalCode: pppBusiness.address.postalCode,
+    phone: pppBusiness.phone.display,
     hours: null,
-    services: ["Pickup", "Delivery"],
+    services: ["Pickup", "Delivery", "Live music", "Sports", "Wi-Fi"],
     channels: [
       { id: "direct", label: "PPP Direct", kind: "direct" },
       { id: "ubereats", label: "Uber Eats", kind: "marketplace" },
@@ -425,7 +427,7 @@ export const locations: Location[] = [
       doorDashUrl: null,
       skipUrl: null,
       tooGoodToGoUrl: null,
-      phoneOrderNumber: "+15144584587",
+      phoneOrderNumber: pppBusiness.phone.e164,
     },
   },
 ];

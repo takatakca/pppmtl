@@ -57,7 +57,14 @@ export function PPPProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(KEY);
-      if (raw) setState((s) => ({ ...s, ...(JSON.parse(raw) as Partial<Persisted>) }));
+      if (raw) {
+        const stored = JSON.parse(raw) as Partial<Persisted>;
+        // Drop stale location ids from earlier location records.
+        if (stored.locationId && !locations.some((l) => l.id === stored.locationId)) {
+          stored.locationId = defaults.locationId;
+        }
+        setState((s) => ({ ...s, ...stored }));
+      }
     } catch {
       /* ignore unreadable storage */
     }
