@@ -31,10 +31,10 @@ export function Hero() {
           <div className="min-w-0">
             <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-display text-[0.65rem] uppercase tracking-[0.35em] text-accent">
               <span>{pppBusiness.neighbourhood} · 6280 Somerled</span>
-              {pppBusiness.google?.rating != null && (
+              {pppBusiness.googleProfile.rating != null && (
                 <span className="inline-flex items-center gap-1 text-muted-foreground">
                   <Star className="h-3 w-3 fill-current text-accent" />
-                  {pppBusiness.google.rating.toFixed(1)}
+                  {pppBusiness.googleProfile.rating.toFixed(1)}
                 </span>
               )}
             </p>
