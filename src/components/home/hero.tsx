@@ -45,7 +45,7 @@ export function Hero() {
         <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
           <div className="min-w-0">
             <p className="font-display text-[0.7rem] uppercase tracking-[0.42em] text-accent">
-              Montréal-Nord · Poulet · Pizza · Poutine
+              Notre-Dame-de-Grâce · 6280 Somerled · Montréal
             </p>
             <h1 className="mt-2 font-display text-[2.6rem] uppercase leading-[0.86] sm:text-6xl lg:text-[6.5rem]">
               {t("Order what", "Commandez ce")}

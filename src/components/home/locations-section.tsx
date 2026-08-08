@@ -18,7 +18,6 @@ const serviceIcons: Record<string, typeof Wifi> = {
 export function LocationsSection() {
   const { t, lang, openOrderSheet } = usePPP();
   const { address, phone, google, googleProfile, hours, serviceOptions } = pppBusiness;
-  const [mapOpen, setMapOpen] = [true, () => {}] as const; // desktop map always mounted
 
   return (
     <section id="locations" className="relative border-y border-border">
@@ -163,7 +162,6 @@ export function LocationsSection() {
             <summary className="cursor-pointer list-none px-4 py-3 text-[0.65rem] font-bold uppercase tracking-[0.25em] text-muted-foreground focus-ppp">
               {t("Show map", "Voir la carte")}
             </summary>
-            {mapOpen && (
               <iframe
                 title={t("Map to PPP NDG", "Carte vers PPP NDG")}
                 src={google.embedUrl}
@@ -171,7 +169,6 @@ export function LocationsSection() {
                 referrerPolicy="no-referrer-when-downgrade"
                 className="h-56 w-full border-t border-border grayscale-[0.35]"
               />
-            )}
           </details>
         </div>
       </div>
