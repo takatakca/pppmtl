@@ -9,7 +9,7 @@ import {
 } from "react";
 import { locations, type Lang, type OrderMode } from "@/data/menu";
 import { track } from "@/lib/analytics";
-import { newLine, type CartLine } from "@/lib/cart";
+import { newLine, type CartLine, type LineSelections } from "@/lib/cart";
 import { menuRepository } from "@/lib/menu-repository";
 
 const KEY = "ppp.session.v1";
@@ -38,7 +38,12 @@ interface Store extends Persisted {
   orderSheetOpen: boolean;
   openOrderSheet: () => void;
   closeOrderSheet: () => void;
-  addToCart: (itemId: string, quantity: number, instructions: string) => void;
+  addToCart: (
+    itemId: string,
+    quantity: number,
+    instructions: string,
+    selections?: LineSelections,
+  ) => void;
   setLineQuantity: (lineId: string, quantity: number) => void;
   removeLine: (lineId: string) => void;
   clearCart: () => void;
@@ -113,11 +118,11 @@ export function PPPProvider({ children }: { children: ReactNode }) {
         persist({ ...state, recentSearches });
       },
       clearRecentSearches: () => persist({ ...state, recentSearches: [] }),
-      addToCart: (itemId, quantity, instructions) => {
+      addToCart: (itemId, quantity, instructions, selections) => {
         const item = menuRepository.getItem(itemId);
         if (!item) return;
         track("cart_item_added", { itemId, quantity });
-        persist({ ...state, cart: [...state.cart, newLine(item, quantity, instructions)] });
+        persist({ ...state, cart: [...state.cart, newLine(item, quantity, instructions, selections ?? {})] });
         setCartOpen(true);
       },
       setLineQuantity: (lineId, quantity) =>
