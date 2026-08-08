@@ -48,7 +48,7 @@ function PhoneChrome({
 
   return (
     <div className="flex h-full flex-col bg-background">
-      <div className="flex items-center justify-between border-b border-border px-3 py-2">
+      <div className="flex items-center justify-between border-b border-border px-3 pb-2 pt-5">
         <span className="flex items-center gap-1.5">
           <PPPLogo variant="appIcon" className="h-6" />
           <span className="font-display text-[0.6rem] uppercase leading-none tracking-widest">
@@ -232,7 +232,7 @@ export function AppPreview() {
                       <p className="font-display text-[0.6rem] uppercase tracking-widest text-accent">
                         {t("Most ordered", "Plus commandés")}
                       </p>
-                      <ul className="grid min-h-0 flex-1 grid-cols-2 gap-1.5 overflow-hidden">
+                      <ul className="grid min-h-0 flex-1 auto-rows-min grid-cols-2 gap-1.5 overflow-hidden">
                         {items.slice(0, 4).map((item) => (
                           <li key={item.id} className="border border-border bg-card">
                             <MenuImage
