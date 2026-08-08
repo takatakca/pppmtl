@@ -35,7 +35,8 @@ const BOX: Record<MenuImageVariant, string> = {
   /* merchandising + promotional — allowed to be expressive */
   featured: "h-40 w-full sm:h-52",
   promo: "h-44 w-full sm:h-56",
-  hero: "h-full w-full",
+  /* fill: the caller owns the box via className */
+  hero: "w-full",
   compact: "h-[6.5rem] w-[6.5rem] sm:h-32 sm:w-32",
   standard: "h-[7.5rem] w-full sm:h-40",
 };
