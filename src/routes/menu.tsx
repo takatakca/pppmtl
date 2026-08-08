@@ -50,7 +50,9 @@ function MenuPage() {
 
   // Scrollspy: the chip nav always reflects the rail currently on screen.
   useEffect(() => {
-    const sections = Array.from(document.querySelectorAll<HTMLElement>("section[id][data-rail]"));
+    const sections = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-rail-root] section[id]"),
+    );
     if (sections.length === 0) return undefined;
     const io = new IntersectionObserver(
       (entries) => {
@@ -125,29 +127,27 @@ function MenuPage() {
         </section>
 
         <div data-rail-root>
-          <div data-rail id="most-ordered-wrap">
-            <MenuRail
-              id="most-ordered"
-              kicker={
-                <>
-                  <Flame className="h-3.5 w-3.5" />
-                  {t("Ordered again and again", "Commandé encore et encore")}
-                </>
-              }
-              title={t("Most ordered", "Les plus commandés")}
-              count={t(`${popular.length} products`, `${popular.length} produits`)}
-            >
-              {popular.map((item, i) => (
-                <ProductCard
-                  key={item.id}
-                  item={item}
-                  index={i}
-                  onOpen={setActive}
-                  badge={t("Popular", "Populaire")}
-                />
-              ))}
-            </MenuRail>
-          </div>
+          <MenuRail
+            id="most-ordered"
+            kicker={
+              <>
+                <Flame className="h-3.5 w-3.5" />
+                {t("Ordered again and again", "Commandé encore et encore")}
+              </>
+            }
+            title={t("Most ordered", "Les plus commandés")}
+            count={t(`${popular.length} products`, `${popular.length} produits`)}
+          >
+            {popular.map((item, i) => (
+              <ProductCard
+                key={item.id}
+                item={item}
+                index={i}
+                onOpen={setActive}
+                badge={t("Popular", "Populaire")}
+              />
+            ))}
+          </MenuRail>
 
           {deals.length > 0 && (
             <MenuRail
