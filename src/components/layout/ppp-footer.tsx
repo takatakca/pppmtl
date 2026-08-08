@@ -147,7 +147,13 @@ export function PPPFooter() {
           </div>
         </div>
 
-        <p className="mt-10 select-none font-display text-[18vw] uppercase leading-[0.75] text-foreground/8 lg:text-[13vw]">
+        <div className="mt-10 flex items-center gap-3">
+          <PPPLogo variant="footer" />
+          <span className="font-display text-sm uppercase tracking-[0.3em] text-muted-foreground">
+            Notre-Dame-de-Grâce · Montréal
+          </span>
+        </div>
+        <p className="mt-4 select-none font-display text-[18vw] uppercase leading-[0.75] text-foreground/8 lg:text-[13vw]">
           PPP Pizzeria
         </p>
         <p className="border-t border-border py-5 text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">

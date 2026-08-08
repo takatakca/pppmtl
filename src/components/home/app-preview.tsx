@@ -212,7 +212,7 @@ export function AppPreview() {
           >
             <span className="absolute left-1/2 top-1 z-10 h-4 w-20 -translate-x-1/2 rounded-full bg-foreground/80" />
             <div className="h-full w-full overflow-hidden rounded-[1.7rem]">
-              <div key={current} className="h-full animate-fade-in">
+              <div key={current} className="screen-in h-full">
                 <PhoneChrome cartCount={current === "cart" ? 2 : 0} active={current}>
                   {current === "order" && (
                     <div className="flex h-full flex-col gap-2 p-2.5">
