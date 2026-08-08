@@ -8,6 +8,7 @@ import { MenuItemImage } from "@/components/menu/menu-item-image";
 import { orderSearch } from "@/lib/order-links";
 import { track } from "@/lib/analytics";
 import { pppBusiness } from "@/config/business";
+import { usePointerDepth } from "@/components/motion/reveal";
 
 const cravings = [
   { en: "Poutine", fr: "Poutine" },
@@ -21,13 +22,25 @@ const cravings = [
 export function Hero() {
   const { lang, mode, setMode, openSearch, openLocationSheet, locationId, t } = usePPP();
   const location = useSelectedLocation();
+  const { containerRef, layer } = usePointerDepth(14);
   const showcase = menuRepository.getPopularItems(locationId, 3);
   const topDeal = getDiscountedItems(locationId, 1)[0];
   const itemCount = menuRepository.getItems(locationId).length;
   const [starA, starB, starC] = showcase;
 
   return (
-    <section className="relative isolate overflow-hidden border-b border-border pt-14 lg:pt-24">
+    <section
+      ref={containerRef}
+      className="relative isolate overflow-hidden border-b border-border pt-14 lg:pt-24"
+    >
+      <span
+        aria-hidden
+        className="night-grain pointer-events-none absolute inset-0 opacity-70"
+      />
+      <span
+        aria-hidden
+        className="red-light pointer-events-none absolute -left-32 top-1/3 h-[26rem] w-[26rem]"
+      />
       {/* Campaign plane — angled red field behind the product composition */}
       <div
         aria-hidden
@@ -52,15 +65,20 @@ export function Hero() {
               )}
             </p>
             <h1
-              className="rise-in mt-1.5 font-display text-[2.6rem] uppercase leading-[0.82] sm:text-7xl lg:text-[6rem]"
-              style={{ animationDelay: "60ms" }}
+              className="mt-1.5 font-display text-[2.6rem] uppercase leading-[0.82] sm:text-7xl lg:text-[6rem]"
             >
-              {t("Chicken. Pizza.", "Poulet. Pizza.")}
-              <br />
-              <span className="text-flame">{t("Poutine.", "Poutine.")}</span>{" "}
-              {t("Ready fast.", "Prêt vite.")}
+              <span className="line-rise block" style={{ animationDelay: "60ms" }}>
+                {t("Chicken. Pizza.", "Poulet. Pizza.")}
+              </span>
+              <span className="line-rise block" style={{ animationDelay: "170ms" }}>
+                <span className="text-flame">{t("Poutine.", "Poutine.")}</span>{" "}
+                {t("Ready fast.", "Prêt vite.")}
+              </span>
             </h1>
-            <p className="mt-1.5 max-w-xl text-xs text-muted-foreground sm:text-sm">
+            <p
+              className="line-rise mt-1.5 max-w-xl text-xs text-muted-foreground sm:text-sm"
+              style={{ animationDelay: "280ms" }}
+            >
               {t(
                 `Pickup or delivery from our NDG kitchen — ${itemCount} items.`,
                 `Cueillette ou livraison de notre cuisine NDG — ${itemCount} articles.`,
@@ -100,7 +118,10 @@ export function Hero() {
             )}
 
             {/* Order terminal — search, voice, mode and location on first screen */}
-            <div className="rise-in mt-3 max-w-2xl border border-border bg-background/85 p-2 backdrop-blur-xl lg:mt-5 lg:p-2.5">
+            <div
+              className="line-rise mt-3 max-w-2xl border border-border bg-background/85 p-2 backdrop-blur-xl lg:mt-5 lg:p-2.5"
+              style={{ animationDelay: "340ms" }}
+            >
               <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2 sm:flex sm:items-stretch">
                 <div className="grid shrink-0 grid-cols-2 border border-border">
                   {(["pickup", "delivery"] as const).map((m) => (
@@ -165,11 +186,12 @@ export function Hero() {
               <Link
                 to="/order"
                 search={orderSearch()}
-                className="cta-glow press-tap mt-2 flex w-full items-center justify-center bg-primary py-3 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp lg:py-3.5 lg:text-2xl"
+                className="cta-glow cta-motion press-tap mt-2 flex w-full items-center justify-center gap-2 bg-primary py-3 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp lg:py-3.5 lg:text-2xl"
               >
                 {mode === "pickup"
                   ? t("Start pickup order", "Commander en cueillette")
                   : t("Start delivery order", "Commander en livraison")}
+                <Bike className="cta-arrow hidden h-5 w-5" aria-hidden />
               </Link>
             </div>
           </div>
@@ -181,6 +203,7 @@ export function Hero() {
                 to="/order"
                 search={orderSearch({ item: starA.id })}
                 className="press-tap food-motion zoom-reveal hero-float absolute left-2 top-4 block h-64 w-64 overflow-hidden rounded-full border-4 border-background shadow-2xl focus-ppp xl:h-72 xl:w-72"
+                style={layer(1)}
               >
                 <MenuItemImage
                   src={starA.image}
@@ -195,7 +218,7 @@ export function Hero() {
                 to="/order"
                 search={orderSearch({ item: starB.id })}
                 className="press-tap food-motion zoom-reveal hero-float-slow absolute right-4 top-0 z-10 block h-48 w-48 overflow-hidden border-4 border-background shadow-2xl focus-ppp xl:h-56 xl:w-56"
-                style={{ animationDelay: "120ms" }}
+                style={{ animationDelay: "120ms", ...layer(1.9) }}
               >
                 <MenuItemImage src={starB.image} alt={localizedName(starB, lang)} size="hero" />
               </Link>
@@ -204,8 +227,8 @@ export function Hero() {
               <Link
                 to="/order"
                 search={orderSearch({ item: starC.id })}
-                className="press-tap food-motion zoom-reveal absolute bottom-4 right-10 z-20 block h-56 w-56 overflow-hidden rounded-full border-4 border-background shadow-2xl focus-ppp"
-                style={{ animationDelay: "200ms" }}
+                className="press-tap food-motion zoom-reveal drift-y absolute bottom-4 right-10 z-20 block h-56 w-56 overflow-hidden rounded-full border-4 border-background shadow-2xl focus-ppp"
+                style={{ animationDelay: "200ms", ...layer(2.6) }}
               >
                 <MenuItemImage src={starC.image} alt={localizedName(starC, lang)} size="hero" />
               </Link>
@@ -214,7 +237,8 @@ export function Hero() {
               <Link
                 to="/order"
                 search={orderSearch({ item: topDeal.item.id })}
-                className="press-tap sale-pop absolute bottom-16 left-0 z-30 block max-w-[15rem] border border-border bg-background p-4 shadow-2xl focus-ppp"
+                className="press-tap sale-pop card-lift absolute bottom-16 left-0 z-30 block max-w-[15rem] border border-border bg-background p-4 shadow-2xl focus-ppp"
+                style={layer(3.2)}
               >
                 <span className="inline-block bg-primary px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-widest text-primary-foreground">
                   −{topDeal.percent}%
@@ -237,7 +261,7 @@ export function Hero() {
       </div>
 
       {/* Promo ticker */}
-      <div className="overflow-hidden border-t border-border bg-primary">
+      <div className="ticker overflow-hidden border-t border-border bg-primary">
         <div className="marquee-track flex w-max gap-10 py-1.5">
           {Array.from({ length: 2 }).map((_, dup) => (
             <div key={dup} className="flex gap-10">
