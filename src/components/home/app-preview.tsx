@@ -374,8 +374,7 @@ export function AppPreview() {
                       <span className="mt-auto flex items-center justify-between border-t border-border pt-1.5 text-[0.55rem] font-bold uppercase">
                         {t("Subtotal", "Sous-total")}
                         <span className="font-display text-sm text-flame">
-                          $
-                          {(((demo.price ?? 0) + (demoTwo.price ?? 0)) as number).toFixed(2)}
+                          ${(((demo.price ?? 0) + (demoTwo.price ?? 0)) as number).toFixed(2)}
                         </span>
                       </span>
                       <span className="bg-primary py-1.5 text-center font-display text-[0.65rem] uppercase text-primary-foreground">

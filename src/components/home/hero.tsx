@@ -33,10 +33,7 @@ export function Hero() {
       ref={containerRef}
       className="relative isolate overflow-hidden border-b border-border pt-14 lg:pt-24"
     >
-      <span
-        aria-hidden
-        className="night-grain pointer-events-none absolute inset-0 opacity-70"
-      />
+      <span aria-hidden className="night-grain pointer-events-none absolute inset-0 opacity-70" />
       <span
         aria-hidden
         className="red-light pointer-events-none absolute -left-32 top-1/3 h-[26rem] w-[26rem]"
@@ -64,9 +61,7 @@ export function Hero() {
                 </span>
               )}
             </p>
-            <h1
-              className="mt-1.5 font-display text-[2.6rem] uppercase leading-[0.82] sm:text-7xl lg:text-[6rem]"
-            >
+            <h1 className="mt-1.5 font-display text-[2.6rem] uppercase leading-[0.82] sm:text-7xl lg:text-[6rem]">
               <span className="line-rise block" style={{ animationDelay: "60ms" }}>
                 {t("Chicken. Pizza.", "Poulet. Pizza.")}
               </span>

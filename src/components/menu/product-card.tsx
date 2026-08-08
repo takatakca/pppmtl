@@ -37,7 +37,10 @@ export function ProductCard({
         className="press-tap group flex h-full w-full flex-col border border-border bg-card text-left transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-1.5 hover:border-primary hover:shadow-[0_18px_40px_-18px_hsl(0_0%_0%/0.9)] focus-ppp"
       >
         <span className="relative block overflow-hidden">
-          <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-0.5 origin-left scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100" />
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-0.5 origin-left scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100"
+          />
           <MenuImage
             src={item.image}
             alt={name}

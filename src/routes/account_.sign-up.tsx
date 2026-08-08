@@ -54,10 +54,16 @@ function SignUpPage() {
     email: touched ? emailError(email) : null,
     username: touched ? usernameError(username) : null,
     password: touched ? passwordError(password) : null,
-    confirm: touched && confirm !== password ? t("Passwords do not match.", "Les mots de passe ne correspondent pas.") : null,
+    confirm:
+      touched && confirm !== password
+        ? t("Passwords do not match.", "Les mots de passe ne correspondent pas.")
+        : null,
   };
   const valid =
-    !emailError(email) && !usernameError(username) && !passwordError(password) && confirm === password;
+    !emailError(email) &&
+    !usernameError(username) &&
+    !passwordError(password) &&
+    confirm === password;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -127,7 +133,12 @@ function SignUpPage() {
           onChange={(e) => setUsername(e.target.value)}
           {...(errors.username
             ? { error: errors.username }
-            : { hint: t("3–30 characters, letters and numbers.", "3 à 30 caractères, lettres et chiffres.") })}
+            : {
+                hint: t(
+                  "3–30 characters, letters and numbers.",
+                  "3 à 30 caractères, lettres et chiffres.",
+                ),
+              })}
         />
         <Field
           label={t("First name (optional)", "Prénom (facultatif)")}

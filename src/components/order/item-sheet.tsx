@@ -162,22 +162,22 @@ export function ItemSheet({
                         onClick={() => onSelectItem?.(p)}
                         className="block w-full text-left focus-ppp"
                       >
-                      <MenuImage
-                        src={p.image}
-                        alt={lang === "fr" ? p.nameFr : p.nameEn}
-                        variant="hero"
-                        className="h-20 w-full"
-                      />
-                      <span className="block px-2 py-2">
-                        <span className="line-clamp-2 block font-display text-sm uppercase leading-tight">
-                          {lang === "fr" ? p.nameFr : p.nameEn}
+                        <MenuImage
+                          src={p.image}
+                          alt={lang === "fr" ? p.nameFr : p.nameEn}
+                          variant="hero"
+                          className="h-20 w-full"
+                        />
+                        <span className="block px-2 py-2">
+                          <span className="line-clamp-2 block font-display text-sm uppercase leading-tight">
+                            {lang === "fr" ? p.nameFr : p.nameEn}
+                          </span>
+                          <span className="mt-1 block font-display text-sm leading-none text-accent">
+                            {p.price !== null
+                              ? `$${p.price.toFixed(2)}`
+                              : t("See price", "Voir le prix")}
+                          </span>
                         </span>
-                        <span className="mt-1 block font-display text-sm leading-none text-accent">
-                          {p.price !== null
-                            ? `$${p.price.toFixed(2)}`
-                            : t("See price", "Voir le prix")}
-                        </span>
-                      </span>
                       </button>
                       <button
                         type="button"

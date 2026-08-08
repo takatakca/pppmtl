@@ -37,7 +37,10 @@ export function FranchiseCareers() {
           </div>
         </Reveal>
 
-        <Reveal delay={90} className="flex flex-col justify-between border border-border bg-card p-6 lg:p-10">
+        <Reveal
+          delay={90}
+          className="flex flex-col justify-between border border-border bg-card p-6 lg:p-10"
+        >
           <div>
             <p className="font-display text-xs uppercase tracking-[0.35em] text-accent">
               {t("Franchise", "Franchise")}

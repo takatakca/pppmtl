@@ -87,7 +87,11 @@ export function PPPHeader() {
         }`}
       >
         <div className="mx-auto grid h-14 max-w-[110rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-6 lg:h-16 lg:gap-4">
-          <Link to="/" className="flex shrink-0 items-center gap-2 focus-ppp" aria-label="PPP Pizzeria">
+          <Link
+            to="/"
+            className="flex shrink-0 items-center gap-2 focus-ppp"
+            aria-label="PPP Pizzeria"
+          >
             <PPPLogo variant="header" />
             <span className="hidden font-display text-lg uppercase leading-none tracking-wide sm:inline">
               PPP Pizzeria

@@ -6,7 +6,11 @@ export function Field({
   error,
   hint,
   ...props
-}: { label: string; error?: string | null; hint?: string } & InputHTMLAttributes<HTMLInputElement>) {
+}: {
+  label: string;
+  error?: string | null;
+  hint?: string;
+} & InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className="block">
       <span className="block text-[0.6rem] font-bold uppercase tracking-widest text-muted-foreground">
@@ -68,9 +72,7 @@ export function PasswordField({
           {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
       </span>
-      {caps && (
-        <span className="mt-1 block text-[0.7rem] text-accent">Caps Lock is on.</span>
-      )}
+      {caps && <span className="mt-1 block text-[0.7rem] text-accent">Caps Lock is on.</span>}
       {error ? (
         <span className="mt-1 block text-[0.7rem] text-primary">{error}</span>
       ) : hint ? (
