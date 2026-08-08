@@ -21,6 +21,10 @@ export function ProductImage({
     <div className={`relative overflow-hidden bg-muted ${className}`}>
       {src && status !== "broken" && (
         <img
+          ref={(el) => {
+            // A cached image can finish decoding before onLoad is attached.
+            if (el?.complete && el.naturalWidth > 0) setStatus("loaded");
+          }}
           src={src}
           alt={alt}
           loading="lazy"
