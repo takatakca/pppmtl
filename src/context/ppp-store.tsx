@@ -122,7 +122,10 @@ export function PPPProvider({ children }: { children: ReactNode }) {
         const item = menuRepository.getItem(itemId);
         if (!item) return;
         track("cart_item_added", { itemId, quantity });
-        persist({ ...state, cart: [...state.cart, newLine(item, quantity, instructions, selections ?? {})] });
+        persist({
+          ...state,
+          cart: [...state.cart, newLine(item, quantity, instructions, selections ?? {})],
+        });
         setCartOpen(true);
       },
       setLineQuantity: (lineId, quantity) =>

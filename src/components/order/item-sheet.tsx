@@ -82,7 +82,9 @@ export function ItemSheet({ item, onClose }: { item: MenuItem | null; onClose: (
                 <fieldset key={group.id}>
                   <legend className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
                     {lang === "fr" ? group.labelFr : group.labelEn}
-                    {group.required && <span className="ml-2 text-primary">{t("Required", "Requis")}</span>}
+                    {group.required && (
+                      <span className="ml-2 text-primary">{t("Required", "Requis")}</span>
+                    )}
                   </legend>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {group.choices.map((choice) => {
@@ -92,9 +94,7 @@ export function ItemSheet({ item, onClose }: { item: MenuItem | null; onClose: (
                           key={choice.id}
                           type="button"
                           aria-pressed={active}
-                          onClick={() =>
-                            setSelections((s) => ({ ...s, [group.id]: choice.id }))
-                          }
+                          onClick={() => setSelections((s) => ({ ...s, [group.id]: choice.id }))}
                           className={`border px-3 py-2 text-[0.7rem] font-bold uppercase tracking-widest transition-colors focus-ppp ${
                             active
                               ? "border-primary bg-primary text-primary-foreground"
