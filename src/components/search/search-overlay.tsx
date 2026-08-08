@@ -95,8 +95,16 @@ export function SearchOverlay() {
             : t("Tap the mic and say what you're craving", "Touchez le micro et dites votre envie");
 
   return (
-    <div className="fixed inset-0 z-[70] flex flex-col bg-background/95 backdrop-blur-xl rise-in">
-      <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden px-4 pb-8 pt-6 sm:px-6">
+    <div className="dim-in fixed inset-0 z-[70] flex flex-col bg-background/95 backdrop-blur-xl">
+      <span
+        aria-hidden
+        className="night-grain pointer-events-none absolute inset-0 opacity-60"
+      />
+      <span
+        aria-hidden
+        className="red-light pointer-events-none absolute left-1/2 top-0 h-72 w-[36rem] -translate-x-1/2"
+      />
+      <div className="sheet-up relative mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden px-4 pb-8 pt-6 sm:px-6">
         <div className="flex items-center gap-3">
           <div className="flex flex-1 items-center gap-3 border border-border bg-card px-4 py-3">
             <Search className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
@@ -157,12 +165,24 @@ export function SearchOverlay() {
           </button>
         </div>
 
-        <p
-          aria-live="polite"
-          className="mt-3 text-xs uppercase tracking-widest text-muted-foreground"
-        >
-          {voice.status === "listening" && voice.transcript ? `“${voice.transcript}”` : voiceLabel}
-        </p>
+        <div className="mt-3 flex items-center gap-3">
+          {voice.status === "listening" && (
+            <span aria-hidden className="flex h-5 items-end gap-[3px]">
+              {[0, 1, 2, 3, 4].map((b) => (
+                <span
+                  key={b}
+                  className="wave-bar block h-4 w-[3px] bg-primary"
+                  style={{ animationDelay: `${b * 110}ms` }}
+                />
+              ))}
+            </span>
+          )}
+          <p aria-live="polite" className="text-xs uppercase tracking-widest text-muted-foreground">
+            {voice.status === "listening" && voice.transcript
+              ? `“${voice.transcript}”`
+              : voiceLabel}
+          </p>
+        </div>
 
         <div className="mt-5 flex flex-wrap gap-2">
           {CRAVINGS.map((c) => {
@@ -280,15 +300,19 @@ export function SearchOverlay() {
                   <h2 className="font-display text-sm uppercase tracking-widest text-accent">
                     {t("Items", "Articles")}
                   </h2>
-                  <ul className="mt-3 space-y-2">
-                    {results.items.map((item) => (
-                      <li key={item.id}>
+                   <ul className="mt-3 space-y-2">
+                    {results.items.map((item, i) => (
+                      <li
+                        key={item.id}
+                        className="rise-in"
+                        style={{ animationDelay: `${Math.min(i, 8) * 35}ms` }}
+                      >
                         <button
                           onClick={() => {
                             addRecentSearch(query);
                             track("search_product_selected", { itemId: item.id, query });
                           }}
-                          className="press-tap flex w-full items-center gap-3 border border-border bg-card p-2 text-left transition-colors hover:border-primary focus-ppp"
+                          className="press-tap card-lift group flex w-full items-center gap-3 border border-border bg-card p-2 text-left transition-colors hover:border-primary focus-ppp"
                         >
                           <MenuImage src={item.image} alt="" variant="search" />
                           <span className="min-w-0 flex-1">
@@ -307,7 +331,7 @@ export function SearchOverlay() {
                               ${item.price.toFixed(2)}
                             </span>
                           )}
-                          <ArrowRight className="h-4 w-4 shrink-0 text-primary" />
+                          <ArrowRight className="h-4 w-4 shrink-0 text-primary transition-transform duration-200 group-hover:translate-x-1" />
                         </button>
                       </li>
                     ))}

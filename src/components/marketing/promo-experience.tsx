@@ -8,7 +8,7 @@ import { localizedName } from "@/lib/search";
 import { MenuItemImage } from "@/components/menu/menu-item-image";
 import { orderSearch } from "@/lib/order-links";
 
-const SEEN_KEY = "ppp.promo.seen.v2";
+const SEEN_KEY = "ppp.promo.seen.v3";
 
 type Campaign = "deal" | "popular" | "account";
 
@@ -44,9 +44,11 @@ export function PromoExperience() {
       setOpen(true);
     };
     const onScroll = () => {
-      if (window.scrollY > 700) show();
+      const depth =
+        window.scrollY / Math.max(document.body.scrollHeight - window.innerHeight, 1);
+      if (depth > 0.35) show();
     };
-    const timer = window.setTimeout(show, 30000);
+    const timer = window.setTimeout(show, 8000);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       window.clearTimeout(timer);
