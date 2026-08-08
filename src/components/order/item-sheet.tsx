@@ -182,7 +182,7 @@ export function ItemSheet({
                       <button
                         type="button"
                         onClick={() => {
-                          if (p.modifierGroups.some((g) => g.required)) {
+                          if ((p.modifierGroups ?? []).some((g) => g.required)) {
                             onSelectItem?.(p);
                             return;
                           }
@@ -191,7 +191,7 @@ export function ItemSheet({
                         className="press-tap flex w-full items-center justify-center gap-1 border-t border-border bg-primary py-1.5 font-display text-xs uppercase leading-none text-primary-foreground focus-ppp"
                       >
                         <Plus className="h-3 w-3" />
-                        {p.modifierGroups.some((g) => g.required)
+                        {(p.modifierGroups ?? []).some((g) => g.required)
                           ? t("Choose", "Choisir")
                           : t("Add", "Ajouter")}
                       </button>
