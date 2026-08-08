@@ -72,7 +72,7 @@ function Index() {
 
       <main>
         {/* Hero */}
-        <section className="relative clip-hero min-h-[86vh] pt-16">
+        <section className="relative clip-hero min-h-[640px] lg:min-h-[760px] pt-16">
           <img
             src={heroImg}
             alt="Montréal skyline at night"
@@ -81,7 +81,7 @@ function Index() {
             className="absolute inset-0 h-full w-full object-cover"
           />
           <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
-          <div className="relative mx-auto flex min-h-[86vh] max-w-7xl flex-col justify-center px-4 pb-40 pt-16 sm:px-6">
+          <div className="relative mx-auto flex min-h-[640px] lg:min-h-[760px] max-w-7xl flex-col justify-center px-4 pb-40 pt-16 sm:px-6">
             <p className="font-display text-sm uppercase tracking-[0.35em] text-accent">
               Montréal-Nord · Depuis 2013
             </p>
