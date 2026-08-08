@@ -18,8 +18,11 @@ import type { MenuItem } from "@/data/menu";
 import { pppBusiness } from "@/config/business";
 
 export const Route = createFileRoute("/order")({
-  validateSearch: (search: Record<string, unknown>) => {
-    const pick = (key: string) => (typeof search[key] === "string" ? (search[key] as string) : "");
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { category?: string; item?: string; q?: string } => {
+    const pick = (key: string) =>
+      typeof search[key] === "string" && search[key] ? (search[key] as string) : undefined;
     return { category: pick("category"), item: pick("item"), q: pick("q") };
   },
   head: () => ({
