@@ -43,11 +43,11 @@ export function Hero() {
 
       <div className="mx-auto max-w-[110rem] px-3 pb-6 pt-6 sm:px-6 lg:pb-10 lg:pt-12">
         <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-          <div>
+          <div className="min-w-0">
             <p className="font-display text-[0.7rem] uppercase tracking-[0.42em] text-accent">
               Montréal-Nord · Poulet · Pizza · Poutine
             </p>
-            <h1 className="mt-2 font-display text-[3.2rem] uppercase leading-[0.86] sm:text-7xl lg:text-[6.5rem]">
+            <h1 className="mt-2 font-display text-[2.6rem] uppercase leading-[0.86] sm:text-6xl lg:text-[6.5rem]">
               {t("Order what", "Commandez ce")}
               <br />
               {t("you're", "dont vous avez")} <span className="text-flame">{t("craving", "envie")}</span>
