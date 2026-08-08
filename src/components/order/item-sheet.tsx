@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Minus, Plus, X } from "lucide-react";
 import type { MenuItem } from "@/data/menu";
 import { usePPP } from "@/context/ppp-store";
 import { ProductImage } from "@/components/order/product-image";
+import type { LineSelections } from "@/lib/cart";
 
 /**
  * Mobile: full-height bottom sheet. Desktop: centred panel. No modifier group
@@ -12,10 +13,12 @@ export function ItemSheet({ item, onClose }: { item: MenuItem | null; onClose: (
   const { lang, t, addToCart } = usePPP();
   const [qty, setQty] = useState(1);
   const [notes, setNotes] = useState("");
+  const [selections, setSelections] = useState<LineSelections>({});
 
   useEffect(() => {
     setQty(1);
     setNotes("");
+    setSelections({});
   }, [item?.id]);
 
   useEffect(() => {
@@ -24,6 +27,9 @@ export function ItemSheet({ item, onClose }: { item: MenuItem | null; onClose: (
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [item, onClose]);
+
+  const groups = useMemo(() => item?.modifierGroups ?? [], [item]);
+  const missing = groups.filter((g) => g.required && !selections[g.id]);
 
   if (!item) return null;
   const name = lang === "fr" ? item.nameFr : item.nameEn;
@@ -70,6 +76,47 @@ export function ItemSheet({ item, onClose }: { item: MenuItem | null; onClose: (
             </p>
           )}
 
+          {groups.length > 0 && (
+            <div className="mt-6 space-y-5">
+              {groups.map((group) => (
+                <fieldset key={group.id}>
+                  <legend className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
+                    {lang === "fr" ? group.labelFr : group.labelEn}
+                    {group.required && <span className="ml-2 text-primary">{t("Required", "Requis")}</span>}
+                  </legend>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {group.choices.map((choice) => {
+                      const active = selections[group.id] === choice.id;
+                      return (
+                        <button
+                          key={choice.id}
+                          type="button"
+                          aria-pressed={active}
+                          onClick={() =>
+                            setSelections((s) => ({ ...s, [group.id]: choice.id }))
+                          }
+                          className={`border px-3 py-2 text-[0.7rem] font-bold uppercase tracking-widest transition-colors focus-ppp ${
+                            active
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          {lang === "fr" ? choice.labelFr : choice.labelEn}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+              ))}
+              <p className="text-xs text-muted-foreground">
+                {t(
+                  "Any price difference between options is confirmed by the restaurant — the published menu does not list one.",
+                  "Toute différence de prix entre les options est confirmée par le restaurant — le menu publié n'en indique aucune.",
+                )}
+              </p>
+            </div>
+          )}
+
           <label className="mt-6 block text-[0.65rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
             {t("Special instructions", "Instructions spéciales")}
           </label>
@@ -105,14 +152,21 @@ export function ItemSheet({ item, onClose }: { item: MenuItem | null; onClose: (
           </div>
           <button
             onClick={() => {
-              addToCart(item.id, qty, notes.trim());
+              if (missing.length > 0) return;
+              addToCart(item.id, qty, notes.trim(), selections);
               onClose();
             }}
-            className="flex-1 bg-primary px-5 py-3.5 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
-            style={{ boxShadow: "var(--shadow-glow)" }}
+            disabled={missing.length > 0}
+            className="flex-1 bg-primary px-5 py-3.5 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp disabled:cursor-not-allowed disabled:opacity-50"
+            style={missing.length > 0 ? undefined : { boxShadow: "var(--shadow-glow)" }}
           >
-            {t("Add to order", "Ajouter à la commande")}
-            {item.price !== null && ` · $${(item.price * qty).toFixed(2)}`}
+            {missing.length > 0
+              ? t(
+                  `Choose ${lang === "fr" ? missing[0]!.labelFr : missing[0]!.labelEn}`,
+                  `Choisissez ${missing[0]!.labelFr.toLowerCase()}`,
+                )
+              : t("Add to order", "Ajouter à la commande")}
+            {missing.length === 0 && item.price !== null && ` · $${(item.price * qty).toFixed(2)}`}
           </button>
         </div>
       </div>
