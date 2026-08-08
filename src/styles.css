@@ -445,3 +445,236 @@
 @utility angle-panel {
   clip-path: polygon(0 0, 100% 0, 100% 100%, 0 92%);
 }
+
+/* ---------- Motion system 6.0 — customer-visible movement ---------- */
+
+/* Ambient product drift (hero layers). Tiny ranges only: 3–8px. */
+@keyframes ppp-drift-x {
+  0%,
+  100% {
+    transform: translate3d(-5px, 0, 0);
+  }
+  50% {
+    transform: translate3d(5px, 0, 0);
+  }
+}
+
+@keyframes ppp-drift-y {
+  0%,
+  100% {
+    transform: translate3d(0, 4px, 0);
+  }
+  50% {
+    transform: translate3d(0, -4px, 0);
+  }
+}
+
+@utility drift-x {
+  animation: ppp-drift-x 14s ease-in-out infinite;
+}
+
+@utility drift-y {
+  animation: ppp-drift-y 9s ease-in-out infinite;
+}
+
+@utility drift-y-rev {
+  animation: ppp-drift-y 11s ease-in-out infinite reverse;
+}
+
+/* Scroll reveal — driven by IntersectionObserver adding .is-revealed */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 520ms var(--ease-out),
+    transform 520ms var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.reveal.is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+.reveal-clip {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 700ms var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal-clip.is-revealed {
+  clip-path: inset(0 0 0 0);
+}
+
+/* Headline masked line rise — campaign headlines only */
+@keyframes ppp-line-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.5em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@utility line-rise {
+  animation: ppp-line-rise 560ms var(--ease-out) both;
+}
+
+/* Voice waveform bars */
+@keyframes ppp-wave {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@utility wave-bar {
+  transform-origin: center;
+  animation: ppp-wave 900ms ease-in-out infinite;
+}
+
+/* Sheets */
+@keyframes ppp-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(48px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@utility slide-in-right-panel {
+  animation: ppp-slide-right 300ms var(--ease-out) both;
+}
+
+/* Restaurant red light — very low opacity ambient wash */
+@keyframes ppp-redlight {
+  0%,
+  100% {
+    opacity: 0.24;
+    transform: translate3d(-3%, 0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: translate3d(3%, -2%, 0) scale(1.08);
+  }
+}
+
+@utility red-light {
+  background: radial-gradient(
+    closest-side,
+    oklch(0.55 0.235 28 / 0.5),
+    oklch(0.55 0.235 28 / 0) 72%
+  );
+  filter: blur(28px);
+  animation: ppp-redlight 16s ease-in-out infinite;
+}
+
+/* Grain / atmospheric layer for dark areas */
+@utility night-grain {
+  background-image:
+    radial-gradient(oklch(1 0 0 / 0.035) 1px, transparent 1px),
+    radial-gradient(oklch(1 0 0 / 0.025) 1px, transparent 1px);
+  background-size: 4px 4px, 7px 7px;
+  background-position: 0 0, 2px 3px;
+}
+
+/* Ticker pause on hover */
+.ticker:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Primary CTA motion */
+@utility cta-motion {
+  transition:
+    filter 200ms var(--ease-out),
+    transform 120ms var(--ease-out);
+
+  & .cta-arrow {
+    transition: transform 200ms var(--ease-out);
+  }
+
+  &:hover {
+    filter: brightness(1.08);
+  }
+
+  &:hover .cta-arrow {
+    transform: translateX(3px);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Product card hover lift */
+@utility card-lift {
+  transition:
+    transform 220ms var(--ease-out),
+    border-color 220ms var(--ease-out),
+    box-shadow 220ms var(--ease-out);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px -18px oklch(0 0 0 / 0.9);
+  }
+}
+
+/* Cart badge bump */
+@keyframes ppp-bump {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.28);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@utility bump {
+  animation: ppp-bump 420ms var(--ease-spring);
+}
+
+/* Snap rail */
+.snap-rail {
+  scroll-snap-type: x mandatory;
+}
+
+.snap-rail > * {
+  scroll-snap-align: start;
+}
+
+/* Angled section cut */
+@utility angle-cut-top {
+  clip-path: polygon(0 3.5%, 100% 0, 100% 100%, 0 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drift-x,
+  .drift-y,
+  .drift-y-rev,
+  .hero-float,
+  .hero-float-slow,
+  .red-light,
+  .wave-bar,
+  .marquee-track {
+    animation: none !important;
+  }
+
+  .reveal,
+  .reveal-clip {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+}
