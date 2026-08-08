@@ -11,10 +11,15 @@ const navItems = [
   { en: "Franchise", fr: "Franchise", href: "#franchise" },
 ];
 
+const mobileRoutes = [
+  { en: "Full menu", fr: "Menu complet", to: "/menu" },
+  { en: "Gift cards", fr: "Cartes-cadeaux", to: "/gift-cards" },
+  { en: "Offers", fr: "Offres", to: "/offers" },
+] as const;
+
 const mobileLinks = [
   { en: "Deals", fr: "Offres", href: "#deals" },
   { en: "Rewards", fr: "Récompenses", href: "#rewards" },
-  { en: "Gift cards", fr: "Cartes-cadeaux", href: "#rewards" },
   { en: "Locations", fr: "Emplacements", href: "#locations" },
   { en: "Careers", fr: "Carrières", href: "#franchise" },
   { en: "Franchise", fr: "Franchise", href: "#franchise" },
@@ -92,10 +97,16 @@ export function PPPHeader() {
 
           <nav className="hidden min-w-0 items-center gap-5 lg:flex">
             <Link
-              to="/order"
+              to="/menu"
               className="font-display text-sm uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground focus-ppp"
             >
               {lang === "fr" ? "Menu" : "Menu"}
+            </Link>
+            <Link
+              to="/gift-cards"
+              className="font-display text-sm uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground focus-ppp"
+            >
+              {lang === "fr" ? "Cartes-cadeaux" : "Gift cards"}
             </Link>
             {navItems.map((item) => (
               <a
@@ -176,6 +187,16 @@ export function PPPHeader() {
             >
               {t("Order online", "Commander en ligne")}
             </Link>
+            {mobileRoutes.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => setOpen(false)}
+                className="block py-3 font-display text-2xl uppercase leading-none focus-ppp"
+              >
+                {lang === "fr" ? item.fr : item.en}
+              </Link>
+            ))}
             {mobileLinks.map((item) => (
               <a
                 key={item.en}
