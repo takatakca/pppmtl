@@ -14,6 +14,8 @@ import { PromoExperience } from "@/components/marketing/promo-experience";
 import { DealBanner } from "@/components/marketing/deal-banner";
 import { StickyOrderCTA } from "@/components/layout/sticky-order-cta";
 import { AccountModule } from "@/components/home/account-module";
+import { AppPreview } from "@/components/home/app-preview";
+import { GiftCardBlock } from "@/components/home/gift-card-block";
 import { LocationsSection } from "@/components/home/locations-section";
 import { FranchiseCareers } from "@/components/home/franchise-careers";
 import { OrderSheet } from "@/components/layout/order-sheet";
@@ -23,7 +25,7 @@ import { businessJsonLd, pppBusiness } from "@/config/business";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PPP Pizzeria NDG | Pizza, Chicken & Poutine on Somerled" },
+      { title: "PPP Pizzeria Montreal | Pizza, Chicken & Poutine in NDG" },
       {
         name: "description",
         content:
@@ -55,7 +57,9 @@ function Index() {
         <OffersGrid />
         <DealBanner />
         <CategoryExplorer />
+        <AppPreview />
         <Rewards />
+        <GiftCardBlock />
         <LocationsSection />
         <FranchiseCareers />
         <AccountModule />

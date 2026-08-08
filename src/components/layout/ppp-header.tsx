@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronDown, MapPin, Menu, Mic, Search, User, X } from "lucide-react";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { marketplaceChannels } from "@/lib/channels";
+import { PPPLogo } from "@/components/brand/ppp-logo";
 
 const navItems = [
   { en: "Deals", fr: "Offres", href: "#deals" },
@@ -86,12 +87,13 @@ export function PPPHeader() {
         }`}
       >
         <div className="mx-auto grid h-14 max-w-[110rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-6 lg:h-16 lg:gap-4">
-          <Link to="/" className="flex shrink-0 items-center gap-1.5 focus-ppp">
-            <span className="bg-primary px-1.5 py-1 font-display text-lg leading-none text-primary-foreground">
-              PPP
-            </span>
-            <span className="hidden font-display text-lg leading-none tracking-wide sm:inline">
-              NDG MTL
+          <Link to="/" className="flex shrink-0 items-center gap-2 focus-ppp" aria-label="PPP Pizzeria">
+            <PPPLogo variant="header" />
+            <span className="hidden font-display text-lg uppercase leading-none tracking-wide sm:inline">
+              PPP Pizzeria
+              <span className="block text-[0.55rem] tracking-[0.3em] text-muted-foreground">
+                NDG
+              </span>
             </span>
           </Link>
 

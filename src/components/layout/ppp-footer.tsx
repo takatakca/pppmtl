@@ -1,6 +1,7 @@
 import { Facebook, Instagram, MapPin, Phone } from "lucide-react";
 import { usePPP } from "@/context/ppp-store";
 import { pppBusiness } from "@/config/business";
+import { PPPLogo } from "@/components/brand/ppp-logo";
 
 const socials = [
   { id: "instagram", label: "Instagram", href: pppBusiness.social.instagram, Icon: Instagram },
@@ -147,7 +148,7 @@ export function PPPFooter() {
         </div>
 
         <p className="mt-10 select-none font-display text-[18vw] uppercase leading-[0.75] text-foreground/8 lg:text-[13vw]">
-          PPP NDG MTL
+          PPP Pizzeria
         </p>
         <p className="border-t border-border py-5 text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
           © {new Date().getFullYear()} {pppBusiness.displayName}
