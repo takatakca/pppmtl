@@ -61,9 +61,11 @@ export function useVoiceSearch(lang: Lang, onTranscript: (text: string) => void)
       recognition.interimResults = true;
       recognition.onresult = (event: SpeechRecognitionEventLike) => {
         let text = "";
-        for (let i = 0; i < event.results.length; i++) text += event.results[i][0].transcript;
+        for (let i = 0; i < event.results.length; i++) {
+          text += event.results[i]?.[0]?.transcript ?? "";
+        }
         setTranscript(text.trim());
-        if (event.results[event.results.length - 1].isFinal) {
+        if (event.results[event.results.length - 1]?.isFinal) {
           setStatus("processing");
           callbackRef.current(text.trim());
         }
