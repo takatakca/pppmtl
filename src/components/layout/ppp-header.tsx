@@ -5,7 +5,6 @@ import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { marketplaceChannels } from "@/lib/channels";
 
 const navItems = [
-  { en: "Menu", fr: "Menu", href: "#menu" },
   { en: "Deals", fr: "Offres", href: "#deals" },
   { en: "Rewards", fr: "Récompenses", href: "#rewards" },
   { en: "Locations", fr: "Emplacements", href: "#locations" },
@@ -13,8 +12,6 @@ const navItems = [
 ];
 
 const mobileLinks = [
-  { en: "Order online", fr: "Commander en ligne", href: "#order" },
-  { en: "Menu", fr: "Menu", href: "#menu" },
   { en: "Deals", fr: "Offres", href: "#deals" },
   { en: "Rewards", fr: "Récompenses", href: "#rewards" },
   { en: "Gift cards", fr: "Cartes-cadeaux", href: "#rewards" },
@@ -87,6 +84,12 @@ export function PPPHeader() {
           </Link>
 
           <nav className="hidden min-w-0 items-center gap-5 lg:flex">
+            <Link
+              to="/order"
+              className="font-display text-sm uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground focus-ppp"
+            >
+              {lang === "fr" ? "Menu" : "Menu"}
+            </Link>
             {navItems.map((item) => (
               <a
                 key={item.en}
@@ -158,6 +161,13 @@ export function PPPHeader() {
             {t("Order now", "Commander")}
           </button>
           <div className="mt-4 divide-y divide-border border-y border-border">
+            <Link
+              to="/order"
+              onClick={() => setOpen(false)}
+              className="block py-3 font-display text-2xl uppercase leading-none focus-ppp"
+            >
+              {t("Order online", "Commander en ligne")}
+            </Link>
             {mobileLinks.map((item) => (
               <a
                 key={item.en}
