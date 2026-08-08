@@ -1,4 +1,5 @@
 import { Bike, Phone, ShoppingBag, Sparkles, X } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { orderChannels } from "@/lib/channels";
 import { startOrder } from "@/lib/order";
@@ -8,9 +9,10 @@ import { startOrder } from "@/lib/order";
  * marketplace, with phone ordering kept as a first-class fallback.
  */
 export function OrderSheet() {
-  const { orderSheetOpen, closeOrderSheet, mode, setMode, openSearch, openLocationSheet, locationId, t } =
+  const { orderSheetOpen, closeOrderSheet, mode, setMode, openLocationSheet, locationId, t } =
     usePPP();
   const location = useSelectedLocation();
+  const navigate = useNavigate();
   if (!orderSheetOpen) return null;
 
   const channels = orderChannels(location, mode);
@@ -26,7 +28,7 @@ export function OrderSheet() {
       return;
     }
     closeOrderSheet();
-    openSearch();
+    void navigate({ to: "/order" });
   };
 
   return (
