@@ -18,13 +18,10 @@ import type { MenuItem } from "@/data/menu";
 import { pppBusiness } from "@/config/business";
 
 export const Route = createFileRoute("/order")({
-  validateSearch: (
-    search: Record<string, unknown>,
-  ): { category?: string; item?: string; q?: string } => ({
-    category: typeof search.category === "string" ? search.category : undefined,
-    item: typeof search.item === "string" ? search.item : undefined,
-    q: typeof search.q === "string" ? search.q : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>) => {
+    const pick = (key: string) => (typeof search[key] === "string" ? (search[key] as string) : "");
+    return { category: pick("category"), item: pick("item"), q: pick("q") };
+  },
   head: () => ({
     meta: [
       { title: "Order Online | PPP Pizzeria NDG — Pickup & Delivery" },
@@ -54,10 +51,8 @@ function OrderPage() {
   const navigate = useNavigate({ from: "/order" });
   const location = useSelectedLocation();
   const categories = menuRepository.getCategories(locationId);
-  const [activeCategory, setActiveCategory] = useState(
-    search.category ?? categories[0]?.id ?? "",
-  );
-  const [query, setQuery] = useState(search.q ?? "");
+  const [activeCategory, setActiveCategory] = useState(search.category || categories[0]?.id || "");
+  const [query, setQuery] = useState(search.q);
   const [filter, setFilter] = useState<"all" | "popular" | "deals">("all");
   const [selected, setSelected] = useState<MenuItem | null>(null);
   const [allCategoriesOpen, setAllCategoriesOpen] = useState(false);
@@ -67,7 +62,7 @@ function OrderPage() {
   /* Deep links: /order?item=… opens the item, /order?category=… jumps to it. */
   useEffect(() => {
     if (search.category) setActiveCategory(search.category);
-    if (search.q !== undefined) setQuery(search.q);
+    if (search.q) setQuery(search.q);
     if (search.item) {
       const item = menuRepository.getItem(search.item);
       if (item) {
@@ -79,7 +74,7 @@ function OrderPage() {
 
   const clearDeepLink = () => {
     if (search.item || search.category || search.q) {
-      void navigate({ search: {}, replace: true });
+      void navigate({ search: { category: "", item: "", q: "" }, replace: true });
     }
   };
 
