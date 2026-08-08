@@ -69,10 +69,7 @@ export function ItemSheet({ item, onClose }: { item: MenuItem | null; onClose: (
           </p>
           {item.price === null && (
             <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
-              {t(
-                "Price is confirmed by the restaurant at checkout.",
-                "Le prix est confirmé par le restaurant à la commande.",
-              )}
+              {t("Price not published for this item.", "Prix non publié pour cet item.")}
             </p>
           )}
 
@@ -82,9 +79,11 @@ export function ItemSheet({ item, onClose }: { item: MenuItem | null; onClose: (
                 <fieldset key={group.id}>
                   <legend className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
                     {lang === "fr" ? group.labelFr : group.labelEn}
-                    {group.required && (
-                      <span className="ml-2 text-primary">{t("Required", "Requis")}</span>
-                    )}
+                    <span className="ml-2 text-primary">
+                      {group.required
+                        ? t("Required · choose 1", "Requis · choisissez 1")
+                        : t("Optional", "Optionnel")}
+                    </span>
                   </legend>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {group.choices.map((choice) => {
@@ -110,8 +109,8 @@ export function ItemSheet({ item, onClose }: { item: MenuItem | null; onClose: (
               ))}
               <p className="text-xs text-muted-foreground">
                 {t(
-                  "Any price difference between options is confirmed by the restaurant — the published menu does not list one.",
-                  "Toute différence de prix entre les options est confirmée par le restaurant — le menu publié n'en indique aucune.",
+                  "Option pricing is not published for this item, so no surcharge is shown or added.",
+                  "Le prix des options n'est pas publié pour cet item : aucun supplément n'est affiché ni ajouté.",
                 )}
               </p>
             </div>
