@@ -3,6 +3,14 @@ import type { Lang } from "@/data/menu";
 
 type VoiceStatus = "idle" | "listening" | "processing" | "denied" | "unsupported" | "error";
 
+interface SpeechRecognitionEventLike {
+  results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal: boolean }>;
+}
+
+interface SpeechRecognitionErrorLike {
+  error?: string;
+}
+
 interface SpeechRecognitionLike {
   lang: string;
   continuous: boolean;
@@ -10,8 +18,8 @@ interface SpeechRecognitionLike {
   start: () => void;
   stop: () => void;
   abort: () => void;
-  onresult: ((event: any) => void) | null;
-  onerror: ((event: any) => void) | null;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorLike) => void) | null;
   onend: (() => void) | null;
 }
 
@@ -51,7 +59,7 @@ export function useVoiceSearch(lang: Lang, onTranscript: (text: string) => void)
       recognition.lang = lang === "fr" ? "fr-CA" : "en-CA";
       recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEventLike) => {
         let text = "";
         for (let i = 0; i < event.results.length; i++) text += event.results[i][0].transcript;
         setTranscript(text.trim());
@@ -60,7 +68,7 @@ export function useVoiceSearch(lang: Lang, onTranscript: (text: string) => void)
           callbackRef.current(text.trim());
         }
       };
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorLike) => {
         setStatus(
           event?.error === "not-allowed" || event?.error === "service-not-allowed"
             ? "denied"
