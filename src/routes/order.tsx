@@ -432,6 +432,11 @@ function OrderPage() {
         onSelectItem={(next) => setSelected(next)}
       />
       <CartPanel />
+      <DeliveryAddressSheet
+        open={addressOpen}
+        onClose={() => setAddressOpen(false)}
+        onConfirm={setDeliveryAddress}
+      />
       <SearchOverlay />
       <LocationSheet />
       <OrderSheet />
