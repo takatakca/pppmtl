@@ -5,6 +5,7 @@ import { menuRepository } from "@/lib/menu-repository";
 import { localizedDescription, localizedName } from "@/lib/search";
 import { MenuItemImage } from "@/components/menu/menu-item-image";
 import { orderSearch } from "@/lib/order-links";
+import { Reveal } from "@/components/motion/reveal";
 
 /**
  * Ordering-first discovery built from the real "most ordered" placements.
@@ -37,14 +38,18 @@ export function MostOrdered() {
         </Link>
       </div>
 
-      {/* Mobile: compact row cards, 2–3 visible per screen */}
-      <ul className="mt-2 grid gap-1.5 sm:hidden">
+      {/* Mobile: snapping rail — the next card always peeks so swiping is obvious */}
+      <ul className="no-scrollbar snap-rail -mx-3 mt-2 flex gap-1.5 overflow-x-auto px-3 pb-1 sm:hidden">
         {items.slice(0, 8).map((item, i) => (
-          <li key={item.id} className="rise-in" style={{ animationDelay: `${i * 40}ms` }}>
+          <li
+            key={item.id}
+            className="rise-in w-[86%] shrink-0"
+            style={{ animationDelay: `${i * 40}ms` }}
+          >
             <Link
               to="/order"
               search={orderSearch({ item: item.id })}
-              className="press-tap food-motion flex items-stretch gap-3 border border-border bg-card transition-colors hover:border-primary focus-ppp"
+              className="press-tap food-motion card-lift flex h-full items-stretch gap-3 border border-border bg-card transition-colors hover:border-primary focus-ppp"
             >
               <MenuItemImage src={item.image} alt={localizedName(item, lang)} size="compact" />
               <span className="flex min-w-0 flex-1 flex-col justify-center py-2 pr-2">
@@ -80,12 +85,12 @@ export function MostOrdered() {
 
       {/* Desktop: dense card grid */}
       <ul className="mt-3 hidden gap-2 sm:grid sm:grid-cols-3 lg:grid-cols-6">
-        {items.map((item) => (
-          <li key={item.id}>
+        {items.map((item, i) => (
+          <Reveal as="li" key={item.id} delay={(i % 6) * 60}>
             <Link
               to="/order"
               search={orderSearch({ item: item.id })}
-              className="press-tap food-motion group block h-full border border-border bg-card transition-colors hover:border-primary focus-ppp"
+              className="press-tap food-motion card-lift group block h-full border border-border bg-card transition-colors hover:border-primary focus-ppp"
             >
               <MenuItemImage
                 src={item.image}
@@ -109,12 +114,12 @@ export function MostOrdered() {
                     </span>
                   )}
                 </span>
-                <span className="mt-1.5 block bg-primary py-1.5 text-center font-display text-xs uppercase leading-none text-primary-foreground">
+                <span className="mt-1.5 block bg-primary py-1.5 text-center font-display text-xs uppercase leading-none text-primary-foreground transition-transform duration-200 group-hover:scale-[1.02]">
                   {t("Add to order", "Ajouter")}
                 </span>
               </span>
             </Link>
-          </li>
+          </Reveal>
         ))}
       </ul>
     </section>

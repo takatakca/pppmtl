@@ -3,6 +3,7 @@ import { usePPP } from "@/context/ppp-store";
 import { menuRepository } from "@/lib/menu-repository";
 import { localizedName } from "@/lib/search";
 import { orderSearch } from "@/lib/order-links";
+import { Reveal } from "@/components/motion/reveal";
 
 /** Every published category, each a direct entry point into /order. */
 export function CategoryGrid() {
@@ -38,14 +39,19 @@ export function CategoryGrid() {
         {categories.map((c, i) => {
           const count = items.filter((i) => i.categoryId === c.id).length;
           return (
-            <li key={c.id} className="rise-in" style={{ animationDelay: `${i * 25}ms` }}>
+            <Reveal as="li" key={c.id} delay={(i % 6) * 45}>
               <Link
                 to="/order"
                 search={orderSearch({ category: c.id })}
-                className="press-tap food-motion group flex items-center gap-2.5 overflow-hidden border border-border bg-card transition-colors hover:border-primary focus-ppp"
+                className="press-tap food-motion card-lift group flex items-center gap-2.5 overflow-hidden border border-border bg-card transition-colors hover:border-primary focus-ppp"
               >
                 <span className="h-16 w-16 shrink-0 overflow-hidden bg-muted sm:h-20 sm:w-20">
-                  <img src={c.image} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  <img
+                    src={c.image}
+                    alt=""
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.06]"
+                  />
                 </span>
                 <span className="min-w-0 flex-1 py-2 pr-2">
                   <span className="line-clamp-2 block font-display text-sm uppercase leading-tight sm:text-base">
@@ -56,7 +62,7 @@ export function CategoryGrid() {
                   </span>
                 </span>
               </Link>
-            </li>
+            </Reveal>
           );
         })}
       </ul>

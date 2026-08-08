@@ -5,6 +5,7 @@ import { getDiscountedItems } from "@/lib/promotions";
 import { localizedDescription, localizedName } from "@/lib/search";
 import { MenuItemImage } from "@/components/menu/menu-item-image";
 import { orderSearch } from "@/lib/order-links";
+import { Reveal } from "@/components/motion/reveal";
 
 /** Only real catalog discounts (compare-at price published) are shown. */
 export function OffersGrid({ limit = 6 }: { limit?: number }) {
@@ -38,6 +39,7 @@ export function OffersGrid({ limit = 6 }: { limit?: number }) {
 
         <div className="mt-2 grid gap-2 lg:grid-cols-[1.4fr_1fr]">
           {lead && (
+            <Reveal clip className="min-w-0">
             <Link
               to="/order"
               search={orderSearch({ item: lead.item.id })}
@@ -47,7 +49,7 @@ export function OffersGrid({ limit = 6 }: { limit?: number }) {
                 src={lead.item.image}
                 alt={localizedName(lead.item, lang)}
                 size="hero"
-                className="h-64 w-full lg:h-[24rem]"
+                className="h-64 w-full transition-transform duration-700 group-hover:scale-[1.03] lg:h-[24rem]"
               />
               <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/55 to-transparent" />
               <span className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
@@ -70,15 +72,16 @@ export function OffersGrid({ limit = 6 }: { limit?: number }) {
                 </span>
               </span>
             </Link>
+            </Reveal>
           )}
 
           <ul className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-1 lg:gap-2">
             {rest.map(({ item, percent }, i) => (
-              <li key={item.id} className="rise-in" style={{ animationDelay: `${i * 45}ms` }}>
+              <Reveal as="li" key={item.id} delay={i * 70}>
                 <Link
                   to="/order"
                   search={orderSearch({ item: item.id })}
-                  className="press-tap food-motion flex h-full items-stretch gap-3 border border-border bg-background transition-colors hover:border-primary focus-ppp"
+                  className="press-tap food-motion card-lift flex h-full items-stretch gap-3 border border-border bg-background transition-colors hover:border-primary focus-ppp"
                 >
                   <MenuItemImage
                     src={item.image}
@@ -102,7 +105,7 @@ export function OffersGrid({ limit = 6 }: { limit?: number }) {
                     </span>
                   </span>
                 </Link>
-              </li>
+              </Reveal>
             ))}
           </ul>
         </div>

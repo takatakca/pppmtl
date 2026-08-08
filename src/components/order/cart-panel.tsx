@@ -20,16 +20,18 @@ export function CartPanel() {
   if (!cartOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[88] flex justify-end bg-background/80 backdrop-blur-sm">
+    <div className="dim-in fixed inset-0 z-[88] flex justify-end bg-background/80 backdrop-blur-sm">
       <aside
         role="dialog"
         aria-label={t("Your order", "Votre commande")}
-        className="flex h-full w-full max-w-md flex-col border-l border-border bg-card"
+        className="slide-in-right-panel flex h-full w-full max-w-md flex-col border-l border-border bg-card"
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <h2 className="font-display text-2xl uppercase leading-none">
             {t("Your order", "Votre commande")}
-            <span className="ml-2 text-accent">{totals.itemCount}</span>
+            <span key={totals.itemCount} className="bump ml-2 inline-block text-accent">
+              {totals.itemCount}
+            </span>
           </h2>
           <button
             onClick={closeCart}
@@ -56,12 +58,16 @@ export function CartPanel() {
             </div>
           ) : (
             <ul className="space-y-3">
-              {cart.map((line) => {
+              {cart.map((line, i) => {
                 const item = menuRepository.getItem(line.itemId);
                 const name = item ? (lang === "fr" ? item.nameFr : item.nameEn) : line.itemId;
                 const options = selectionLabels(item, line.selections ?? {}, lang === "fr");
                 return (
-                  <li key={line.lineId} className="border border-border p-3">
+                  <li
+                    key={line.lineId}
+                    className="rise-in border border-border p-3"
+                    style={{ animationDelay: `${Math.min(i, 6) * 35}ms` }}
+                  >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="font-display text-lg uppercase leading-tight">{name}</p>
@@ -145,7 +151,7 @@ export function CartPanel() {
 
             <button
               onClick={() => track("cart_checkout_continued", { mode, lines: cart.length })}
-              className="mt-4 w-full bg-primary px-5 py-4 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
+              className="cta-motion mt-4 w-full bg-primary px-5 py-4 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
               style={{ boxShadow: "var(--shadow-glow)" }}
             >
               {t("Continue to direct order", "Continuer vers la commande directe")}

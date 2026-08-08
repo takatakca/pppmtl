@@ -191,7 +191,6 @@ export function Hero() {
                 {mode === "pickup"
                   ? t("Start pickup order", "Commander en cueillette")
                   : t("Start delivery order", "Commander en livraison")}
-                <Bike className="cta-arrow hidden h-5 w-5" aria-hidden />
               </Link>
             </div>
           </div>
