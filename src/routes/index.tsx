@@ -10,7 +10,7 @@ import { OffersGrid } from "@/components/home/offers-grid";
 import { CategoryGrid } from "@/components/home/category-grid";
 import { Rewards } from "@/components/home/rewards";
 import { PromoExperience } from "@/components/marketing/promo-experience";
-import { Link } from "@tanstack/react-router";
+import { AccountModule } from "@/components/home/account-module";
 import { LocationsSection } from "@/components/home/locations-section";
 import { FranchiseCareers } from "@/components/home/franchise-careers";
 import { OrderSheet } from "@/components/layout/order-sheet";
@@ -42,39 +42,6 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-function AccountTeaser() {
-  const { t } = usePPP();
-  return (
-    <section id="account" className="mx-auto max-w-[110rem] px-3 pb-14 sm:px-6">
-      <div className="border border-border bg-card p-6 sm:p-10">
-        <h2 className="font-display text-4xl uppercase leading-none sm:text-6xl">
-          {t("Your PPP account", "Votre compte PPP")}
-        </h2>
-        <p className="mt-3 max-w-2xl text-muted-foreground">
-          {t(
-            "Sign in to see recent orders, reorder in one tap, track your points balance, manage gift cards and save your favourites.",
-            "Connectez-vous pour voir vos commandes récentes, recommander en une touche, suivre vos points, gérer vos cartes-cadeaux et enregistrer vos favoris.",
-          )}
-        </p>
-        <div className="mt-6 flex flex-wrap gap-2">
-          <Link
-            to="/account"
-            className="press-tap bg-primary px-6 py-3.5 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
-          >
-            {t("Open my account", "Ouvrir mon compte")}
-          </Link>
-          <Link
-            to="/order"
-            className="press-tap border border-border px-6 py-3.5 font-display text-lg uppercase leading-none focus-ppp"
-          >
-            {t("Start an order", "Commencer une commande")}
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function Index() {
   return (
     <div id="top" className="min-h-screen bg-background pb-16 lg:pb-0">
@@ -87,7 +54,7 @@ function Index() {
         <Rewards />
         <LocationsSection />
         <FranchiseCareers />
-        <AccountTeaser />
+        <AccountModule />
       </main>
       <PPPFooter />
       <MobileOrderBar />
