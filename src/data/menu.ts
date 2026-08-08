@@ -98,6 +98,8 @@ export interface Location {
   };
 }
 
+const NDG = "loc-ndg-somerled";
+
 export const categories: MenuCategory[] = generatedCategories.map((c) => ({ ...c }));
 
 /**
