@@ -5,7 +5,7 @@ import { MobileOrderBar } from "@/components/layout/mobile-order-bar";
 import { SearchOverlay } from "@/components/search/search-overlay";
 import { LocationSheet } from "@/components/layout/location-sheet";
 import { OrderSheet } from "@/components/layout/order-sheet";
-import { ProductImage } from "@/components/order/product-image";
+import { MenuImage } from "@/components/menu/menu-item-image";
 import { usePPP } from "@/context/ppp-store";
 import { getDiscountedItems } from "@/lib/promotions";
 import { localizedDescription, localizedName } from "@/lib/search";
@@ -71,10 +71,10 @@ function OffersPage() {
                   search={orderSearch({ item: item.id })}
                   className="press-tap flex h-full items-stretch gap-3 border border-border bg-card transition-colors hover:border-primary focus-ppp"
                 >
-                  <ProductImage
+                  <MenuImage
                     src={item.image}
                     alt={localizedName(item, lang)}
-                    className="h-32 w-32 shrink-0"
+                    variant="list"
                   />
                   <span className="min-w-0 flex-1 py-3 pr-3">
                     <span className="inline-block bg-primary px-1.5 py-0.5 text-[0.55rem] font-bold uppercase tracking-widest text-primary-foreground">
