@@ -16,6 +16,8 @@ import { StickyOrderCTA } from "@/components/layout/sticky-order-cta";
 import { AccountModule } from "@/components/home/account-module";
 import { AppPreview } from "@/components/home/app-preview";
 import { GiftCardBlock } from "@/components/home/gift-card-block";
+import { OrderYourWay } from "@/components/home/order-your-way";
+import { FollowPPP } from "@/components/home/follow-ppp";
 import { LocationsSection } from "@/components/home/locations-section";
 import { FranchiseCareers } from "@/components/home/franchise-careers";
 import { OrderSheet } from "@/components/layout/order-sheet";
@@ -57,10 +59,12 @@ function Index() {
         <OffersGrid />
         <DealBanner />
         <CategoryExplorer />
+        <OrderYourWay />
         <AppPreview />
         <Rewards />
         <GiftCardBlock />
         <LocationsSection />
+        <FollowPPP />
         <FranchiseCareers />
         <AccountModule />
       </main>
