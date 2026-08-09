@@ -75,8 +75,8 @@ export function StayInTheLoop({ compact = false }: { compact?: boolean }) {
       {!marketingPersistenceEnabled && (
         <p className="mt-3 text-[0.6rem] uppercase tracking-widest text-muted-foreground/70">
           {t(
-            "Preview — subscriptions are not stored yet.",
-            "Aperçu — les abonnements ne sont pas encore enregistrés.",
+            "Coming soon — subscriptions aren't saved yet.",
+            "Bientôt disponible — les abonnements ne sont pas encore enregistrés.",
           )}
         </p>
       )}
