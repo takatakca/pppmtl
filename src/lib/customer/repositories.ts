@@ -37,6 +37,7 @@ export const customerRepository: CustomerRepository = {
   me: () => unavailable(),
   update: () => unavailable(),
   isUsernameAvailable: () => unavailable(),
+  lockPreferredName: () => unavailable(),
 };
 
 export const addressRepository: AddressRepository = {
