@@ -19,7 +19,8 @@ export function OrderYourWay() {
           {t("Online ordering", "Commande en ligne")}
         </p>
         <h2 className="mt-1 font-display text-5xl uppercase leading-[0.85] sm:text-7xl">
-          {t("Order PPP", "Commandez PPP")} <span className="text-flame">{t("your way", "à votre façon")}</span>
+          {t("Order PPP", "Commandez PPP")}{" "}
+          <span className="text-flame">{t("your way", "à votre façon")}</span>
         </h2>
       </Reveal>
 
@@ -79,7 +80,9 @@ export function OrderYourWay() {
                   className="h-10 w-auto max-w-full self-start transition-transform duration-300 group-hover:-translate-y-1"
                 />
                 <span>
-                  <span className="block font-display text-2xl uppercase leading-none">{c.name}</span>
+                  <span className="block font-display text-2xl uppercase leading-none">
+                    {c.name}
+                  </span>
                   <span className="mt-1 flex items-center gap-1 text-[0.6rem] font-bold uppercase tracking-widest text-muted-foreground">
                     {t(c.labelEn, c.labelFr)}
                     <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

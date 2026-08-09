@@ -22,7 +22,10 @@ export function StayInTheLoop({ compact = false }: { compact?: boolean }) {
       <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
         {t("Marketing", "Marketing")}
       </p>
-      <h2 id="stay-loop-title" className="mt-1 font-display text-3xl uppercase leading-none sm:text-4xl">
+      <h2
+        id="stay-loop-title"
+        className="mt-1 font-display text-3xl uppercase leading-none sm:text-4xl"
+      >
         {t("Stay in the loop", "Restez informé")}
       </h2>
       <div className="mt-3 flex border border-border">
@@ -54,7 +57,10 @@ export function StayInTheLoop({ compact = false }: { compact?: boolean }) {
             onChange={(e) => setEmailOffers(e.target.checked)}
             className="mt-0.5 accent-[var(--primary)]"
           />
-          {t("Email me PPP offers and new menu drops.", "Recevoir les offres PPP et les nouveautés par courriel.")}
+          {t(
+            "Email me PPP offers and new menu drops.",
+            "Recevoir les offres PPP et les nouveautés par courriel.",
+          )}
         </label>
         <label className="flex items-start gap-2 text-xs text-muted-foreground">
           <input

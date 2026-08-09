@@ -152,10 +152,7 @@ export function AppPreview() {
   ];
 
   return (
-    <section
-      id="app"
-      className="relative overflow-hidden border-y border-border bg-card/40"
-    >
+    <section id="app" className="relative overflow-hidden border-y border-border bg-card/40">
       <div className="mx-auto grid max-w-[110rem] items-center gap-6 px-3 py-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:py-16">
         <div>
           <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">

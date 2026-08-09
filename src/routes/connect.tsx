@@ -46,7 +46,8 @@ function ConnectPage() {
       <PPPHeader />
       <main className="mx-auto max-w-[110rem] px-3 pt-24 sm:px-6 lg:pt-28">
         <h1 className="font-display text-5xl uppercase leading-[0.85] sm:text-7xl">
-          {t("Find PPP", "Trouver PPP")} <span className="text-flame">{t("online", "en ligne")}</span>
+          {t("Find PPP", "Trouver PPP")}{" "}
+          <span className="text-flame">{t("online", "en ligne")}</span>
         </h1>
         <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
           {t(
