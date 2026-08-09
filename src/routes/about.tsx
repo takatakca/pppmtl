@@ -108,8 +108,8 @@ function AboutPage() {
               <Reveal>
                 <Eyebrow>{t("PPP Pizzeria — our story", "PPP Pizzeria — notre histoire")}</Eyebrow>
               </Reveal>
-              <Reveal delay={90} clip>
-                <h1 className="mt-3 font-display text-[2.6rem] uppercase leading-[0.86] sm:text-7xl lg:text-8xl">
+              <Reveal delay={90}>
+                <h1 className="clip-rise mt-3 font-display text-[2.6rem] uppercase leading-[0.86] sm:text-7xl lg:text-8xl">
                   {t("Built in Montréal.", "Né à Montréal.")}
                   <br />
                   <span className="text-flame">{t("Still moving.", "Toujours en mouvement.")}</span>
@@ -144,8 +144,8 @@ function AboutPage() {
               </Reveal>
             </div>
 
-            <Reveal delay={140} clip className="relative">
-              <div className="relative aspect-[4/3] overflow-hidden border border-border sm:aspect-[5/4]">
+            <Reveal delay={140} className="relative">
+              <div className="clip-rise relative aspect-[4/3] overflow-hidden border border-border sm:aspect-[5/4]">
                 <img
                   src={storefront}
                   alt={t(
@@ -168,7 +168,7 @@ function AboutPage() {
         {/* 02 — WHERE PPP STARTED */}
         {origin && (
           <section className="mx-auto grid max-w-[80rem] gap-6 px-3 py-12 sm:px-6 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-12 lg:py-16">
-            <Reveal clip className="relative overflow-hidden">
+            <Reveal className="clip-rise relative overflow-hidden">
               <img
                 src={crew}
                 alt=""
