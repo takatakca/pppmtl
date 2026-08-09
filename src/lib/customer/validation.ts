@@ -52,3 +52,12 @@ export function maskEmail(email: string) {
   const [user = "", domain = ""] = email.split("@");
   return `${user.slice(0, 1)}•••@${domain}`;
 }
+
+/** The name PPP uses everywhere once confirmed — short, human, one-time. */
+export function preferredNameError(raw: string): string | null {
+  const n = raw.trim();
+  if (n.length < 2) return "Use at least 2 characters.";
+  if (n.length > 24) return "Keep it to 24 characters or fewer.";
+  if (!/^[\p{L}\p{M}][\p{L}\p{M}'’\- ]*$/u.test(n)) return "Letters, spaces, hyphens only.";
+  return null;
+}
