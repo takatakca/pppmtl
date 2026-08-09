@@ -7,6 +7,8 @@ import { SearchOverlay } from "@/components/search/search-overlay";
 import { LocationSheet } from "@/components/layout/location-sheet";
 import { OrderSheet } from "@/components/layout/order-sheet";
 import { usePPP } from "@/context/ppp-store";
+import { StayInTheLoop } from "@/components/marketing/stay-in-the-loop";
+import { marketingPersistenceEnabled } from "@/lib/marketing-consent";
 import { pppBusiness } from "@/config/business";
 
 export const Route = createFileRoute("/account")({
@@ -90,6 +92,48 @@ function AccountPage() {
               <p className="mt-2 text-sm text-muted-foreground">{p.body}</p>
             </section>
           ))}
+        </div>
+
+        <div className="mt-6 grid gap-2 lg:grid-cols-2">
+          <section className="border border-border bg-card p-5">
+            <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
+              {t("PPP Member", "Membre PPP")}
+            </p>
+            <h2 className="mt-1 font-display text-3xl uppercase leading-none">
+              {t("Communications", "Communications")}
+            </h2>
+            <ul className="mt-3 space-y-2">
+              {[
+                { id: "email", label: t("Email offers", "Offres par courriel") },
+                { id: "sms", label: t("SMS offers", "Offres par SMS") },
+                { id: "push", label: t("Push notifications", "Notifications push") },
+              ].map((c) => (
+                <li
+                  key={c.id}
+                  className="flex items-center justify-between border border-border px-4 py-3 text-sm"
+                >
+                  <label htmlFor={`pref-${c.id}`} className="text-muted-foreground">
+                    {c.label}
+                  </label>
+                  <input
+                    id={`pref-${c.id}`}
+                    type="checkbox"
+                    disabled={!marketingPersistenceEnabled}
+                    className="accent-[var(--primary)]"
+                  />
+                </li>
+              ))}
+            </ul>
+            {!marketingPersistenceEnabled && (
+              <p className="mt-3 text-[0.6rem] uppercase tracking-widest text-muted-foreground/70">
+                {t(
+                  "Prototype — preferences are not saved yet.",
+                  "Aperçu — les préférences ne sont pas encore enregistrées.",
+                )}
+              </p>
+            )}
+          </section>
+          <StayInTheLoop />
         </div>
 
         <div className="mt-6 flex flex-wrap gap-2">
