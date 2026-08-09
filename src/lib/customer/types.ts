@@ -15,6 +15,14 @@ export interface RestaurantCustomer {
   authUserId: string;
   email: string;
   username: string | null;
+  /**
+   * What PPP calls the customer everywhere in the product. Chosen once
+   * during onboarding; `preferredNameLockedAt` records when it was
+   * confirmed. Once locked it is not self-editable — changing it is a
+   * support action, so the value stays stable across receipts and orders.
+   */
+  preferredName: string | null;
+  preferredNameLockedAt: string | null;
   firstName: string | null;
   lastName: string | null;
   phone: string | null;
@@ -69,6 +77,8 @@ export interface CustomerRepository {
   me(): Promise<AuthResult<RestaurantCustomer | null>>;
   update(patch: Partial<RestaurantCustomer>): Promise<AuthResult<RestaurantCustomer>>;
   isUsernameAvailable(username: string): Promise<AuthResult<boolean>>;
+  /** One-time write; rejected with `conflict` if a name is already locked. */
+  lockPreferredName(preferredName: string): Promise<AuthResult<RestaurantCustomer>>;
 }
 
 export interface AddressRepository {
