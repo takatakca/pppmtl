@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronDown, MapPin, Menu, Mic, Search, User, X } from "lucide-react";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
-import { marketplaceChannels } from "@/lib/channels";
+import { orderingChannels } from "@/config/external-presence";
+import { trackExternalOrder, trackSocialLink } from "@/lib/analytics";
+import { pppSocials } from "@/components/home/follow-ppp";
 import { PPPLogo } from "@/components/brand/ppp-logo";
 
 const navItems = [
@@ -16,6 +18,7 @@ const mobileRoutes = [
   { en: "Full menu", fr: "Menu complet", to: "/menu" },
   { en: "Gift cards", fr: "Cartes-cadeaux", to: "/gift-cards" },
   { en: "Offers", fr: "Offres", to: "/offers" },
+  { en: "Find us online", fr: "Nous trouver en ligne", to: "/connect" },
 ] as const;
 
 const mobileLinks = [
@@ -32,7 +35,6 @@ export function PPPHeader() {
   const location = useSelectedLocation();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const marketplaces = marketplaceChannels(location, mode);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -59,16 +61,9 @@ export function PPPHeader() {
             {mode === "pickup" ? t("Pickup", "Cueillette") : t("Delivery", "Livraison")}
           </button>
           <div className="ml-auto flex items-center gap-3">
-            <span className="text-muted-foreground/60">{t("Also on", "Aussi sur")}</span>
-            {marketplaces.map((c) => (
-              <button
-                key={c.id}
-                onClick={openOrderSheet}
-                className="hover:text-foreground focus-ppp"
-              >
-                {c.label}
-              </button>
-            ))}
+            <button onClick={openOrderSheet} className="hover:text-foreground focus-ppp">
+              {t("Other ways to order", "Autres façons de commander")}
+            </button>
             <button
               onClick={() => setLang(lang === "en" ? "fr" : "en")}
               className="border border-border px-2 py-0.5 hover:text-foreground focus-ppp"
