@@ -95,6 +95,7 @@ export function AppPreview() {
   );
   const [screen, setScreen] = useState(0);
   const [paused, setPaused] = useState(false);
+  const resumeRef = useRef<number | null>(null);
   const [reduced, setReduced] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
   const promptRef = useRef<{ prompt: () => void } | null>(null);
@@ -119,9 +120,23 @@ export function AppPreview() {
 
   useEffect(() => {
     if (paused || reduced) return undefined;
-    const id = window.setInterval(() => setScreen((s) => (s + 1) % SCREENS.length), 4600);
+    const id = window.setInterval(() => setScreen((s) => (s + 1) % SCREENS.length), 4200);
     return () => window.clearInterval(id);
   }, [paused, reduced]);
+
+  /** Pause on interaction, but always resume so the preview never dies. */
+  function pauseBriefly() {
+    setPaused(true);
+    if (resumeRef.current) window.clearTimeout(resumeRef.current);
+    resumeRef.current = window.setTimeout(() => setPaused(false), 9000);
+  }
+
+  useEffect(
+    () => () => {
+      if (resumeRef.current) window.clearTimeout(resumeRef.current);
+    },
+    [],
+  );
 
   if (items.length === 0) return null;
   const current: Screen = reduced ? "order" : (SCREENS[screen] ?? "order");
