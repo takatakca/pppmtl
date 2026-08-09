@@ -71,8 +71,8 @@ export interface RestaurantLocation {
   discovery: { birdeye: string | null; restoEnLigne: string | null };
   legacy: Record<string, string>;
   support: LocationSupport;
-  /** Menu is shared brand-wide until a store publishes its own catalog. */
-  menuScope: "brand-catalog" | "location-catalog";
+  /** "verified" = this store's menu/prices have been confirmed for display. */
+  menuScope: "verified" | "not-published";
   seo: { titleEn: string; titleFr: string; descriptionEn: string; descriptionFr: string };
   storyEn: string | null;
   storyFr: string | null;
@@ -156,7 +156,7 @@ export const restaurantLocations: RestaurantLocation[] = [
       email: null,
       marketplaceNote: true,
     },
-    menuScope: "brand-catalog",
+    menuScope: "verified",
     seo: {
       titleEn: "PPP Pizzeria NDG — 6280 Av. Somerled, Montréal",
       titleFr: "PPP Pizzeria NDG — 6280 av. Somerled, Montréal",
@@ -191,7 +191,7 @@ export const restaurantLocations: RestaurantLocation[] = [
       lastSyncedAt: null,
     },
     social: emptySocial,
-    ordering: { ...emptyOrdering, direct: true },
+    ordering: emptyOrdering,
     discovery: { birdeye: null, restoEnLigne: null },
     legacy: { orderOnlineHochelaga: externalPresence.legacy.orderOnlineHochelaga },
     support: {
@@ -200,7 +200,7 @@ export const restaurantLocations: RestaurantLocation[] = [
       email: null,
       marketplaceNote: false,
     },
-    menuScope: "brand-catalog",
+    menuScope: "not-published",
     seo: {
       titleEn: "PPP Pizzeria Sainte-Catherine E — Montréal",
       titleFr: "PPP Pizzeria Sainte-Catherine E — Montréal",
@@ -247,7 +247,7 @@ export const restaurantLocations: RestaurantLocation[] = [
       linktree: pppBusiness.legacyExternalMenuUrl,
     },
     support: { directPhone: null, directPhoneDisplay: null, email: null, marketplaceNote: false },
-    menuScope: "brand-catalog",
+    menuScope: "not-published",
     seo: {
       titleEn: "PPP Pizzeria Montréal-Nord — Closed Location",
       titleFr: "PPP Pizzeria Montréal-Nord — Emplacement fermé",
@@ -286,7 +286,7 @@ export const restaurantLocations: RestaurantLocation[] = [
     discovery: { birdeye: null, restoEnLigne: null },
     legacy: {},
     support: { directPhone: null, directPhoneDisplay: null, email: null, marketplaceNote: false },
-    menuScope: "brand-catalog",
+    menuScope: "not-published",
     seo: {
       titleEn: "PPP Pizzeria Saint-Léonard — Coming Soon",
       titleFr: "PPP Pizzeria Saint-Léonard — Bientôt ouvert",
@@ -324,7 +324,7 @@ export const restaurantLocations: RestaurantLocation[] = [
     discovery: { birdeye: null, restoEnLigne: null },
     legacy: {},
     support: { directPhone: null, directPhoneDisplay: null, email: null, marketplaceNote: false },
-    menuScope: "brand-catalog",
+    menuScope: "not-published",
     seo: {
       titleEn: "PPP Pizzeria Chambly — Coming Soon",
       titleFr: "PPP Pizzeria Chambly — Bientôt ouvert",
@@ -362,7 +362,7 @@ export const restaurantLocations: RestaurantLocation[] = [
     discovery: { birdeye: null, restoEnLigne: null },
     legacy: {},
     support: { directPhone: null, directPhoneDisplay: null, email: null, marketplaceNote: false },
-    menuScope: "brand-catalog",
+    menuScope: "not-published",
     seo: {
       titleEn: "PPP Pizzeria Brossard — Coming Soon",
       titleFr: "PPP Pizzeria Brossard — Bientôt ouvert",

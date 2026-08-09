@@ -4,12 +4,11 @@ import { Loader2, ShieldCheck } from "lucide-react";
 import { usePPP } from "@/context/ppp-store";
 
 /**
- * Guest phone verification: phone entry → simulated 6-digit OTP.
- * Nothing here calls a real SMS provider — GuestVerificationRepository is
- * the seam a real Twilio (or similar) integration would replace.
- * `requestCode` / `verifyCode` never actually send an SMS or validate a
- * server-issued code: they are local timers so the UI can be built and
- * reviewed honestly ahead of a real backend.
+ * Guest phone verification UI. Not wired up to a live SMS service yet, so
+ * no code is ever actually sent or checked — this always tells the
+ * customer honestly that verification isn't ready, never a fake success.
+ * Currently unused; keep hidden from customer flows until phone
+ * verification is live.
  */
 
 const RESEND_COOLDOWN_S = 30;
@@ -74,7 +73,7 @@ export function GuestVerifySheet({
       return;
     }
     setSending(true);
-    // Simulated network delay — no real SMS is sent.
+    // No SMS is sent yet — this delay only mirrors what the real flow will feel like.
     await new Promise((r) => setTimeout(r, 600));
     setSending(false);
     setStep("otp");
@@ -133,12 +132,12 @@ export function GuestVerifySheet({
     setOtpError(null);
     await new Promise((r) => setTimeout(r, 500));
     setVerifying(false);
-    // No SMS backend is connected — verification cannot actually succeed yet.
+    // Phone verification isn't live yet — never claim success here.
     setAttempts((a) => a + 1);
     setOtpError(
       t(
-        "We can't verify codes yet — SMS verification isn't connected in this preview.",
-        "Impossible de vérifier le code pour l'instant — la vérification par SMS n'est pas encore branchée dans cet aperçu.",
+        "Phone verification is coming soon — we can't check codes yet.",
+        "La vérification par téléphone arrive bientôt — nous ne pouvons pas encore vérifier les codes.",
       ),
     );
     setDigits(Array(CODE_LENGTH).fill(""));
