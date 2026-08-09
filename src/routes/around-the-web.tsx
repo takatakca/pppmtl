@@ -1,5 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ArrowUpRight } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { PPPHeader } from "@/components/layout/ppp-header";
 import { PPPFooter } from "@/components/layout/ppp-footer";
 import { MobileOrderBar } from "@/components/layout/mobile-order-bar";
@@ -7,22 +6,21 @@ import { OrderSheet } from "@/components/layout/order-sheet";
 import { SearchOverlay } from "@/components/search/search-overlay";
 import { LocationSheet } from "@/components/layout/location-sheet";
 import { usePPP } from "@/context/ppp-store";
-import { trackSocialLink } from "@/lib/analytics";
 import { Reveal } from "@/components/motion/reveal";
 import {
-  presenceByCategory,
   legacyPresence,
-  type PresenceCategory,
+  livePresence,
   type PresenceRecord,
 } from "@/config/presence-directory";
+import { AroundHero } from "@/components/presence/around-hero";
+import { GoogleTrustCard } from "@/components/presence/google-trust-card";
 import {
-  Facebook,
-  Instagram,
-  MapPin,
-  Store,
-  Star,
-} from "lucide-react";
-import { TikTokIcon, XIcon, GoogleGlyph } from "@/components/brand/social-icons";
+  HistoricalPlatformCard,
+  PresenceIndexLink,
+  StandardPlatformCard,
+} from "@/components/presence/presence-cards";
+import { getSummariesSync } from "@/lib/reputation/repositories";
+import { NDG_LOCATION_ID, restaurantLocations } from "@/config/locations";
 import { canonicalUrl } from "@/config/site";
 
 const CANONICAL = canonicalUrl("/around-the-web");
