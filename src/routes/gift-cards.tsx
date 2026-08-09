@@ -9,6 +9,7 @@ import { LocationSheet } from "@/components/layout/location-sheet";
 import { OrderSheet } from "@/components/layout/order-sheet";
 import { usePPP } from "@/context/ppp-store";
 import { pppBusiness } from "@/config/business";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/gift-cards")({
   head: () => ({
@@ -27,7 +28,7 @@ export const Route = createFileRoute("/gift-cards")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "/gift-cards" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/gift-cards") }],
   }),
   component: GiftCards,
 });

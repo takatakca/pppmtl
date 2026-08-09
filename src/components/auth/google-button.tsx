@@ -4,7 +4,8 @@ import { usePPP } from "@/context/ppp-store";
 /**
  * "Continue with Google" — follows Google's sign-in branding guidelines:
  * white surface, full-colour "G" glyph, neutral border, Roboto-esque weight
- * on the label. This is UI-only: no real OAuth is wired up yet.
+ * on the label. Rendering is gated by GOOGLE_SIGN_IN_ENABLED in
+ * @/config/auth-flags until Google sign-in is actually available.
  */
 export function GoogleButton({
   onClick,

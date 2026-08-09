@@ -115,7 +115,7 @@ export function OrderSheet() {
             {orderingChannels.map((c) => (
               <li key={c.id}>
                 <a
-                  href={c.url ?? "#"}
+                  href={c.orderingUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => trackExternalOrder(c.id)}

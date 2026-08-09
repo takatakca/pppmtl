@@ -11,6 +11,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { usePPP } from "@/context/ppp-store";
 import { openLocations, comingSoonLocations, pastLocations } from "@/config/locations";
 import storefront from "@/assets/storefront-night.jpg";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/franchise")({
   head: () => ({
@@ -28,9 +29,9 @@ export const Route = createFileRoute("/franchise")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:url", content: "/franchise" },
+      { property: "og:url", content: canonicalUrl("/franchise") },
     ],
-    links: [{ rel: "canonical", href: "/franchise" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/franchise") }],
   }),
   component: FranchisePage,
 });

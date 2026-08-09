@@ -8,6 +8,7 @@ import { LocationSheet } from "@/components/layout/location-sheet";
 import { OrderSheet } from "@/components/layout/order-sheet";
 import { FaqList } from "@/components/support/faq-list";
 import { usePPP } from "@/context/ppp-store";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/faq")({
   head: () => ({
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/faq")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "/faq" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/faq") }],
   }),
   component: FaqPage,
 });

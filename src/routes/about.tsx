@@ -13,6 +13,7 @@ import crew from "@/assets/team-crew.jpg";
 import foodPizza from "@/assets/food-pizza.jpg";
 import foodChicken from "@/assets/food-chicken.jpg";
 import foodPoutine from "@/assets/food-poutine.jpg";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -30,9 +31,9 @@ export const Route = createFileRoute("/about")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:url", content: "/about" },
+      { property: "og:url", content: canonicalUrl("/about") },
     ],
-    links: [{ rel: "canonical", href: "/about" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/about") }],
   }),
   component: AboutPage,
 });

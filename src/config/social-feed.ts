@@ -1,7 +1,11 @@
 /**
- * Curated, PPP-authored "social feed" — there is no live API integration.
- * This is a typed seam: swap `getSocialPosts` for a real fetch later without
- * touching any component.
+ * Social content model for the homepage "Fresh from PPP" band.
+ *
+ * Today every post is `curated`/`ppp` — content written and photographed by
+ * PPP itself, never presented as a real Instagram/Facebook/TikTok post. The
+ * `SocialFeedRepository` seam below is shaped so a real platform adapter
+ * (Instagram/Facebook/TikTok) can be plugged in later without touching any
+ * component. There is no network call here.
  */
 
 import foodPizza from "@/assets/food-pizza.jpg";
@@ -13,25 +17,41 @@ import foodDessert from "@/assets/food-dessert.jpg";
 import comboBurger from "@/assets/combo-burger.jpg";
 import menuRotisserie from "@/assets/menu-rotisserie.jpg";
 import { NDG_LOCATION_ID } from "@/config/locations";
-import type { SocialProvider } from "@/config/external-presence";
+
+/** Where a post's content actually came from. */
+export type SocialSource = "curated" | "instagram" | "facebook" | "tiktok";
+
+/**
+ * `ppp` = authored by PPP for this site (must be labelled "From PPP" and
+ * never wear a platform badge). `platform` = a real post pulled from a
+ * third-party platform (only valid once a live adapter is wired up).
+ */
+export type SocialProvenance = "ppp" | "platform";
 
 export interface SocialPost {
   id: string;
-  platform: SocialProvider;
+  source: SocialSource;
+  provenance: SocialProvenance;
   image: string;
   captionEn: string;
   captionFr: string;
+  /** Real destination only. `null` means the card renders as non-clickable. */
   href: string | null;
   /** `null` = brand-wide post, shown for every location. */
   locationId: string | null;
   publishedAt: string;
 }
 
-/** PPP-authored posts. Images reuse the existing menu catalog imagery. */
-const socialPosts: SocialPost[] = [
+/**
+ * PPP-authored cards. Images reuse the existing menu catalog imagery.
+ * `href: null` because there is no real per-post destination to link to —
+ * the cards intentionally render as non-clickable.
+ */
+const curatedPosts: SocialPost[] = [
   {
     id: "post-pizza-friday",
-    platform: "instagram",
+    source: "curated",
+    provenance: "ppp",
     image: foodPizza,
     captionEn: "Fresh out of the oven — pizza night starts here.",
     captionFr: "Fraîche sortie du four — la soirée pizza commence ici.",
@@ -41,7 +61,8 @@ const socialPosts: SocialPost[] = [
   },
   {
     id: "post-fried-chicken",
-    platform: "instagram",
+    source: "curated",
+    provenance: "ppp",
     image: foodChicken,
     captionEn: "Pressure-fried, always crispy, always by the piece.",
     captionFr: "Frit sous pression, toujours croustillant, toujours au morceau.",
@@ -51,7 +72,8 @@ const socialPosts: SocialPost[] = [
   },
   {
     id: "post-poutine",
-    platform: "facebook",
+    source: "curated",
+    provenance: "ppp",
     image: foodPoutine,
     captionEn: "Poutine weather, every day of the year.",
     captionFr: "Un temps à poutine, à longueur d'année.",
@@ -61,7 +83,8 @@ const socialPosts: SocialPost[] = [
   },
   {
     id: "post-pita",
-    platform: "tiktok",
+    source: "curated",
+    provenance: "ppp",
     image: foodPita,
     captionEn: "Wrapped tight, packed with flavour.",
     captionFr: "Bien enroulé, plein de saveur.",
@@ -71,7 +94,8 @@ const socialPosts: SocialPost[] = [
   },
   {
     id: "post-burger",
-    platform: "instagram",
+    source: "curated",
+    provenance: "ppp",
     image: foodBurger,
     captionEn: "The trio lineup — burger, fries, drink, done right.",
     captionFr: "La gamme de trios — burger, frites, boisson, comme il faut.",
@@ -81,7 +105,8 @@ const socialPosts: SocialPost[] = [
   },
   {
     id: "post-dessert",
-    platform: "instagram",
+    source: "curated",
+    provenance: "ppp",
     image: foodDessert,
     captionEn: "Save room. Always save room.",
     captionFr: "Gardez de la place. Toujours garder de la place.",
@@ -91,7 +116,8 @@ const socialPosts: SocialPost[] = [
   },
   {
     id: "post-family-combo",
-    platform: "facebook",
+    source: "curated",
+    provenance: "ppp",
     image: comboBurger,
     captionEn: "Family combos built for the whole table.",
     captionFr: "Des combos familiaux pensés pour toute la table.",
@@ -101,7 +127,8 @@ const socialPosts: SocialPost[] = [
   },
   {
     id: "post-rotisserie",
-    platform: "x",
+    source: "curated",
+    provenance: "ppp",
     image: menuRotisserie,
     captionEn: "Slow-turned rotisserie, ready when you are.",
     captionFr: "Poulet rôti à la broche, prêt quand vous l'êtes.",
@@ -112,18 +139,37 @@ const socialPosts: SocialPost[] = [
 ];
 
 /**
- * Pure selector so a future live feed can replace the array above without
- * changing call sites. Prefers posts scoped to the given location, then
- * fills with brand-wide posts, newest first.
+ * A source of social posts. `CuratedSocialFeedRepository` is the only
+ * implementation today. Future platform adapters (Instagram/Facebook/TikTok)
+ * can implement the same interface — fetching real posts over the network —
+ * and be swapped in without touching any component.
  */
+export interface SocialFeedRepository {
+  getPosts(locationId: string | null, limit?: number): SocialPost[];
+}
+
+class CuratedSocialFeedRepository implements SocialFeedRepository {
+  constructor(private readonly posts: SocialPost[]) {}
+
+  getPosts(locationId: string | null, limit = 8): SocialPost[] {
+    const sorted = [...this.posts].sort(
+      (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+    );
+    const scoped = sorted.filter((p) => p.locationId === locationId);
+    const brandWide = sorted.filter((p) => p.locationId === null);
+    const merged = [...scoped, ...brandWide.filter((p) => !scoped.includes(p))];
+    const seen = new Set<string>();
+    const deduped = merged.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true)));
+    return deduped.slice(0, limit);
+  }
+}
+
+/** Active repository. Swap this instance for a live one once available. */
+export const socialFeedRepository: SocialFeedRepository = new CuratedSocialFeedRepository(
+  curatedPosts,
+);
+
+/** Convenience wrapper kept for existing call sites. */
 export function getSocialPosts(locationId: string | null, limit = 8): SocialPost[] {
-  const sorted = [...socialPosts].sort(
-    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
-  );
-  const scoped = sorted.filter((p) => p.locationId === locationId);
-  const brandWide = sorted.filter((p) => p.locationId === null);
-  const merged = [...scoped, ...brandWide.filter((p) => !scoped.includes(p))];
-  const seen = new Set<string>();
-  const deduped = merged.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true)));
-  return deduped.slice(0, limit);
+  return socialFeedRepository.getPosts(locationId, limit);
 }

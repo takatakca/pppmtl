@@ -8,6 +8,7 @@ import { LocationSheet } from "@/components/layout/location-sheet";
 import { OrderSheet } from "@/components/layout/order-sheet";
 import { usePPP } from "@/context/ppp-store";
 import { canOrder, comingSoonLocations, openLocations, pastLocations } from "@/config/locations";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/locations/")({
   head: () => ({
@@ -24,10 +25,10 @@ export const Route = createFileRoute("/locations/")({
         content: "Find an open PPP, see what's coming soon, and read our location history.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/locations" },
+      { property: "og:url", content: canonicalUrl("/locations") },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "/locations" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/locations") }],
   }),
   component: LocationsPage,
 });

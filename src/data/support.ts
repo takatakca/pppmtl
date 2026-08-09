@@ -377,9 +377,9 @@ export const faqEntries: FaqEntry[] = [
   },
 ];
 
-export const uberEatsHelpUrl = uberEats.url;
-export const doorDashHelpUrl = doorDash.url;
-export const skipHelpUrl = skip.url;
+export const uberEatsHelpUrl = uberEats.supportUrl;
+export const doorDashHelpUrl = doorDash.supportUrl;
+export const skipHelpUrl = skip.supportUrl;
 
 export function faqByCategory(category: FaqCategory) {
   return faqEntries.filter((f) => f.category === category);

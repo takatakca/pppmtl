@@ -23,8 +23,9 @@ import {
   Star,
 } from "lucide-react";
 import { TikTokIcon, XIcon, GoogleGlyph } from "@/components/brand/social-icons";
+import { canonicalUrl } from "@/config/site";
 
-const CANONICAL = "https://pppmtl.lovable.app/around-the-web";
+const CANONICAL = canonicalUrl("/around-the-web");
 
 export const Route = createFileRoute("/around-the-web")({
   head: () => ({
@@ -53,7 +54,7 @@ export const Route = createFileRoute("/around-the-web")({
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Home", item: "https://pppmtl.lovable.app/" },
+            { "@type": "ListItem", position: 1, name: "Home", item: canonicalUrl("/") },
             {
               "@type": "ListItem",
               position: 2,
@@ -99,7 +100,7 @@ function PresenceRow({ record }: { record: PresenceRecord }) {
         href={record.url ?? "#"}
         target="_blank"
         rel="noopener noreferrer"
-        onClick={() => trackSocialLink("google")}
+        onClick={() => trackSocialLink(record.iconKey)}
         aria-disabled={!record.url}
         className={`flex items-start gap-3 border border-border bg-card p-4 transition-colors hover:border-primary focus-ppp ${
           !record.url ? "pointer-events-none opacity-60" : ""

@@ -22,7 +22,7 @@ function unavailable<T>(): Promise<AuthResult<T>> {
     ok: false,
     code: "unavailable",
     message:
-      "Customer accounts are not connected yet. This form is the production-ready interface; no data is stored.",
+      "PPP accounts are coming soon. Nothing was saved — please try again once accounts open.",
   });
 }
 

@@ -203,9 +203,9 @@ export function SupportRouter() {
               `Cette commande a été passée via ${marketplace.name}. Le suivi de commande, les problèmes de livreur, les annulations et les remboursements sont gérés par ${marketplace.name} — PPP ne peut pas rembourser, annuler ni suivre une commande passée sur une autre plateforme.`,
             )}
           </p>
-          {marketplace.url ? (
+          {marketplace.supportUrl ? (
             <a
-              href={marketplace.url}
+              href={marketplace.supportUrl}
               target="_blank"
               rel="noreferrer"
               onClick={() => trackSupportRouted("location")}
@@ -235,9 +235,9 @@ export function SupportRouter() {
             )}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
-            {marketplace.url && (
+            {marketplace.supportUrl && (
               <a
-                href={marketplace.url}
+                href={marketplace.supportUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="press-tap inline-flex items-center gap-2 bg-primary px-4 py-3 font-display text-sm uppercase leading-none text-primary-foreground focus-ppp"

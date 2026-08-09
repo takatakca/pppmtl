@@ -14,6 +14,7 @@ import {
   restaurantLocations,
 } from "@/config/locations";
 import { orderingChannels } from "@/config/external-presence";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/locations/$slug")({
   loader: ({ params }) => {
@@ -30,10 +31,10 @@ export const Route = createFileRoute("/locations/$slug")({
         { property: "og:title", content: loc.seo.titleEn },
         { property: "og:description", content: loc.seo.descriptionEn },
         { property: "og:type", content: "restaurant.restaurant" },
-        { property: "og:url", content: `/locations/${loc.slug}` },
+        { property: "og:url", content: canonicalUrl(`/locations/${loc.slug}`) },
         { name: "twitter:card", content: "summary" },
       ],
-      links: [{ rel: "canonical", href: `/locations/${loc.slug}` }],
+      links: [{ rel: "canonical", href: canonicalUrl(`/locations/${loc.slug}`) }],
       scripts:
         loc.lifecycleStatus === "open"
           ? [

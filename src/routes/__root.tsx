@@ -11,7 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { PPPProvider } from "../context/ppp-store";
+import { PPPProvider, usePPP } from "../context/ppp-store";
 
 function NotFoundComponent() {
   return (
@@ -93,7 +93,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
       { name: "theme-color", content: "#0a0a0a" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-title", content: "PPP NDG" },
@@ -123,7 +122,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
@@ -141,9 +140,24 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <PPPProvider>
+        <HtmlLangSync />
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
       </PPPProvider>
     </QueryClientProvider>
   );
+}
+
+/**
+ * Keeps <html lang> in sync with the active app language. Runs client-side only
+ * (after hydration) so SSR output stays deterministic ("en") and hydration-safe.
+ */
+function HtmlLangSync() {
+  const { lang } = usePPP();
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
+  return null;
 }

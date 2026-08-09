@@ -121,8 +121,8 @@ export function CallbackSheet({ trigger, defaultReason, defaultLocationSlug }: C
           </SheetTitle>
           <SheetDescription>
             {t(
-              "Leave your info and a PPP team member can call you back. This form is not connected to a callback provider yet — nothing is sent automatically.",
-              "Laissez vos coordonnées et un membre de l'équipe PPP pourra vous rappeler. Ce formulaire n'est pas encore relié à un service de rappel — rien n'est envoyé automatiquement.",
+              "Callback requests aren't sent automatically yet. For anything urgent, please call the location directly.",
+              "Les demandes de rappel ne sont pas encore envoyées automatiquement. Pour toute urgence, veuillez appeler l'établissement directement.",
             )}
           </SheetDescription>
         </SheetHeader>
@@ -131,12 +131,12 @@ export function CallbackSheet({ trigger, defaultReason, defaultLocationSlug }: C
           <div className="mt-6 space-y-4">
             <div className="border border-primary/40 bg-primary/5 p-4 text-sm text-foreground">
               <p className="font-display text-base uppercase leading-none text-primary">
-                {t("Not sent yet", "Pas encore envoyé")}
+                {t("Callback requests coming soon", "Demandes de rappel bientôt disponibles")}
               </p>
               <p className="mt-2 text-muted-foreground">
                 {t(
-                  "Your details were validated locally, but there is no callback provider connected yet, so nothing was actually sent to the restaurant. For anything urgent, please call the location directly.",
-                  "Vos informations ont été validées localement, mais aucun service de rappel n'est encore relié, alors rien n'a réellement été envoyé au restaurant. Pour toute urgence, veuillez appeler l'établissement directement.",
+                  "This request wasn't sent to the restaurant yet — we're still setting up callback requests. For anything urgent, please call the location directly.",
+                  "Cette demande n'a pas encore été envoyée au restaurant — nous mettons en place les demandes de rappel. Pour toute urgence, veuillez appeler l'établissement directement.",
                 )}
               </p>
             </div>

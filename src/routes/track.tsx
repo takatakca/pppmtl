@@ -18,6 +18,8 @@ import { OrderSheet } from "@/components/layout/order-sheet";
 import { CallbackSheet } from "@/components/support/callback-sheet";
 import { usePPP, useSelectedRestaurantLocation } from "@/context/ppp-store";
 import { trackExternalOrder, trackProviderSelected } from "@/lib/analytics";
+import { orderingChannels } from "@/config/external-presence";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/track")({
   head: () => ({
@@ -36,7 +38,7 @@ export const Route = createFileRoute("/track")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "/track" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/track") }],
   }),
   component: TrackPage,
 });
@@ -58,17 +60,17 @@ const marketplaceMeta: Record<
   uber_eats: {
     labelEn: "Uber Eats",
     labelFr: "Uber Eats",
-    appUrl: "https://www.ubereats.com/orders",
+    appUrl: orderingChannels.find((c) => c.id === "uber_eats")!.trackingUrl,
   },
   doordash: {
     labelEn: "DoorDash",
     labelFr: "DoorDash",
-    appUrl: "https://www.doordash.com/orders",
+    appUrl: orderingChannels.find((c) => c.id === "doordash")!.trackingUrl,
   },
   skip: {
     labelEn: "Skip the Dishes",
     labelFr: "Skip the Dishes",
-    appUrl: "https://www.skipthedishes.com/",
+    appUrl: orderingChannels.find((c) => c.id === "skip")!.trackingUrl,
   },
 };
 
@@ -158,15 +160,15 @@ function TrackPage() {
           {provider === "ppp_direct" && (
             <div className="mt-8 border border-border p-5">
               <div className="mb-3 inline-flex items-center gap-2 border border-primary/40 bg-primary/5 px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-widest text-primary">
-                {t("Preview — coming soon", "Aperçu — bientôt disponible")}
+                {t("Coming soon", "Bientôt disponible")}
               </div>
               <h2 className="font-display text-2xl uppercase leading-none">
                 {t("Live PPP Direct tracking", "Suivi PPP Direct en direct")}
               </h2>
               <p className="mt-2 max-w-xl text-sm text-muted-foreground">
                 {t(
-                  "This is a preview of how a PPP Direct order will move through the kitchen. Live order tracking is not connected yet — no real order status is shown here.",
-                  "Voici un aperçu du déroulement d'une commande PPP Direct dans la cuisine. Le suivi en direct n'est pas encore branché — aucun état réel de commande n'est affiché ici.",
+                  "This shows the steps a PPP Direct order moves through in the kitchen. Live order status isn't available here yet — check back soon.",
+                  "Voici les étapes que suit une commande PPP Direct en cuisine. Le statut en direct n'est pas encore disponible ici — revenez bientôt.",
                 )}
               </p>
               <ol className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-5">
@@ -199,15 +201,15 @@ function TrackPage() {
           {provider === "phone" && (
             <div className="mt-8 border border-border p-5">
               <div className="mb-3 inline-flex items-center gap-2 border border-primary/40 bg-primary/5 px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-widest text-primary">
-                {t("Not connected yet", "Non branché pour le moment")}
+                {t("Coming soon", "Bientôt disponible")}
               </div>
               <h2 className="font-display text-2xl uppercase leading-none">
                 {t("Look up a phone order", "Consulter une commande téléphonique")}
               </h2>
               <p className="mt-2 max-w-xl text-sm text-muted-foreground">
                 {t(
-                  "Phone order lookup requires verifying your phone number and order code with the restaurant. This form validates your input locally, but it is not connected to the store's order system yet — for a real-time answer, please call the location directly.",
-                  "La consultation d'une commande téléphonique nécessite de vérifier votre numéro et votre code de commande avec le restaurant. Ce formulaire valide vos données localement, mais n'est pas encore relié au système de commande du magasin — pour une réponse en temps réel, veuillez appeler l'établissement.",
+                  "Phone order lookup is coming soon. For a real-time answer on a phone order, please call the location directly.",
+                  "La consultation des commandes téléphoniques arrive bientôt. Pour une réponse en temps réel sur une commande téléphonique, veuillez appeler l'établissement directement.",
                 )}
               </p>
               <form onSubmit={handleLookup} className="mt-5 grid max-w-md gap-3">
@@ -228,8 +230,8 @@ function TrackPage() {
                 {lookupTried && !lookupError && (
                   <p className="border border-border bg-card/50 p-3 text-xs text-muted-foreground">
                     {t(
-                      "Your info looks valid, but secure verification with the store is not connected yet, so no status can be shown here.",
-                      "Vos informations semblent valides, mais la vérification sécurisée avec le magasin n'est pas encore branchée, donc aucun état ne peut être affiché ici.",
+                      "Thanks — phone order lookup isn't available yet, so we can't show a status here. Please call the location directly for an update.",
+                      "Merci — la consultation des commandes téléphoniques n'est pas encore disponible, nous ne pouvons donc pas afficher d'état ici. Veuillez appeler l'établissement directement pour un suivi.",
                     )}
                   </p>
                 )}

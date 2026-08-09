@@ -14,3 +14,5 @@ User-agent: *
 Allow: /
 Disallow: /dev/
 Disallow: /account
+
+Sitemap: https://pppmtl.com/sitemap.xml

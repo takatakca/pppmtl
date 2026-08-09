@@ -25,6 +25,12 @@ export function FreshFromPPP() {
           <h2 className="mt-1 font-display text-4xl uppercase leading-[0.85] sm:text-5xl">
             {t("Straight from the kitchen", "Tout droit de la cuisine")}
           </h2>
+          <p className="mt-2 max-w-md text-sm text-muted-foreground">
+            {t(
+              "A look at what's coming out of the kitchen, plus where to find PPP online.",
+              "Un aperçu de ce qui sort de la cuisine, et où retrouver PPP en ligne.",
+            )}
+          </p>
         </div>
         {socials.length > 0 && (
           <ul className="flex flex-wrap gap-2">

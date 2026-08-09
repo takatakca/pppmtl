@@ -8,6 +8,7 @@ import { LocationSheet } from "@/components/layout/location-sheet";
 import { OrderSheet } from "@/components/layout/order-sheet";
 import { CallbackSheet } from "@/components/support/callback-sheet";
 import { usePPP, useSelectedRestaurantLocation } from "@/context/ppp-store";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/phone-order")({
   head: () => ({
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/phone-order")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "/phone-order" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/phone-order") }],
   }),
   component: PhoneOrderPage,
 });
@@ -124,8 +125,8 @@ function PhoneOrderPage() {
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 {t(
-                  "Leave your details and ask for a callback. Note: this request form is not connected to a live callback system yet.",
-                  "Laissez vos coordonnées et demandez un rappel. Note : ce formulaire n'est pas encore relié à un système de rappel en direct.",
+                  "Leave your details and ask for a callback. Callbacks are coming soon — calling the restaurant is still the fastest way to order.",
+                  "Laissez vos coordonnées et demandez un rappel. Les rappels arrivent bientôt — appeler le restaurant reste le plus rapide.",
                 )}
               </p>
               <div className="mt-4">

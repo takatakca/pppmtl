@@ -12,8 +12,12 @@ export type SocialProvider = "facebook" | "instagram" | "tiktok" | "x" | "google
 export interface OrderingChannelConfig {
   id: Exclude<OrderingProvider, "direct">;
   name: string;
-  /** null for PPP Direct — it is handled in-app, not by an external handoff. */
-  url: string | null;
+  /** The restaurant's storefront on that marketplace — where an order is placed. */
+  orderingUrl: string;
+  /** That marketplace's own help/support destination — never the storefront. */
+  supportUrl: string;
+  /** Where a placed order can be tracked on that marketplace, if different from supportUrl. */
+  trackingUrl: string;
   /** Local brand asset. null renders the branded-text fallback card. */
   logo: string | null;
   labelEn: string;
@@ -39,9 +43,11 @@ export const orderingChannels: OrderingChannelConfig[] = [
   {
     id: "uber_eats",
     name: "Uber Eats",
-    url: clean(
+    orderingUrl: clean(
       "https://www.ubereats.com/ca/store/ppp-pizzeria-ndg/3Ek_uhIPUpylCMrvapJt6Q?srsltid=AfmBOoqNFJmEOTNhfhIsmjqGmN7LomjbmipFI7KLPdHpQRT-WlOUzqNN",
     ),
+    supportUrl: "https://help.uber.com/ubereats",
+    trackingUrl: "https://www.ubereats.com/orders",
     logo: "/brands/uber-eats.svg",
     labelEn: "Order on Uber Eats",
     labelFr: "Commander sur Uber Eats",
@@ -49,9 +55,11 @@ export const orderingChannels: OrderingChannelConfig[] = [
   {
     id: "doordash",
     name: "DoorDash",
-    url: clean(
+    orderingUrl: clean(
       "https://www.doordash.com/en-CA/store/ppp-pizzeria-montr%C3%A9al-28040070/112031546/?srsltid=AfmBOoqojNGmDjaRfibExpfxYCx1T7_LCVAKWw0zeN3oS9FAAFp9kIXm",
     ),
+    supportUrl: "https://help.doordash.com/en-ca/consumers",
+    trackingUrl: "https://www.doordash.com/orders/",
     logo: "/brands/doordash.svg",
     labelEn: "Order on DoorDash",
     labelFr: "Commander sur DoorDash",
@@ -59,7 +67,9 @@ export const orderingChannels: OrderingChannelConfig[] = [
   {
     id: "skip",
     name: "SkipTheDishes",
-    url: "https://www.skipthedishes.com/ppp-somerled",
+    orderingUrl: "https://www.skipthedishes.com/ppp-somerled",
+    supportUrl: "https://www.skipthedishes.com/contact-us",
+    trackingUrl: "https://www.skipthedishes.com/account/orders",
     logo: "/brands/skip.svg",
     labelEn: "Order on Skip",
     labelFr: "Commander sur Skip",
@@ -69,9 +79,9 @@ export const orderingChannels: OrderingChannelConfig[] = [
 export const externalPresence = {
   ordering: {
     direct: null as string | null,
-    uberEats: orderingChannels[0]!.url,
-    doorDash: orderingChannels[1]!.url,
-    skip: orderingChannels[2]!.url,
+    uberEats: orderingChannels[0]!.orderingUrl,
+    doorDash: orderingChannels[1]!.orderingUrl,
+    skip: orderingChannels[2]!.orderingUrl,
   },
   social: {
     facebook: clean("https://www.facebook.com/pppmtl.com1?mibextid=ZbWKwL"),

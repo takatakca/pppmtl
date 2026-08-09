@@ -10,6 +10,7 @@ import { usePPP } from "@/context/ppp-store";
 import { getDiscountedItems } from "@/lib/promotions";
 import { localizedDescription, localizedName } from "@/lib/search";
 import { orderSearch } from "@/lib/order-links";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/offers")({
   head: () => ({
@@ -26,10 +27,10 @@ export const Route = createFileRoute("/offers")({
         content: "All current PPP Notre-Dame-de-Grâce discounts, straight from the menu.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/offers" },
+      { property: "og:url", content: canonicalUrl("/offers") },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "/offers" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/offers") }],
   }),
   component: OffersPage,
 });
