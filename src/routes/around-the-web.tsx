@@ -71,7 +71,6 @@ const ndg = restaurantLocations.find((l) => l.id === NDG_LOCATION_ID)!;
 
 /** A titled band of platform cards. Renders nothing when it has no records. */
 function PresenceBand({
-  id,
   eyebrow,
   title,
   intro,
@@ -79,7 +78,6 @@ function PresenceBand({
   actionLabel,
   columns = "sm:grid-cols-2 xl:grid-cols-3",
 }: {
-  id: string;
   eyebrow: string;
   title: string;
   intro: string;
@@ -90,7 +88,7 @@ function PresenceBand({
   if (records.length === 0) return null;
 
   return (
-    <Reveal as="section" id={id} className="mt-16 scroll-mt-24">
+    <Reveal as="section" className="mt-16 scroll-mt-24">
       <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
         {eyebrow}
       </p>
@@ -125,7 +123,7 @@ function AroundTheWebPage() {
         <AroundHero />
 
         {googleSummary && (
-          <Reveal as="section" id="reviews" className="mt-16 scroll-mt-24">
+          <Reveal as="section" className="mt-16 scroll-mt-24">
             <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
               {t("What people say", "Ce qu'on en dit")}
             </p>
@@ -156,7 +154,6 @@ function AroundTheWebPage() {
         )}
 
         <PresenceBand
-          id="social"
           eyebrow={t("Follow the kitchen", "Suivez la cuisine")}
           title={t("PPP, day to day", "PPP, au quotidien")}
           intro={t(
@@ -168,7 +165,6 @@ function AroundTheWebPage() {
         />
 
         <PresenceBand
-          id="ordering"
           eyebrow={t("Order your way", "Commandez à votre façon")}
           title={t("Where you can order PPP", "Où commander PPP")}
           intro={t(
