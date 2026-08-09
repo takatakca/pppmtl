@@ -168,16 +168,18 @@ function AboutPage() {
         {/* 02 — WHERE PPP STARTED */}
         {origin && (
           <section className="mx-auto grid max-w-[80rem] gap-6 px-3 py-12 sm:px-6 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-12 lg:py-16">
-            <Reveal className="clip-rise relative overflow-hidden">
-              <img
-                src={crew}
-                alt=""
-                loading="lazy"
-                className="ken-burns h-56 w-full object-cover sm:h-96"
-              />
-              <span className="absolute left-0 top-0 bg-background px-2 py-1 font-display text-[0.55rem] uppercase tracking-[0.3em] text-muted-foreground">
-                {t("Former location — closed", "Ancien emplacement — fermé")}
-              </span>
+            <Reveal className="relative">
+              <div className="clip-rise relative overflow-hidden">
+                <img
+                  src={crew}
+                  alt=""
+                  loading="lazy"
+                  className="ken-burns h-56 w-full object-cover sm:h-96"
+                />
+                <span className="absolute left-0 top-0 bg-background px-2 py-1 font-display text-[0.55rem] uppercase tracking-[0.3em] text-muted-foreground">
+                  {t("Former location — closed", "Ancien emplacement — fermé")}
+                </span>
+              </div>
             </Reveal>
             <Reveal delay={90}>
               <Eyebrow>
