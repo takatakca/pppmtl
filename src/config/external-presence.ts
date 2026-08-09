@@ -10,7 +10,7 @@ export type OrderingProvider = "direct" | "uber_eats" | "doordash" | "skip";
 export type SocialProvider = "facebook" | "instagram" | "tiktok" | "x" | "google";
 
 export interface OrderingChannelConfig {
-  id: OrderingProvider;
+  id: Exclude<OrderingProvider, "direct">;
   name: string;
   /** null for PPP Direct — it is handled in-app, not by an external handoff. */
   url: string | null;
