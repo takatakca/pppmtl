@@ -28,15 +28,15 @@ export function OrderYourWay() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="min-w-0">
             <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
-              {t("Best price · earn points", "Meilleur prix · gagnez des points")}
+              {t("Straight from our kitchen", "Directement de notre cuisine")}
             </p>
             <h3 className="mt-1 font-display text-4xl uppercase leading-none sm:text-5xl">
               {t("Order direct with PPP", "Commander direct avec PPP")}
             </h3>
             <p className="mt-2 max-w-lg text-sm text-muted-foreground">
               {t(
-                "Pickup or delivery straight from our NDG kitchen on Somerled — full menu, every option, PPP Rewards on every order.",
-                "Cueillette ou livraison directement de notre cuisine NDG sur Somerled — menu complet, toutes les options, points PPP à chaque commande.",
+                "Pickup or delivery straight from our NDG kitchen on Somerled — full menu, every option.",
+                "Cueillette ou livraison directement de notre cuisine NDG sur Somerled — menu complet, toutes les options.",
               )}
             </p>
           </div>
