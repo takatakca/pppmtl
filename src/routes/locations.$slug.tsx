@@ -18,8 +18,7 @@ import { orderingChannels } from "@/config/external-presence";
 export const Route = createFileRoute("/locations/$slug")({
   loader: ({ params }) => {
     const loc = locationBySlug(params.slug);
-    console.log("LOADER_SLUG", JSON.stringify(params), !!loc);
-    if (!loc) return restaurantLocations[0]!;
+    if (!loc) throw notFound();
     return loc;
   },
   head: ({ loaderData }) => {
