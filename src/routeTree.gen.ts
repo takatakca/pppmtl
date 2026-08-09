@@ -29,6 +29,7 @@ import { Route as AccountSignUpRouteImport } from './routes/account_.sign-up'
 import { Route as DevMenuAuditRouteImport } from './routes/dev.menu-audit'
 import { Route as LocationsIndexRouteImport } from './routes/locations.index'
 import { Route as LocationsSlugRouteImport } from './routes/locations.$slug'
+import { Route as TIdRouteImport } from './routes/t.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -130,6 +131,11 @@ const LocationsSlugRoute = LocationsSlugRouteImport.update({
   path: '/locations/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TIdRoute = TIdRouteImport.update({
+  id: '/t/$id',
+  path: '/t/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/account/sign-up': typeof AccountSignUpRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
+  '/t/$id': typeof TIdRoute
   '/locations/': typeof LocationsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   '/account/sign-up': typeof AccountSignUpRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
+  '/t/$id': typeof TIdRoute
   '/locations': typeof LocationsIndexRoute
 }
 export interface FileRoutesById {
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/account_/sign-up': typeof AccountSignUpRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
+  '/t/$id': typeof TIdRoute
   '/locations/': typeof LocationsIndexRoute
 }
 export interface FileRouteTypes {
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/account/sign-up'
     | '/dev/menu-audit'
     | '/locations/$slug'
+    | '/t/$id'
     | '/locations/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
     | '/account/sign-up'
     | '/dev/menu-audit'
     | '/locations/$slug'
+    | '/t/$id'
     | '/locations'
   id:
     | '__root__'
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/account_/sign-up'
     | '/dev/menu-audit'
     | '/locations/$slug'
+    | '/t/$id'
     | '/locations/'
   fileRoutesById: FileRoutesById
 }
@@ -287,6 +299,7 @@ export interface RootRouteChildren {
   AccountSignUpRoute: typeof AccountSignUpRoute
   DevMenuAuditRoute: typeof DevMenuAuditRoute
   LocationsSlugRoute: typeof LocationsSlugRoute
+  TIdRoute: typeof TIdRoute
   LocationsIndexRoute: typeof LocationsIndexRoute
 }
 
@@ -432,6 +445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LocationsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/t/$id': {
+      id: '/t/$id'
+      path: '/t/$id'
+      fullPath: '/t/$id'
+      preLoaderRoute: typeof TIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -455,6 +475,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountSignUpRoute: AccountSignUpRoute,
   DevMenuAuditRoute: DevMenuAuditRoute,
   LocationsSlugRoute: LocationsSlugRoute,
+  TIdRoute: TIdRoute,
   LocationsIndexRoute: LocationsIndexRoute,
 }
 export const routeTree = rootRouteImport
