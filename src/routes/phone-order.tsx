@@ -125,8 +125,8 @@ function PhoneOrderPage() {
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 {t(
-                  "Leave your details and ask for a callback. Note: this request form is not connected to a live callback system yet.",
-                  "Laissez vos coordonnées et demandez un rappel. Note : ce formulaire n'est pas encore relié à un système de rappel en direct.",
+                  "Leave your details and ask for a callback. Callbacks are coming soon — calling the restaurant is still the fastest way to order.",
+                  "Laissez vos coordonnées et demandez un rappel. Les rappels arrivent bientôt — appeler le restaurant reste le plus rapide.",
                 )}
               </p>
               <div className="mt-4">

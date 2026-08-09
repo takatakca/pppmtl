@@ -292,8 +292,8 @@ export function GuestVerifySheet({
 
           <p className="mt-3 text-[0.65rem] uppercase tracking-widest text-muted-foreground/70">
             {t(
-              "Preview — SMS verification is not connected yet.",
-              "Aperçu — la vérification par SMS n'est pas encore branchée.",
+              "Phone verification is coming soon.",
+              "La vérification par téléphone arrive bientôt.",
             )}
           </p>
         </>

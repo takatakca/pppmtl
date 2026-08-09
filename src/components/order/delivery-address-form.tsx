@@ -107,8 +107,8 @@ export function DeliveryAddressForm({
 
       <p className="border border-dashed border-border p-3 text-[0.65rem] uppercase tracking-widest text-muted-foreground">
         {t(
-          "Prototype: address saving and delivery-zone checks are not connected yet.",
-          "Prototype : l'enregistrement d'adresse et la vérification de zone ne sont pas connectés.",
+          "Saved addresses and delivery-zone checks are coming soon.",
+          "Les adresses enregistrées et la vérification de zone arrivent bientôt.",
         )}
       </p>
 
