@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronDown, MapPin, Menu, Mic, Search, User, X } from "lucide-react";
-import { usePPP, useSelectedLocation } from "@/context/ppp-store";
+import { usePPP, useSelectedRestaurantLocation } from "@/context/ppp-store";
 import { orderingChannels } from "@/config/external-presence";
 import { trackExternalOrder, trackSocialLink } from "@/lib/analytics";
 import { pppSocials } from "@/components/home/follow-ppp";
@@ -10,9 +10,10 @@ import { PPPLogo } from "@/components/brand/ppp-logo";
 const navItems = [
   { en: "Deals", fr: "Offres", href: "#deals" },
   { en: "Rewards", fr: "Récompenses", href: "#rewards" },
-  { en: "Locations", fr: "Emplacements", href: "#locations" },
+  { en: "Locations", fr: "Emplacements", href: "/locations" },
   { en: "Franchise", fr: "Franchise", href: "#franchise" },
 ];
+
 
 const mobileRoutes = [
   { en: "Full menu", fr: "Menu complet", to: "/menu" },
@@ -24,7 +25,7 @@ const mobileRoutes = [
 const mobileLinks = [
   { en: "Deals", fr: "Offres", href: "#deals" },
   { en: "Rewards", fr: "Récompenses", href: "#rewards" },
-  { en: "Locations", fr: "Emplacements", href: "#locations" },
+  { en: "Locations", fr: "Emplacements", href: "/locations" },
   { en: "Careers", fr: "Carrières", href: "#franchise" },
   { en: "Franchise", fr: "Franchise", href: "#franchise" },
   { en: "Contact", fr: "Contact", href: "#locations" },
@@ -32,7 +33,7 @@ const mobileLinks = [
 
 export function PPPHeader() {
   const { lang, setLang, mode, openSearch, openLocationSheet, openOrderSheet, t } = usePPP();
-  const location = useSelectedLocation();
+  const location = useSelectedRestaurantLocation();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -53,7 +54,7 @@ export function PPPHeader() {
             className="flex items-center gap-1.5 hover:text-foreground focus-ppp"
           >
             <MapPin className="h-3 w-3 text-primary" />
-            {location?.name ?? t("Choose a location", "Choisir un emplacement")}
+            {location?.neighborhood ?? t("Choose a location", "Choisir un emplacement")}
             <ChevronDown className="h-3 w-3" />
           </button>
           <span className="text-border">/</span>
@@ -127,7 +128,7 @@ export function PPPHeader() {
           >
             <MapPin className="h-3.5 w-3.5 shrink-0 text-primary" />
             <span className="truncate text-[0.65rem] font-bold uppercase tracking-widest">
-              {location?.name ?? t("Location", "Emplacement")}
+              {location?.neighborhood ?? t("Location", "Emplacement")}
             </span>
           </button>
 

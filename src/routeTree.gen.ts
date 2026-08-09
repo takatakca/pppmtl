@@ -10,21 +10,34 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountRouteImport } from './routes/account'
+import { Route as CareersRouteImport } from './routes/careers'
 import { Route as ConnectRouteImport } from './routes/connect'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as FranchiseRouteImport } from './routes/franchise'
 import { Route as GiftCardsRouteImport } from './routes/gift-cards'
 import { Route as MenuRouteImport } from './routes/menu'
 import { Route as OffersRouteImport } from './routes/offers'
 import { Route as OrderRouteImport } from './routes/order'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as AccountForgotPasswordRouteImport } from './routes/account_.forgot-password'
 import { Route as AccountSignInRouteImport } from './routes/account_.sign-in'
 import { Route as AccountSignUpRouteImport } from './routes/account_.sign-up'
 import { Route as DevMenuAuditRouteImport } from './routes/dev.menu-audit'
+import { Route as LocationsIndexRouteImport } from './routes/locations.index'
+import { Route as LocationsSlugRouteImport } from './routes/locations.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountRoute = AccountRouteImport.update({
@@ -32,9 +45,29 @@ const AccountRoute = AccountRouteImport.update({
   path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CareersRoute = CareersRouteImport.update({
+  id: '/careers',
+  path: '/careers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConnectRoute = ConnectRouteImport.update({
   id: '/connect',
   path: '/connect',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FranchiseRoute = FranchiseRouteImport.update({
+  id: '/franchise',
+  path: '/franchise',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GiftCardsRoute = GiftCardsRouteImport.update({
@@ -62,6 +95,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AccountForgotPasswordRoute = AccountForgotPasswordRouteImport.update({
   id: '/account_/forgot-password',
   path: '/account/forgot-password',
@@ -82,108 +120,174 @@ const DevMenuAuditRoute = DevMenuAuditRouteImport.update({
   path: '/dev/menu-audit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LocationsIndexRoute = LocationsIndexRouteImport.update({
+  id: '/locations/',
+  path: '/locations/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LocationsSlugRoute = LocationsSlugRouteImport.update({
+  id: '/locations/$slug',
+  path: '/locations/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/careers': typeof CareersRoute
   '/connect': typeof ConnectRoute
+  '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
+  '/franchise': typeof FranchiseRoute
   '/gift-cards': typeof GiftCardsRoute
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/support': typeof SupportRoute
   '/account/forgot-password': typeof AccountForgotPasswordRoute
   '/account/sign-in': typeof AccountSignInRoute
   '/account/sign-up': typeof AccountSignUpRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
+  '/locations/$slug': typeof LocationsSlugRoute
+  '/locations/': typeof LocationsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/careers': typeof CareersRoute
   '/connect': typeof ConnectRoute
+  '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
+  '/franchise': typeof FranchiseRoute
   '/gift-cards': typeof GiftCardsRoute
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/support': typeof SupportRoute
   '/account/forgot-password': typeof AccountForgotPasswordRoute
   '/account/sign-in': typeof AccountSignInRoute
   '/account/sign-up': typeof AccountSignUpRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
+  '/locations/$slug': typeof LocationsSlugRoute
+  '/locations': typeof LocationsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/careers': typeof CareersRoute
   '/connect': typeof ConnectRoute
+  '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
+  '/franchise': typeof FranchiseRoute
   '/gift-cards': typeof GiftCardsRoute
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/support': typeof SupportRoute
   '/account_/forgot-password': typeof AccountForgotPasswordRoute
   '/account_/sign-in': typeof AccountSignInRoute
   '/account_/sign-up': typeof AccountSignUpRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
+  '/locations/$slug': typeof LocationsSlugRoute
+  '/locations/': typeof LocationsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/account'
+    | '/careers'
     | '/connect'
+    | '/contact'
+    | '/faq'
+    | '/franchise'
     | '/gift-cards'
     | '/menu'
     | '/offers'
     | '/order'
     | '/sitemap.xml'
+    | '/support'
     | '/account/forgot-password'
     | '/account/sign-in'
     | '/account/sign-up'
     | '/dev/menu-audit'
+    | '/locations/$slug'
+    | '/locations/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/account'
+    | '/careers'
     | '/connect'
+    | '/contact'
+    | '/faq'
+    | '/franchise'
     | '/gift-cards'
     | '/menu'
     | '/offers'
     | '/order'
     | '/sitemap.xml'
+    | '/support'
     | '/account/forgot-password'
     | '/account/sign-in'
     | '/account/sign-up'
     | '/dev/menu-audit'
+    | '/locations/$slug'
+    | '/locations'
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/account'
+    | '/careers'
     | '/connect'
+    | '/contact'
+    | '/faq'
+    | '/franchise'
     | '/gift-cards'
     | '/menu'
     | '/offers'
     | '/order'
     | '/sitemap.xml'
+    | '/support'
     | '/account_/forgot-password'
     | '/account_/sign-in'
     | '/account_/sign-up'
     | '/dev/menu-audit'
+    | '/locations/$slug'
+    | '/locations/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
+  CareersRoute: typeof CareersRoute
   ConnectRoute: typeof ConnectRoute
+  ContactRoute: typeof ContactRoute
+  FaqRoute: typeof FaqRoute
+  FranchiseRoute: typeof FranchiseRoute
   GiftCardsRoute: typeof GiftCardsRoute
   MenuRoute: typeof MenuRoute
   OffersRoute: typeof OffersRoute
   OrderRoute: typeof OrderRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SupportRoute: typeof SupportRoute
   AccountForgotPasswordRoute: typeof AccountForgotPasswordRoute
   AccountSignInRoute: typeof AccountSignInRoute
   AccountSignUpRoute: typeof AccountSignUpRoute
   DevMenuAuditRoute: typeof DevMenuAuditRoute
+  LocationsSlugRoute: typeof LocationsSlugRoute
+  LocationsIndexRoute: typeof LocationsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -195,6 +299,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/account': {
       id: '/account'
       path: '/account'
@@ -202,11 +313,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/careers': {
+      id: '/careers'
+      path: '/careers'
+      fullPath: '/careers'
+      preLoaderRoute: typeof CareersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/connect': {
       id: '/connect'
       path: '/connect'
       fullPath: '/connect'
       preLoaderRoute: typeof ConnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/franchise': {
+      id: '/franchise'
+      path: '/franchise'
+      fullPath: '/franchise'
+      preLoaderRoute: typeof FranchiseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gift-cards': {
@@ -244,6 +383,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/account_/forgot-password': {
       id: '/account_/forgot-password'
       path: '/account/forgot-password'
@@ -272,33 +418,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevMenuAuditRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/locations/': {
+      id: '/locations/'
+      path: '/locations'
+      fullPath: '/locations/'
+      preLoaderRoute: typeof LocationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/locations/$slug': {
+      id: '/locations/$slug'
+      path: '/locations/$slug'
+      fullPath: '/locations/$slug'
+      preLoaderRoute: typeof LocationsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
+  CareersRoute: CareersRoute,
   ConnectRoute: ConnectRoute,
+  ContactRoute: ContactRoute,
+  FaqRoute: FaqRoute,
+  FranchiseRoute: FranchiseRoute,
   GiftCardsRoute: GiftCardsRoute,
   MenuRoute: MenuRoute,
   OffersRoute: OffersRoute,
   OrderRoute: OrderRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SupportRoute: SupportRoute,
   AccountForgotPasswordRoute: AccountForgotPasswordRoute,
   AccountSignInRoute: AccountSignInRoute,
   AccountSignUpRoute: AccountSignUpRoute,
   DevMenuAuditRoute: DevMenuAuditRoute,
+  LocationsSlugRoute: LocationsSlugRoute,
+  LocationsIndexRoute: LocationsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
