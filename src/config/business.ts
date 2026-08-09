@@ -118,7 +118,6 @@ export const businessSameAs = [
   pppBusiness.social.instagram,
   pppBusiness.social.facebook,
   pppBusiness.social.x,
-  pppBusiness.social.pinterest,
 ];
 
 /** Restaurant / LocalBusiness JSON-LD built only from confirmed fields. */
