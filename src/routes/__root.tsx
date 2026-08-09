@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PPPProvider, usePPP } from "../context/ppp-store";
+import { CustomerSessionProvider } from "../lib/customer/session";
 
 function NotFoundComponent() {
   return (
@@ -140,9 +141,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <PPPProvider>
-        <HtmlLangSync />
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
+        <CustomerSessionProvider>
+          <HtmlLangSync />
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+        </CustomerSessionProvider>
       </PPPProvider>
     </QueryClientProvider>
   );
