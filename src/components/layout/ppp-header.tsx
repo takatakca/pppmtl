@@ -209,6 +209,45 @@ export function PPPHeader() {
               </a>
             ))}
           </div>
+          <p className="mt-5 text-[0.6rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
+            {t("Order online", "Commander en ligne")}
+          </p>
+          <ul className="mt-2 grid grid-cols-3 gap-2">
+            {orderingChannels.map((c) => (
+              <li key={c.id}>
+                <a
+                  href={c.url ?? "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackExternalOrder(c.id)}
+                  aria-label={c.labelEn}
+                  className="flex h-full items-center justify-center border border-border p-2 focus-ppp"
+                >
+                  <img src={c.logo ?? ""} alt={c.name} className="h-6 w-auto" />
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-5 text-[0.6rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
+            {t("Follow", "Suivre")}
+          </p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {pppSocials.map((s) => (
+              <li key={s.id}>
+                <a
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackSocialLink(s.id)}
+                  aria-label={`Visit PPP Pizzeria on ${s.name}`}
+                  className="inline-flex items-center gap-1.5 border border-border px-3 py-2 text-[0.6rem] font-bold uppercase tracking-widest text-muted-foreground focus-ppp"
+                >
+                  <s.Icon className="h-3.5 w-3.5 text-primary" />
+                  {s.name}
+                </a>
+              </li>
+            ))}
+          </ul>
           <button
             onClick={() => setLang(lang === "en" ? "fr" : "en")}
             className="mt-4 w-full border border-border py-3 text-xs font-bold uppercase tracking-widest focus-ppp"
