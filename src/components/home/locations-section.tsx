@@ -12,6 +12,7 @@ import {
 import storefront from "@/assets/storefront-night.jpg";
 import { usePPP } from "@/context/ppp-store";
 import { pppBusiness } from "@/config/business";
+import { externalPresence } from "@/config/external-presence";
 import { Reveal } from "@/components/motion/reveal";
 
 const serviceIcons: Record<string, typeof Wifi> = {
