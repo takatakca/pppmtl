@@ -61,13 +61,12 @@ export function Hero() {
                 </span>
               )}
             </p>
-            <h1 className="mt-1.5 font-display text-[2.6rem] uppercase leading-[0.82] sm:text-7xl lg:text-[6rem]">
+            <h1 className="mt-1.5 font-display text-[2.9rem] uppercase leading-[0.8] sm:text-8xl lg:text-[7rem]">
               <span className="line-rise block" style={{ animationDelay: "60ms" }}>
-                {t("Chicken. Pizza.", "Poulet. Pizza.")}
+                {t("Craving", "Envie de")}
               </span>
               <span className="line-rise block" style={{ animationDelay: "170ms" }}>
-                <span className="text-flame">{t("Poutine.", "Poutine.")}</span>{" "}
-                {t("Ready fast.", "Prêt vite.")}
+                <span className="text-flame">{t("PPP?", "PPP?")}</span>
               </span>
             </h1>
             <p
@@ -75,8 +74,8 @@ export function Hero() {
               style={{ animationDelay: "280ms" }}
             >
               {t(
-                `Pickup or delivery from our NDG kitchen — ${itemCount} items.`,
-                `Cueillette ou livraison de notre cuisine NDG — ${itemCount} articles.`,
+                `Chicken · pizza · poutine, from our NDG kitchen — ${itemCount} items, pickup or delivery.`,
+                `Poulet · pizza · poutine, de notre cuisine NDG — ${itemCount} articles, cueillette ou livraison.`,
               )}
             </p>
 
@@ -254,33 +253,6 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Promo ticker */}
-      <div className="ticker overflow-hidden border-t border-border bg-primary">
-        <div className="marquee-track flex w-max gap-10 py-1.5">
-          {Array.from({ length: 2 }).map((_, dup) => (
-            <div key={dup} className="flex gap-10">
-              {[
-                topDeal
-                  ? t(
-                      `${localizedName(topDeal.item, "en")} — ${topDeal.percent}% off`,
-                      `${localizedName(topDeal.item, "fr")} — ${topDeal.percent} % de rabais`,
-                    )
-                  : t("Fresh every day", "Frais tous les jours"),
-                t("Order ahead · skip the line", "Commandez à l'avance · évitez la file"),
-                t("Rotisserie · Pizza · Poutine", "Rôtisserie · Pizza · Poutine"),
-                t("Points on every direct order", "Des points sur chaque commande directe"),
-              ].map((msg) => (
-                <span
-                  key={msg}
-                  className="whitespace-nowrap font-display text-sm uppercase tracking-[0.3em] text-primary-foreground"
-                >
-                  {msg}
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
     </section>
   );
 }

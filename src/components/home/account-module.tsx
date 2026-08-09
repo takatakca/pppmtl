@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { Clock, Heart, MapPin, Star, UserPlus, Zap } from "lucide-react";
 import { usePPP } from "@/context/ppp-store";
+import { Reveal } from "@/components/motion/reveal";
+import { GoogleButton } from "@/components/auth/google-button";
 
 /** Homepage entry point into the PPP customer account (create / sign in). */
 export function AccountModule() {
@@ -17,7 +19,7 @@ export function AccountModule() {
 
   return (
     <section id="account" className="mx-auto max-w-[110rem] px-3 pb-10 sm:px-6 lg:pb-14">
-      <div className="grid gap-0 border border-border bg-card lg:grid-cols-[1.1fr_0.9fr]">
+      <Reveal className="grid gap-0 border border-border bg-card lg:grid-cols-[1.1fr_0.9fr]">
         <div className="p-5 sm:p-8">
           <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
             {t("PPP customer account", "Compte client PPP")}
@@ -40,6 +42,7 @@ export function AccountModule() {
         </div>
 
         <div className="grid content-center gap-2 border-t border-border p-5 sm:p-8 lg:border-l lg:border-t-0">
+          <GoogleButton />
           <Link
             to="/account/sign-up"
             className="press-tap cta-glow bg-primary py-3.5 text-center font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
@@ -60,7 +63,7 @@ export function AccountModule() {
             {t("Or order as a guest", "Ou commander sans compte")}
           </Link>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }

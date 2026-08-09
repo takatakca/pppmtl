@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { locations, type Lang, type OrderMode } from "@/data/menu";
+import { NDG_LOCATION_ID, locationById, restaurantLocations } from "@/config/locations";
 import { track } from "@/lib/analytics";
 import { newLine, type CartLine, type LineSelections } from "@/lib/cart";
 import { menuRepository } from "@/lib/menu-repository";
@@ -17,6 +18,8 @@ const KEY = "ppp.session.v1";
 interface Persisted {
   lang: Lang;
   locationId: string | null;
+  /** Selected storefront in the multi-location registry (config/locations). */
+  selectedLocationId: string;
   mode: OrderMode;
   recentSearches: string[];
   cart: CartLine[];
@@ -25,6 +28,7 @@ interface Persisted {
 interface Store extends Persisted {
   setLang: (lang: Lang) => void;
   setLocationId: (id: string | null) => void;
+  setSelectedLocationId: (id: string) => void;
   setMode: (mode: OrderMode) => void;
   addRecentSearch: (q: string) => void;
   clearRecentSearches: () => void;
@@ -56,6 +60,7 @@ interface Store extends Persisted {
 const defaults: Persisted = {
   lang: "en",
   locationId: locations[0]?.id ?? null,
+  selectedLocationId: NDG_LOCATION_ID,
   mode: "pickup",
   recentSearches: [],
   cart: [],
@@ -80,6 +85,12 @@ export function PPPProvider({ children }: { children: ReactNode }) {
         if (stored.locationId && !locations.some((l) => l.id === stored.locationId)) {
           stored.locationId = defaults.locationId;
         }
+        if (
+          stored.selectedLocationId &&
+          !restaurantLocations.some((l) => l.id === stored.selectedLocationId)
+        ) {
+          stored.selectedLocationId = defaults.selectedLocationId;
+        }
         setState((s) => ({ ...s, ...stored }));
       }
     } catch {
@@ -103,6 +114,10 @@ export function PPPProvider({ children }: { children: ReactNode }) {
       setLocationId: (locationId) => {
         track("location_selected", { locationId });
         persist({ ...state, locationId });
+      },
+      setSelectedLocationId: (selectedLocationId) => {
+        track("location_selected", { locationId: selectedLocationId });
+        persist({ ...state, selectedLocationId });
       },
       setMode: (mode) => {
         track("order_mode_selected", { mode });
@@ -172,4 +187,10 @@ export function usePPP() {
 export function useSelectedLocation() {
   const { locationId } = usePPP();
   return locations.find((l) => l.id === locationId) ?? null;
+}
+
+/** The selected storefront from the multi-location registry (config/locations). */
+export function useSelectedRestaurantLocation() {
+  const { selectedLocationId } = usePPP();
+  return locationById(selectedLocationId) ?? restaurantLocations[0]!;
 }

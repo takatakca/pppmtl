@@ -10,9 +10,10 @@ import {
   Wifi,
 } from "lucide-react";
 import storefront from "@/assets/storefront-night.jpg";
-import { usePPP } from "@/context/ppp-store";
+import { usePPP, useSelectedRestaurantLocation } from "@/context/ppp-store";
 import { pppBusiness } from "@/config/business";
 import { externalPresence } from "@/config/external-presence";
+import { canOrder } from "@/config/locations";
 import { Reveal } from "@/components/motion/reveal";
 
 const serviceIcons: Record<string, typeof Wifi> = {
@@ -29,7 +30,16 @@ const serviceIcons: Record<string, typeof Wifi> = {
  */
 export function LocationsSection() {
   const { t, lang, openOrderSheet } = usePPP();
-  const { address, phone, google, googleProfile, hours, serviceOptions } = pppBusiness;
+  const store = useSelectedRestaurantLocation();
+  const { serviceOptions } = pppBusiness;
+  const orderable = canOrder(store);
+  const google = store.google;
+  const googleProfile = {
+    rating: store.google.rating,
+    reviewCount: store.google.reviewCount,
+    lastSyncedAt: store.google.lastSyncedAt,
+    priceRange: store.id === "loc-ndg-somerled" ? pppBusiness.googleProfile.priceRange : null,
+  };
 
   return (
     <section id="locations" className="relative border-y border-border">
@@ -49,13 +59,14 @@ export function LocationsSection() {
             <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/25 to-transparent" />
             <p className="absolute bottom-3 left-4 font-display text-4xl uppercase leading-[0.85] lg:text-6xl">
               {t("Your PPP", "Votre PPP")}
-              <span className="block text-flame">Notre-Dame-de-Grâce</span>
+              <span className="block text-flame">{store.neighborhood}</span>
             </p>
           </div>
+          {google.embedUrl && (
           <div className="relative hidden border-t border-border lg:block">
             <iframe
               title={t("Map to PPP NDG", "Carte vers PPP NDG")}
-              src={google.embedUrl}
+              src={google.embedUrl!}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               className="h-[16rem] w-full grayscale-[0.35] contrast-[1.1]"
@@ -65,6 +76,7 @@ export function LocationsSection() {
               className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-border"
             />
           </div>
+          )}
         </Reveal>
 
         {/* Store record */}
@@ -72,14 +84,15 @@ export function LocationsSection() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="font-display text-3xl uppercase leading-none lg:text-5xl">
-                {pppBusiness.brandName}
+                {t("PPP Pizzeria", "PPP Pizzeria")}
               </h2>
               <p className="mt-1 font-display text-lg uppercase tracking-[0.2em] text-accent">
-                {pppBusiness.locationName}
+                {store.neighborhood}
               </p>
             </div>
+            {googleProfile.rating != null && (
             <a
-              href={externalPresence.discovery.google}
+              href={store.google.reviewsUrl ?? externalPresence.discovery.google}
               target="_blank"
               rel="noopener noreferrer"
               className="shrink-0 border border-border px-3 py-2 text-right focus-ppp hover:border-primary"
@@ -98,33 +111,38 @@ export function LocationsSection() {
                 {t("synced", "màj")} {googleProfile.lastSyncedAt}
               </span>
             </a>
+            )}
           </div>
 
           <address className="mt-5 not-italic">
             <p className="flex items-start gap-2 text-base">
               <MapPin className="mt-1 h-4 w-4 shrink-0 text-primary" />
               <span>
-                {address.line1}
+                {store.address}
                 <br />
-                {address.city}, {address.province} {address.postalCode}
+                {store.city}, {store.province} {store.postalCode ?? ""}
               </span>
             </p>
-            <a
-              href={phone.href}
-              className="mt-2 flex items-center gap-2 text-base hover:text-accent focus-ppp"
-            >
-              <Phone className="h-4 w-4 shrink-0 text-primary" />
-              {phone.display}
-            </a>
+            {store.phone ? (
+              <a
+                href={`tel:${store.phone.e164}`}
+                className="mt-2 flex items-center gap-2 text-base hover:text-accent focus-ppp"
+              >
+                <Phone className="h-4 w-4 shrink-0 text-primary" />
+                {store.phone.display}
+              </a>
+            ) : (
+              <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+                <Phone className="h-4 w-4 shrink-0 text-primary" />
+                {t("Phone line not published yet", "Ligne téléphonique pas encore publiée")}
+              </p>
+            )}
           </address>
 
           <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="h-4 w-4 shrink-0 text-primary" />
-            {hours.currentStatusNote
-              ? t(
-                  `Google listing: ${hours.currentStatusNote}`,
-                  "Fiche Google : fermé · ouvre à 16 h",
-                )
+            {store.statusNote
+              ? t(`Google listing: ${store.statusNote}`, "Fiche Google : fermé · ouvre à 16 h")
               : t("Hours available in the ordering experience", "Heures affichées à la commande")}
           </p>
           {googleProfile.priceRange && (
@@ -150,15 +168,23 @@ export function LocationsSection() {
           </ul>
 
           <div className="mt-6 grid gap-2 sm:grid-cols-3">
-            <button
-              onClick={openOrderSheet}
-              className="cta-motion bg-primary px-5 py-3.5 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
-              style={{ boxShadow: "var(--shadow-glow)" }}
-            >
-              {t("Order", "Commander")}
-            </button>
+            {orderable ? (
+              <button
+                onClick={openOrderSheet}
+                className="cta-motion bg-primary px-5 py-3.5 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
+                style={{ boxShadow: "var(--shadow-glow)" }}
+              >
+                {t("Order", "Commander")}
+              </button>
+            ) : (
+              <p className="flex items-center justify-center border border-dashed border-border px-5 py-3.5 text-center text-[0.65rem] font-bold uppercase tracking-widest text-muted-foreground">
+                {store.lifecycleStatus === "coming_soon"
+                  ? t("Opening soon", "Ouverture bientôt")
+                  : t("This location is closed", "Cet emplacement est fermé")}
+              </p>
+            )}
             <a
-              href={google.directionsUrl}
+              href={google.directionsUrl ?? "/locations"}
               target="_blank"
               rel="noreferrer"
               className="flex items-center justify-center gap-2 border border-border px-5 py-3.5 font-display text-lg uppercase leading-none focus-ppp hover:border-primary"
@@ -166,28 +192,32 @@ export function LocationsSection() {
               {t("Directions", "Itinéraire")}
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
-            <a
-              href={phone.href}
-              className="flex items-center justify-center gap-2 border border-border px-5 py-3.5 font-display text-lg uppercase leading-none focus-ppp hover:border-primary"
-            >
-              <Phone className="h-4 w-4 text-primary" />
-              {t("Call", "Appeler")}
-            </a>
+            {store.phone && (
+              <a
+                href={`tel:${store.phone.e164}`}
+                className="flex items-center justify-center gap-2 border border-border px-5 py-3.5 font-display text-lg uppercase leading-none focus-ppp hover:border-primary"
+              >
+                <Phone className="h-4 w-4 text-primary" />
+                {t("Call", "Appeler")}
+              </a>
+            )}
           </div>
 
           {/* Mobile map lives behind a disclosure so it never eats the viewport */}
+          {google.embedUrl && (
           <details className="mt-4 border border-border lg:hidden">
             <summary className="cursor-pointer list-none px-4 py-3 text-[0.65rem] font-bold uppercase tracking-[0.25em] text-muted-foreground focus-ppp">
               {t("Show map", "Voir la carte")}
             </summary>
             <iframe
               title={t("Map to PPP NDG", "Carte vers PPP NDG")}
-              src={google.embedUrl}
+              src={google.embedUrl!}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               className="h-56 w-full border-t border-border grayscale-[0.35]"
             />
           </details>
+          )}
         </Reveal>
       </div>
     </section>

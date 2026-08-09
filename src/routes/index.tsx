@@ -19,6 +19,9 @@ import { GiftCardBlock } from "@/components/home/gift-card-block";
 import { OrderYourWay } from "@/components/home/order-your-way";
 import { FollowPPP } from "@/components/home/follow-ppp";
 import { LocationsSection } from "@/components/home/locations-section";
+import { LocationStrip } from "@/components/home/location-strip";
+import { StoryBand } from "@/components/home/story-band";
+import { PromoTicker } from "@/components/marketing/promo-ticker";
 import { FranchiseCareers } from "@/components/home/franchise-careers";
 import { OrderSheet } from "@/components/layout/order-sheet";
 import { usePPP } from "@/context/ppp-store";
@@ -52,6 +55,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <div id="top" className="min-h-screen bg-background pb-16 lg:pb-0">
+      <PromoTicker />
       <PPPHeader />
       <main>
         <Hero />
@@ -60,13 +64,15 @@ function Index() {
         <DealBanner />
         <CategoryExplorer />
         <OrderYourWay />
-        <AppPreview />
         <Rewards />
+        <AccountModule />
+        <AppPreview />
         <GiftCardBlock />
         <LocationsSection />
+        <LocationStrip />
+        <StoryBand />
         <FollowPPP />
         <FranchiseCareers />
-        <AccountModule />
       </main>
       <PPPFooter />
       <MobileOrderBar />
