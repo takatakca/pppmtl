@@ -9,6 +9,7 @@ import comboBurger from "@/assets/combo-burger.jpg";
 import menuRotisserie from "@/assets/menu-rotisserie.jpg";
 
 import { pppBusiness } from "@/config/business";
+import { externalPresence } from "@/config/external-presence";
 import { generatedCategories, generatedItems } from "@/data/catalog.generated";
 import { mostOrderedItemIds } from "@/data/collections.generated";
 import type { ModifierChoice, ModifierGroup } from "@/data/catalog-types";
@@ -189,10 +190,10 @@ export const locations: Location[] = [
     links: {
       directPickupUrl: null,
       directDeliveryUrl: null,
-      uberEatsUrl: null,
-      doorDashUrl:
-        "https://www.doordash.com/en-CA/store/po-poulet-ndg-montr%C3%A9al-27982486/110185563/",
-      skipUrl: null,
+      uberEatsUrl: externalPresence.ordering.uberEats,
+      doorDashUrl: externalPresence.ordering.doorDash,
+      skipUrl: externalPresence.ordering.skip,
+      /** No confirmed NDG Too Good To Go listing — the MTL-Nord one is legacy. */
       tooGoodToGoUrl: null,
       phoneOrderNumber: pppBusiness.phone.e164,
     },

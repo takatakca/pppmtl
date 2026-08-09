@@ -12,6 +12,7 @@ import {
 import storefront from "@/assets/storefront-night.jpg";
 import { usePPP } from "@/context/ppp-store";
 import { pppBusiness } from "@/config/business";
+import { externalPresence } from "@/config/external-presence";
 import { Reveal } from "@/components/motion/reveal";
 
 const serviceIcons: Record<string, typeof Wifi> = {
@@ -78,9 +79,9 @@ export function LocationsSection() {
               </p>
             </div>
             <a
-              href={google.reviewsUrl}
+              href={externalPresence.discovery.google}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="shrink-0 border border-border px-3 py-2 text-right focus-ppp hover:border-primary"
             >
               <span className="block text-[0.55rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
@@ -91,7 +92,10 @@ export function LocationsSection() {
                 <Star className="h-4 w-4 fill-accent text-accent" />
               </span>
               <span className="block text-[0.6rem] uppercase tracking-widest text-muted-foreground">
-                {googleProfile.reviewCount} {t("reviews", "avis")}
+                {googleProfile.reviewCount} {t("Google reviews", "avis Google")}
+              </span>
+              <span className="block text-[0.5rem] uppercase tracking-widest text-muted-foreground/60">
+                {t("synced", "màj")} {googleProfile.lastSyncedAt}
               </span>
             </a>
           </div>

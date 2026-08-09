@@ -20,6 +20,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/menu", changefreq: "daily", priority: "0.9" },
           { path: "/offers", changefreq: "daily", priority: "0.8" },
           { path: "/gift-cards", changefreq: "monthly", priority: "0.6" },
+          { path: "/connect", changefreq: "monthly", priority: "0.5" },
         ];
 
         const urls = entries.map((e) =>

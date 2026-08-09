@@ -6,6 +6,8 @@
  * must render as a truthful fallback rather than an invented value.
  */
 
+import { currentBrandSameAs } from "@/config/external-presence";
+
 export interface GoogleProfileSnapshot {
   /** Owner-supplied Google listing values. Replace with a live sync later. */
   rating: number | null;
@@ -77,9 +79,9 @@ export const pppBusiness = {
   /** Owner-supplied listing snapshot. Sync from Google Business Profile later. */
   googleProfile: {
     rating: 4.0,
-    reviewCount: 20,
+    reviewCount: 21,
     priceRange: "$10–20",
-    lastSyncedAt: "2026-08-08",
+    lastSyncedAt: "2026-08-09",
   } satisfies GoogleProfileSnapshot,
 
   hours: {
@@ -113,13 +115,11 @@ export const pppBusiness = {
   legacyExternalMenuUrl: "https://linktr.ee/pppmontrealnord",
 } as const;
 
-export const businessSameAs = [
-  pppBusiness.website,
-  pppBusiness.social.instagram,
-  pppBusiness.social.facebook,
-  pppBusiness.social.x,
-  pppBusiness.social.pinterest,
-];
+/**
+ * Only current PPP-brand profiles. Legacy Montréal-Nord directory records are
+ * deliberately excluded so NDG structured data stays unambiguous.
+ */
+export const businessSameAs = [pppBusiness.website, ...currentBrandSameAs];
 
 /** Restaurant / LocalBusiness JSON-LD built only from confirmed fields. */
 export function businessJsonLd() {
