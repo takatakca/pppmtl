@@ -484,13 +484,13 @@ function OpenLocationRow({ loc, index }: { loc: RestaurantLocation; index: numbe
       delay={index * 90}
       className="grid gap-0 bg-background sm:grid-cols-[minmax(0,14rem)_1fr] lg:grid-cols-[minmax(0,20rem)_1fr]"
     >
-      <div className="relative h-36 overflow-hidden sm:h-full sm:min-h-[11rem]">
+      <div className="relative h-36 overflow-hidden sm:h-[13rem]">
         <img src={image} alt="" loading="lazy" className="h-full w-full object-cover" />
         <span className="absolute left-0 top-0 bg-primary px-2 py-1 font-display text-[0.55rem] uppercase tracking-[0.3em] text-primary-foreground">
           {t("Open location", "Emplacement ouvert")}
         </span>
       </div>
-      <div className="flex flex-col justify-between gap-4 p-5 sm:p-6">
+      <div className="flex flex-col justify-center gap-4 p-5 sm:p-6">
         <div>
           <h3 className="font-display text-3xl uppercase leading-none sm:text-4xl">
             {loc.neighborhood}
