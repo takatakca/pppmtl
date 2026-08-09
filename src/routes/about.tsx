@@ -276,8 +276,8 @@ function AboutPage() {
             </Reveal>
 
             {/* overlapping editorial food composition */}
-            <Reveal delay={120} className="relative">
-              <div className="no-scrollbar -mx-3 flex gap-3 overflow-x-auto px-3 lg:mx-0 lg:block lg:px-0">
+            <Reveal delay={120} className="relative min-w-0">
+              <div className="no-scrollbar -mx-3 flex w-[calc(100%+1.5rem)] gap-3 overflow-x-auto px-3 lg:mx-0 lg:block lg:w-full lg:px-0">
                 <figure className="food-pop relative w-[70vw] shrink-0 overflow-hidden border border-border sm:w-80 lg:w-[78%]">
                   <img
                     src={foodPizza}
