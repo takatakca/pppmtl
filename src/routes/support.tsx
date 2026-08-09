@@ -8,6 +8,7 @@ import { SearchOverlay } from "@/components/search/search-overlay";
 import { LocationSheet } from "@/components/layout/location-sheet";
 import { OrderSheet } from "@/components/layout/order-sheet";
 import { AskPPP } from "@/components/support/ask-ppp";
+import { CallbackSheet } from "@/components/support/callback-sheet";
 import { SupportRouter } from "@/components/support/support-router";
 import { usePPP } from "@/context/ppp-store";
 import { restaurantLocations } from "@/config/locations";
@@ -132,6 +133,9 @@ function SupportPage() {
               <MapPin className="h-3.5 w-3.5" />
               {t("Find a location's phone number", "Trouver le numéro d'un emplacement")}
             </Link>
+            <div className="mt-4">
+              <CallbackSheet />
+            </div>
           </div>
         </section>
       </main>
