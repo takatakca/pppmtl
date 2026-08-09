@@ -767,3 +767,63 @@
     transition: none !important;
   }
 }
+
+/* External-presence cards: quiet by default, deliberate on hover. */
+.presence-card {
+  transition:
+    transform 220ms var(--ease-out),
+    border-color 220ms var(--ease-out),
+    background-color 220ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .presence-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
+  }
+
+  .presence-card:hover .presence-arrow {
+    transform: translate(2px, -2px);
+  }
+}
+
+.presence-card:active {
+  transform: scale(0.985);
+}
+
+.presence-arrow {
+  transition: transform 220ms var(--ease-out);
+}
+
+/* Platform chips drifting into place around the hero visual. */
+.chip-in {
+  animation: chip-in 620ms var(--ease-out) both;
+  animation-delay: var(--chip-delay, 0ms);
+}
+
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .presence-card,
+  .presence-arrow {
+    transition: none !important;
+  }
+
+  .presence-card:hover,
+  .presence-card:active {
+    transform: none !important;
+  }
+
+  .chip-in {
+    animation: none !important;
+  }
+}
