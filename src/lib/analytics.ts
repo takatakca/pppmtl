@@ -18,7 +18,10 @@ export type PPPEvent =
   | "cart_item_removed"
   | "cart_checkout_continued"
   | "external_order_clicked"
-  | "social_link_clicked";
+  | "social_link_clicked"
+  | "track_provider_selected"
+  | "support_route_selected"
+  | "callback_requested";
 
 export function track(event: PPPEvent, payload: Record<string, unknown> = {}) {
   if (import.meta.env.DEV) {
@@ -40,4 +43,28 @@ export function trackSocialLink(
   sourcePage = typeof window === "undefined" ? "" : window.location.pathname,
 ) {
   track("social_link_clicked", { provider, sourcePage });
+}
+
+/** Order tracking provider chosen on /track. */
+export function trackProviderSelected(
+  provider: "ppp_direct" | "phone" | "uber_eats" | "doordash" | "skip",
+  sourcePage = typeof window === "undefined" ? "" : window.location.pathname,
+) {
+  track("track_provider_selected", { provider, sourcePage });
+}
+
+/** Support routing choice (which contact path a visitor picked). */
+export function trackSupportRouted(
+  route: "location" | "general" | "phone_order" | "track_order" | "callback",
+  sourcePage = typeof window === "undefined" ? "" : window.location.pathname,
+) {
+  track("support_route_selected", { route, sourcePage });
+}
+
+/** Callback request submitted from the CallbackSheet, before/without a live provider. */
+export function trackCallbackRequested(
+  payload: { locationId: string | null; reason: string },
+  sourcePage = typeof window === "undefined" ? "" : window.location.pathname,
+) {
+  track("callback_requested", { ...payload, sourcePage });
 }

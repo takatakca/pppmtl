@@ -33,6 +33,11 @@ export interface FaqEntry {
   answerEn: string;
   answerFr: string;
   tags: string[];
+  /** Optional cross-link CTA shown under the answer (e.g. open provider support). */
+  ctaEn?: string;
+  ctaFr?: string;
+  ctaHref?: string;
+  ctaExternal?: boolean;
 }
 
 export const faqCategories: { id: FaqCategory; labelEn: string; labelFr: string }[] = [
@@ -305,6 +310,70 @@ export const faqEntries: FaqEntry[] = [
     answerFr:
       "Certains emplacements récents ou à venir n'ont pas encore de numéro publié. Une fois confirmé par le restaurant, il apparaîtra sur la page de cet emplacement.",
     tags: ["phone", "not published", "no number"],
+  },
+  {
+    id: "track-ppp-order",
+    category: "ordering",
+    questionEn: "How do I track my PPP order?",
+    questionFr: "Comment suivre ma commande PPP?",
+    answerEn:
+      "For an order placed directly on this site (PPP Direct), use the Track Order page and choose PPP Direct. For a phone order, choose Phone order on the same page. Orders placed on Uber Eats, DoorDash or SkipTheDishes are tracked inside that app, not on this site.",
+    answerFr:
+      "Pour une commande passée directement sur ce site (PPP Direct), utilisez la page Suivi de commande et choisissez PPP Direct. Pour une commande par téléphone, choisissez Commande téléphonique sur la même page. Les commandes passées sur Uber Eats, DoorDash ou SkipTheDishes se suivent dans cette application, pas sur ce site.",
+    tags: ["track", "tracking", "where is my order", "status"],
+    ctaEn: "Go to Support",
+    ctaFr: "Aller au Support",
+    ctaHref: "/support",
+  },
+  {
+    id: "phone-order-how",
+    category: "ordering",
+    questionEn: "How do I order by phone?",
+    questionFr: "Comment commander par téléphone?",
+    answerEn:
+      "Call the PPP location you'd like to order from and place your order with the team. Phone numbers are listed on each location's page — some newer locations don't have a published number yet.",
+    answerFr:
+      "Appelez l'emplacement PPP où vous souhaitez commander et passez votre commande avec l'équipe. Les numéros sont indiqués sur la page de chaque emplacement — certains nouveaux emplacements n'ont pas encore de numéro publié.",
+    tags: ["phone order", "call to order", "order by phone"],
+    ctaEn: "Find a location's number",
+    ctaFr: "Trouver le numéro d'un emplacement",
+    ctaHref: "/contact",
+  },
+  {
+    id: "callback-request",
+    category: "ordering",
+    questionEn: "Can I request a callback?",
+    questionFr: "Puis-je demander un rappel?",
+    answerEn:
+      "A dedicated callback request feature is coming. For now, the fastest way to reach a PPP location is to call it directly during open hours — see the Contact page for numbers.",
+    answerFr:
+      "Une fonction de demande de rappel dédiée s'en vient. Pour l'instant, le moyen le plus rapide de joindre un emplacement PPP est de l'appeler directement pendant les heures d'ouverture — voir la page Contact pour les numéros.",
+    tags: ["callback", "call me back", "request a call"],
+    ctaEn: "Go to Contact",
+    ctaFr: "Aller à Contact",
+    ctaHref: "/contact",
+  },
+  {
+    id: "marketplace-vs-direct",
+    category: "ordering",
+    questionEn: "What's the difference between PPP Direct and ordering through a delivery app?",
+    questionFr: "Quelle est la différence entre PPP Direct et une application de livraison?",
+    answerEn:
+      "PPP Direct means you're ordering straight from this website or by phone — PPP handles the whole order. Uber Eats, DoorDash and SkipTheDishes are separate marketplaces: they own the order, the courier and the refund process for anything placed through them.",
+    answerFr:
+      "PPP Direct signifie que vous commandez directement sur ce site ou par téléphone — PPP gère toute la commande. Uber Eats, DoorDash et SkipTheDishes sont des plateformes distinctes : elles gèrent la commande, le livreur et le remboursement pour tout ce qui y est commandé.",
+    tags: ["marketplace", "ppp direct", "difference", "third party"],
+  },
+  {
+    id: "refund-ppp-direct",
+    category: "payment",
+    questionEn: "How do I get a refund for a PPP Direct order?",
+    questionFr: "Comment obtenir un remboursement pour une commande PPP Direct?",
+    answerEn:
+      "Call the location you ordered from with your order details. For a marketplace order (Uber Eats, DoorDash, Skip), the refund must be requested in that app — PPP cannot issue a refund on an order it doesn't control.",
+    answerFr:
+      "Appelez l'emplacement où vous avez commandé avec les détails de votre commande. Pour une commande sur une plateforme (Uber Eats, DoorDash, Skip), le remboursement doit être demandé dans cette application — PPP ne peut pas rembourser une commande qu'il ne contrôle pas.",
+    tags: ["refund", "money back", "payment issue"],
   },
 ];
 
