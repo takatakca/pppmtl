@@ -100,7 +100,7 @@ function PresenceRow({ record }: { record: PresenceRecord }) {
         href={record.url ?? "#"}
         target="_blank"
         rel="noopener noreferrer"
-        onClick={() => trackSocialLink("google")}
+        onClick={() => trackSocialLink(record.iconKey)}
         aria-disabled={!record.url}
         className={`flex items-start gap-3 border border-border bg-card p-4 transition-colors hover:border-primary focus-ppp ${
           !record.url ? "pointer-events-none opacity-60" : ""

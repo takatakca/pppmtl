@@ -37,7 +37,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Order pickup or delivery from PPP Pizzeria Montreal in Notre-Dame-de-Grâce, 6280 Av. Somerled. Pizza, rotisserie chicken, poutine, shawarma and $15.99 combos.",
+          "Order pickup or delivery from PPP Pizzeria Montreal in Notre-Dame-de-Grâce, 6280 Av. Somerled. Pizza, rotisserie chicken, poutine, shawarma and combo deals.",
       },
       { property: "og:title", content: "PPP Pizzeria NDG | Poulet · Pizza · Poutine" },
       {
