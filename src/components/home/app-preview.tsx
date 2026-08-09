@@ -155,7 +155,6 @@ export function AppPreview() {
     <section
       id="app"
       className="relative overflow-hidden border-y border-border bg-card/40"
-      onPointerDown={() => setPaused(true)}
     >
       <div className="mx-auto grid max-w-[110rem] items-center gap-6 px-3 py-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:py-16">
         <div>
@@ -224,6 +223,7 @@ export function AppPreview() {
             style={{ marginInline: "auto" }}
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
+            onPointerDown={pauseBriefly}
           >
             <span className="absolute left-1/2 top-1 z-10 h-4 w-20 -translate-x-1/2 rounded-full bg-foreground/80" />
             <div className="h-full w-full overflow-hidden rounded-[1.7rem]">
@@ -410,7 +410,7 @@ export function AppPreview() {
                   aria-label={s}
                   onClick={() => {
                     setScreen(i);
-                    setPaused(true);
+                    pauseBriefly();
                   }}
                   className={`h-1.5 w-6 transition-colors focus-ppp ${
                     i === screen ? "bg-primary" : "bg-border"
