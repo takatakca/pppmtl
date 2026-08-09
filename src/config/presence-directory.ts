@@ -266,4 +266,28 @@ export function legacyPresence() {
   return presenceDirectory.filter((p) => p.status === "legacy");
 }
 
+/** Records that are current AND actually have a destination to send people to. */
+export function livePresence(category?: PresenceCategory) {
+  return presenceDirectory.filter(
+    (p) => p.status !== "legacy" && !!p.url && (!category || p.category === category),
+  );
+}
+
+/** Factual counts for the page header — derived, never hardcoded. */
+export function presenceCounts() {
+  const live = livePresence();
+  return {
+    total: live.length,
+    social: live.filter((p) => p.category === "social").length,
+    ordering: live.filter((p) => p.category === "ordering").length,
+    reviews: live.filter((p) => p.category === "review" || p.category === "directory").length,
+  };
+}
+
+/** Short, human location context for a record ("NDG", "Montréal-Nord"…). */
+export function presenceLocationLabel(record: PresenceRecord): string | null {
+  if (record.locationScope === "brand") return null;
+  return restaurantLocations.find((l) => l.id === record.locationScope)?.neighborhood ?? null;
+}
+
 export { ndg, montrealNord, sainteCatherine };
