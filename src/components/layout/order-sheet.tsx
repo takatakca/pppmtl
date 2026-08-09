@@ -1,7 +1,9 @@
-import { Bike, Phone, ShoppingBag, Sparkles, X } from "lucide-react";
+import { ArrowUpRight, Bike, Phone, ShoppingBag, Sparkles, X } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { orderChannels } from "@/lib/channels";
+import { orderingChannels } from "@/config/external-presence";
+import { trackExternalOrder } from "@/lib/analytics";
 import { startOrder } from "@/lib/order";
 
 /**
@@ -18,7 +20,6 @@ export function OrderSheet() {
   const channels = orderChannels(location, mode);
   const direct = channels.find((c) => c.id === "direct");
   const phone = channels.find((c) => c.id === "phone");
-  const marketplaces = channels.filter((c) => c.kind === "marketplace" || c.kind === "surplus");
 
   const beginDirect = () => {
     const result = startOrder({ locationId, mode, channel: "direct" });
@@ -108,30 +109,32 @@ export function OrderSheet() {
           )}
 
           <p className="mt-6 text-[0.65rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
-            {t("Also available on", "Aussi disponible sur")}
+            {t("Or order with a delivery app", "Ou commandez avec une app de livraison")}
           </p>
-          <div className="mt-2 grid grid-cols-2 gap-2">
-            {marketplaces.map((c) =>
-              c.href ? (
+          <ul className="mt-2 grid gap-2 sm:grid-cols-3">
+            {orderingChannels.map((c) => (
+              <li key={c.id}>
                 <a
-                  key={c.id}
-                  href={c.href}
+                  href={c.url ?? "#"}
                   target="_blank"
-                  rel="noreferrer"
-                  className="border border-border px-4 py-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp"
+                  rel="noopener noreferrer"
+                  onClick={() => trackExternalOrder(c.id)}
+                  aria-label={`${c.labelEn} — ${c.name}`}
+                  className="press-tap group flex h-full flex-col gap-3 border border-border p-3 transition-all hover:-translate-y-0.5 hover:border-primary focus-ppp"
                 >
-                  {c.label}
+                  <img
+                    src={c.logo ?? ""}
+                    alt={c.name}
+                    className="h-8 w-auto self-start transition-transform group-hover:-translate-y-0.5"
+                  />
+                  <span className="flex items-center gap-1 text-[0.6rem] font-bold uppercase tracking-widest text-muted-foreground">
+                    {c.name}
+                    <ArrowUpRight className="h-3 w-3" />
+                  </span>
                 </a>
-              ) : (
-                <span
-                  key={c.id}
-                  className="border border-dashed border-border px-4 py-3 text-xs font-bold uppercase tracking-widest text-muted-foreground/60"
-                >
-                  {c.label}
-                </span>
-              ),
-            )}
-          </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
