@@ -228,7 +228,7 @@ function AboutPage() {
 
         {/* 04 — THE FOOD */}
         <section className="mx-auto max-w-[80rem] px-3 py-12 sm:px-6 lg:py-16">
-          <div className="grid gap-8 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:gap-12">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-center lg:gap-12">
             <Reveal>
               <Eyebrow>{t("The food", "La bouffe")}</Eyebrow>
               <h2 className="mt-2 font-display text-4xl uppercase leading-[0.88] sm:text-6xl">
@@ -277,7 +277,7 @@ function AboutPage() {
 
             {/* overlapping editorial food composition */}
             <Reveal delay={120} className="relative min-w-0">
-              <div className="no-scrollbar -mx-3 flex w-[calc(100%+1.5rem)] gap-3 overflow-x-auto px-3 lg:mx-0 lg:block lg:w-full lg:px-0">
+              <div className="no-scrollbar -mx-3 flex max-w-[100vw] gap-3 overflow-x-auto px-3 lg:mx-0 lg:block lg:w-full lg:px-0">
                 <figure className="food-pop relative w-[70vw] shrink-0 overflow-hidden border border-border sm:w-80 lg:w-[78%]">
                   <img
                     src={foodPizza}
