@@ -1,5 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Clock, Gift, Heart, MapPin, Star } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
 import { PPPHeader } from "@/components/layout/ppp-header";
 import { PPPFooter } from "@/components/layout/ppp-footer";
 import { MobileOrderBar } from "@/components/layout/mobile-order-bar";
@@ -7,10 +6,10 @@ import { SearchOverlay } from "@/components/search/search-overlay";
 import { LocationSheet } from "@/components/layout/location-sheet";
 import { OrderSheet } from "@/components/layout/order-sheet";
 import { usePPP } from "@/context/ppp-store";
-import { GoogleButton } from "@/components/auth/google-button";
-import { MarketingPreferencesPanel } from "@/components/account/marketing-preferences";
-import { LocationPreference } from "@/components/account/location-preference";
-import { pppBusiness } from "@/config/business";
+import { SignedOutHero } from "@/components/account/signed-out-hero";
+import { PreferredNameStep } from "@/components/account/preferred-name-step";
+import { MemberDashboard } from "@/components/account/member-dashboard";
+import { useCustomerSession } from "@/lib/customer/session";
 import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/account")({
