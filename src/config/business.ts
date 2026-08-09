@@ -113,12 +113,11 @@ export const pppBusiness = {
   legacyExternalMenuUrl: "https://linktr.ee/pppmontrealnord",
 } as const;
 
-export const businessSameAs = [
-  pppBusiness.website,
-  pppBusiness.social.instagram,
-  pppBusiness.social.facebook,
-  pppBusiness.social.x,
-];
+/**
+ * Only current PPP-brand profiles. Legacy Montréal-Nord directory records are
+ * deliberately excluded so NDG structured data stays unambiguous.
+ */
+export const businessSameAs = [pppBusiness.website, ...currentBrandSameAs];
 
 /** Restaurant / LocalBusiness JSON-LD built only from confirmed fields. */
 export function businessJsonLd() {
