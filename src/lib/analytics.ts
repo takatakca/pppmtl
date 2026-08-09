@@ -19,6 +19,7 @@ export type PPPEvent =
   | "cart_checkout_continued"
   | "external_order_clicked"
   | "social_link_clicked"
+  | "external_presence_clicked"
   | "track_provider_selected"
   | "support_route_selected"
   | "callback_requested";
@@ -43,6 +44,22 @@ export function trackSocialLink(
   sourcePage = typeof window === "undefined" ? "" : window.location.pathname,
 ) {
   track("social_link_clicked", { provider, sourcePage });
+}
+
+/**
+ * Any outbound click to an external PPP profile, listing or storefront.
+ * Carries the real provider — never a hardcoded one — plus the category and
+ * the location the record belongs to. No personal data, ever.
+ */
+export function trackExternalPresenceClick(
+  payload: {
+    provider: string;
+    category: string;
+    locationId: string | null;
+  },
+  sourcePage = typeof window === "undefined" ? "" : window.location.pathname,
+) {
+  track("external_presence_clicked", { ...payload, sourcePage });
 }
 
 /** Order tracking provider chosen on /track. */
