@@ -18,6 +18,8 @@ import { OrderSheet } from "@/components/layout/order-sheet";
 import { CallbackSheet } from "@/components/support/callback-sheet";
 import { usePPP, useSelectedRestaurantLocation } from "@/context/ppp-store";
 import { trackExternalOrder, trackProviderSelected } from "@/lib/analytics";
+import { orderingChannels } from "@/config/external-presence";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/track")({
   head: () => ({
@@ -36,7 +38,7 @@ export const Route = createFileRoute("/track")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "/track" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/track") }],
   }),
   component: TrackPage,
 });
@@ -58,17 +60,17 @@ const marketplaceMeta: Record<
   uber_eats: {
     labelEn: "Uber Eats",
     labelFr: "Uber Eats",
-    appUrl: "https://www.ubereats.com/orders",
+    appUrl: orderingChannels.find((c) => c.id === "uber_eats")!.trackingUrl,
   },
   doordash: {
     labelEn: "DoorDash",
     labelFr: "DoorDash",
-    appUrl: "https://www.doordash.com/orders",
+    appUrl: orderingChannels.find((c) => c.id === "doordash")!.trackingUrl,
   },
   skip: {
     labelEn: "Skip the Dishes",
     labelFr: "Skip the Dishes",
-    appUrl: "https://www.skipthedishes.com/",
+    appUrl: orderingChannels.find((c) => c.id === "skip")!.trackingUrl,
   },
 };
 

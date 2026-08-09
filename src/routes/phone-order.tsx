@@ -8,6 +8,7 @@ import { LocationSheet } from "@/components/layout/location-sheet";
 import { OrderSheet } from "@/components/layout/order-sheet";
 import { CallbackSheet } from "@/components/support/callback-sheet";
 import { usePPP, useSelectedRestaurantLocation } from "@/context/ppp-store";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/phone-order")({
   head: () => ({
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/phone-order")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "/phone-order" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/phone-order") }],
   }),
   component: PhoneOrderPage,
 });

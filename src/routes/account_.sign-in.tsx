@@ -6,6 +6,7 @@ import { Field, PasswordField } from "@/components/account/field";
 import { usePPP } from "@/context/ppp-store";
 import { authRepository } from "@/lib/customer/repositories";
 import { emailError, safeReturnTo } from "@/lib/customer/validation";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/account_/sign-in")({
   validateSearch: (search: Record<string, unknown>): { returnTo?: string | undefined } => ({
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/account_/sign-in")({
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
-    links: [{ rel: "canonical", href: "/account/sign-in" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/account/sign-in") }],
   }),
   component: SignInPage,
 });

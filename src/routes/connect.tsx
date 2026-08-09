@@ -13,6 +13,7 @@ import { usePPP } from "@/context/ppp-store";
 import { pppBusiness } from "@/config/business";
 import { externalPresence, orderingChannels } from "@/config/external-presence";
 import { trackExternalOrder, trackSocialLink } from "@/lib/analytics";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/connect")({
   head: () => ({
@@ -29,10 +30,10 @@ export const Route = createFileRoute("/connect")({
         content: "Every way to order, follow and reach PPP Pizzeria at 6280 Av. Somerled, NDG.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://pppmtl.lovable.app/connect" },
+      { property: "og:url", content: canonicalUrl("/connect") },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "https://pppmtl.lovable.app/connect" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/connect") }],
   }),
   component: ConnectPage,
 });
@@ -71,7 +72,7 @@ function ConnectPage() {
             {orderingChannels.map((c) => (
               <a
                 key={c.id}
-                href={c.url ?? "#"}
+                href={c.orderingUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackExternalOrder(c.id)}

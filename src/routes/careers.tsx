@@ -11,6 +11,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { usePPP } from "@/context/ppp-store";
 import { pppBusiness } from "@/config/business";
 import crew from "@/assets/team-crew.jpg";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/careers")({
   head: () => ({
@@ -25,9 +26,9 @@ export const Route = createFileRoute("/careers")({
       { property: "og:description", content: "Work with PPP — kitchen, counter and delivery roles." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:url", content: "/careers" },
+      { property: "og:url", content: canonicalUrl("/careers") },
     ],
-    links: [{ rel: "canonical", href: "/careers" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/careers") }],
   }),
   component: CareersPage,
 });

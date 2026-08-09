@@ -17,6 +17,7 @@ import { cartTotals } from "@/lib/cart";
 import { useVoiceSearch } from "@/hooks/use-voice-search";
 import type { MenuItem } from "@/data/menu";
 import { pppBusiness } from "@/config/business";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/order")({
   validateSearch: (
@@ -41,10 +42,10 @@ export const Route = createFileRoute("/order")({
           "Search the PPP NDG menu by text or voice, build your order and continue by phone or app.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/order" },
+      { property: "og:url", content: canonicalUrl("/order") },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "/order" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/order") }],
   }),
   component: OrderPage,
 });

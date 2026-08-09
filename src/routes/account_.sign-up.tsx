@@ -7,6 +7,7 @@ import { Field, PasswordField } from "@/components/account/field";
 import { usePPP } from "@/context/ppp-store";
 import { authRepository } from "@/lib/customer/repositories";
 import {
+import { canonicalUrl } from "@/config/site";
   emailError,
   maskEmail,
   normalizeUsername,
@@ -33,7 +34,7 @@ export const Route = createFileRoute("/account_/sign-up")({
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
-    links: [{ rel: "canonical", href: "/account/sign-up" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/account/sign-up") }],
   }),
   component: SignUpPage,
 });

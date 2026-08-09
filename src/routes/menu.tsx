@@ -16,6 +16,7 @@ import { menuRepository } from "@/lib/menu-repository";
 import { getDiscountedItems } from "@/lib/promotions";
 import { localizedName } from "@/lib/search";
 import type { MenuItem } from "@/data/menu";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/menu")({
   head: () => ({
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/menu")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "/menu" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/menu") }],
   }),
   component: MenuPage,
 });

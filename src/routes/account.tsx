@@ -11,6 +11,7 @@ import { GoogleButton } from "@/components/auth/google-button";
 import { MarketingPreferencesPanel } from "@/components/account/marketing-preferences";
 import { LocationPreference } from "@/components/account/location-preference";
 import { pppBusiness } from "@/config/business";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/account")({
   head: () => ({
@@ -24,10 +25,10 @@ export const Route = createFileRoute("/account")({
       { property: "og:title", content: "My PPP Account" },
       { property: "og:description", content: "Recent orders, rewards, favourites and gift cards." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/account" },
+      { property: "og:url", content: canonicalUrl("/account") },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "/account" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/account") }],
   }),
   component: AccountPage,
 });

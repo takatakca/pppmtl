@@ -28,6 +28,7 @@ import { FranchiseCareers } from "@/components/home/franchise-careers";
 import { OrderSheet } from "@/components/layout/order-sheet";
 import { usePPP } from "@/context/ppp-store";
 import { businessJsonLd, pppBusiness } from "@/config/business";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -46,9 +47,9 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:url", content: "/" },
+      { property: "og:url", content: canonicalUrl("/") },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/") }],
     scripts: [{ type: "application/ld+json", children: JSON.stringify(businessJsonLd()) }],
   }),
   component: Index,

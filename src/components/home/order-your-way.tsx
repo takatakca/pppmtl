@@ -66,7 +66,7 @@ export function OrderYourWay() {
           <li key={c.id} className="min-w-[11rem] shrink-0 snap-start sm:min-w-0">
             <Reveal delay={120 + i * 90}>
               <a
-                href={c.url ?? "#order-your-way"}
+                href={c.orderingUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackExternalOrder(c.id)}

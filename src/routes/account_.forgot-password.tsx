@@ -6,6 +6,7 @@ import { Field } from "@/components/account/field";
 import { usePPP } from "@/context/ppp-store";
 import { authRepository } from "@/lib/customer/repositories";
 import { emailError, maskEmail } from "@/lib/customer/validation";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/account_/forgot-password")({
   head: () => ({
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/account_/forgot-password")({
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
-    links: [{ rel: "canonical", href: "/account/forgot-password" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/account/forgot-password") }],
   }),
   component: ForgotPasswordPage,
 });

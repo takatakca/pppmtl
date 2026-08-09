@@ -12,6 +12,7 @@ import { CallbackSheet } from "@/components/support/callback-sheet";
 import { SupportRouter } from "@/components/support/support-router";
 import { usePPP } from "@/context/ppp-store";
 import { restaurantLocations } from "@/config/locations";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/support")({
   head: () => ({
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/support")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "/support" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/support") }],
   }),
   component: SupportPage,
 });

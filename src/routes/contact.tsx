@@ -10,6 +10,7 @@ import { OrderSheet } from "@/components/layout/order-sheet";
 import { usePPP } from "@/context/ppp-store";
 import { locationSocial, restaurantLocations } from "@/config/locations";
 import { CallbackSheet } from "@/components/support/callback-sheet";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/contact")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "/contact" }],
+    links: [{ rel: "canonical", href: canonicalUrl("/contact") }],
   }),
   component: ContactPage,
 });
