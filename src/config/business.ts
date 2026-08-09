@@ -6,6 +6,8 @@
  * must render as a truthful fallback rather than an invented value.
  */
 
+import { currentBrandSameAs } from "@/config/external-presence";
+
 export interface GoogleProfileSnapshot {
   /** Owner-supplied Google listing values. Replace with a live sync later. */
   rating: number | null;
