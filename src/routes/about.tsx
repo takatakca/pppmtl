@@ -1,302 +1,467 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, MapPin } from "lucide-react";
+import { ArrowUpRight, MapPin, Navigation } from "lucide-react";
 import { PPPHeader } from "@/components/layout/ppp-header";
 import { PPPFooter } from "@/components/layout/ppp-footer";
 import { MobileOrderBar } from "@/components/layout/mobile-order-bar";
 import { SearchOverlay } from "@/components/search/search-overlay";
 import { LocationSheet } from "@/components/layout/location-sheet";
 import { OrderSheet } from "@/components/layout/order-sheet";
-import { Reveal } from "@/components/motion/reveal";
+import { Reveal, usePointerDepth } from "@/components/motion/reveal";
 import { usePPP } from "@/context/ppp-store";
 import storefront from "@/assets/storefront-night.jpg";
 import crew from "@/assets/team-crew.jpg";
 import foodPizza from "@/assets/food-pizza.jpg";
 import foodChicken from "@/assets/food-chicken.jpg";
 import foodPoutine from "@/assets/food-poutine.jpg";
-import { canonicalUrl } from "@/config/site";
+import foodPita from "@/assets/food-pita.jpg";
+import foodDessert from "@/assets/food-dessert.jpg";
+import { canonicalUrl, SITE_URL } from "@/config/site";
+import {
+  canOrder,
+  comingSoonLocations,
+  openLocations,
+  pastLocations,
+  type RestaurantLocation,
+} from "@/config/locations";
+import { externalPresence } from "@/config/external-presence";
+
+const TITLE_EN = "Our Story | PPP Pizzeria Montreal";
+const TITLE_FR = "Notre histoire | PPP Pizzeria Montréal";
+const DESC_EN =
+  "PPP Pizzeria started as one kitchen in Montréal-Nord and now serves Montréal from NDG and Sainte-Catherine E, with more neighbourhoods on the way.";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "Our Story | PPP Pizzeria Montréal" },
-      {
-        name: "description",
-        content:
-          "From a single kitchen in Montréal-Nord to NDG and Sainte-Catherine E — the honest story behind PPP Pizzeria Montréal.",
-      },
-      { property: "og:title", content: "Our Story | PPP Pizzeria Montréal" },
-      {
-        property: "og:description",
-        content: "How PPP grew from Montréal-Nord into a multi-location Montréal brand.",
-      },
+      { title: TITLE_EN },
+      { name: "description", content: DESC_EN },
+      { property: "og:title", content: TITLE_EN },
+      { property: "og:description", content: DESC_EN },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
       { property: "og:url", content: canonicalUrl("/about") },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: canonicalUrl("/about") }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "AboutPage",
+              "@id": canonicalUrl("/about"),
+              url: canonicalUrl("/about"),
+              name: TITLE_EN,
+              description: DESC_EN,
+              about: { "@type": "Organization", name: "PPP Pizzeria", url: SITE_URL },
+            },
+            {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Home", item: canonicalUrl("/") },
+                { "@type": "ListItem", position: 2, name: "Our Story", item: canonicalUrl("/about") },
+              ],
+            },
+          ],
+        }),
+      },
+    ],
   }),
   component: AboutPage,
 });
 
-type StoneStatus = "past" | "present" | "next";
-const dotClass: Record<StoneStatus, string> = {
-  past: "bg-muted-foreground/50",
-  present: "bg-primary",
-  next: "border border-border bg-transparent",
-};
+/* ------------------------------- helpers -------------------------------- */
+
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">{children}</p>
+  );
+}
+
+function Rule() {
+  return <span aria-hidden className="block h-px w-full bg-border" />;
+}
+
+/* --------------------------------- page --------------------------------- */
 
 function AboutPage() {
   const { t } = usePPP();
+  const { containerRef, layer } = usePointerDepth(5);
 
-  const timeline: { status: StoneStatus; place: { en: string; fr: string }; note: { en: string; fr: string } }[] = [
-    {
-      status: "past",
-      place: { en: "Montréal-Nord", fr: "Montréal-Nord" },
-      note: { en: "Origin — closed today", fr: "Origine — fermé aujourd'hui" },
-    },
-    {
-      status: "present",
-      place: { en: "NDG", fr: "NDG" },
-      note: { en: "Flagship kitchen", fr: "Cuisine phare" },
-    },
-    {
-      status: "present",
-      place: { en: "Sainte-Catherine E", fr: "Sainte-Catherine E" },
-      note: { en: "Second kitchen", fr: "Deuxième cuisine" },
-    },
-    {
-      status: "next",
-      place: { en: "Saint-Léonard", fr: "Saint-Léonard" },
-      note: { en: "Coming soon", fr: "Bientôt" },
-    },
-    {
-      status: "next",
-      place: { en: "Chambly", fr: "Chambly" },
-      note: { en: "Coming soon", fr: "Bientôt" },
-    },
-    {
-      status: "next",
-      place: { en: "Brossard", fr: "Brossard" },
-      note: { en: "Coming soon", fr: "Bientôt" },
-    },
-  ];
+  const openCount = openLocations.length;
+  const soonCount = comingSoonLocations.length;
+  const pastCount = pastLocations.length;
+  const origin = pastLocations.find((l) => l.slug === "montreal-nord") ?? pastLocations[0];
 
   return (
     <div className="min-h-screen bg-background pb-16 lg:pb-0">
       <PPPHeader />
       <main className="pt-14 lg:pt-24">
-        {/* Hero */}
-        <section className="relative isolate overflow-hidden border-b border-border">
-          <img
-            src={storefront}
-            alt=""
-            loading="eager"
-            className="absolute inset-0 h-full w-full object-cover opacity-25"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/90 to-background/60" />
-          <Reveal className="relative mx-auto max-w-[70rem] px-3 py-14 sm:px-6 sm:py-20">
-            <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
-              {t("PPP Pizzeria", "PPP Pizzeria")}
-            </p>
-            <h1 className="mt-2 font-display text-5xl uppercase leading-[0.85] sm:text-8xl">
-              {t("Our story", "Notre histoire")}
-            </h1>
-            <p className="mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
-              {t(
-                "Chicken, pizza and poutine, cooked the same honest way since day one — just from more kitchens than before.",
-                "Poulet, pizza et poutine, cuisinés de la même façon honnête depuis le premier jour — simplement dans plus de cuisines qu'avant.",
-              )}
-            </p>
-          </Reveal>
-        </section>
+        {/* 01 — HERO */}
+        <section
+          ref={containerRef}
+          className="relative isolate overflow-hidden border-b border-border"
+        >
+          <div className="mx-auto grid max-w-[80rem] items-center gap-8 px-3 py-10 sm:px-6 sm:py-16 lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:py-20">
+            <div>
+              <Reveal>
+                <Eyebrow>{t("PPP Pizzeria — our story", "PPP Pizzeria — notre histoire")}</Eyebrow>
+              </Reveal>
+              <Reveal delay={90}>
+                <h1 className="clip-rise mt-3 font-display text-[2.6rem] uppercase leading-[0.86] sm:text-7xl lg:text-8xl">
+                  {t("Built in Montréal.", "Né à Montréal.")}
+                  <br />
+                  <span className="text-flame">{t("Still moving.", "Toujours en mouvement.")}</span>
+                </h1>
+              </Reveal>
+              <Reveal delay={180}>
+                <p className="mt-4 max-w-md text-sm text-muted-foreground sm:text-base">
+                  {t(
+                    "One kitchen started it. PPP kept growing — pizza, chicken, poutine and subs made for the neighbourhood, now cooked in more than one part of the city.",
+                    "Une seule cuisine a tout lancé. PPP a continué de grandir — pizza, poulet, poutine et sous-marins faits pour le quartier, maintenant cuisinés dans plus d'un coin de la ville.",
+                  )}
+                </p>
+              </Reveal>
 
-        {/* Where it started */}
-        <section className="mx-auto grid max-w-[80rem] gap-6 px-3 py-12 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-12 lg:py-16">
-          <Reveal clip className="overflow-hidden border border-border">
-            <img
-              src={crew}
-              alt=""
-              loading="lazy"
-              className="ken-burns h-64 w-full object-cover sm:h-96"
-            />
-          </Reveal>
-          <Reveal delay={90}>
-            <p className="flex items-center gap-1.5 font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
-              <MapPin className="h-3.5 w-3.5" />
-              {t("Where it started", "Là où tout a commencé")}
-            </p>
-            <h2 className="mt-2 font-display text-4xl uppercase leading-[0.88] sm:text-6xl">
-              {t("Montréal-Nord", "Montréal-Nord")}
-            </h2>
-            <p className="mt-3 max-w-md text-sm text-muted-foreground sm:text-base">
-              {t(
-                "PPP began as one neighbourhood kitchen in Montréal-Nord, built on rotisserie chicken, hand-stretched pizza and poutine done properly. That original store is closed today — but it's where the recipes, the name and the habit of doing things right all came from.",
-                "PPP a commencé comme une seule cuisine de quartier à Montréal-Nord, bâtie sur le poulet rôti, la pizza étirée à la main et la poutine bien faite. Ce premier commerce est fermé aujourd'hui — mais c'est de là que viennent les recettes, le nom et l'habitude de bien faire les choses.",
-              )}
-            </p>
-          </Reveal>
-        </section>
-
-        {/* Where we are now */}
-        <section className="border-y border-border bg-card/40">
-          <div className="mx-auto max-w-[80rem] px-3 py-12 sm:px-6 lg:py-16">
-            <Reveal>
-              <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
-                {t("Where we are now", "Où nous sommes maintenant")}
-              </p>
-              <h2 className="mt-2 font-display text-4xl uppercase leading-[0.88] sm:text-6xl">
-                {t("Two kitchens, one menu", "Deux cuisines, un seul menu")}
-              </h2>
-            </Reveal>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              {[
-                {
-                  name: { en: "NDG", fr: "NDG" },
-                  desc: {
-                    en: "Notre-Dame-de-Grâce — the flagship kitchen the whole menu is built around.",
-                    fr: "Notre-Dame-de-Grâce — la cuisine phare autour de laquelle tout le menu est bâti.",
-                  },
-                  img: foodPizza,
-                },
-                {
-                  name: { en: "Sainte-Catherine E", fr: "Sainte-Catherine E" },
-                  desc: {
-                    en: "Hochelaga — PPP's second operating kitchen, east of downtown.",
-                    fr: "Hochelaga — la deuxième cuisine de PPP, à l'est du centre-ville.",
-                  },
-                  img: foodChicken,
-                },
-              ].map((loc) => (
-                <Reveal key={loc.name.en} className="border border-border bg-background">
-                  <img src={loc.img} alt="" loading="lazy" className="h-40 w-full object-cover" />
-                  <div className="p-4">
-                    <h3 className="font-display text-2xl uppercase leading-none">
-                      {t(loc.name.en, loc.name.fr)}
-                    </h3>
-                    <p className="mt-1.5 text-sm text-muted-foreground">
-                      {t(loc.desc.en, loc.desc.fr)}
-                    </p>
-                  </div>
-                </Reveal>
-              ))}
+              {/* 09 — location strip, derived from config */}
+              <Reveal delay={280}>
+                <dl className="mt-6 flex flex-wrap items-stretch gap-x-6 gap-y-3 border-t border-border pt-4">
+                  {[
+                    { n: openCount, l: t("Open now", "Ouverts") },
+                    { n: soonCount, l: t("Coming soon", "Bientôt") },
+                    { n: pastCount, l: t("In our history", "Dans notre histoire") },
+                  ].map((s) => (
+                    <div key={s.l} className="min-w-[5.5rem]">
+                      <dt className="sr-only">{s.l}</dt>
+                      <dd className="font-display text-3xl leading-none sm:text-4xl">{s.n}</dd>
+                      <p className="mt-1 text-[0.6rem] uppercase tracking-[0.25em] text-muted-foreground">
+                        {s.l}
+                      </p>
+                    </div>
+                  ))}
+                </dl>
+              </Reveal>
             </div>
+
+            <Reveal delay={140} className="relative">
+              <div className="clip-rise relative aspect-[4/3] overflow-hidden border border-border sm:aspect-[5/4]">
+                <img
+                  src={storefront}
+                  alt={t(
+                    "A PPP Pizzeria storefront lit up at night in Montréal",
+                    "Une devanture PPP Pizzeria éclairée le soir à Montréal",
+                  )}
+                  loading="eager"
+                  className="h-full w-full object-cover"
+                  style={layer(1)}
+                />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
+                <span className="absolute bottom-3 left-3 bg-background/85 px-2 py-1 font-display text-[0.55rem] uppercase tracking-[0.3em]">
+                  {t("Montréal", "Montréal")}
+                </span>
+              </div>
+            </Reveal>
           </div>
         </section>
 
-        {/* What's next / expansion timeline */}
-        <section className="mx-auto max-w-[80rem] px-3 py-12 sm:px-6 lg:py-16">
-          <Reveal>
-            <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
-              {t("What's next", "La suite")}
-            </p>
-            <h2 className="mt-2 font-display text-4xl uppercase leading-[0.88] sm:text-6xl">
-              {t("The expansion map", "La carte d'expansion")}
-            </h2>
-          </Reveal>
-          <Reveal delay={100} className="mt-8 overflow-x-auto">
-            <ol className="flex min-w-max items-start gap-0">
-              {timeline.map((s, i) => (
-                <li key={`${s.place.en}-${i}`} className="flex items-start">
-                  <div className="flex w-36 flex-col items-start gap-2 sm:w-44">
-                    <span className={`h-3 w-3 shrink-0 rounded-full ${dotClass[s.status]}`} aria-hidden />
-                    <span className="font-display text-base uppercase leading-tight sm:text-lg">
-                      {t(s.place.en, s.place.fr)}
-                    </span>
-                    <span className="text-[0.65rem] uppercase tracking-widest text-muted-foreground">
-                      {t(s.note.en, s.note.fr)}
-                    </span>
-                  </div>
-                  {i < timeline.length - 1 && (
-                    <span aria-hidden className="mt-1.5 h-px w-8 shrink-0 bg-border sm:w-14" />
-                  )}
-                </li>
-              ))}
-            </ol>
-          </Reveal>
-        </section>
-
-        {/* Our food */}
-        <section className="border-y border-border bg-card/40">
-          <div className="mx-auto max-w-[80rem] px-3 py-12 sm:px-6 lg:py-16">
-            <Reveal>
-              <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
-                {t("Our food", "Notre nourriture")}
-              </p>
-              <h2 className="mt-2 max-w-xl font-display text-4xl uppercase leading-[0.88] sm:text-6xl">
-                {t("Rotisserie, pizza, poutine — done right", "Rôtisserie, pizza, poutine — bien faites")}
+        {/* 02 — WHERE PPP STARTED */}
+        {origin && (
+          <section className="mx-auto grid max-w-[80rem] gap-6 px-3 py-12 sm:px-6 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-12 lg:py-16">
+            <Reveal className="relative">
+              <div className="clip-rise relative overflow-hidden">
+                <img
+                  src={crew}
+                  alt=""
+                  loading="lazy"
+                  className="ken-burns h-56 w-full object-cover sm:h-96"
+                />
+                <span className="absolute left-0 top-0 bg-background px-2 py-1 font-display text-[0.55rem] uppercase tracking-[0.3em] text-muted-foreground">
+                  {t("Former location — closed", "Ancien emplacement — fermé")}
+                </span>
+              </div>
+            </Reveal>
+            <Reveal delay={90}>
+              <Eyebrow>
+                <span className="inline-flex items-center gap-1.5">
+                  <MapPin className="h-3.5 w-3.5" />
+                  {t("Where PPP started", "Là où PPP a commencé")}
+                </span>
+              </Eyebrow>
+              <h2 className="mt-2 font-display text-4xl uppercase leading-[0.88] sm:text-6xl">
+                {origin.neighborhood}
               </h2>
-              <p className="mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
+              <p className="mt-3 max-w-md text-sm text-muted-foreground sm:text-base">
                 {t(
-                  "Same recipes, same standards, wherever the kitchen is. No shortcuts on the fryer oil, the dough or the gravy.",
-                  "Mêmes recettes, mêmes standards, peu importe la cuisine. Aucun raccourci sur l'huile de friture, la pâte ou la sauce.",
+                  "PPP started in Montréal-Nord as a neighbourhood food operation built around what people actually order — pizza, chicken, poutine, subs and late-night comfort food. That original address is closed today, but it's still where the name and the menu come from.",
+                  "PPP a commencé à Montréal-Nord comme un commerce de quartier bâti autour de ce que les gens commandent vraiment — pizza, poulet, poutine, sous-marins et bouffe réconfort de fin de soirée. Cette adresse d'origine est fermée aujourd'hui, mais c'est de là que viennent le nom et le menu.",
                 )}
               </p>
+              <Link
+                to="/locations/$slug"
+                params={{ slug: origin.slug }}
+                className="cta-motion mt-5 inline-flex items-center gap-2 border border-border px-5 py-3 font-display text-sm uppercase tracking-widest transition-colors hover:border-primary focus-ppp"
+              >
+                {t("View the Montréal-Nord story", "Voir l'histoire de Montréal-Nord")}
+                <ArrowUpRight className="cta-arrow h-4 w-4" />
+              </Link>
             </Reveal>
-            <div className="no-scrollbar mt-6 flex gap-3 overflow-x-auto">
-              {[foodPizza, foodChicken, foodPoutine].map((img, i) => (
-                <Reveal key={i} delay={i * 80} className="w-56 shrink-0 overflow-hidden border border-border">
-                  <img src={img} alt="" loading="lazy" className="h-40 w-full object-cover" />
-                </Reveal>
+          </section>
+        )}
+
+        {/* 03 — PPP TODAY */}
+        <section className="border-y border-border bg-card/40">
+          <div className="mx-auto max-w-[80rem] px-3 py-12 sm:px-6 lg:py-16">
+            <Reveal>
+              <Eyebrow>{t("PPP today", "PPP aujourd'hui")}</Eyebrow>
+              <h2 className="mt-2 font-display text-4xl uppercase leading-[0.88] sm:text-6xl">
+                {openCount === 2
+                  ? t("Two kitchens. One PPP.", "Deux cuisines. Un seul PPP.")
+                  : t("PPP is growing across Montréal.", "PPP grandit à travers Montréal.")}
+              </h2>
+            </Reveal>
+            <div className="mt-8 flex flex-col gap-px bg-border">
+              {openLocations.map((loc, i) => (
+                <OpenLocationRow key={loc.id} loc={loc} index={i} />
               ))}
             </div>
           </div>
         </section>
 
-        {/* Our community */}
+        {/* 04 — THE FOOD */}
         <section className="mx-auto max-w-[80rem] px-3 py-12 sm:px-6 lg:py-16">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-center lg:gap-12">
+            <Reveal>
+              <Eyebrow>{t("The food", "La bouffe")}</Eyebrow>
+              <h2 className="mt-2 font-display text-4xl uppercase leading-[0.88] sm:text-6xl">
+                {t("This is PPP.", "Ça, c'est PPP.")}
+              </h2>
+              <p className="mt-3 max-w-md text-sm text-muted-foreground sm:text-base">
+                {t(
+                  "Pizza, chicken, poutine, subs, pita and wraps, Mexican plates and desserts — the kind of menu Montréal reaches for when the craving hits, in one order.",
+                  "Pizza, poulet, poutine, sous-marins, pitas et wraps, plats mexicains et desserts — le genre de menu que Montréal choisit quand l'envie frappe, en une seule commande.",
+                )}
+              </p>
+              <ul className="mt-5 flex flex-wrap gap-x-4 gap-y-2">
+                {[
+                  t("Pizza", "Pizza"),
+                  t("Chicken", "Poulet"),
+                  t("Poutine", "Poutine"),
+                  t("Subs", "Sous-marins"),
+                  t("Pita / Wrap", "Pita / Wrap"),
+                  t("Mexican", "Mexicain"),
+                  t("Desserts", "Desserts"),
+                ].map((c) => (
+                  <li
+                    key={c}
+                    className="font-display text-xs uppercase tracking-[0.2em] text-muted-foreground"
+                  >
+                    {c}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  to="/menu"
+                  className="cta-motion inline-flex items-center gap-2 bg-primary px-5 py-3 font-display text-base uppercase leading-none text-primary-foreground focus-ppp"
+                >
+                  {t("Explore the menu", "Explorer le menu")}
+                  <ArrowUpRight className="cta-arrow h-4 w-4" />
+                </Link>
+                <Link
+                  to="/order"
+                  className="cta-motion inline-flex items-center gap-2 border border-border px-5 py-3 font-display text-base uppercase leading-none transition-colors hover:border-primary focus-ppp"
+                >
+                  {t("Start order", "Commander")}
+                </Link>
+              </div>
+            </Reveal>
+
+            {/* overlapping editorial food composition */}
+            <Reveal delay={120} className="relative min-w-0">
+              <div className="no-scrollbar -mx-3 flex max-w-[100vw] gap-3 overflow-x-auto px-3 lg:mx-0 lg:block lg:w-full lg:px-0">
+                <figure className="food-pop relative w-[70vw] shrink-0 overflow-hidden border border-border sm:w-80 lg:w-[78%]">
+                  <img
+                    src={foodPizza}
+                    alt=""
+                    loading="lazy"
+                    className="h-52 w-full object-cover sm:h-64 lg:h-80"
+                  />
+                </figure>
+                <figure className="food-pop relative w-[45vw] shrink-0 overflow-hidden border border-border bg-background sm:w-52 lg:absolute lg:-bottom-8 lg:right-0 lg:w-[42%]">
+                  <img
+                    src={foodChicken}
+                    alt=""
+                    loading="lazy"
+                    className="h-40 w-full object-cover lg:h-48"
+                  />
+                </figure>
+                <figure className="food-pop relative w-[38vw] shrink-0 overflow-hidden border border-border bg-background sm:w-44 lg:absolute lg:-left-6 lg:bottom-4 lg:w-[30%]">
+                  <img
+                    src={foodPoutine}
+                    alt=""
+                    loading="lazy"
+                    className="h-32 w-full object-cover lg:h-40"
+                  />
+                </figure>
+                <figure className="food-pop w-[38vw] shrink-0 overflow-hidden border border-border sm:w-44 lg:hidden">
+                  <img src={foodPita} alt="" loading="lazy" className="h-32 w-full object-cover" />
+                </figure>
+                <figure className="food-pop w-[38vw] shrink-0 overflow-hidden border border-border sm:w-44 lg:hidden">
+                  <img
+                    src={foodDessert}
+                    alt=""
+                    loading="lazy"
+                    className="h-32 w-full object-cover"
+                  />
+                </figure>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* 05 — THE ROAD AHEAD */}
+        <section className="border-y border-border bg-card/40">
+          <div className="mx-auto max-w-[80rem] px-3 py-12 sm:px-6 lg:py-16">
+            <Reveal className="max-w-2xl">
+              <Eyebrow>{t("The road ahead", "La suite")}</Eyebrow>
+              <h2 className="mt-2 font-display text-4xl uppercase leading-[0.88] sm:text-6xl">
+                {t("PPP isn't staying in one neighbourhood", "PPP ne reste pas dans un seul quartier")}
+              </h2>
+            </Reveal>
+
+            <div className="mt-8 grid gap-8 lg:grid-cols-3 lg:gap-6">
+              <TimelineGroup
+                label={t("Past", "Passé")}
+                tone="past"
+                items={pastLocations}
+                note={t("Origin — closed", "Origine — fermé")}
+              />
+              <TimelineGroup
+                label={t("Now", "Maintenant")}
+                tone="now"
+                items={openLocations}
+                note={t("Open location", "Emplacement ouvert")}
+              />
+              <TimelineGroup
+                label={t("Next", "Prochain")}
+                tone="next"
+                items={comingSoonLocations}
+                note={t("Coming soon", "Bientôt")}
+              />
+            </div>
+
+            <Reveal delay={120}>
+              <Link
+                to="/locations"
+                className="cta-motion mt-8 inline-flex items-center gap-2 border border-border px-5 py-3 font-display text-sm uppercase tracking-widest transition-colors hover:border-primary focus-ppp"
+              >
+                {t("See all locations", "Voir tous les emplacements")}
+                <ArrowUpRight className="cta-arrow h-4 w-4" />
+              </Link>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* community — compact */}
+        <section className="mx-auto max-w-[80rem] px-3 py-10 sm:px-6 lg:py-14">
           <Reveal className="max-w-2xl">
-            <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
-              {t("Our community", "Notre communauté")}
-            </p>
-            <h2 className="mt-2 font-display text-4xl uppercase leading-[0.88] sm:text-6xl">
-              {t("Built by the neighbourhood, for the neighbourhood", "Bâti par le quartier, pour le quartier")}
-            </h2>
-            <p className="mt-3 text-sm text-muted-foreground sm:text-base">
+            <Eyebrow>{t("Our neighbourhood", "Notre quartier")}</Eyebrow>
+            <p className="mt-3 font-display text-2xl uppercase leading-[1.05] sm:text-3xl">
               {t(
-                "Every PPP kitchen hires locally and serves locally. As we grow to new addresses, that stays the same.",
-                "Chaque cuisine PPP embauche localement et sert localement. En grandissant vers de nouvelles adresses, ça ne change pas.",
+                "PPP started as a neighbourhood restaurant, and that local identity still shapes the brand as it grows.",
+                "PPP a commencé comme un restaurant de quartier, et cette identité locale façonne encore la marque en grandissant.",
               )}
             </p>
           </Reveal>
         </section>
 
-        {/* Franchise + careers CTA */}
-        <section className="border-t border-border">
-          <div className="mx-auto grid max-w-[80rem] gap-3 px-3 py-10 sm:grid-cols-2 sm:px-6 lg:py-14">
-            <Reveal className="flex flex-col justify-between border border-border bg-card p-6">
+        {/* 06 — AROUND THE WEB */}
+        <section className="border-y border-border">
+          <div className="mx-auto max-w-[80rem] px-3 py-10 sm:px-6 lg:py-12">
+            <Reveal className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
-                  {t("Franchise", "Franchise")}
-                </p>
-                <h3 className="mt-1 font-display text-2xl uppercase leading-none sm:text-3xl">
-                  {t("Bring PPP to your city", "Amenez PPP dans votre ville")}
-                </h3>
+                <Eyebrow>{t("Find PPP around the web", "Trouvez PPP sur le web")}</Eyebrow>
+                <h2 className="mt-2 font-display text-3xl uppercase leading-[0.9] sm:text-4xl">
+                  {t("Where PPP already lives", "Où PPP est déjà présent")}
+                </h2>
               </div>
               <Link
-                to="/franchise"
-                className="cta-motion mt-4 inline-flex w-fit items-center gap-2 bg-primary px-5 py-3 font-display text-base uppercase leading-none text-primary-foreground focus-ppp"
+                to="/around-the-web"
+                className="cta-motion inline-flex items-center gap-2 border border-border px-4 py-2.5 font-display text-xs uppercase tracking-widest transition-colors hover:border-primary focus-ppp"
               >
-                {t("Explore franchising", "Explorer la franchise")}
-                <ArrowUpRight className="cta-arrow h-4 w-4" />
+                {t("See PPP around the web", "Voir PPP sur le web")}
+                <ArrowUpRight className="cta-arrow h-3.5 w-3.5" />
               </Link>
             </Reveal>
-            <Reveal delay={90} className="flex flex-col justify-between border border-border bg-card p-6">
-              <div>
-                <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
-                  {t("Careers", "Carrières")}
-                </p>
-                <h3 className="mt-1 font-display text-2xl uppercase leading-none sm:text-3xl">
-                  {t("Work with PPP", "Travaillez chez PPP")}
-                </h3>
-              </div>
+            <Reveal delay={90} className="mt-6">
+              <Rule />
+              <ul className="flex flex-wrap gap-x-8 gap-y-3 pt-4">
+                {[
+                  { name: "Google", href: externalPresence.discovery.google },
+                  { name: "Instagram", href: externalPresence.social.instagram },
+                  { name: "Facebook", href: externalPresence.social.facebook },
+                  { name: "Uber Eats", href: externalPresence.ordering.uberEats },
+                  { name: "DoorDash", href: externalPresence.ordering.doorDash },
+                  { name: "Birdeye", href: externalPresence.discovery.birdeye },
+                ]
+                  .filter((p) => Boolean(p.href))
+                  .map((p) => (
+                    <li key={p.name}>
+                      <a
+                        href={p.href as string}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-display text-sm uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground focus-ppp"
+                      >
+                        {p.name}
+                      </a>
+                    </li>
+                  ))}
+              </ul>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* 07 — FRANCHISE + CAREERS campaign panels */}
+        <section className="mx-auto grid max-w-[80rem] gap-3 px-3 py-10 sm:grid-cols-2 sm:px-6 lg:py-14">
+          <CampaignPanel
+            eyebrow={t("Franchise", "Franchise")}
+            title={t("Bring PPP to your city", "Amenez PPP dans votre ville")}
+            cta={t("Explore franchising", "Explorer la franchise")}
+            to="/franchise"
+            image={storefront}
+          />
+          <CampaignPanel
+            eyebrow={t("Careers", "Carrières")}
+            title={t("Build the next PPP with us", "Bâtissez le prochain PPP avec nous")}
+            cta={t("See open roles", "Voir les postes")}
+            to="/careers"
+            image={crew}
+            delay={90}
+          />
+        </section>
+
+        {/* 33 — final action bar */}
+        <section className="border-t border-border bg-card/40">
+          <div className="mx-auto flex max-w-[80rem] flex-wrap items-center justify-between gap-4 px-3 py-8 sm:px-6">
+            <h2 className="font-display text-3xl uppercase leading-none sm:text-4xl">
+              {t("Craving PPP?", "Une envie de PPP ?")}
+            </h2>
+            <div className="flex flex-wrap gap-3">
               <Link
-                to="/careers"
-                className="cta-motion mt-4 inline-flex w-fit items-center gap-2 bg-primary px-5 py-3 font-display text-base uppercase leading-none text-primary-foreground focus-ppp"
+                to="/menu"
+                className="cta-motion inline-flex items-center gap-2 bg-primary px-5 py-3 font-display text-base uppercase leading-none text-primary-foreground focus-ppp"
               >
-                {t("See open roles", "Voir les postes")}
-                <ArrowUpRight className="cta-arrow h-4 w-4" />
+                {t("View menu", "Voir le menu")}
               </Link>
-            </Reveal>
+              <Link
+                to="/locations"
+                className="cta-motion inline-flex items-center gap-2 border border-border px-5 py-3 font-display text-base uppercase leading-none transition-colors hover:border-primary focus-ppp"
+              >
+                {t("Find a location", "Trouver un emplacement")}
+              </Link>
+            </div>
           </div>
         </section>
       </main>
@@ -306,5 +471,168 @@ function AboutPage() {
       <LocationSheet />
       <OrderSheet />
     </div>
+  );
+}
+
+/* ----------------------------- sub-components ---------------------------- */
+
+function OpenLocationRow({ loc, index }: { loc: RestaurantLocation; index: number }) {
+  const { t } = usePPP();
+  const image = index % 2 === 0 ? foodPizza : foodChicken;
+  return (
+    <Reveal
+      delay={index * 90}
+      className="grid gap-0 bg-background sm:grid-cols-[minmax(0,14rem)_1fr] lg:grid-cols-[minmax(0,20rem)_1fr]"
+    >
+      <div className="relative h-36 overflow-hidden sm:h-[13rem]">
+        <img src={image} alt="" loading="lazy" className="h-full w-full object-cover" />
+        <span className="absolute left-0 top-0 bg-primary px-2 py-1 font-display text-[0.55rem] uppercase tracking-[0.3em] text-primary-foreground">
+          {t("Open location", "Emplacement ouvert")}
+        </span>
+      </div>
+      <div className="flex flex-col justify-center gap-4 p-5 sm:p-6">
+        <div>
+          <h3 className="font-display text-3xl uppercase leading-none sm:text-4xl">
+            {loc.neighborhood}
+          </h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {loc.address}
+            {loc.postalCode ? `, ${loc.city} ${loc.postalCode}` : `, ${loc.city}`}
+          </p>
+          {loc.menuScope === "verified" && (
+            <p className="mt-2 inline-block border border-border px-2 py-1 font-display text-[0.55rem] uppercase tracking-[0.3em] text-muted-foreground">
+              {t("Full menu available", "Menu complet disponible")}
+            </p>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            to="/locations/$slug"
+            params={{ slug: loc.slug }}
+            className="cta-motion inline-flex items-center gap-2 border border-border px-4 py-2.5 font-display text-xs uppercase tracking-widest transition-colors hover:border-primary focus-ppp"
+          >
+            {t("View location", "Voir l'emplacement")}
+            <ArrowUpRight className="cta-arrow h-3.5 w-3.5" />
+          </Link>
+          {loc.google.directionsUrl && (
+            <a
+              href={loc.google.directionsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 border border-border px-4 py-2.5 font-display text-xs uppercase tracking-widest transition-colors hover:border-primary focus-ppp"
+            >
+              <Navigation className="h-3.5 w-3.5" />
+              {t("Directions", "Itinéraire")}
+            </a>
+          )}
+          {canOrder(loc) && loc.menuScope === "verified" && (
+            <Link
+              to="/order"
+              className="cta-motion inline-flex items-center gap-2 bg-primary px-4 py-2.5 font-display text-xs uppercase tracking-widest text-primary-foreground focus-ppp"
+            >
+              {t("Order", "Commander")}
+            </Link>
+          )}
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
+function TimelineGroup({
+  label,
+  tone,
+  items,
+  note,
+}: {
+  label: string;
+  tone: "past" | "now" | "next";
+  items: RestaurantLocation[];
+  note: string;
+}) {
+  const dot =
+    tone === "now"
+      ? "bg-primary"
+      : tone === "past"
+        ? "bg-muted-foreground/50"
+        : "border border-border bg-transparent";
+  if (items.length === 0) return null;
+  return (
+    <Reveal className="relative">
+      <div className="flex items-center gap-3">
+        <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dot}`} aria-hidden />
+        <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-muted-foreground">
+          {label}
+        </p>
+        <span aria-hidden className="h-px flex-1 bg-border" />
+      </div>
+      <ul className="mt-4 space-y-4 border-l border-border pl-4">
+        {items.map((l) => (
+          <li key={l.id}>
+            <Link
+              to="/locations/$slug"
+              params={{ slug: l.slug }}
+              className="group block focus-ppp"
+            >
+              <span className="font-display text-xl uppercase leading-none transition-colors group-hover:text-flame sm:text-2xl">
+                {l.neighborhood}
+              </span>
+              <span className="mt-1 block text-[0.6rem] uppercase tracking-[0.25em] text-muted-foreground">
+                {note}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </Reveal>
+  );
+}
+
+function CampaignPanel({
+  eyebrow,
+  title,
+  cta,
+  to,
+  image,
+  delay = 0,
+}: {
+  eyebrow: string;
+  title: string;
+  cta: string;
+  to: "/franchise" | "/careers";
+  image: string;
+  delay?: number;
+}) {
+  return (
+    <Reveal delay={delay}>
+      <Link
+        to={to}
+        className="campaign-panel group relative flex min-h-[15rem] flex-col justify-end overflow-hidden border border-border p-6 transition-colors hover:border-primary focus-ppp"
+      >
+        <img
+          src={image}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover opacity-30 transition-transform duration-500 group-hover:scale-[1.03]"
+        />
+        <span
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-t from-background via-background/85 to-background/40"
+        />
+        <span aria-hidden className="campaign-edge absolute inset-y-0 left-0 w-1 bg-primary" />
+        <span className="relative">
+          <span className="block font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
+            {eyebrow}
+          </span>
+          <span className="mt-1 block font-display text-2xl uppercase leading-none sm:text-3xl">
+            {title}
+          </span>
+          <span className="mt-4 inline-flex items-center gap-2 font-display text-sm uppercase tracking-widest">
+            {cta}
+            <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
+          </span>
+        </span>
+      </Link>
+    </Reveal>
   );
 }
