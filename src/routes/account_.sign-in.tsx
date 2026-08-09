@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AuthShell } from "@/components/account/auth-shell";
 import { GoogleButton } from "@/components/auth/google-button";
+import { GOOGLE_SIGN_IN_ENABLED } from "@/config/auth-flags";
 import { Field, PasswordField } from "@/components/account/field";
 import { usePPP } from "@/context/ppp-store";
 import { authRepository } from "@/lib/customer/repositories";
@@ -67,12 +68,16 @@ function SignInPage() {
         `Après la connexion, vous reviendrez à ${returnTo}.`,
       )}
     >
-      <GoogleButton className="mb-1" />
-      <div className="my-3 flex items-center gap-3 text-[0.65rem] uppercase tracking-widest text-muted-foreground">
-        <span className="h-px flex-1 bg-border" />
-        {t("or", "ou")}
-        <span className="h-px flex-1 bg-border" />
-      </div>
+      {GOOGLE_SIGN_IN_ENABLED && (
+        <>
+          <GoogleButton className="mb-1" />
+          <div className="my-3 flex items-center gap-3 text-[0.65rem] uppercase tracking-widest text-muted-foreground">
+            <span className="h-px flex-1 bg-border" />
+            {t("or", "ou")}
+            <span className="h-px flex-1 bg-border" />
+          </div>
+        </>
+      )}
       <form onSubmit={submit} className="grid gap-3" noValidate>
         <Field
           label={t("Email", "Courriel")}

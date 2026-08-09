@@ -3,11 +3,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { MailCheck } from "lucide-react";
 import { AuthShell } from "@/components/account/auth-shell";
 import { GoogleButton } from "@/components/auth/google-button";
+import { GOOGLE_SIGN_IN_ENABLED } from "@/config/auth-flags";
 import { Field, PasswordField } from "@/components/account/field";
 import { usePPP } from "@/context/ppp-store";
 import { authRepository } from "@/lib/customer/repositories";
 import {
-import { canonicalUrl } from "@/config/site";
   emailError,
   maskEmail,
   normalizeUsername,
@@ -15,6 +15,7 @@ import { canonicalUrl } from "@/config/site";
   passwordStrength,
   usernameError,
 } from "@/lib/customer/validation";
+import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/account_/sign-up")({
   head: () => ({
@@ -119,12 +120,16 @@ function SignUpPage() {
         "Commandez plus vite, enregistrez vos favoris, recommandez vos repas, conservez vos points, sauvegardez vos adresses et recevez les offres membres.",
       )}
     >
-      <GoogleButton className="mb-1" />
-      <div className="my-3 flex items-center gap-3 text-[0.65rem] uppercase tracking-widest text-muted-foreground">
-        <span className="h-px flex-1 bg-border" />
-        {t("or", "ou")}
-        <span className="h-px flex-1 bg-border" />
-      </div>
+      {GOOGLE_SIGN_IN_ENABLED && (
+        <>
+          <GoogleButton className="mb-1" />
+          <div className="my-3 flex items-center gap-3 text-[0.65rem] uppercase tracking-widest text-muted-foreground">
+            <span className="h-px flex-1 bg-border" />
+            {t("or", "ou")}
+            <span className="h-px flex-1 bg-border" />
+          </div>
+        </>
+      )}
       <form onSubmit={submit} className="grid gap-3" noValidate>
         <Field
           label={t("Email", "Courriel")}

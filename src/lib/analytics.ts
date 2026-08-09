@@ -39,7 +39,7 @@ export function trackExternalOrder(
 }
 
 export function trackSocialLink(
-  provider: "instagram" | "facebook" | "tiktok" | "x" | "google",
+  provider: string,
   sourcePage = typeof window === "undefined" ? "" : window.location.pathname,
 ) {
   track("social_link_clicked", { provider, sourcePage });
