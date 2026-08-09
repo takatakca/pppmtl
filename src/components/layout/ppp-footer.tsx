@@ -1,54 +1,32 @@
-import { Facebook, Instagram, MapPin, Phone } from "lucide-react";
+import { MapPin, Phone } from "lucide-react";
 import { usePPP } from "@/context/ppp-store";
 import { pppBusiness } from "@/config/business";
+import { externalPresence, orderingChannels } from "@/config/external-presence";
+import { trackExternalOrder, trackSocialLink } from "@/lib/analytics";
+import { pppSocials } from "@/components/home/follow-ppp";
+import { GoogleGlyph } from "@/components/brand/social-icons";
 import { PPPLogo } from "@/components/brand/ppp-logo";
-
-const socials = [
-  { id: "instagram", label: "Instagram", href: pppBusiness.social.instagram, Icon: Instagram },
-  { id: "facebook", label: "Facebook", href: pppBusiness.social.facebook, Icon: Facebook },
-  { id: "x", label: "X", href: pppBusiness.social.x, Icon: null },
-  { id: "pinterest", label: "Pinterest", href: pppBusiness.social.pinterest, Icon: null },
-] as const;
+import { Link } from "@tanstack/react-router";
 
 const columns = [
-  {
-    titleEn: "Order",
-    titleFr: "Commander",
-    items: [
-      { en: "Order online", fr: "Commander en ligne" },
-      { en: "Pickup", fr: "Cueillette" },
-      { en: "Delivery", fr: "Livraison" },
-      { en: "Too Good To Go", fr: "Too Good To Go" },
-    ],
-  },
   {
     titleEn: "PPP",
     titleFr: "PPP",
     items: [
-      { en: "About us", fr: "À propos" },
-      { en: "Careers", fr: "Carrières" },
-      { en: "Franchise", fr: "Franchise" },
-      { en: "Contact us", fr: "Nous joindre" },
+      { en: "Menu", fr: "Menu", to: "/menu" as const },
+      { en: "Offers", fr: "Offres", to: "/offers" as const },
+      { en: "Gift cards", fr: "Cartes-cadeaux", to: "/gift-cards" as const },
+      { en: "Find us online", fr: "Nous trouver en ligne", to: "/connect" as const },
     ],
   },
   {
     titleEn: "Rewards",
     titleFr: "Récompenses",
     items: [
-      { en: "PPP Rewards", fr: "PPP Récompenses" },
-      { en: "Gift cards", fr: "Cartes-cadeaux" },
-      { en: "Offers", fr: "Offres" },
-      { en: "Download the app", fr: "Télécharger l'app" },
-    ],
-  },
-  {
-    titleEn: "Support",
-    titleFr: "Soutien",
-    items: [
-      { en: "FAQs", fr: "FAQ" },
-      { en: "Privacy policy", fr: "Confidentialité" },
-      { en: "Terms of service", fr: "Conditions" },
-      { en: "Accessibility", fr: "Accessibilité" },
+      { en: "PPP account", fr: "Compte PPP", to: "/account" as const },
+      { en: "Create account", fr: "Créer un compte", to: "/account/sign-up" as const },
+      { en: "Order online", fr: "Commander en ligne", to: "/order" as const },
+      { en: "Full menu", fr: "Menu complet", to: "/menu" as const },
     ],
   },
 ];
@@ -107,24 +85,38 @@ export function PPPFooter() {
               </button>
             </form>
             <ul className="mt-6 flex flex-wrap gap-2">
-              {socials.map((s) => (
+              {pppSocials.map((s) => (
                 <li key={s.id}>
                   <a
                     href={s.href}
                     target="_blank"
-                    rel="noreferrer"
-                    aria-label={`PPP ${s.label}`}
-                    className="inline-flex items-center gap-1.5 border border-border px-3 py-2 text-[0.6rem] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp"
+                    rel="noopener noreferrer"
+                    onClick={() => trackSocialLink(s.id)}
+                    aria-label={`Visit PPP Pizzeria on ${s.name}`}
+                    className="inline-flex items-center gap-1.5 border border-border px-3 py-2 text-[0.6rem] font-bold uppercase tracking-widest text-muted-foreground transition-transform duration-200 hover:scale-[1.08] hover:text-foreground focus-ppp"
                   >
-                    {s.Icon ? <s.Icon className="h-3.5 w-3.5 text-primary" aria-hidden /> : null}
-                    {s.label}
+                    <s.Icon className="h-3.5 w-3.5 text-primary" aria-hidden />
+                    {s.name}
                   </a>
                 </li>
               ))}
+              <li>
+                <a
+                  href={externalPresence.discovery.google}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackSocialLink("google")}
+                  aria-label="View PPP Pizzeria on Google"
+                  className="inline-flex items-center gap-1.5 border border-border px-3 py-2 text-[0.6rem] font-bold uppercase tracking-widest text-muted-foreground transition-transform duration-200 hover:scale-[1.08] hover:text-foreground focus-ppp"
+                >
+                  <GoogleGlyph className="h-3.5 w-3.5 text-primary" />
+                  Google
+                </a>
+              </li>
             </ul>
           </div>
 
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3">
             {columns.map((c) => (
               <div key={c.titleEn}>
                 <h3 className="font-display text-sm uppercase tracking-widest text-accent">
@@ -133,17 +125,46 @@ export function PPPFooter() {
                 <ul className="mt-3 space-y-2">
                   {c.items.map((i) => (
                     <li key={i.en}>
-                      <a
-                        href="#top"
+                      <Link
+                        to={i.to}
                         className="text-sm text-muted-foreground transition-colors hover:text-foreground focus-ppp"
                       >
                         {lang === "fr" ? i.fr : i.en}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>
               </div>
             ))}
+            <div>
+              <h3 className="font-display text-sm uppercase tracking-widest text-accent">
+                {t("Order", "Commander")}
+              </h3>
+              <ul className="mt-3 space-y-2">
+                <li>
+                  <Link
+                    to="/order"
+                    className="text-sm text-muted-foreground transition-colors hover:text-foreground focus-ppp"
+                  >
+                    {t("PPP Direct", "PPP Direct")}
+                  </Link>
+                </li>
+                {orderingChannels.map((c) => (
+                  <li key={c.id}>
+                    <a
+                      href={c.url ?? "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackExternalOrder(c.id)}
+                      aria-label={c.labelEn}
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground focus-ppp"
+                    >
+                      {c.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
 
