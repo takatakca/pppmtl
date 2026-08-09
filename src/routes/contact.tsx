@@ -9,6 +9,7 @@ import { LocationSheet } from "@/components/layout/location-sheet";
 import { OrderSheet } from "@/components/layout/order-sheet";
 import { usePPP } from "@/context/ppp-store";
 import { locationSocial, restaurantLocations } from "@/config/locations";
+import { CallbackSheet } from "@/components/support/callback-sheet";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -72,6 +73,9 @@ function ContactPage() {
                 "Choisissez un emplacement pour le téléphone, l'itinéraire et les réseaux sociaux — ou joignez directement l'équipe PPP pour la franchise, les carrières ou une question générale.",
               )}
             </p>
+            <div className="mt-4">
+              <CallbackSheet />
+            </div>
           </div>
         </section>
 

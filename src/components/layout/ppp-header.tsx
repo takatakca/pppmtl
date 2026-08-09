@@ -6,17 +6,20 @@ import { orderingChannels } from "@/config/external-presence";
 import { trackExternalOrder, trackSocialLink } from "@/lib/analytics";
 import { pppSocials } from "@/components/home/follow-ppp";
 import { PPPLogo } from "@/components/brand/ppp-logo";
+import { trackSupportRouted } from "@/lib/analytics";
 
 const navItems = [
   { en: "Deals", fr: "Offres", href: "#deals" },
   { en: "Rewards", fr: "Récompenses", href: "#rewards" },
   { en: "Locations", fr: "Emplacements", href: "/locations" },
   { en: "Franchise", fr: "Franchise", href: "#franchise" },
+  { en: "Around the Web", fr: "Aux quatre coins du web", href: "/around-the-web" },
 ];
 
 
 const mobileRoutes = [
   { en: "Full menu", fr: "Menu complet", to: "/menu" },
+  { en: "Track order", fr: "Suivre ma commande", to: "/track" },
   { en: "Gift cards", fr: "Cartes-cadeaux", to: "/gift-cards" },
   { en: "Offers", fr: "Offres", to: "/offers" },
   { en: "Find us online", fr: "Nous trouver en ligne", to: "/connect" },
@@ -29,6 +32,7 @@ const mobileLinks = [
   { en: "Careers", fr: "Carrières", href: "#franchise" },
   { en: "Franchise", fr: "Franchise", href: "#franchise" },
   { en: "Contact", fr: "Contact", href: "#locations" },
+  { en: "Around the Web", fr: "Aux quatre coins du web", href: "/around-the-web" },
 ];
 
 export function PPPHeader() {
@@ -62,6 +66,13 @@ export function PPPHeader() {
             {mode === "pickup" ? t("Pickup", "Cueillette") : t("Delivery", "Livraison")}
           </button>
           <div className="ml-auto flex items-center gap-3">
+            <Link
+              to="/track"
+              onClick={() => trackSupportRouted("track_order")}
+              className="hover:text-foreground focus-ppp"
+            >
+              {t("Track order", "Suivre ma commande")}
+            </Link>
             <button onClick={openOrderSheet} className="hover:text-foreground focus-ppp">
               {t("Other ways to order", "Autres façons de commander")}
             </button>

@@ -23,6 +23,7 @@ const companyLinks = [
   { en: "Franchise", fr: "Franchise", href: "/franchise" },
   { en: "Careers", fr: "Carrières", href: "/careers" },
   { en: "Contact", fr: "Contact", href: "/contact" },
+  { en: "Around the Web", fr: "Aux quatre coins du web", href: "/around-the-web" },
 ];
 
 const helpLinks = [

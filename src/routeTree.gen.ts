@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountRouteImport } from './routes/account'
+import { Route as AroundTheWebRouteImport } from './routes/around-the-web'
 import { Route as CareersRouteImport } from './routes/careers'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -21,8 +22,10 @@ import { Route as GiftCardsRouteImport } from './routes/gift-cards'
 import { Route as MenuRouteImport } from './routes/menu'
 import { Route as OffersRouteImport } from './routes/offers'
 import { Route as OrderRouteImport } from './routes/order'
+import { Route as PhoneOrderRouteImport } from './routes/phone-order'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SupportRouteImport } from './routes/support'
+import { Route as TrackRouteImport } from './routes/track'
 import { Route as AccountForgotPasswordRouteImport } from './routes/account_.forgot-password'
 import { Route as AccountSignInRouteImport } from './routes/account_.sign-in'
 import { Route as AccountSignUpRouteImport } from './routes/account_.sign-up'
@@ -43,6 +46,11 @@ const AboutRoute = AboutRouteImport.update({
 const AccountRoute = AccountRouteImport.update({
   id: '/account',
   path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AroundTheWebRoute = AroundTheWebRouteImport.update({
+  id: '/around-the-web',
+  path: '/around-the-web',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CareersRoute = CareersRouteImport.update({
@@ -90,6 +98,11 @@ const OrderRoute = OrderRouteImport.update({
   path: '/order',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PhoneOrderRoute = PhoneOrderRouteImport.update({
+  id: '/phone-order',
+  path: '/phone-order',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -98,6 +111,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrackRoute = TrackRouteImport.update({
+  id: '/track',
+  path: '/track',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountForgotPasswordRoute = AccountForgotPasswordRouteImport.update({
@@ -135,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/around-the-web': typeof AroundTheWebRoute
   '/careers': typeof CareersRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
@@ -144,8 +163,10 @@ export interface FileRoutesByFullPath {
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
+  '/phone-order': typeof PhoneOrderRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
+  '/track': typeof TrackRoute
   '/account/forgot-password': typeof AccountForgotPasswordRoute
   '/account/sign-in': typeof AccountSignInRoute
   '/account/sign-up': typeof AccountSignUpRoute
@@ -157,6 +178,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/around-the-web': typeof AroundTheWebRoute
   '/careers': typeof CareersRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
@@ -166,8 +188,10 @@ export interface FileRoutesByTo {
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
+  '/phone-order': typeof PhoneOrderRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
+  '/track': typeof TrackRoute
   '/account/forgot-password': typeof AccountForgotPasswordRoute
   '/account/sign-in': typeof AccountSignInRoute
   '/account/sign-up': typeof AccountSignUpRoute
@@ -180,6 +204,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/around-the-web': typeof AroundTheWebRoute
   '/careers': typeof CareersRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
@@ -189,8 +214,10 @@ export interface FileRoutesById {
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
+  '/phone-order': typeof PhoneOrderRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
+  '/track': typeof TrackRoute
   '/account_/forgot-password': typeof AccountForgotPasswordRoute
   '/account_/sign-in': typeof AccountSignInRoute
   '/account_/sign-up': typeof AccountSignUpRoute
@@ -204,6 +231,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/account'
+    | '/around-the-web'
     | '/careers'
     | '/connect'
     | '/contact'
@@ -213,8 +241,10 @@ export interface FileRouteTypes {
     | '/menu'
     | '/offers'
     | '/order'
+    | '/phone-order'
     | '/sitemap.xml'
     | '/support'
+    | '/track'
     | '/account/forgot-password'
     | '/account/sign-in'
     | '/account/sign-up'
@@ -226,6 +256,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/account'
+    | '/around-the-web'
     | '/careers'
     | '/connect'
     | '/contact'
@@ -235,8 +266,10 @@ export interface FileRouteTypes {
     | '/menu'
     | '/offers'
     | '/order'
+    | '/phone-order'
     | '/sitemap.xml'
     | '/support'
+    | '/track'
     | '/account/forgot-password'
     | '/account/sign-in'
     | '/account/sign-up'
@@ -248,6 +281,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/account'
+    | '/around-the-web'
     | '/careers'
     | '/connect'
     | '/contact'
@@ -257,8 +291,10 @@ export interface FileRouteTypes {
     | '/menu'
     | '/offers'
     | '/order'
+    | '/phone-order'
     | '/sitemap.xml'
     | '/support'
+    | '/track'
     | '/account_/forgot-password'
     | '/account_/sign-in'
     | '/account_/sign-up'
@@ -271,6 +307,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
+  AroundTheWebRoute: typeof AroundTheWebRoute
   CareersRoute: typeof CareersRoute
   ConnectRoute: typeof ConnectRoute
   ContactRoute: typeof ContactRoute
@@ -280,8 +317,10 @@ export interface RootRouteChildren {
   MenuRoute: typeof MenuRoute
   OffersRoute: typeof OffersRoute
   OrderRoute: typeof OrderRoute
+  PhoneOrderRoute: typeof PhoneOrderRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRoute
+  TrackRoute: typeof TrackRoute
   AccountForgotPasswordRoute: typeof AccountForgotPasswordRoute
   AccountSignInRoute: typeof AccountSignInRoute
   AccountSignUpRoute: typeof AccountSignUpRoute
@@ -311,6 +350,13 @@ declare module '@tanstack/react-router' {
       path: '/account'
       fullPath: '/account'
       preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/around-the-web': {
+      id: '/around-the-web'
+      path: '/around-the-web'
+      fullPath: '/around-the-web'
+      preLoaderRoute: typeof AroundTheWebRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/careers': {
@@ -376,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/phone-order': {
+      id: '/phone-order'
+      path: '/phone-order'
+      fullPath: '/phone-order'
+      preLoaderRoute: typeof PhoneOrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -388,6 +441,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/support'
       preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/track': {
+      id: '/track'
+      path: '/track'
+      fullPath: '/track'
+      preLoaderRoute: typeof TrackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account_/forgot-password': {
@@ -439,6 +499,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
+  AroundTheWebRoute: AroundTheWebRoute,
   CareersRoute: CareersRoute,
   ConnectRoute: ConnectRoute,
   ContactRoute: ContactRoute,
@@ -448,8 +509,10 @@ const rootRouteChildren: RootRouteChildren = {
   MenuRoute: MenuRoute,
   OffersRoute: OffersRoute,
   OrderRoute: OrderRoute,
+  PhoneOrderRoute: PhoneOrderRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRoute,
+  TrackRoute: TrackRoute,
   AccountForgotPasswordRoute: AccountForgotPasswordRoute,
   AccountSignInRoute: AccountSignInRoute,
   AccountSignUpRoute: AccountSignUpRoute,

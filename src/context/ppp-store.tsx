@@ -15,6 +15,14 @@ import { menuRepository } from "@/lib/menu-repository";
 
 const KEY = "ppp.session.v1";
 
+export type SupportOrderChannel =
+  | "direct"
+  | "phone"
+  | "uber_eats"
+  | "doordash"
+  | "skip"
+  | "not_yet";
+
 interface Persisted {
   lang: Lang;
   locationId: string | null;
@@ -23,6 +31,9 @@ interface Persisted {
   mode: OrderMode;
   recentSearches: string[];
   cart: CartLine[];
+  /** Last order channel + location picked in the Support decision tree. */
+  lastSupportChannel: SupportOrderChannel | null;
+  lastSupportLocationId: string | null;
 }
 
 interface Store extends Persisted {
@@ -30,6 +41,7 @@ interface Store extends Persisted {
   setLocationId: (id: string | null) => void;
   setSelectedLocationId: (id: string) => void;
   setMode: (mode: OrderMode) => void;
+  setSupportContext: (channel: SupportOrderChannel, locationId?: string | null) => void;
   addRecentSearch: (q: string) => void;
   clearRecentSearches: () => void;
   searchOpen: boolean;
@@ -64,6 +76,8 @@ const defaults: Persisted = {
   mode: "pickup",
   recentSearches: [],
   cart: [],
+  lastSupportChannel: null,
+  lastSupportLocationId: null,
 };
 
 const PPPContext = createContext<Store | null>(null);
@@ -122,6 +136,13 @@ export function PPPProvider({ children }: { children: ReactNode }) {
       setMode: (mode) => {
         track("order_mode_selected", { mode });
         persist({ ...state, mode });
+      },
+      setSupportContext: (channel, locId) => {
+        persist({
+          ...state,
+          lastSupportChannel: channel,
+          lastSupportLocationId: locId !== undefined ? locId : state.lastSupportLocationId,
+        });
       },
       addRecentSearch: (q) => {
         const clean = q.trim();

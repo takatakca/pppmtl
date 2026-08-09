@@ -17,7 +17,9 @@ import { AccountModule } from "@/components/home/account-module";
 import { AppPreview } from "@/components/home/app-preview";
 import { GiftCardBlock } from "@/components/home/gift-card-block";
 import { OrderYourWay } from "@/components/home/order-your-way";
-import { FollowPPP } from "@/components/home/follow-ppp";
+import { FreshFromPPP } from "@/components/home/fresh-from-ppp";
+import { WhatPeopleSay } from "@/components/home/what-people-say";
+import { NeedHelp } from "@/components/home/need-help";
 import { LocationsSection } from "@/components/home/locations-section";
 import { LocationStrip } from "@/components/home/location-strip";
 import { StoryBand } from "@/components/home/story-band";
@@ -71,7 +73,9 @@ function Index() {
         <LocationsSection />
         <LocationStrip />
         <StoryBand />
-        <FollowPPP />
+        <WhatPeopleSay />
+        <FreshFromPPP />
+        <NeedHelp />
         <FranchiseCareers />
       </main>
       <PPPFooter />
