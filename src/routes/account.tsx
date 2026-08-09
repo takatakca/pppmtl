@@ -34,7 +34,7 @@ export const Route = createFileRoute("/account")({
 
 function AccountPage() {
   const { t } = usePPP();
-  const { status, customer } = useCustomerSession();
+  const { status, customer, accountsAvailable } = useCustomerSession();
 
   return (
     <div className="min-h-dvh bg-background pb-20 lg:pb-0">
@@ -51,7 +51,7 @@ function AccountPage() {
           </div>
         )}
 
-        {status === "signed_out" && <SignedOutHero accountsAvailable={false} />}
+        {status === "signed_out" && <SignedOutHero accountsAvailable={accountsAvailable} />}
 
         {status === "onboarding" && <PreferredNameStep />}
 
