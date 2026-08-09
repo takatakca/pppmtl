@@ -77,9 +77,9 @@ export const pppBusiness = {
   /** Owner-supplied listing snapshot. Sync from Google Business Profile later. */
   googleProfile: {
     rating: 4.0,
-    reviewCount: 20,
+    reviewCount: 21,
     priceRange: "$10–20",
-    lastSyncedAt: "2026-08-08",
+    lastSyncedAt: "2026-08-09",
   } satisfies GoogleProfileSnapshot,
 
   hours: {
