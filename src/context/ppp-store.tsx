@@ -12,6 +12,8 @@ import { NDG_LOCATION_ID, locationById, restaurantLocations } from "@/config/loc
 import { track } from "@/lib/analytics";
 import { newLine, type CartLine, type LineSelections } from "@/lib/cart";
 import { menuRepository } from "@/lib/menu-repository";
+import { isLang } from "@/i18n/types";
+import { translate, type TranslationKey } from "@/i18n";
 
 const KEY = "ppp.session.v1";
 
@@ -25,6 +27,8 @@ export type SupportOrderChannel =
 
 interface Persisted {
   lang: Lang;
+  /** Set only once the customer has explicitly picked a language. */
+  preferredLanguage?: Lang;
   locationId: string | null;
   /** Selected storefront in the multi-location registry (config/locations). */
   selectedLocationId: string;
@@ -38,6 +42,9 @@ interface Persisted {
 
 interface Store extends Persisted {
   setLang: (lang: Lang) => void;
+  /** Records an explicit customer language choice (used by the welcome experience). */
+  setPreferredLanguage: (lang: Lang) => void;
+  tr: (key: TranslationKey) => string;
   setLocationId: (id: string | null) => void;
   setSelectedLocationId: (id: string) => void;
   setMode: (mode: OrderMode) => void;
@@ -95,6 +102,11 @@ export function PPPProvider({ children }: { children: ReactNode }) {
       const raw = window.localStorage.getItem(KEY);
       if (raw) {
         const stored = JSON.parse(raw) as Partial<Persisted>;
+        // Older sessions predate Spanish / preferredLanguage — keep them loadable.
+        if (stored.lang && !isLang(stored.lang)) delete stored.lang;
+        if (stored.preferredLanguage && !isLang(stored.preferredLanguage)) {
+          delete stored.preferredLanguage;
+        }
         // Drop stale location ids from earlier location records.
         if (stored.locationId && !locations.some((l) => l.id === stored.locationId)) {
           stored.locationId = defaults.locationId;
@@ -124,7 +136,9 @@ export function PPPProvider({ children }: { children: ReactNode }) {
   const value = useMemo<Store>(() => {
     return {
       ...state,
-      setLang: (lang) => persist({ ...state, lang }),
+      setLang: (lang) => persist({ ...state, lang, preferredLanguage: lang }),
+      setPreferredLanguage: (lang) => persist({ ...state, lang, preferredLanguage: lang }),
+      tr: (key) => translate(state.lang, key),
       setLocationId: (locationId) => {
         track("location_selected", { locationId });
         persist({ ...state, locationId });
