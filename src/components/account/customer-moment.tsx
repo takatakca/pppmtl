@@ -16,13 +16,7 @@ const ICONS = {
   returning: UserCheck,
 } as const;
 
-export function CustomerMomentBanner({
-  moment,
-  name,
-}: {
-  moment: CustomerMoment;
-  name?: string;
-}) {
+export function CustomerMomentBanner({ moment, name }: { moment: CustomerMoment; name?: string }) {
   const { tr } = usePPP();
   const Icon = ICONS[moment];
   const headline = tr(`moments.${moment}` as "moments.welcome");

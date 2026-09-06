@@ -30,7 +30,12 @@ const CHANNELS: { id: Channel; labelEn: string; labelFr: string; icon: typeof St
   { id: "uber_eats", labelEn: "Uber Eats", labelFr: "Uber Eats", icon: Package },
   { id: "doordash", labelEn: "DoorDash", labelFr: "DoorDash", icon: Package },
   { id: "skip", labelEn: "SkipTheDishes", labelFr: "SkipTheDishes", icon: Package },
-  { id: "not_yet", labelEn: "Haven't ordered yet", labelFr: "Je n'ai pas encore commandé", icon: HelpCircle },
+  {
+    id: "not_yet",
+    labelEn: "Haven't ordered yet",
+    labelFr: "Je n'ai pas encore commandé",
+    icon: HelpCircle,
+  },
 ];
 
 const marketplaceById: Record<string, (typeof orderingChannels)[number] | undefined> = {
@@ -49,20 +54,61 @@ type Issue =
   | "menu_question"
   | "account_rewards";
 
-const FIRST_PARTY_ISSUES: { id: Issue; labelEn: string; labelFr: string; icon: typeof Package }[] = [
-  { id: "missing_item", labelEn: "Missing item", labelFr: "Article manquant", icon: Package },
-  { id: "wrong_order", labelEn: "Wrong order", labelFr: "Mauvaise commande", icon: ShieldAlert },
-  { id: "late_delivery", labelEn: "Late delivery / pickup", labelFr: "Livraison ou cueillette en retard", icon: Clock },
-  { id: "refund", labelEn: "Refund / payment", labelFr: "Remboursement / paiement", icon: Receipt },
-  { id: "allergy", labelEn: "Allergy / food safety", labelFr: "Allergie / sécurité alimentaire", icon: AlertTriangle },
-  { id: "hours", labelEn: "Hours / location", labelFr: "Heures / emplacement", icon: MapPin },
-  { id: "menu_question", labelEn: "Menu question", labelFr: "Question sur le menu", icon: HelpCircle },
-  { id: "account_rewards", labelEn: "Account / rewards", labelFr: "Compte / récompenses", icon: User },
-];
+const FIRST_PARTY_ISSUES: { id: Issue; labelEn: string; labelFr: string; icon: typeof Package }[] =
+  [
+    { id: "missing_item", labelEn: "Missing item", labelFr: "Article manquant", icon: Package },
+    { id: "wrong_order", labelEn: "Wrong order", labelFr: "Mauvaise commande", icon: ShieldAlert },
+    {
+      id: "late_delivery",
+      labelEn: "Late delivery / pickup",
+      labelFr: "Livraison ou cueillette en retard",
+      icon: Clock,
+    },
+    {
+      id: "refund",
+      labelEn: "Refund / payment",
+      labelFr: "Remboursement / paiement",
+      icon: Receipt,
+    },
+    {
+      id: "allergy",
+      labelEn: "Allergy / food safety",
+      labelFr: "Allergie / sécurité alimentaire",
+      icon: AlertTriangle,
+    },
+    { id: "hours", labelEn: "Hours / location", labelFr: "Heures / emplacement", icon: MapPin },
+    {
+      id: "menu_question",
+      labelEn: "Menu question",
+      labelFr: "Question sur le menu",
+      icon: HelpCircle,
+    },
+    {
+      id: "account_rewards",
+      labelEn: "Account / rewards",
+      labelFr: "Compte / récompenses",
+      icon: User,
+    },
+  ];
 
-const THIRD_PARTY_ISSUES: { id: "food" | "delivery"; labelEn: string; labelFr: string; icon: typeof Package }[] = [
-  { id: "food", labelEn: "Food quality / wrong item", labelFr: "Qualité de la nourriture / article erroné", icon: ShieldAlert },
-  { id: "delivery", labelEn: "Courier, tracking or payment", labelFr: "Livreur, suivi ou paiement", icon: Package },
+const THIRD_PARTY_ISSUES: {
+  id: "food" | "delivery";
+  labelEn: string;
+  labelFr: string;
+  icon: typeof Package;
+}[] = [
+  {
+    id: "food",
+    labelEn: "Food quality / wrong item",
+    labelFr: "Qualité de la nourriture / article erroné",
+    icon: ShieldAlert,
+  },
+  {
+    id: "delivery",
+    labelEn: "Courier, tracking or payment",
+    labelFr: "Livreur, suivi ou paiement",
+    icon: Package,
+  },
 ];
 
 /**
@@ -98,9 +144,7 @@ export function SupportRouter() {
     setChannel(c);
     setIssue(null);
     setSupportContext(c, activeLocation.id);
-    trackSupportRouted(
-      c === "not_yet" ? "general" : c === "phone" ? "phone_order" : "location",
-    );
+    trackSupportRouted(c === "not_yet" ? "general" : c === "phone" ? "phone_order" : "location");
   }
 
   function reset() {

@@ -14,7 +14,8 @@ export function FaqList() {
     return faqEntries.filter((f) => {
       if (category !== "all" && f.category !== category) return false;
       if (!q) return true;
-      const hay = `${f.questionEn} ${f.questionFr} ${f.answerEn} ${f.answerFr} ${f.tags.join(" ")}`.toLowerCase();
+      const hay =
+        `${f.questionEn} ${f.questionFr} ${f.answerEn} ${f.answerFr} ${f.tags.join(" ")}`.toLowerCase();
       return hay.includes(q);
     });
   }, [query, category]);

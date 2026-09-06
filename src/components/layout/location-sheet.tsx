@@ -131,13 +131,12 @@ function LocationRow({
         selected ? "border-primary bg-card" : "border-border bg-card"
       }`}
     >
-      <button
-        onClick={() => setSelectedLocationId(loc.id)}
-        className="w-full text-left focus-ppp"
-      >
+      <button onClick={() => setSelectedLocationId(loc.id)} className="w-full text-left focus-ppp">
         <div className="flex items-center justify-between gap-2">
           <p className="font-display text-xl uppercase">{loc.neighborhood}</p>
-          <span className={`border px-2 py-0.5 text-[0.55rem] font-bold uppercase tracking-widest ${badgeClass}`}>
+          <span
+            className={`border px-2 py-0.5 text-[0.55rem] font-bold uppercase tracking-widest ${badgeClass}`}
+          >
             {isClosed
               ? t("Closed", "Fermé")
               : isComingSoon

@@ -206,7 +206,9 @@ export function CallbackSheet({ trigger, defaultReason, defaultLocationSlug }: C
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="cb-time">{t("Preferred callback time (optional)", "Heure de rappel préférée (optionnel)")}</Label>
+              <Label htmlFor="cb-time">
+                {t("Preferred callback time (optional)", "Heure de rappel préférée (optionnel)")}
+              </Label>
               <Textarea
                 id="cb-time"
                 rows={2}

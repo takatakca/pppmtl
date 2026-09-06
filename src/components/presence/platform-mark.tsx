@@ -27,8 +27,7 @@ export function PlatformMark({
   className?: string;
 }) {
   const meta = platformMeta(platformId);
-  const box =
-    size === "lg" ? "h-14 w-14" : size === "sm" ? "h-8 w-8" : "h-11 w-11";
+  const box = size === "lg" ? "h-14 w-14" : size === "sm" ? "h-8 w-8" : "h-11 w-11";
   const glyph = size === "lg" ? "h-7 w-7" : size === "sm" ? "h-4 w-4" : "h-5 w-5";
   const frame = `grid ${box} shrink-0 place-items-center border border-border bg-background ${className}`;
 

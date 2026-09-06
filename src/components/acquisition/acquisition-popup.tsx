@@ -227,7 +227,11 @@ export function AcquisitionPopup() {
                 }`}
               />
               {error && (
-                <p id="ppp-welcome-email-error" role="alert" className="mt-1.5 text-xs text-destructive">
+                <p
+                  id="ppp-welcome-email-error"
+                  role="alert"
+                  className="mt-1.5 text-xs text-destructive"
+                >
                   {tr("auth.invalidEmail")}
                 </p>
               )}

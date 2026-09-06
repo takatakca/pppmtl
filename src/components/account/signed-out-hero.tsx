@@ -17,12 +17,18 @@ export function SignedOutHero({ accountsAvailable }: { accountsAvailable: boolea
     {
       icon: Clock,
       title: t("One-tap reorder", "Recommander en une touche"),
-      body: t("Your last PPP order, ready to send again.", "Votre dernière commande, prête à repartir."),
+      body: t(
+        "Your last PPP order, ready to send again.",
+        "Votre dernière commande, prête à repartir.",
+      ),
     },
     {
       icon: Star,
       title: t("Keep your points", "Conservez vos points"),
-      body: t("Rewards follow your account, not your device.", "Les points suivent votre compte, pas l'appareil."),
+      body: t(
+        "Rewards follow your account, not your device.",
+        "Les points suivent votre compte, pas l'appareil.",
+      ),
     },
     {
       icon: Heart,
@@ -105,7 +111,6 @@ export function SignedOutHero({ accountsAvailable }: { accountsAvailable: boolea
           </section>
         ))}
       </div>
-
 
       <section className="mt-2 flex items-start gap-3 border border-border bg-card p-5">
         <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-accent" />

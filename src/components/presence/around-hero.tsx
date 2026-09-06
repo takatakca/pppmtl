@@ -44,7 +44,10 @@ export function AroundHero() {
 
         <dl className="mt-6 grid grid-cols-2 gap-y-4 border-t border-border pt-5 sm:grid-cols-4">
           {stats.map((s) => (
-            <div key={s.label} className="border-l border-border pl-3 first:border-l-0 first:pl-0 sm:pl-4">
+            <div
+              key={s.label}
+              className="border-l border-border pl-3 first:border-l-0 first:pl-0 sm:pl-4"
+            >
               <dt className="sr-only">{s.label}</dt>
               <dd className="font-display text-4xl leading-none">{s.value}</dd>
               <p className="mt-1 text-[0.55rem] font-bold uppercase tracking-[0.25em] text-muted-foreground">
@@ -70,11 +73,7 @@ export function AroundHero() {
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent" />
         </div>
 
-        <ul
-          className="absolute inset-0 hidden sm:block"
-          aria-hidden
-          style={layer(1)}
-        >
+        <ul className="absolute inset-0 hidden sm:block" aria-hidden style={layer(1)}>
           {chips.map((id, i) => (
             <li
               key={id}
@@ -85,7 +84,11 @@ export function AroundHero() {
                 left: `${[6, 78, 4, 86, 58, 44][i]}%`,
               }}
             >
-              <PlatformMark platformId={id} size="sm" className="shadow-[0_6px_20px_rgba(0,0,0,0.35)]" />
+              <PlatformMark
+                platformId={id}
+                size="sm"
+                className="shadow-[0_6px_20px_rgba(0,0,0,0.35)]"
+              />
             </li>
           ))}
         </ul>
