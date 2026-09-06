@@ -114,11 +114,6 @@ export const fr: DeepPartial<Dictionary> = {
     noAddresses: "Aucune adresse enregistrée",
     noRewards: "Aucun point pour l'instant",
   },
-  moments: {
-    welcome: "Bienvenue chez PPP",
-    firstOrder: "Votre PPP commence ici",
-    returning: "Content de vous revoir",
-  },
   auth: {
     invalidEmail: "Entrez une adresse courriel valide.",
   },
