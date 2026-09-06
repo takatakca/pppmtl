@@ -204,7 +204,7 @@ export function PPPFooter() {
               </h3>
               <ul className="mt-3 space-y-2">
                 {exploreLinks.map((i) => (
-                  <li key={i.key + ("to" in i ? i.to : i.href)}>
+                  <li key={i.key}>
                     <Link
                       to={i.to}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground focus-ppp"
@@ -222,7 +222,7 @@ export function PPPFooter() {
               </h3>
               <ul className="mt-3 space-y-2">
                 {companyLinks.map((i) => (
-                  <li key={i.key + ("to" in i ? i.to : i.href)}>
+                  <li key={i.key}>
                     <a
                       href={i.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground focus-ppp"
@@ -240,7 +240,7 @@ export function PPPFooter() {
               </h3>
               <ul className="mt-3 space-y-2">
                 {helpLinks.map((i) => (
-                  <li key={i.key + ("to" in i ? i.to : i.href)}>
+                  <li key={i.key}>
                     <a
                       href={i.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground focus-ppp"
