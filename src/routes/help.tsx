@@ -93,7 +93,7 @@ function HelpPage() {
           <p className="mt-3 max-w-xl text-sm text-primary-foreground/90">{tr("help.subtitle")}</p>
           <a
             href={pppBusiness.phone.href}
-            onClick={() => trackSupportRouted("phone")}
+            onClick={() => trackSupportRouted("phone_order")}
             className="press-tap mt-5 inline-flex items-center gap-2 bg-background px-6 py-3.5 font-display text-xl uppercase leading-none focus-ppp"
           >
             <Phone className="h-4 w-4 text-primary" />
@@ -112,7 +112,7 @@ function HelpPage() {
                   key={topic.id}
                   onClick={() => {
                     setBranch(topic.id);
-                    trackSupportRouted(topic.id);
+                    trackSupportRouted("general");
                   }}
                   className="lift-btn border border-border bg-card p-5 text-left focus-ppp"
                 >
@@ -159,7 +159,7 @@ function HelpPage() {
                   ))}
                   <a
                     href={pppBusiness.phone.href}
-                    onClick={() => trackSupportRouted("phone")}
+                    onClick={() => trackSupportRouted("phone_order")}
                     className="lift-btn flex items-center justify-between gap-3 border border-primary bg-primary/10 p-4 focus-ppp"
                   >
                     <span className="font-display text-xl uppercase leading-none">
