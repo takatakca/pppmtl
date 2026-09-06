@@ -51,6 +51,10 @@ export const en = {
   },
   popup: {
     welcome: "Welcome to PPP",
+    join: "Join PPP",
+    benefitsTitle: "What you get",
+    emailPlaceholder: "you@example.com",
+    back: "Back",
     welcomeBack: "Welcome back to PPP",
     chooseLanguage: "Choose your language",
     yourPpp: "Your PPP.",
