@@ -119,7 +119,7 @@ export function PPPFooter() {
                 className="w-full bg-secondary px-3 py-3 text-sm outline-none placeholder:text-muted-foreground"
               />
               <button className="bg-primary px-5 text-xs font-bold uppercase tracking-widest text-primary-foreground focus-ppp">
-                {t("Subscribe", "S'abonner")}
+                {t("Subscribe", "S'abonner", "Suscribirse")}
               </button>
             </form>
 
