@@ -3,6 +3,12 @@
  * intentionally local so a real pipeline can subscribe later.
  */
 export type PPPEvent =
+  | "language_changed"
+  | "acquisition_popup_shown"
+  | "acquisition_language_selected"
+  | "acquisition_email_started"
+  | "acquisition_signin_clicked"
+  | "acquisition_guest_clicked"
   | "food_search_started"
   | "food_search_submitted"
   | "voice_search_started"

@@ -3,9 +3,10 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Search, Sparkles } from "lucide-react";
 import { usePPP } from "@/context/ppp-store";
 import { faqEntries, faqCategories, type FaqEntry } from "@/data/support";
+import type { Lang } from "@/i18n/types";
 
 /** Deterministic local keyword match — no AI call, answers only from src/data/support.ts. */
-function rank(query: string, lang: "en" | "fr"): FaqEntry[] {
+function rank(query: string, lang: Lang): FaqEntry[] {
   const q = query.trim().toLowerCase();
   if (!q.length) return [];
   const words = q.split(/\s+/).filter(Boolean);
