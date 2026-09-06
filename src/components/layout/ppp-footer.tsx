@@ -10,30 +10,33 @@ import { GoogleGlyph } from "@/components/brand/social-icons";
 import { PPPLogo } from "@/components/brand/ppp-logo";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 
+import type { TranslationKey } from "@/i18n";
+
 const exploreLinks = [
-  { en: "Menu", fr: "Menu", to: "/menu" as const },
-  { en: "Offers", fr: "Offres", to: "/offers" as const },
-  { en: "Rewards", fr: "Récompenses", to: "/account" as const },
-  { en: "Gift Cards", fr: "Cartes-cadeaux", to: "/gift-cards" as const },
-  { en: "Locations", fr: "Emplacements", to: "/locations" as const },
+  { key: "navigation.menu", to: "/menu" },
+  { key: "navigation.offers", to: "/offers" },
+  { key: "navigation.rewards", to: "/account" },
+  { key: "navigation.giftCards", to: "/gift-cards" },
+  { key: "navigation.locations", to: "/locations" },
+] as const satisfies ReadonlyArray<{ key: TranslationKey; to: string }>;
+
+const companyLinks: Array<{ key: TranslationKey; href: string }> = [
+  { key: "navigation.about", href: "/about" },
+  { key: "navigation.franchise", href: "/franchise" },
+  { key: "navigation.careers", href: "/careers" },
+  { key: "navigation.contact", href: "/contact" },
+  { key: "navigation.aroundTheWeb", href: "/around-the-web" },
 ];
 
-/** Not yet owned as routed pages — kept as plain links so the footer is honest about scope. */
-const companyLinks = [
-  { en: "About", fr: "À propos", href: "/about" },
-  { en: "Franchise", fr: "Franchise", href: "/franchise" },
-  { en: "Careers", fr: "Carrières", href: "/careers" },
-  { en: "Contact", fr: "Contact", href: "/contact" },
-  { en: "Around the Web", fr: "Aux quatre coins du web", href: "/around-the-web" },
-];
-
-const helpLinks = [
-  { en: "FAQ", fr: "FAQ", href: "/faq" },
-  { en: "Support", fr: "Assistance", href: "/support" },
+const helpLinks: Array<{ key: TranslationKey; href: string }> = [
+  { key: "navigation.help", href: "/help" },
+  { key: "footer.faq", href: "/faq" },
+  { key: "navigation.support", href: "/support" },
+  { key: "navigation.trackOrder", href: "/track" },
 ];
 
 export function PPPFooter() {
-  const { lang, t, openOrderSheet } = usePPP();
+  const { t, tr, openOrderSheet } = usePPP();
   const location = useSelectedRestaurantLocation();
   const social = locationSocial(location);
   const orderable = canOrder(location);
@@ -159,7 +162,7 @@ export function PPPFooter() {
           <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
             <div>
               <h3 className="font-display text-sm uppercase tracking-widest text-accent">
-                {t("Order", "Commander")}
+                {tr("navigation.order")}
               </h3>
               <ul className="mt-3 space-y-2">
                 <li>
@@ -189,7 +192,7 @@ export function PPPFooter() {
                   })
                 ) : (
                   <li className="text-sm text-muted-foreground">
-                    {t("PPP Direct only", "PPP Direct seulement")}
+                    {t("PPP Direct only", "PPP Direct seulement", "Solo PPP Direct")}
                   </li>
                 )}
               </ul>
@@ -197,16 +200,16 @@ export function PPPFooter() {
 
             <div>
               <h3 className="font-display text-sm uppercase tracking-widest text-accent">
-                {t("Explore", "Explorer")}
+                {tr("footer.explore")}
               </h3>
               <ul className="mt-3 space-y-2">
                 {exploreLinks.map((i) => (
-                  <li key={i.en}>
+                  <li key={i.key + ("to" in i ? i.to : i.href)}>
                     <Link
                       to={i.to}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground focus-ppp"
                     >
-                      {lang === "fr" ? i.fr : i.en}
+                      {tr(i.key)}
                     </Link>
                   </li>
                 ))}
@@ -215,16 +218,16 @@ export function PPPFooter() {
 
             <div>
               <h3 className="font-display text-sm uppercase tracking-widest text-accent">
-                {t("Company", "Entreprise")}
+                {tr("footer.company")}
               </h3>
               <ul className="mt-3 space-y-2">
                 {companyLinks.map((i) => (
-                  <li key={i.en}>
+                  <li key={i.key + ("to" in i ? i.to : i.href)}>
                     <a
                       href={i.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground focus-ppp"
                     >
-                      {lang === "fr" ? i.fr : i.en}
+                      {tr(i.key)}
                     </a>
                   </li>
                 ))}
@@ -233,16 +236,16 @@ export function PPPFooter() {
 
             <div>
               <h3 className="font-display text-sm uppercase tracking-widest text-accent">
-                {t("Help", "Aide")}
+                {tr("footer.helpTitle")}
               </h3>
               <ul className="mt-3 space-y-2">
                 {helpLinks.map((i) => (
-                  <li key={i.en}>
+                  <li key={i.key + ("to" in i ? i.to : i.href)}>
                     <a
                       href={i.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground focus-ppp"
                     >
-                      {lang === "fr" ? i.fr : i.en}
+                      {tr(i.key)}
                     </a>
                   </li>
                 ))}
