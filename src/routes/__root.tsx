@@ -13,6 +13,8 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PPPProvider, usePPP } from "../context/ppp-store";
 import { CustomerSessionProvider } from "../lib/customer/session";
+import { AcquisitionPopup } from "../components/acquisition/acquisition-popup";
+import { htmlLangFor } from "../i18n/types";
 
 function NotFoundComponent() {
   return (
@@ -145,6 +147,7 @@ function RootComponent() {
           <HtmlLangSync />
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
+          <AcquisitionPopup />
         </CustomerSessionProvider>
       </PPPProvider>
     </QueryClientProvider>
@@ -159,7 +162,7 @@ function HtmlLangSync() {
   const { lang } = usePPP();
 
   useEffect(() => {
-    document.documentElement.lang = lang;
+    document.documentElement.lang = htmlLangFor(lang);
   }, [lang]);
 
   return null;

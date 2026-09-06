@@ -6,6 +6,7 @@ import { orderingChannels } from "@/config/external-presence";
 import { trackExternalOrder, trackSocialLink } from "@/lib/analytics";
 import { pppSocials } from "@/components/home/follow-ppp";
 import { PPPLogo } from "@/components/brand/ppp-logo";
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { trackSupportRouted } from "@/lib/analytics";
 
 const navItems = [
@@ -36,7 +37,7 @@ const mobileLinks = [
 ];
 
 export function PPPHeader() {
-  const { lang, setLang, mode, openSearch, openLocationSheet, openOrderSheet, t } = usePPP();
+  const { lang, mode, openSearch, openLocationSheet, openOrderSheet, t } = usePPP();
   const location = useSelectedRestaurantLocation();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -76,12 +77,7 @@ export function PPPHeader() {
             <button onClick={openOrderSheet} className="hover:text-foreground focus-ppp">
               {t("Other ways to order", "Autres façons de commander")}
             </button>
-            <button
-              onClick={() => setLang(lang === "en" ? "fr" : "en")}
-              className="border border-border px-2 py-0.5 hover:text-foreground focus-ppp"
-            >
-              {lang === "en" ? "FR" : "EN"}
-            </button>
+            <LanguageSwitcher variant="compact" />
           </div>
         </div>
       </div>
@@ -260,12 +256,7 @@ export function PPPHeader() {
               </li>
             ))}
           </ul>
-          <button
-            onClick={() => setLang(lang === "en" ? "fr" : "en")}
-            className="mt-4 w-full border border-border py-3 text-xs font-bold uppercase tracking-widest focus-ppp"
-          >
-            {lang === "en" ? "Français" : "English"}
-          </button>
+          <LanguageSwitcher variant="menu" className="mt-5" />
         </nav>
       )}
     </header>

@@ -8,6 +8,7 @@ import { trackExternalOrder, trackSocialLink } from "@/lib/analytics";
 import { pppSocials } from "@/components/home/follow-ppp";
 import { GoogleGlyph } from "@/components/brand/social-icons";
 import { PPPLogo } from "@/components/brand/ppp-logo";
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 
 const exploreLinks = [
   { en: "Menu", fr: "Menu", to: "/menu" as const },
@@ -259,6 +260,9 @@ export function PPPFooter() {
         <p className="mt-4 select-none font-display text-[18vw] uppercase leading-[0.75] text-foreground/8 lg:text-[13vw]">
           PPP Pizzeria
         </p>
+        <div className="mt-4 flex justify-start">
+          <LanguageSwitcher variant="compact" />
+        </div>
         <p className="border-t border-border py-5 text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
           © {new Date().getFullYear()} {pppBusiness.displayName}
         </p>
