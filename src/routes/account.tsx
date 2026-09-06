@@ -61,12 +61,13 @@ function AccountPage() {
         {status !== "loading" && status !== "onboarding" && (
           <section className="mt-2 border border-border bg-card p-5">
             <h2 className="font-display text-3xl uppercase leading-none">
-              {t("Order history", "Historique des commandes")}
+              {t("Order history", "Historique des commandes", "Historial de pedidos")}
             </h2>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
               {t(
                 "Orders placed through Uber Eats, DoorDash or Skip are handled by that platform, so they can't appear here — reorder them in the same app you used.",
                 "Les commandes passées sur Uber Eats, DoorDash ou Skip sont gérées par ces plateformes et ne peuvent pas apparaître ici — recommandez-les dans la même application.",
+                "Los pedidos hechos en Uber Eats, DoorDash o Skip los gestiona esa plataforma, así que no pueden aparecer aquí — vuelve a pedirlos en la misma aplicación.",
               )}
             </p>
           </section>
