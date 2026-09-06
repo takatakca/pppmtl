@@ -28,7 +28,8 @@ export function AcquisitionPopup() {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (open) track("acquisition_popup_shown", { step: preferredLanguage ? "account" : "language" });
+    if (open)
+      track("acquisition_popup_shown", { step: preferredLanguage ? "account" : "language" });
   }, [open, preferredLanguage]);
 
   useEffect(() => {

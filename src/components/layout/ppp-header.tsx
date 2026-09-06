@@ -17,7 +17,6 @@ const navItems = [
   { en: "Around the Web", fr: "Aux quatre coins du web", href: "/around-the-web" },
 ];
 
-
 const mobileRoutes = [
   { en: "Full menu", fr: "Menu complet", to: "/menu" },
   { en: "Track order", fr: "Suivre ma commande", to: "/track" },

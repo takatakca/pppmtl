@@ -18,12 +18,7 @@ import { translate, type TranslationKey } from "@/i18n";
 const KEY = "ppp.session.v1";
 
 export type SupportOrderChannel =
-  | "direct"
-  | "phone"
-  | "uber_eats"
-  | "doordash"
-  | "skip"
-  | "not_yet";
+  "direct" | "phone" | "uber_eats" | "doordash" | "skip" | "not_yet";
 
 interface Persisted {
   lang: Lang;
