@@ -69,7 +69,7 @@ export const fr: DeepPartial<Dictionary> = {
   },
   moments: {
     welcome: "Bienvenue chez PPP",
-    firstOrder: "Votre parcours PPP commence ici",
+    firstOrder: "Votre PPP commence ici",
     returning: "Bon retour",
   },
   footer: {
