@@ -7,11 +7,7 @@ import { SearchOverlay } from "@/components/search/search-overlay";
 import { LocationSheet } from "@/components/layout/location-sheet";
 import { usePPP } from "@/context/ppp-store";
 import { Reveal } from "@/components/motion/reveal";
-import {
-  legacyPresence,
-  livePresence,
-  type PresenceRecord,
-} from "@/config/presence-directory";
+import { legacyPresence, livePresence, type PresenceRecord } from "@/config/presence-directory";
 import { AroundHero } from "@/components/presence/around-hero";
 import { GoogleTrustCard } from "@/components/presence/google-trust-card";
 import {
@@ -37,8 +33,7 @@ export const Route = createFileRoute("/around-the-web")({
       { property: "og:title", content: "Talking About PPP — Around the Web" },
       {
         property: "og:description",
-        content:
-          "A single directory of PPP Pizzeria's real online presence, current and historic.",
+        content: "A single directory of PPP Pizzeria's real online presence, current and historic.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: CANONICAL },

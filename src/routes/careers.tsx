@@ -23,7 +23,10 @@ export const Route = createFileRoute("/careers")({
           "Kitchen, counter and delivery roles at PPP Pizzeria Montréal. See what it's like to work with PPP and how to apply.",
       },
       { property: "og:title", content: "Careers at PPP Pizzeria" },
-      { property: "og:description", content: "Work with PPP — kitchen, counter and delivery roles." },
+      {
+        property: "og:description",
+        content: "Work with PPP — kitchen, counter and delivery roles.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:url", content: canonicalUrl("/careers") },
@@ -34,10 +37,38 @@ export const Route = createFileRoute("/careers")({
 });
 
 const roles = [
-  { icon: ChefHat, en: { t: "Kitchen", d: "Line cooks and prep, rotisserie, pizza and fry stations." }, fr: { t: "Cuisine", d: "Cuisiniers et préparation, rôtisserie, pizza et friture." } },
-  { icon: Users, en: { t: "Counter / Guest Experience", d: "Front counter, phone orders and in-store guest experience." }, fr: { t: "Comptoir / Expérience client", d: "Comptoir, commandes téléphoniques et accueil en salle." } },
-  { icon: Truck, en: { t: "Delivery / Operations", d: "Where applicable — delivery and day-to-day store operations." }, fr: { t: "Livraison / Opérations", d: "Selon l'emplacement — livraison et opérations quotidiennes." } },
-  { icon: Wrench, en: { t: "Management", d: "Shift leads and store management across PPP locations." }, fr: { t: "Gestion", d: "Chefs de quart et gestion de commerce dans les emplacements PPP." } },
+  {
+    icon: ChefHat,
+    en: { t: "Kitchen", d: "Line cooks and prep, rotisserie, pizza and fry stations." },
+    fr: { t: "Cuisine", d: "Cuisiniers et préparation, rôtisserie, pizza et friture." },
+  },
+  {
+    icon: Users,
+    en: {
+      t: "Counter / Guest Experience",
+      d: "Front counter, phone orders and in-store guest experience.",
+    },
+    fr: {
+      t: "Comptoir / Expérience client",
+      d: "Comptoir, commandes téléphoniques et accueil en salle.",
+    },
+  },
+  {
+    icon: Truck,
+    en: {
+      t: "Delivery / Operations",
+      d: "Where applicable — delivery and day-to-day store operations.",
+    },
+    fr: {
+      t: "Livraison / Opérations",
+      d: "Selon l'emplacement — livraison et opérations quotidiennes.",
+    },
+  },
+  {
+    icon: Wrench,
+    en: { t: "Management", d: "Shift leads and store management across PPP locations." },
+    fr: { t: "Gestion", d: "Chefs de quart et gestion de commerce dans les emplacements PPP." },
+  },
 ];
 
 function CareersPage() {
@@ -88,7 +119,11 @@ function CareersPage() {
               const c = lang === "fr" ? r.fr : r.en;
               const Icon = r.icon;
               return (
-                <Reveal key={c.t} delay={i * 70} className="flex gap-3 border border-border bg-card p-5">
+                <Reveal
+                  key={c.t}
+                  delay={i * 70}
+                  className="flex gap-3 border border-border bg-card p-5"
+                >
                   <Icon className="h-5 w-5 shrink-0 text-primary" />
                   <div>
                     <h3 className="font-display text-xl uppercase leading-none">{c.t}</h3>

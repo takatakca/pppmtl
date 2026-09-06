@@ -163,6 +163,15 @@ function HtmlLangSync() {
 
   useEffect(() => {
     document.documentElement.lang = htmlLangFor(lang);
+    // Short cross-fade so switching language reads as one smooth change of copy
+    // rather than a flicker. State (cart, location, account) is never touched.
+    const root = document.documentElement;
+    root.classList.add("lang-swap");
+    const timer = window.setTimeout(() => root.classList.remove("lang-swap"), 260);
+    return () => {
+      window.clearTimeout(timer);
+      root.classList.remove("lang-swap");
+    };
   }, [lang]);
 
   return null;

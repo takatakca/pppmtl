@@ -71,8 +71,10 @@ export const reputationRepository: ReputationRepository = {
    * Returning `[]` is what keeps the UI on "read reviews on the platform"
    * instead of inventing testimonials.
    */
-  getReviews: async (_provider: ReviewProvider, _locationId?: string): Promise<ReviewRecord[]> =>
-    [],
+  getReviews: async (
+    _provider: ReviewProvider,
+    _locationId?: string,
+  ): Promise<ReviewRecord[]> => [],
 };
 
 export const socialFeedRepository: SocialFeedRepository = {

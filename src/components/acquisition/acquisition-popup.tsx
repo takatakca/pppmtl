@@ -19,7 +19,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
  * fake account creation — email simply carries into the real sign-up route.
  */
 export function AcquisitionPopup() {
-  const { open, dismiss } = useAcquisitionPopup();
+  const { open, dismiss, returning } = useAcquisitionPopup();
   const { lang, preferredLanguage, setPreferredLanguage, tr } = usePPP();
   const navigate = useNavigate();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -166,7 +166,7 @@ export function AcquisitionPopup() {
               <div className="flex items-center gap-3 pr-12">
                 <PPPLogo variant="account" />
                 <span className="text-[0.6rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
-                  {tr("popup.welcome")}
+                  {returning ? tr("popup.welcomeBack") : tr("popup.welcome")}
                 </span>
               </div>
 
@@ -174,11 +174,11 @@ export function AcquisitionPopup() {
                 id="ppp-welcome-title"
                 className="mt-3 font-display text-3xl uppercase leading-[0.9] sm:text-[2.75rem]"
               >
-                {tr("popup.join")}
+                {returning ? tr("common.signIn") : tr("popup.join")}
               </h2>
 
               <p className="mt-2 max-w-prose text-sm text-muted-foreground">
-                {tr("popup.description")}
+                {returning ? tr("popup.descriptionReturning") : tr("popup.description")}
               </p>
 
               <div className="mt-4 grid gap-2 sm:grid-cols-2">

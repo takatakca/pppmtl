@@ -9,34 +9,37 @@ import { PPPLogo } from "@/components/brand/ppp-logo";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { trackSupportRouted } from "@/lib/analytics";
 
-const navItems = [
-  { en: "Deals", fr: "Offres", href: "#deals" },
-  { en: "Rewards", fr: "Récompenses", href: "#rewards" },
-  { en: "Locations", fr: "Emplacements", href: "/locations" },
-  { en: "Franchise", fr: "Franchise", href: "#franchise" },
-  { en: "Around the Web", fr: "Aux quatre coins du web", href: "/around-the-web" },
+import type { TranslationKey } from "@/i18n";
+
+const navItems: Array<{ key: TranslationKey; href: string }> = [
+  { key: "navigation.deals", href: "#deals" },
+  { key: "navigation.rewards", href: "#rewards" },
+  { key: "navigation.locations", href: "/locations" },
+  { key: "navigation.franchise", href: "#franchise" },
+  { key: "navigation.aroundTheWeb", href: "/around-the-web" },
 ];
 
 const mobileRoutes = [
-  { en: "Full menu", fr: "Menu complet", to: "/menu" },
-  { en: "Track order", fr: "Suivre ma commande", to: "/track" },
-  { en: "Gift cards", fr: "Cartes-cadeaux", to: "/gift-cards" },
-  { en: "Offers", fr: "Offres", to: "/offers" },
-  { en: "Find us online", fr: "Nous trouver en ligne", to: "/connect" },
-] as const;
+  { key: "navigation.fullMenu", to: "/menu" },
+  { key: "navigation.trackOrder", to: "/track" },
+  { key: "navigation.giftCards", to: "/gift-cards" },
+  { key: "navigation.offers", to: "/offers" },
+  { key: "navigation.help", to: "/help" },
+  { key: "navigation.findUsOnline", to: "/connect" },
+] as const satisfies ReadonlyArray<{ key: TranslationKey; to: string }>;
 
-const mobileLinks = [
-  { en: "Deals", fr: "Offres", href: "#deals" },
-  { en: "Rewards", fr: "Récompenses", href: "#rewards" },
-  { en: "Locations", fr: "Emplacements", href: "/locations" },
-  { en: "Careers", fr: "Carrières", href: "#franchise" },
-  { en: "Franchise", fr: "Franchise", href: "#franchise" },
-  { en: "Contact", fr: "Contact", href: "#locations" },
-  { en: "Around the Web", fr: "Aux quatre coins du web", href: "/around-the-web" },
+const mobileLinks: Array<{ key: TranslationKey; href: string }> = [
+  { key: "navigation.deals", href: "#deals" },
+  { key: "navigation.rewards", href: "#rewards" },
+  { key: "navigation.locations", href: "/locations" },
+  { key: "navigation.careers", href: "#franchise" },
+  { key: "navigation.franchise", href: "#franchise" },
+  { key: "navigation.contact", href: "#locations" },
+  { key: "navigation.aroundTheWeb", href: "/around-the-web" },
 ];
 
 export function PPPHeader() {
-  const { lang, mode, openSearch, openLocationSheet, openOrderSheet, t } = usePPP();
+  const { mode, openSearch, openLocationSheet, openOrderSheet, t, tr } = usePPP();
   const location = useSelectedRestaurantLocation();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -58,12 +61,12 @@ export function PPPHeader() {
             className="flex items-center gap-1.5 hover:text-foreground focus-ppp"
           >
             <MapPin className="h-3 w-3 text-primary" />
-            {location?.neighborhood ?? t("Choose a location", "Choisir un emplacement")}
+            {location?.neighborhood ?? tr("navigation.chooseLocation")}
             <ChevronDown className="h-3 w-3" />
           </button>
           <span className="text-border">/</span>
           <button onClick={openOrderSheet} className="hover:text-foreground focus-ppp">
-            {mode === "pickup" ? t("Pickup", "Cueillette") : t("Delivery", "Livraison")}
+            {mode === "pickup" ? tr("navigation.pickup") : tr("navigation.delivery")}
           </button>
           <div className="ml-auto flex items-center gap-3">
             <Link
@@ -71,10 +74,10 @@ export function PPPHeader() {
               onClick={() => trackSupportRouted("track_order")}
               className="hover:text-foreground focus-ppp"
             >
-              {t("Track order", "Suivre ma commande")}
+              {tr("navigation.trackOrder")}
             </Link>
             <button onClick={openOrderSheet} className="hover:text-foreground focus-ppp">
-              {t("Other ways to order", "Autres façons de commander")}
+              {tr("navigation.otherWaysToOrder")}
             </button>
             <LanguageSwitcher variant="compact" />
           </div>
@@ -108,21 +111,21 @@ export function PPPHeader() {
               to="/menu"
               className="font-display text-sm uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground focus-ppp"
             >
-              {lang === "fr" ? "Menu" : "Menu"}
+              {tr("navigation.menu")}
             </Link>
             <Link
               to="/gift-cards"
               className="font-display text-sm uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground focus-ppp"
             >
-              {lang === "fr" ? "Cartes-cadeaux" : "Gift cards"}
+              {tr("navigation.giftCards")}
             </Link>
             {navItems.map((item) => (
               <a
-                key={item.en}
+                key={item.key + item.href}
                 href={item.href}
                 className="font-display text-sm uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground focus-ppp"
               >
-                {lang === "fr" ? item.fr : item.en}
+                {tr(item.key)}
               </a>
             ))}
           </nav>
@@ -134,39 +137,39 @@ export function PPPHeader() {
           >
             <MapPin className="h-3.5 w-3.5 shrink-0 text-primary" />
             <span className="truncate text-[0.65rem] font-bold uppercase tracking-widest">
-              {location?.neighborhood ?? t("Location", "Emplacement")}
+              {location?.neighborhood ?? t("Location", "Emplacement", "Sucursal")}
             </span>
           </button>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => openSearch()}
-              aria-label={t("Search the menu", "Rechercher au menu")}
+              aria-label={t("Search the menu", "Rechercher au menu", "Buscar en el menú")}
               className="inline-flex h-9 items-center gap-2 border border-border px-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground focus-ppp lg:h-10 lg:px-3"
             >
               <Search className="h-4 w-4" />
-              <span className="hidden lg:inline">{t("Search food", "Chercher")}</span>
+              <span className="hidden lg:inline">{t("Search food", "Chercher", "Buscar")}</span>
               <Mic className="hidden h-4 w-4 text-primary lg:inline" />
             </button>
             <Link
               to="/account/sign-in"
               search={{ returnTo: "/account" }}
-              aria-label={t("Sign in", "Connexion")}
+              aria-label={tr("common.signIn")}
               className="hidden h-10 items-center gap-2 border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp lg:inline-flex"
             >
               <User className="h-4 w-4" />
-              {t("Sign in", "Connexion")}
+              {tr("common.signIn")}
             </Link>
             <button
               onClick={openOrderSheet}
               className="hidden h-10 items-center bg-primary px-5 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp lg:inline-flex"
               style={{ boxShadow: "var(--shadow-glow)" }}
             >
-              {t("Order now", "Commander")}
+              {tr("navigation.orderNow")}
             </button>
             <button
               onClick={() => setOpen((v) => !v)}
-              aria-label={t("Open menu", "Ouvrir le menu")}
+              aria-label={t("Open menu", "Ouvrir le menu", "Abrir el menú")}
               aria-expanded={open}
               className="inline-flex h-9 w-9 items-center justify-center border border-border focus-ppp lg:hidden"
             >
@@ -185,7 +188,7 @@ export function PPPHeader() {
             }}
             className="w-full bg-primary py-3.5 font-display text-2xl uppercase leading-none text-primary-foreground focus-ppp"
           >
-            {t("Order now", "Commander")}
+            {tr("navigation.orderNow")}
           </button>
           <div className="mt-4 divide-y divide-border border-y border-border">
             <Link
@@ -193,7 +196,7 @@ export function PPPHeader() {
               onClick={() => setOpen(false)}
               className="block py-3 font-display text-2xl uppercase leading-none focus-ppp"
             >
-              {t("Order online", "Commander en ligne")}
+              {t("Order online", "Commander en ligne", "Pedir en línea")}
             </Link>
             {mobileRoutes.map((item) => (
               <Link
@@ -202,22 +205,22 @@ export function PPPHeader() {
                 onClick={() => setOpen(false)}
                 className="block py-3 font-display text-2xl uppercase leading-none focus-ppp"
               >
-                {lang === "fr" ? item.fr : item.en}
+                {tr(item.key)}
               </Link>
             ))}
             {mobileLinks.map((item) => (
               <a
-                key={item.en}
+                key={item.key + item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className="block py-3 font-display text-2xl uppercase leading-none focus-ppp"
               >
-                {lang === "fr" ? item.fr : item.en}
+                {tr(item.key)}
               </a>
             ))}
           </div>
           <p className="mt-5 text-[0.6rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
-            {t("Order online", "Commander en ligne")}
+            {t("Order online", "Commander en ligne", "Pedir en línea")}
           </p>
           <ul className="mt-2 grid grid-cols-3 gap-2">
             {orderingChannels.map((c) => (
@@ -236,7 +239,7 @@ export function PPPHeader() {
             ))}
           </ul>
           <p className="mt-5 text-[0.6rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
-            {t("Follow", "Suivre")}
+            {t("Follow", "Suivre", "Síguenos")}
           </p>
           <ul className="mt-2 flex flex-wrap gap-2">
             {pppSocials.map((s) => (

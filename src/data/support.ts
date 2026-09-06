@@ -200,16 +200,14 @@ export const faqEntries: FaqEntry[] = [
     category: "locations",
     questionEn: "Where are PPP locations?",
     questionFr: "Où se trouvent les emplacements PPP?",
-    answerEn:
-      `Open PPP kitchens today are in ${restaurantLocations
-        .filter((l) => l.lifecycleStatus === "open")
-        .map((l) => l.neighborhood)
-        .join(" and ")}. See the Locations section for addresses, phone numbers and directions.`,
-    answerFr:
-      `Les cuisines PPP ouvertes aujourd'hui sont à ${restaurantLocations
-        .filter((l) => l.lifecycleStatus === "open")
-        .map((l) => l.neighborhood)
-        .join(" et ")}. Consultez la section Emplacements pour les adresses, numéros et itinéraires.`,
+    answerEn: `Open PPP kitchens today are in ${restaurantLocations
+      .filter((l) => l.lifecycleStatus === "open")
+      .map((l) => l.neighborhood)
+      .join(" and ")}. See the Locations section for addresses, phone numbers and directions.`,
+    answerFr: `Les cuisines PPP ouvertes aujourd'hui sont à ${restaurantLocations
+      .filter((l) => l.lifecycleStatus === "open")
+      .map((l) => l.neighborhood)
+      .join(" et ")}. Consultez la section Emplacements pour les adresses, numéros et itinéraires.`,
     tags: ["locations", "where", "address"],
   },
   {
@@ -217,10 +215,8 @@ export const faqEntries: FaqEntry[] = [
     category: "locations",
     questionEn: "Which locations are coming soon?",
     questionFr: "Quels emplacements ouvriront bientôt?",
-    answerEn:
-      `New PPP kitchens are planned for ${comingSoonNamesEn}. No opening dates are confirmed yet — check back on the Locations page for updates.`,
-    answerFr:
-      `De nouvelles cuisines PPP sont prévues à ${comingSoonNamesFr}. Aucune date d'ouverture n'est confirmée pour le moment — revenez consulter la page Emplacements pour les mises à jour.`,
+    answerEn: `New PPP kitchens are planned for ${comingSoonNamesEn}. No opening dates are confirmed yet — check back on the Locations page for updates.`,
+    answerFr: `De nouvelles cuisines PPP sont prévues à ${comingSoonNamesFr}. Aucune date d'ouverture n'est confirmée pour le moment — revenez consulter la page Emplacements pour les mises à jour.`,
     tags: ["coming soon", "new location", "opening"],
   },
   {

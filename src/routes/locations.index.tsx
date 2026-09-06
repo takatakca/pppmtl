@@ -50,7 +50,11 @@ function LocationsPage() {
           )}
         </p>
 
-        <Section title={t("Open now", "Ouverts")} locations={openLocations} badgeClass="border-primary text-primary" />
+        <Section
+          title={t("Open now", "Ouverts")}
+          locations={openLocations}
+          badgeClass="border-primary text-primary"
+        />
         <Section
           title={t("Coming soon", "Bientôt ouvert")}
           locations={comingSoonLocations}
@@ -91,7 +95,9 @@ function Section({
           <li key={l.id} className="border border-border bg-card p-4">
             <div className="flex items-start justify-between gap-2">
               <p className="font-display text-xl uppercase leading-tight">{l.neighborhood}</p>
-              <span className={`shrink-0 border px-2 py-0.5 text-[0.55rem] font-bold uppercase tracking-widest ${badgeClass}`}>
+              <span
+                className={`shrink-0 border px-2 py-0.5 text-[0.55rem] font-bold uppercase tracking-widest ${badgeClass}`}
+              >
                 {l.lifecycleStatus === "open"
                   ? t("Open", "Ouvert")
                   : l.lifecycleStatus === "coming_soon"
@@ -110,7 +116,9 @@ function Section({
               params={{ slug: l.slug }}
               className="mt-3 inline-block border border-border px-4 py-2 text-xs font-bold uppercase tracking-widest focus-ppp hover:border-primary"
             >
-              {canOrder(l) ? t("Order / details", "Commander / détails") : t("View details", "Voir les détails")}
+              {canOrder(l)
+                ? t("Order / details", "Commander / détails")
+                : t("View details", "Voir les détails")}
             </Link>
           </li>
         ))}

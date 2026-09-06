@@ -19,34 +19,38 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
   const empties = [
     {
       icon: Clock,
-      title: t("Order again", "Recommander"),
+      title: t("Order again", "Recommander", "Pedir de nuevo"),
       body: t(
         "No PPP Direct orders yet. Your first one lands here for one-tap reordering.",
         "Aucune commande PPP Direct. La première apparaîtra ici pour recommander en une touche.",
+        "Aún no hay pedidos PPP Direct. El primero aparecerá aquí para repetirlo con un toque.",
       ),
     },
     {
       icon: Heart,
-      title: t("Favourites", "Favoris"),
+      title: t("Favourites", "Favoris", "Favoritos"),
       body: t(
         "Tap the heart on any item to pin it here.",
         "Touchez le cœur d'un article pour l'épingler ici.",
+        "Toca el corazón de un plato para fijarlo aquí.",
       ),
     },
     {
       icon: MapPin,
-      title: t("Saved addresses", "Adresses enregistrées"),
+      title: t("Saved addresses", "Adresses enregistrées", "Direcciones guardadas"),
       body: t(
         "Add a delivery address at checkout and it stays saved here.",
         "Ajoutez une adresse au paiement et elle sera enregistrée ici.",
+        "Agrega una dirección al pagar y quedará guardada aquí.",
       ),
     },
     {
       icon: Gift,
-      title: t("Gift cards", "Cartes-cadeaux"),
+      title: t("Gift cards", "Cartes-cadeaux", "Tarjetas de regalo"),
       body: t(
         "Buy, send and redeem PPP gift cards.",
         "Achetez, offrez et utilisez des cartes PPP.",
+        "Compra, envía y usa tarjetas de regalo PPP.",
       ),
     },
   ];
@@ -58,12 +62,13 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
           PPP {pppBusiness.shortLocationName}
         </p>
         <h1 className="mt-2 font-display text-5xl uppercase leading-[0.85] text-primary-foreground sm:text-7xl">
-          {t("Hey", "Salut")} {name}
+          {t("Hey", "Salut", "Hola")} {name}
         </h1>
         <p className="mt-3 max-w-xl text-sm text-primary-foreground/90">
           {t(
             "Everything PPP knows about how you like to order, in one place.",
             "Tout ce que PPP sait de vos habitudes de commande, au même endroit.",
+            "Todo lo que PPP sabe sobre cómo te gusta pedir, en un solo lugar.",
           )}
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
@@ -71,7 +76,7 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
             to="/order"
             className="press-tap cta-glow bg-background px-6 py-3.5 font-display text-xl uppercase leading-none focus-ppp"
           >
-            {t("Start an order", "Commencer une commande")}
+            {t("Start an order", "Commencer une commande", "Empezar un pedido")}
           </Link>
           <button
             type="button"
@@ -79,17 +84,17 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
             className="press-tap inline-flex items-center gap-2 border border-primary-foreground/40 px-6 py-3.5 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
           >
             <LogOut className="h-4 w-4" />
-            {t("Sign out", "Déconnexion")}
+            {t("Sign out", "Déconnexion", "Cerrar sesión")}
           </button>
         </div>
       </section>
 
       <section className="mt-2 border border-border bg-card p-5">
         <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
-          {t("PPP Rewards", "Points PPP")}
+          {t("PPP Rewards", "Points PPP", "Recompensas PPP")}
         </p>
         <h2 className="mt-1 font-display text-3xl uppercase leading-none">
-          {t("Your rewards progress", "Votre progression")}
+          {t("Your rewards progress", "Votre progression", "Tu progreso de recompensas")}
         </h2>
         <div className="mt-3 flex items-center gap-4 border border-dashed border-border p-4">
           <Star className="h-8 w-8 shrink-0 text-muted-foreground" />
@@ -97,6 +102,7 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
             {t(
               "No points yet. Order directly from PPP to start earning.",
               "Aucun point pour l'instant. Commandez directement chez PPP pour en gagner.",
+              "Aún no hay puntos. Pide directamente en PPP para empezar a acumular.",
             )}
           </p>
         </div>
@@ -119,12 +125,12 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
 
       <section className="mt-2 border border-border bg-card p-5">
         <h2 className="font-display text-3xl uppercase leading-none">
-          {t("Your details", "Vos informations")}
+          {t("Your details", "Vos informations", "Tus datos")}
         </h2>
         <dl className="mt-3 grid gap-2 sm:grid-cols-2">
           <div className="border border-border p-4">
             <dt className="text-[0.6rem] font-bold uppercase tracking-widest text-muted-foreground">
-              {t("Preferred name", "Nom d'usage")}
+              {t("Preferred name", "Nom d'usage", "Nombre preferido")}
             </dt>
             <dd className="mt-1 font-display text-2xl uppercase">{name}</dd>
             <p className="mt-1 text-[0.7rem] text-muted-foreground">
@@ -136,7 +142,7 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
           </div>
           <div className="border border-border p-4">
             <dt className="text-[0.6rem] font-bold uppercase tracking-widest text-muted-foreground">
-              {t("Email", "Courriel")}
+              {t("Email", "Courriel", "Correo electrónico")}
             </dt>
             <dd className="mt-1 break-all text-sm">{customer.email}</dd>
           </div>

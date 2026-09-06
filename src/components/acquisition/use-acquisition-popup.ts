@@ -3,6 +3,8 @@ import { useRouterState } from "@tanstack/react-router";
 import { usePPP } from "@/context/ppp-store";
 
 const DISMISSED_KEY = "ppp.welcome.dismissed.v1";
+/** Survives the session so a second visit gets the returning-customer wording. */
+const SEEN_KEY = "ppp.welcome.seen.v1";
 
 /** Routes where a welcome interruption would get in the customer's way. */
 const SUPPRESSED = ["/account/sign-in", "/account/sign-up", "/account/forgot-password", "/dev"];
@@ -24,11 +26,20 @@ function alreadyDismissed() {
  * or a second public-route navigation — whichever happens first. Never on first
  * paint, never on auth routes, never on top of another open sheet.
  */
+function isReturningVisitor() {
+  try {
+    return window.localStorage.getItem(SEEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export function useAcquisitionPopup() {
   const { searchOpen, locationSheetOpen, orderSheetOpen, cartOpen } = usePPP();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   const [navCount, setNavCount] = useState(0);
+  const [returning, setReturning] = useState(false);
 
   useEffect(() => {
     setNavCount((n) => n + 1);
@@ -44,6 +55,12 @@ export function useAcquisitionPopup() {
     const show = () => {
       if (done) return;
       done = true;
+      setReturning(isReturningVisitor());
+      try {
+        window.localStorage.setItem(SEEN_KEY, "1");
+      } catch {
+        /* ignore */
+      }
       setOpen(true);
     };
 
@@ -73,5 +90,5 @@ export function useAcquisitionPopup() {
     setOpen(false);
   };
 
-  return { open: open && !blocked, dismiss };
+  return { open: open && !blocked, dismiss, returning };
 }

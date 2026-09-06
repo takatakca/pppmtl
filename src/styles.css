@@ -96,7 +96,8 @@
     oklch(0.145 0 0 / 0.95) 100%
   );
   --gradient-flame: linear-gradient(100deg, oklch(0.55 0.235 28), oklch(0.68 0.2 45));
-  --shadow-glow: 0 0 0 1px oklch(0.55 0.235 28 / 0.35), 0 18px 50px -18px oklch(0.55 0.235 28 / 0.6);
+  --shadow-glow:
+    0 0 0 1px oklch(0.55 0.235 28 / 0.35), 0 18px 50px -18px oklch(0.55 0.235 28 / 0.6);
   --shadow-card: 0 24px 60px -30px oklch(0 0 0 / 0.8);
   --font-display: "Anton", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Barlow", ui-sans-serif, system-ui, sans-serif;
@@ -206,7 +207,13 @@
 }
 
 @utility edge-fade-x {
-  mask-image: linear-gradient(to right, transparent 0, black 24px, black calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black 24px,
+    black calc(100% - 24px),
+    transparent 100%
+  );
 }
 
 @keyframes ppp-marquee {
@@ -653,8 +660,12 @@
   background-image:
     radial-gradient(oklch(1 0 0 / 0.035) 1px, transparent 1px),
     radial-gradient(oklch(1 0 0 / 0.025) 1px, transparent 1px);
-  background-size: 4px 4px, 7px 7px;
-  background-position: 0 0, 2px 3px;
+  background-size:
+    4px 4px,
+    7px 7px;
+  background-position:
+    0 0,
+    2px 3px;
 }
 
 /* Ticker pause on hover */
@@ -934,5 +945,25 @@
   }
   .lift-btn {
     transition: none !important;
+  }
+}
+
+/* Language change cross-fade — copy settles softly, layout never jumps. */
+@keyframes ppp-lang-swap {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.lang-swap body {
+  animation: ppp-lang-swap 260ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lang-swap body {
+    animation: none;
   }
 }

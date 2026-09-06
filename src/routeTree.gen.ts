@@ -19,6 +19,7 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as FranchiseRouteImport } from './routes/franchise'
 import { Route as GiftCardsRouteImport } from './routes/gift-cards'
+import { Route as HelpRouteImport } from './routes/help'
 import { Route as MenuRouteImport } from './routes/menu'
 import { Route as OffersRouteImport } from './routes/offers'
 import { Route as OrderRouteImport } from './routes/order'
@@ -81,6 +82,11 @@ const FranchiseRoute = FranchiseRouteImport.update({
 const GiftCardsRoute = GiftCardsRouteImport.update({
   id: '/gift-cards',
   path: '/gift-cards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MenuRoute = MenuRouteImport.update({
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/franchise': typeof FranchiseRoute
   '/gift-cards': typeof GiftCardsRoute
+  '/help': typeof HelpRoute
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/franchise': typeof FranchiseRoute
   '/gift-cards': typeof GiftCardsRoute
+  '/help': typeof HelpRoute
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/franchise': typeof FranchiseRoute
   '/gift-cards': typeof GiftCardsRoute
+  '/help': typeof HelpRoute
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/franchise'
     | '/gift-cards'
+    | '/help'
     | '/menu'
     | '/offers'
     | '/order'
@@ -263,6 +273,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/franchise'
     | '/gift-cards'
+    | '/help'
     | '/menu'
     | '/offers'
     | '/order'
@@ -288,6 +299,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/franchise'
     | '/gift-cards'
+    | '/help'
     | '/menu'
     | '/offers'
     | '/order'
@@ -314,6 +326,7 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   FranchiseRoute: typeof FranchiseRoute
   GiftCardsRoute: typeof GiftCardsRoute
+  HelpRoute: typeof HelpRoute
   MenuRoute: typeof MenuRoute
   OffersRoute: typeof OffersRoute
   OrderRoute: typeof OrderRoute
@@ -399,6 +412,13 @@ declare module '@tanstack/react-router' {
       path: '/gift-cards'
       fullPath: '/gift-cards'
       preLoaderRoute: typeof GiftCardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/menu': {
@@ -506,6 +526,7 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   FranchiseRoute: FranchiseRoute,
   GiftCardsRoute: GiftCardsRoute,
+  HelpRoute: HelpRoute,
   MenuRoute: MenuRoute,
   OffersRoute: OffersRoute,
   OrderRoute: OrderRoute,

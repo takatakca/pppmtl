@@ -10,30 +10,33 @@ import { GoogleGlyph } from "@/components/brand/social-icons";
 import { PPPLogo } from "@/components/brand/ppp-logo";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 
+import type { TranslationKey } from "@/i18n";
+
 const exploreLinks = [
-  { en: "Menu", fr: "Menu", to: "/menu" as const },
-  { en: "Offers", fr: "Offres", to: "/offers" as const },
-  { en: "Rewards", fr: "Récompenses", to: "/account" as const },
-  { en: "Gift Cards", fr: "Cartes-cadeaux", to: "/gift-cards" as const },
-  { en: "Locations", fr: "Emplacements", to: "/locations" as const },
+  { key: "navigation.menu", to: "/menu" },
+  { key: "navigation.offers", to: "/offers" },
+  { key: "navigation.rewards", to: "/account" },
+  { key: "navigation.giftCards", to: "/gift-cards" },
+  { key: "navigation.locations", to: "/locations" },
+] as const satisfies ReadonlyArray<{ key: TranslationKey; to: string }>;
+
+const companyLinks: Array<{ key: TranslationKey; href: string }> = [
+  { key: "navigation.about", href: "/about" },
+  { key: "navigation.franchise", href: "/franchise" },
+  { key: "navigation.careers", href: "/careers" },
+  { key: "navigation.contact", href: "/contact" },
+  { key: "navigation.aroundTheWeb", href: "/around-the-web" },
 ];
 
-/** Not yet owned as routed pages — kept as plain links so the footer is honest about scope. */
-const companyLinks = [
-  { en: "About", fr: "À propos", href: "/about" },
-  { en: "Franchise", fr: "Franchise", href: "/franchise" },
-  { en: "Careers", fr: "Carrières", href: "/careers" },
-  { en: "Contact", fr: "Contact", href: "/contact" },
-  { en: "Around the Web", fr: "Aux quatre coins du web", href: "/around-the-web" },
-];
-
-const helpLinks = [
-  { en: "FAQ", fr: "FAQ", href: "/faq" },
-  { en: "Support", fr: "Assistance", href: "/support" },
+const helpLinks: Array<{ key: TranslationKey; href: string }> = [
+  { key: "navigation.help", href: "/help" },
+  { key: "footer.faq", href: "/faq" },
+  { key: "navigation.support", href: "/support" },
+  { key: "navigation.trackOrder", href: "/track" },
 ];
 
 export function PPPFooter() {
-  const { lang, t, openOrderSheet } = usePPP();
+  const { t, tr, openOrderSheet } = usePPP();
   const location = useSelectedRestaurantLocation();
   const social = locationSocial(location);
   const orderable = canOrder(location);
@@ -55,7 +58,7 @@ export function PPPFooter() {
         <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
           <div>
             <p className="text-[0.55rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
-              {t("Selected location", "Emplacement sélectionné")}
+              {t("Selected location", "Emplacement sélectionné", "Sucursal seleccionada")}
             </p>
             <p className="mt-1 font-display text-2xl uppercase leading-none">
               {location.neighborhood}
@@ -80,7 +83,7 @@ export function PPPFooter() {
               ) : (
                 <p className="flex items-center gap-2">
                   <Phone className="h-4 w-4 shrink-0 text-primary" />
-                  {t("Phone not confirmed", "Téléphone non confirmé")}
+                  {t("Phone not confirmed", "Téléphone non confirmé", "Teléfono no confirmado")}
                 </p>
               )}
             </address>
@@ -90,7 +93,7 @@ export function PPPFooter() {
                 onClick={openOrderSheet}
                 className="mt-4 bg-primary px-6 py-3 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
               >
-                {t("Order now", "Commander")}
+                {tr("navigation.orderNow")}
               </button>
             ) : (
               <Link
@@ -99,8 +102,8 @@ export function PPPFooter() {
                 className="mt-4 inline-block border border-border px-6 py-3 font-display text-xl uppercase leading-none focus-ppp hover:border-primary"
               >
                 {location.lifecycleStatus === "coming_soon"
-                  ? t("Ordering coming soon", "Commande bientôt disponible")
-                  : t("View location", "Voir l'emplacement")}
+                  ? t("Ordering coming soon", "Commande bientôt disponible", "Pedidos muy pronto")
+                  : t("View location", "Voir l'emplacement", "Ver sucursal")}
               </Link>
             )}
 
@@ -111,12 +114,12 @@ export function PPPFooter() {
               <input
                 type="email"
                 required
-                placeholder={t("Get our offers", "Recevez nos offres")}
-                aria-label={t("Email address", "Adresse courriel")}
+                placeholder={t("Get our offers", "Recevez nos offres", "Recibe nuestras ofertas")}
+                aria-label={t("Email address", "Adresse courriel", "Correo electrónico")}
                 className="w-full bg-secondary px-3 py-3 text-sm outline-none placeholder:text-muted-foreground"
               />
               <button className="bg-primary px-5 text-xs font-bold uppercase tracking-widest text-primary-foreground focus-ppp">
-                {t("Subscribe", "S'abonner")}
+                {t("Subscribe", "S'abonner", "Suscribirse")}
               </button>
             </form>
 
@@ -159,7 +162,7 @@ export function PPPFooter() {
           <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
             <div>
               <h3 className="font-display text-sm uppercase tracking-widest text-accent">
-                {t("Order", "Commander")}
+                {tr("navigation.order")}
               </h3>
               <ul className="mt-3 space-y-2">
                 <li>
@@ -189,7 +192,7 @@ export function PPPFooter() {
                   })
                 ) : (
                   <li className="text-sm text-muted-foreground">
-                    {t("PPP Direct only", "PPP Direct seulement")}
+                    {t("PPP Direct only", "PPP Direct seulement", "Solo PPP Direct")}
                   </li>
                 )}
               </ul>
@@ -197,16 +200,16 @@ export function PPPFooter() {
 
             <div>
               <h3 className="font-display text-sm uppercase tracking-widest text-accent">
-                {t("Explore", "Explorer")}
+                {tr("footer.explore")}
               </h3>
               <ul className="mt-3 space-y-2">
                 {exploreLinks.map((i) => (
-                  <li key={i.en}>
+                  <li key={i.key}>
                     <Link
                       to={i.to}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground focus-ppp"
                     >
-                      {lang === "fr" ? i.fr : i.en}
+                      {tr(i.key)}
                     </Link>
                   </li>
                 ))}
@@ -215,16 +218,16 @@ export function PPPFooter() {
 
             <div>
               <h3 className="font-display text-sm uppercase tracking-widest text-accent">
-                {t("Company", "Entreprise")}
+                {tr("footer.company")}
               </h3>
               <ul className="mt-3 space-y-2">
                 {companyLinks.map((i) => (
-                  <li key={i.en}>
+                  <li key={i.key}>
                     <a
                       href={i.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground focus-ppp"
                     >
-                      {lang === "fr" ? i.fr : i.en}
+                      {tr(i.key)}
                     </a>
                   </li>
                 ))}
@@ -233,16 +236,16 @@ export function PPPFooter() {
 
             <div>
               <h3 className="font-display text-sm uppercase tracking-widest text-accent">
-                {t("Help", "Aide")}
+                {tr("footer.helpTitle")}
               </h3>
               <ul className="mt-3 space-y-2">
                 {helpLinks.map((i) => (
-                  <li key={i.en}>
+                  <li key={i.key}>
                     <a
                       href={i.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground focus-ppp"
                     >
-                      {lang === "fr" ? i.fr : i.en}
+                      {tr(i.key)}
                     </a>
                   </li>
                 ))}
