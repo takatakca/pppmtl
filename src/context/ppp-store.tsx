@@ -68,7 +68,11 @@ interface Store extends Persisted {
   cartOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
-  t: (en: string, fr: string) => string;
+  /**
+   * Inline three-language helper. Spanish is optional: when a screen has no
+   * Spanish copy yet the customer sees English, never an empty string.
+   */
+  t: (en: string, fr: string, es?: string) => string;
 }
 
 const defaults: Persisted = {
@@ -201,7 +205,11 @@ export function PPPProvider({ children }: { children: ReactNode }) {
       orderSheetOpen,
       openOrderSheet: () => setOrderSheetOpen(true),
       closeOrderSheet: () => setOrderSheetOpen(false),
-      t: (en, fr) => (state.lang === "fr" ? fr : en),
+      t: (en, fr, es) => {
+        if (state.lang === "fr") return fr;
+        if (state.lang === "es") return es && es.length > 0 ? es : en;
+        return en;
+      },
     };
   }, [state, persist, searchOpen, searchSeed, locationSheetOpen, orderSheetOpen, cartOpen]);
 
