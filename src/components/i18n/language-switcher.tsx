@@ -15,7 +15,7 @@ export function LanguageSwitcher({
   variant?: Variant;
   className?: string;
 }) {
-  const { lang, setLang } = usePPP();
+  const { lang, setLang, tr } = usePPP();
 
   const choose = (next: (typeof LANGUAGES)[number]["code"]) => {
     if (next === lang) return;
@@ -27,7 +27,7 @@ export function LanguageSwitcher({
     return (
       <div className={className}>
         <p className="text-[0.6rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
-          {lang === "fr" ? "Langue" : lang === "es" ? "Idioma" : "Language"}
+          {tr("common.language")}
         </p>
         <div className="mt-2 grid grid-cols-3 gap-2">
           {LANGUAGES.map((l) => (
@@ -55,7 +55,7 @@ export function LanguageSwitcher({
   return (
     <div
       role="group"
-      aria-label={lang === "fr" ? "Langue" : lang === "es" ? "Idioma" : "Language"}
+      aria-label={tr("common.language")}
       className={`inline-flex items-center border border-border ${className}`}
     >
       {LANGUAGES.map((l) => (
