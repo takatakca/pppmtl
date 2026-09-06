@@ -58,7 +58,7 @@ export function PPPFooter() {
         <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
           <div>
             <p className="text-[0.55rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
-              {t("Selected location", "Emplacement sélectionné")}
+              {t("Selected location", "Emplacement sélectionné", "Sucursal seleccionada")}
             </p>
             <p className="mt-1 font-display text-2xl uppercase leading-none">
               {location.neighborhood}
@@ -83,7 +83,7 @@ export function PPPFooter() {
               ) : (
                 <p className="flex items-center gap-2">
                   <Phone className="h-4 w-4 shrink-0 text-primary" />
-                  {t("Phone not confirmed", "Téléphone non confirmé")}
+                  {t("Phone not confirmed", "Téléphone non confirmé", "Teléfono no confirmado")}
                 </p>
               )}
             </address>
@@ -93,7 +93,7 @@ export function PPPFooter() {
                 onClick={openOrderSheet}
                 className="mt-4 bg-primary px-6 py-3 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
               >
-                {t("Order now", "Commander")}
+                {tr("navigation.orderNow")}
               </button>
             ) : (
               <Link
@@ -102,8 +102,8 @@ export function PPPFooter() {
                 className="mt-4 inline-block border border-border px-6 py-3 font-display text-xl uppercase leading-none focus-ppp hover:border-primary"
               >
                 {location.lifecycleStatus === "coming_soon"
-                  ? t("Ordering coming soon", "Commande bientôt disponible")
-                  : t("View location", "Voir l'emplacement")}
+                  ? t("Ordering coming soon", "Commande bientôt disponible", "Pedidos muy pronto")
+                  : t("View location", "Voir l'emplacement", "Ver sucursal")}
               </Link>
             )}
 
@@ -114,8 +114,8 @@ export function PPPFooter() {
               <input
                 type="email"
                 required
-                placeholder={t("Get our offers", "Recevez nos offres")}
-                aria-label={t("Email address", "Adresse courriel")}
+                placeholder={t("Get our offers", "Recevez nos offres", "Recibe nuestras ofertas")}
+                aria-label={t("Email address", "Adresse courriel", "Correo electrónico")}
                 className="w-full bg-secondary px-3 py-3 text-sm outline-none placeholder:text-muted-foreground"
               />
               <button className="bg-primary px-5 text-xs font-bold uppercase tracking-widest text-primary-foreground focus-ppp">
