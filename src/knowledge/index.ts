@@ -19,14 +19,7 @@ import { orderingChannels } from "@/config/external-presence";
 import { comingSoonLocations, openLocations, restaurantLocations } from "@/config/locations";
 
 export type KnowledgeTopic =
-  | "menu"
-  | "locations"
-  | "ordering"
-  | "delivery"
-  | "support"
-  | "account"
-  | "loyalty"
-  | "franchise";
+  "menu" | "locations" | "ordering" | "delivery" | "support" | "account" | "loyalty" | "franchise";
 
 export interface KnowledgeFact {
   id: string;
