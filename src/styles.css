@@ -827,3 +827,112 @@
     animation: none !important;
   }
 }
+
+/* ---------- Welcome panel (acquisition) motion ---------- */
+
+@keyframes ppp-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.panel-in {
+  animation: ppp-panel-in 420ms var(--ease-out) both;
+}
+
+@keyframes ppp-image-in {
+  from {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.image-in {
+  animation: ppp-image-in 900ms var(--ease-out) both;
+}
+
+/* Content stagger: children fade up in sequence. */
+.stagger > * {
+  animation: ppp-rise 460ms var(--ease-out) both;
+}
+.stagger > *:nth-child(1) {
+  animation-delay: 60ms;
+}
+.stagger > *:nth-child(2) {
+  animation-delay: 110ms;
+}
+.stagger > *:nth-child(3) {
+  animation-delay: 160ms;
+}
+.stagger > *:nth-child(4) {
+  animation-delay: 210ms;
+}
+.stagger > *:nth-child(5) {
+  animation-delay: 260ms;
+}
+.stagger > *:nth-child(6) {
+  animation-delay: 310ms;
+}
+.stagger > *:nth-child(7) {
+  animation-delay: 360ms;
+}
+.stagger > *:nth-child(8) {
+  animation-delay: 410ms;
+}
+
+/* Step swap inside the welcome panel. */
+@keyframes ppp-step-in {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.step-in {
+  animation: ppp-step-in 320ms var(--ease-out) both;
+}
+
+/* Premium action button: quiet lift, honest press. */
+.lift-btn {
+  transition:
+    transform 200ms var(--ease-out),
+    box-shadow 200ms var(--ease-out),
+    background-color 200ms ease,
+    border-color 200ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .lift-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px -16px oklch(0 0 0 / 0.85);
+  }
+}
+
+.lift-btn:active {
+  transform: translateY(0) scale(0.99);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-in,
+  .image-in,
+  .step-in,
+  .stagger > * {
+    animation: none !important;
+  }
+  .lift-btn {
+    transition: none !important;
+  }
+}

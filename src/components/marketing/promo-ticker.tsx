@@ -51,7 +51,11 @@ export function PromoTicker() {
       </div>
       <button
         onClick={() => setPaused((p) => !p)}
-        aria-label={paused ? t("Play promo ticker", "Lancer le bandeau") : t("Pause promo ticker", "Mettre en pause")}
+        aria-label={
+          paused
+            ? t("Play promo ticker", "Lancer le bandeau")
+            : t("Pause promo ticker", "Mettre en pause")
+        }
         aria-pressed={paused}
         className="press-tap flex shrink-0 items-center justify-center border-l border-primary-foreground/20 bg-primary px-2.5 py-1.5 text-primary-foreground focus-ppp"
       >

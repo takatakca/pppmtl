@@ -17,12 +17,18 @@ export function SignedOutHero({ accountsAvailable }: { accountsAvailable: boolea
     {
       icon: Clock,
       title: t("One-tap reorder", "Recommander en une touche"),
-      body: t("Your last PPP order, ready to send again.", "Votre dernière commande, prête à repartir."),
+      body: t(
+        "Your last PPP order, ready to send again.",
+        "Votre dernière commande, prête à repartir.",
+      ),
     },
     {
       icon: Star,
       title: t("Keep your points", "Conservez vos points"),
-      body: t("Rewards follow your account, not your device.", "Les points suivent votre compte, pas l'appareil."),
+      body: t(
+        "Rewards follow your account, not your device.",
+        "Les points suivent votre compte, pas l'appareil.",
+      ),
     },
     {
       icon: Heart,
@@ -39,57 +45,66 @@ export function SignedOutHero({ accountsAvailable }: { accountsAvailable: boolea
   return (
     <>
       <section className="relative overflow-hidden border border-border bg-primary p-6 sm:p-10">
-        <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-primary-foreground/80">
-          PPP {pppBusiness.shortLocationName}
-        </p>
-        <h1 className="mt-2 font-display text-5xl uppercase leading-[0.85] text-primary-foreground sm:text-7xl">
-          {t("My PPP", "Mon PPP")}
-        </h1>
-        <p className="mt-3 max-w-xl text-sm text-primary-foreground/90">
-          {t(
-            "One identity for every PPP order: faster checkout, your rewards, your favourites — and you can always order as a guest.",
-            "Une seule identité pour toutes vos commandes PPP : paiement plus rapide, vos points, vos favoris — et vous pouvez toujours commander sans compte.",
-          )}
-        </p>
+        <div className="stagger">
+          <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-primary-foreground/80">
+            PPP {pppBusiness.shortLocationName}
+          </p>
+          <h1 className="mt-2 font-display text-5xl uppercase leading-[0.85] text-primary-foreground sm:text-7xl">
+            {t("My PPP", "Mon PPP")}
+          </h1>
+          <p className="mt-3 font-display text-2xl uppercase leading-[0.95] text-primary-foreground/90 sm:text-3xl">
+            {t("Your orders.", "Vos commandes.")}
+            <br />
+            {t("Your favourites.", "Vos favoris.")}
+            <br />
+            {t("Your PPP experience.", "Votre expérience PPP.")}
+          </p>
+          <p className="mt-3 max-w-xl text-sm text-primary-foreground/90">
+            {t(
+              "Order faster, find your favourites again, and keep your PPP details in one place — or order as a guest any time.",
+              "Commandez plus vite, retrouvez vos favoris et gardez vos infos PPP au même endroit — ou commandez sans compte quand vous voulez.",
+            )}
+          </p>
 
-        <div className="mt-5 grid max-w-sm gap-2">
-          {accountsAvailable ? (
-            <>
-              {GOOGLE_SIGN_IN_ENABLED && <GoogleButton />}
-              <Link
-                to="/account/sign-up"
-                className="press-tap bg-background py-3.5 text-center font-display text-xl uppercase leading-none focus-ppp"
-              >
-                {t("Create my PPP account", "Créer mon compte PPP")}
-              </Link>
-              <Link
-                to="/account/sign-in"
-                search={{ returnTo: "/account" }}
-                className="press-tap border border-primary-foreground/40 py-3.5 text-center font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
-              >
-                {t("Sign in", "Se connecter")}
-              </Link>
-            </>
-          ) : (
-            <p className="border border-primary-foreground/40 px-4 py-3 text-sm text-primary-foreground/90">
-              {t(
-                "PPP accounts open soon. Ordering, pickup and delivery all work right now without one.",
-                "Les comptes PPP arrivent bientôt. La commande, la cueillette et la livraison fonctionnent déjà sans compte.",
-              )}
-            </p>
-          )}
-          <Link
-            to="/order"
-            className="press-tap py-3 text-center text-sm font-bold uppercase tracking-widest text-primary-foreground underline underline-offset-4 focus-ppp"
-          >
-            {t("Order without an account", "Commander sans compte")}
-          </Link>
+          <div className="mt-5 grid max-w-sm gap-2">
+            {accountsAvailable ? (
+              <>
+                {GOOGLE_SIGN_IN_ENABLED && <GoogleButton />}
+                <Link
+                  to="/account/sign-up"
+                  className="lift-btn press-tap bg-background py-3.5 text-center font-display text-xl uppercase leading-none focus-ppp"
+                >
+                  {t("Create my PPP account", "Créer mon compte PPP")}
+                </Link>
+                <Link
+                  to="/account/sign-in"
+                  search={{ returnTo: "/account" }}
+                  className="lift-btn press-tap border border-primary-foreground/40 py-3.5 text-center font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
+                >
+                  {t("Sign in", "Se connecter")}
+                </Link>
+              </>
+            ) : (
+              <p className="border border-primary-foreground/40 px-4 py-3 text-sm text-primary-foreground/90">
+                {t(
+                  "PPP accounts open soon. Ordering, pickup and delivery all work right now without one.",
+                  "Les comptes PPP arrivent bientôt. La commande, la cueillette et la livraison fonctionnent déjà sans compte.",
+                )}
+              </p>
+            )}
+            <Link
+              to="/order"
+              className="press-tap py-3 text-center text-sm font-bold uppercase tracking-widest text-primary-foreground underline underline-offset-4 focus-ppp"
+            >
+              {t("Continue as guest", "Continuer comme invité")}
+            </Link>
+          </div>
         </div>
       </section>
 
       <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
         {perks.map((p) => (
-          <section key={p.title} className="border border-border bg-card p-5">
+          <section key={p.title} className="food-pop press-tap border border-border bg-card p-5">
             <p.icon className="h-5 w-5 text-primary" />
             <h2 className="mt-3 font-display text-2xl uppercase leading-none">{p.title}</h2>
             <p className="mt-2 text-sm text-muted-foreground">{p.body}</p>

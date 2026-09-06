@@ -22,7 +22,13 @@ function TierDial() {
   return (
     <div className="relative h-[132px] w-[132px] shrink-0">
       <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full -rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} strokeWidth={stroke} className="stroke-primary-foreground/15 fill-none" />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          strokeWidth={stroke}
+          className="stroke-primary-foreground/15 fill-none"
+        />
         <circle
           cx={size / 2}
           cy={size / 2}

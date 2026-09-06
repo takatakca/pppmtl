@@ -36,10 +36,7 @@ export function WhatPeopleSay() {
               </div>
               <span className="font-display text-2xl leading-none">{rating.toFixed(1)}</span>
               <span className="text-sm text-muted-foreground">
-                {t(
-                  `from ${reviewCount} Google reviews`,
-                  `selon ${reviewCount} avis Google`,
-                )}
+                {t(`from ${reviewCount} Google reviews`, `selon ${reviewCount} avis Google`)}
               </span>
             </div>
           ) : (

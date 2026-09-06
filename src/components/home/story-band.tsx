@@ -110,10 +110,7 @@ export function StoryBand() {
                   </span>
                 </div>
                 {i < timeline.length - 1 && (
-                  <span
-                    aria-hidden
-                    className="mt-1.5 h-px w-8 shrink-0 bg-border sm:w-14"
-                  />
+                  <span aria-hidden className="mt-1.5 h-px w-8 shrink-0 bg-border sm:w-14" />
                 )}
               </li>
             ))}

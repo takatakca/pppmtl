@@ -179,7 +179,9 @@ export function GuestVerifySheet({
                 className="w-full bg-transparent py-3 pr-3 text-lg outline-none focus-ppp"
               />
             </span>
-            {phoneError && <span className="mt-1 block text-[0.7rem] text-primary">{phoneError}</span>}
+            {phoneError && (
+              <span className="mt-1 block text-[0.7rem] text-primary">{phoneError}</span>
+            )}
           </label>
           <p className="mt-2 text-[0.7rem] text-muted-foreground">
             {t(

@@ -63,19 +63,19 @@ export function LocationsSection() {
             </p>
           </div>
           {google.embedUrl && (
-          <div className="relative hidden border-t border-border lg:block">
-            <iframe
-              title={t("Map to PPP NDG", "Carte vers PPP NDG")}
-              src={google.embedUrl!}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="h-[16rem] w-full grayscale-[0.35] contrast-[1.1]"
-            />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-border"
-            />
-          </div>
+            <div className="relative hidden border-t border-border lg:block">
+              <iframe
+                title={t("Map to PPP NDG", "Carte vers PPP NDG")}
+                src={google.embedUrl!}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="h-[16rem] w-full grayscale-[0.35] contrast-[1.1]"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-border"
+              />
+            </div>
           )}
         </Reveal>
 
@@ -91,26 +91,26 @@ export function LocationsSection() {
               </p>
             </div>
             {googleProfile.rating != null && (
-            <a
-              href={store.google.reviewsUrl ?? externalPresence.discovery.google}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="shrink-0 border border-border px-3 py-2 text-right focus-ppp hover:border-primary"
-            >
-              <span className="block text-[0.55rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
-                Google
-              </span>
-              <span className="mt-0.5 flex items-center gap-1 font-display text-2xl leading-none">
-                {googleProfile.rating?.toFixed(1)}
-                <Star className="h-4 w-4 fill-accent text-accent" />
-              </span>
-              <span className="block text-[0.6rem] uppercase tracking-widest text-muted-foreground">
-                {googleProfile.reviewCount} {t("Google reviews", "avis Google")}
-              </span>
-              <span className="block text-[0.5rem] uppercase tracking-widest text-muted-foreground/60">
-                {t("synced", "màj")} {googleProfile.lastSyncedAt}
-              </span>
-            </a>
+              <a
+                href={store.google.reviewsUrl ?? externalPresence.discovery.google}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 border border-border px-3 py-2 text-right focus-ppp hover:border-primary"
+              >
+                <span className="block text-[0.55rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
+                  Google
+                </span>
+                <span className="mt-0.5 flex items-center gap-1 font-display text-2xl leading-none">
+                  {googleProfile.rating?.toFixed(1)}
+                  <Star className="h-4 w-4 fill-accent text-accent" />
+                </span>
+                <span className="block text-[0.6rem] uppercase tracking-widest text-muted-foreground">
+                  {googleProfile.reviewCount} {t("Google reviews", "avis Google")}
+                </span>
+                <span className="block text-[0.5rem] uppercase tracking-widest text-muted-foreground/60">
+                  {t("synced", "màj")} {googleProfile.lastSyncedAt}
+                </span>
+              </a>
             )}
           </div>
 
@@ -205,18 +205,18 @@ export function LocationsSection() {
 
           {/* Mobile map lives behind a disclosure so it never eats the viewport */}
           {google.embedUrl && (
-          <details className="mt-4 border border-border lg:hidden">
-            <summary className="cursor-pointer list-none px-4 py-3 text-[0.65rem] font-bold uppercase tracking-[0.25em] text-muted-foreground focus-ppp">
-              {t("Show map", "Voir la carte")}
-            </summary>
-            <iframe
-              title={t("Map to PPP NDG", "Carte vers PPP NDG")}
-              src={google.embedUrl!}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="h-56 w-full border-t border-border grayscale-[0.35]"
-            />
-          </details>
+            <details className="mt-4 border border-border lg:hidden">
+              <summary className="cursor-pointer list-none px-4 py-3 text-[0.65rem] font-bold uppercase tracking-[0.25em] text-muted-foreground focus-ppp">
+                {t("Show map", "Voir la carte")}
+              </summary>
+              <iframe
+                title={t("Map to PPP NDG", "Carte vers PPP NDG")}
+                src={google.embedUrl!}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="h-56 w-full border-t border-border grayscale-[0.35]"
+              />
+            </details>
           )}
         </Reveal>
       </div>

@@ -97,7 +97,10 @@ export function PreferredNameStep() {
             maxLength={24}
             onChange={(e) => setName(e.target.value)}
             {...(touched && error ? { error } : {})}
-            hint={t("Set once — choose the one you like.", "Défini une seule fois — choisissez bien.")}
+            hint={t(
+              "Set once — choose the one you like.",
+              "Défini une seule fois — choisissez bien.",
+            )}
           />
           {notice && (
             <p className="rise-in border border-border p-3 text-[0.75rem] text-muted-foreground">

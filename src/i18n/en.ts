@@ -20,6 +20,10 @@ export const en = {
     trackOrder: "Track order",
   },
   popup: {
+    join: "Join PPP",
+    benefitsTitle: "What you get",
+    emailPlaceholder: "Email address",
+    back: "Back",
     welcome: "Welcome to PPP",
     chooseLanguage: "Choose your language",
     yourPpp: "Your PPP.",
@@ -36,6 +40,11 @@ export const en = {
     benefitOrders: "Keep your PPP orders together",
     benefitAddresses: "Save addresses",
     benefitMembership: "Access eligible member benefits",
+  },
+  moments: {
+    welcome: "Welcome to PPP",
+    firstOrder: "Your PPP journey starts here",
+    returning: "Welcome back",
   },
   auth: {
     invalidEmail: "Enter a valid email address.",

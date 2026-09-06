@@ -23,6 +23,10 @@ export const es: DeepPartial<Dictionary> = {
     trackOrder: "Seguir mi pedido",
   },
   popup: {
+    join: "Únete a PPP",
+    benefitsTitle: "Lo que obtienes",
+    emailPlaceholder: "Correo electrónico",
+    back: "Volver",
     welcome: "Bienvenido a PPP",
     chooseLanguage: "Elige tu idioma",
     yourPpp: "Tu PPP.",
@@ -39,6 +43,11 @@ export const es: DeepPartial<Dictionary> = {
     benefitOrders: "Mantén tus pedidos PPP en un solo lugar",
     benefitAddresses: "Guarda tus direcciones",
     benefitMembership: "Accede a beneficios para miembros cuando corresponda",
+  },
+  moments: {
+    welcome: "Bienvenido a PPP",
+    firstOrder: "Tu experiencia PPP comienza aquí",
+    returning: "Bienvenido de nuevo",
   },
   auth: {
     invalidEmail: "Ingresa un correo electrónico válido.",

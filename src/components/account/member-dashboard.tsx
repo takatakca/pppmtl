@@ -44,7 +44,10 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
     {
       icon: Gift,
       title: t("Gift cards", "Cartes-cadeaux"),
-      body: t("Buy, send and redeem PPP gift cards.", "Achetez, offrez et utilisez des cartes PPP."),
+      body: t(
+        "Buy, send and redeem PPP gift cards.",
+        "Achetez, offrez et utilisez des cartes PPP.",
+      ),
     },
   ];
 
