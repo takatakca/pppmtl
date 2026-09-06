@@ -16,7 +16,7 @@ import type { ModifierChoice, ModifierGroup } from "@/data/catalog-types";
 
 export type { ModifierChoice, ModifierGroup };
 
-export type Lang = "en" | "fr";
+export type { Lang } from "@/i18n/types";
 export type OrderMode = "pickup" | "delivery";
 
 export interface MenuCategory {
