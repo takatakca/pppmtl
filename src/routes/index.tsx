@@ -10,7 +10,6 @@ import { OffersGrid } from "@/components/home/offers-grid";
 import { CategoryExplorer } from "@/components/home/category-explorer";
 import { CartPanel } from "@/components/order/cart-panel";
 import { Rewards } from "@/components/home/rewards";
-import { PromoExperience } from "@/components/marketing/promo-experience";
 import { DealBanner } from "@/components/marketing/deal-banner";
 import { StickyOrderCTA } from "@/components/layout/sticky-order-cta";
 import { AccountModule } from "@/components/home/account-module";
@@ -86,7 +85,6 @@ function Index() {
       <LocationSheet />
       <OrderSheet />
       <CartPanel />
-      <PromoExperience />
     </div>
   );
 }

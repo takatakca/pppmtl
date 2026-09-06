@@ -3,9 +3,10 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Search, Sparkles } from "lucide-react";
 import { usePPP } from "@/context/ppp-store";
 import { faqEntries, faqCategories, type FaqEntry } from "@/data/support";
+import type { Lang } from "@/i18n/types";
 
 /** Deterministic local keyword match — no AI call, answers only from src/data/support.ts. */
-function rank(query: string, lang: "en" | "fr"): FaqEntry[] {
+function rank(query: string, lang: Lang): FaqEntry[] {
   const q = query.trim().toLowerCase();
   if (!q.length) return [];
   const words = q.split(/\s+/).filter(Boolean);
@@ -82,54 +83,55 @@ export function AskPPP({ onEscalate }: { onEscalate?: () => void }) {
               )}
             </p>
           )}
-          {results.length > 0 ? (
-            results.map((r) => {
-              const category = faqCategories.find((c) => c.id === r.category);
-              return (
-                <div key={r.id} className="border border-border bg-background p-3">
-                  {category && (
-                    <p className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-accent">
-                      {lang === "fr" ? category.labelFr : category.labelEn}
+          {results.length > 0
+            ? results.map((r) => {
+                const category = faqCategories.find((c) => c.id === r.category);
+                return (
+                  <div key={r.id} className="border border-border bg-background p-3">
+                    {category && (
+                      <p className="text-[0.6rem] font-bold uppercase tracking-[0.25em] text-accent">
+                        {lang === "fr" ? category.labelFr : category.labelEn}
+                      </p>
+                    )}
+                    <p className="mt-1 font-display text-sm uppercase leading-tight">
+                      {lang === "fr" ? r.questionFr : r.questionEn}
                     </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {lang === "fr" ? r.answerFr : r.answerEn}
+                    </p>
+                    {r.ctaHref && (
+                      <Link
+                        to={r.ctaHref}
+                        className="mt-2 inline-flex items-center gap-1 text-xs uppercase tracking-widest text-accent underline focus-ppp"
+                      >
+                        {lang === "fr" ? r.ctaFr : r.ctaEn}
+                        <ArrowUpRight className="h-3.5 w-3.5" />
+                      </Link>
+                    )}
+                    <p className="mt-2 text-[0.6rem] uppercase tracking-[0.2em] text-muted-foreground/70">
+                      {t("Source: PPP help article", "Source : article d'aide PPP")}
+                    </p>
+                  </div>
+                );
+              })
+            : !isOrderStatusQuery && (
+                <p className="border border-border bg-background p-3 text-sm text-muted-foreground">
+                  {t(
+                    "No match yet in PPP's help content. Use the support router below to reach the right help.",
+                    "Aucune correspondance dans le contenu d'aide de PPP. Utilisez l'aiguillage support ci-dessous pour obtenir la bonne aide.",
                   )}
-                  <p className="mt-1 font-display text-sm uppercase leading-tight">
-                    {lang === "fr" ? r.questionFr : r.questionEn}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {lang === "fr" ? r.answerFr : r.answerEn}
-                  </p>
-                  {r.ctaHref && (
-                    <Link
-                      to={r.ctaHref}
-                      className="mt-2 inline-flex items-center gap-1 text-xs uppercase tracking-widest text-accent underline focus-ppp"
-                    >
-                      {lang === "fr" ? r.ctaFr : r.ctaEn}
-                      <ArrowUpRight className="h-3.5 w-3.5" />
-                    </Link>
-                  )}
-                  <p className="mt-2 text-[0.6rem] uppercase tracking-[0.2em] text-muted-foreground/70">
-                    {t("Source: PPP help article", "Source : article d'aide PPP")}
-                  </p>
-                </div>
-              );
-            })
-          ) : (
-            !isOrderStatusQuery && (
-              <p className="border border-border bg-background p-3 text-sm text-muted-foreground">
-                {t(
-                  "No match yet in PPP's help content. Use the support router below to reach the right help.",
-                  "Aucune correspondance dans le contenu d'aide de PPP. Utilisez l'aiguillage support ci-dessous pour obtenir la bonne aide.",
-                )}
-              </p>
-            )
-          )}
+                </p>
+              )}
           {onEscalate && (
             <button
               type="button"
               onClick={onEscalate}
               className="press-tap mt-1 w-full border border-border py-2.5 font-display text-sm uppercase leading-none text-foreground transition-colors hover:border-primary focus-ppp"
             >
-              {t("Still need help? Use the support router", "Besoin d'aide? Utilisez l'aiguillage support")}
+              {t(
+                "Still need help? Use the support router",
+                "Besoin d'aide? Utilisez l'aiguillage support",
+              )}
             </button>
           )}
         </div>
