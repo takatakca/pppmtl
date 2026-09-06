@@ -290,7 +290,8 @@ export const restaurantLocations: RestaurantLocation[] = [
     seo: {
       titleEn: "PPP Pizzeria Saint-Léonard — Coming Soon",
       titleFr: "PPP Pizzeria Saint-Léonard — Bientôt ouvert",
-      descriptionEn: "PPP Pizzeria is coming to Jean-Talon E in Saint-Léonard. Get opening updates.",
+      descriptionEn:
+        "PPP Pizzeria is coming to Jean-Talon E in Saint-Léonard. Get opening updates.",
       descriptionFr:
         "PPP Pizzeria arrive sur Jean-Talon E à Saint-Léonard. Recevez les nouvelles d'ouverture.",
     },

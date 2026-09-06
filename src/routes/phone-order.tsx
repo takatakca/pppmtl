@@ -111,10 +111,31 @@ function PhoneOrderPage() {
                   {t("What to have ready", "Ce qu'il faut avoir sous la main")}
                 </p>
                 <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
-                  <li>• {t("Pickup or delivery, and your address if delivery", "Cueillette ou livraison, et votre adresse pour la livraison")}</li>
-                  <li>• {t("Items, sizes and any modifications", "Articles, formats et modifications")}</li>
-                  <li>• {t("A callback number in case the order needs confirming", "Un numéro de rappel au cas où la commande doive être confirmée")}</li>
-                  <li>• {t("How you'll pay (card or cash on pickup/delivery, as offered in-store)", "Mode de paiement (carte ou comptant à la cueillette/livraison, selon l'offre en magasin)")}</li>
+                  <li>
+                    •{" "}
+                    {t(
+                      "Pickup or delivery, and your address if delivery",
+                      "Cueillette ou livraison, et votre adresse pour la livraison",
+                    )}
+                  </li>
+                  <li>
+                    •{" "}
+                    {t("Items, sizes and any modifications", "Articles, formats et modifications")}
+                  </li>
+                  <li>
+                    •{" "}
+                    {t(
+                      "A callback number in case the order needs confirming",
+                      "Un numéro de rappel au cas où la commande doive être confirmée",
+                    )}
+                  </li>
+                  <li>
+                    •{" "}
+                    {t(
+                      "How you'll pay (card or cash on pickup/delivery, as offered in-store)",
+                      "Mode de paiement (carte ou comptant à la cueillette/livraison, selon l'offre en magasin)",
+                    )}
+                  </li>
                 </ul>
               </div>
             </div>

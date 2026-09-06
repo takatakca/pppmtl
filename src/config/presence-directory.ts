@@ -91,8 +91,10 @@ export const presenceDirectory: PresenceRecord[] = [
     url: externalPresence.social.tiktok,
     locationScope: "brand",
     status: "active",
-    blurbEn: "Short clips from the PPP kitchen — historically posted under the Montréal-Nord handle.",
-    blurbFr: "Courtes vidéos de la cuisine PPP — publiées historiquement sous le compte Montréal-Nord.",
+    blurbEn:
+      "Short clips from the PPP kitchen — historically posted under the Montréal-Nord handle.",
+    blurbFr:
+      "Courtes vidéos de la cuisine PPP — publiées historiquement sous le compte Montréal-Nord.",
     iconKey: "tiktok",
   },
   {
@@ -136,8 +138,10 @@ export const presenceDirectory: PresenceRecord[] = [
     url: externalPresence.legacy.yelpMontrealNord,
     locationScope: "loc-montreal-nord",
     status: "legacy",
-    blurbEn: "A historic Yelp record from the original Montréal-Nord kitchen on Rue Léger — not the current NDG listing.",
-    blurbFr: "Une fiche Yelp historique de la cuisine d'origine à Montréal-Nord, rue Léger — pas la fiche NDG actuelle.",
+    blurbEn:
+      "A historic Yelp record from the original Montréal-Nord kitchen on Rue Léger — not the current NDG listing.",
+    blurbFr:
+      "Une fiche Yelp historique de la cuisine d'origine à Montréal-Nord, rue Léger — pas la fiche NDG actuelle.",
     iconKey: "yelp",
   },
   {
@@ -159,7 +163,8 @@ export const presenceDirectory: PresenceRecord[] = [
     locationScope: "loc-montreal-nord",
     status: "legacy",
     blurbEn: "A legacy TripAdvisor listing from before the Montréal-Nord kitchen closed.",
-    blurbFr: "Une ancienne fiche TripAdvisor datant d'avant la fermeture de la cuisine de Montréal-Nord.",
+    blurbFr:
+      "Une ancienne fiche TripAdvisor datant d'avant la fermeture de la cuisine de Montréal-Nord.",
     iconKey: "tripadvisor",
   },
   // ------------------------------------------------------------ directory
@@ -182,7 +187,8 @@ export const presenceDirectory: PresenceRecord[] = [
     locationScope: "loc-montreal-nord",
     status: "legacy",
     blurbEn: "An older Linktree published under the Montréal-Nord name — kept for reference only.",
-    blurbFr: "Un ancien Linktree publié sous le nom Montréal-Nord — conservé pour référence seulement.",
+    blurbFr:
+      "Un ancien Linktree publié sous le nom Montréal-Nord — conservé pour référence seulement.",
     iconKey: "linktree",
   },
   // ------------------------------------------------------------- ordering
@@ -226,8 +232,10 @@ export const presenceDirectory: PresenceRecord[] = [
     url: externalPresence.legacy.tooGoodToGoMontrealNord,
     locationScope: "loc-montreal-nord",
     status: "legacy",
-    blurbEn: "A historic Too Good To Go surprise-bag listing from the closed Montréal-Nord kitchen.",
-    blurbFr: "Une ancienne fiche de sac surprise Too Good To Go de la cuisine fermée de Montréal-Nord.",
+    blurbEn:
+      "A historic Too Good To Go surprise-bag listing from the closed Montréal-Nord kitchen.",
+    blurbFr:
+      "Une ancienne fiche de sac surprise Too Good To Go de la cuisine fermée de Montréal-Nord.",
     iconKey: "too-good-to-go",
   },
   {
@@ -237,8 +245,10 @@ export const presenceDirectory: PresenceRecord[] = [
     url: externalPresence.legacy.orderOnlineHochelaga,
     locationScope: "loc-sainte-catherine-e",
     status: "legacy",
-    blurbEn: "An older order.online storefront listed under the Hochelaga name, near the current Sainte-Catherine E kitchen.",
-    blurbFr: "Une ancienne vitrine order.online publiée sous le nom Hochelaga, près de la cuisine actuelle Sainte-Catherine E.",
+    blurbEn:
+      "An older order.online storefront listed under the Hochelaga name, near the current Sainte-Catherine E kitchen.",
+    blurbFr:
+      "Une ancienne vitrine order.online publiée sous le nom Hochelaga, près de la cuisine actuelle Sainte-Catherine E.",
     iconKey: "order-online",
   },
   {
@@ -249,7 +259,8 @@ export const presenceDirectory: PresenceRecord[] = [
     locationScope: "loc-montreal-nord",
     status: "legacy",
     blurbEn: "A historic Setmore booking page tied to the original Montréal-Nord operation.",
-    blurbFr: "Une ancienne page de réservation Setmore liée à l'exploitation d'origine de Montréal-Nord.",
+    blurbFr:
+      "Une ancienne page de réservation Setmore liée à l'exploitation d'origine de Montréal-Nord.",
     iconKey: "setmore",
   },
 ];

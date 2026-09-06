@@ -217,7 +217,10 @@ function TrackPage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   type="tel"
-                  placeholder={t("Phone number used for the order", "Numéro utilisé pour la commande")}
+                  placeholder={t(
+                    "Phone number used for the order",
+                    "Numéro utilisé pour la commande",
+                  )}
                   className="h-10 border border-border bg-background px-3 text-sm focus-ppp"
                 />
                 <input
@@ -274,7 +277,10 @@ function TrackPage() {
                 onClick={() => trackExternalOrder(provider, location.id, "/track")}
                 className="press-tap mt-5 inline-flex items-center gap-2 border border-border px-4 py-2.5 font-display text-sm uppercase leading-none hover:border-primary focus-ppp"
               >
-                {t(`Open ${marketplaceMeta[provider].labelEn} orders`, `Ouvrir les commandes ${marketplaceMeta[provider].labelFr}`)}
+                {t(
+                  `Open ${marketplaceMeta[provider].labelEn} orders`,
+                  `Ouvrir les commandes ${marketplaceMeta[provider].labelFr}`,
+                )}
                 <ExternalLink className="h-4 w-4" />
               </a>
             </div>
@@ -298,4 +304,3 @@ function TrackPage() {
     </div>
   );
 }
-

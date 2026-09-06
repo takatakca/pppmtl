@@ -60,7 +60,12 @@ export const Route = createFileRoute("/about")({
               "@type": "BreadcrumbList",
               itemListElement: [
                 { "@type": "ListItem", position: 1, name: "Home", item: canonicalUrl("/") },
-                { "@type": "ListItem", position: 2, name: "Our Story", item: canonicalUrl("/about") },
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: "Our Story",
+                  item: canonicalUrl("/about"),
+                },
               ],
             },
           ],
@@ -326,7 +331,10 @@ function AboutPage() {
             <Reveal className="max-w-2xl">
               <Eyebrow>{t("The road ahead", "La suite")}</Eyebrow>
               <h2 className="mt-2 font-display text-4xl uppercase leading-[0.88] sm:text-6xl">
-                {t("PPP isn't staying in one neighbourhood", "PPP ne reste pas dans un seul quartier")}
+                {t(
+                  "PPP isn't staying in one neighbourhood",
+                  "PPP ne reste pas dans un seul quartier",
+                )}
               </h2>
             </Reveal>
 
@@ -569,11 +577,7 @@ function TimelineGroup({
       <ul className="mt-4 space-y-4 border-l border-border pl-4">
         {items.map((l) => (
           <li key={l.id}>
-            <Link
-              to="/locations/$slug"
-              params={{ slug: l.slug }}
-              className="group block focus-ppp"
-            >
+            <Link to="/locations/$slug" params={{ slug: l.slug }} className="group block focus-ppp">
               <span className="font-display text-xl uppercase leading-none transition-colors group-hover:text-flame sm:text-2xl">
                 {l.neighborhood}
               </span>

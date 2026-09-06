@@ -38,28 +38,61 @@ export const Route = createFileRoute("/franchise")({
 
 const pillars = [
   {
-    en: { t: "The brand", d: "A distinct, red-forward identity people already recognize and crave." },
+    en: {
+      t: "The brand",
+      d: "A distinct, red-forward identity people already recognize and crave.",
+    },
     fr: { t: "La marque", d: "Une identité rouge et distincte que les gens reconnaissent déjà." },
   },
   {
-    en: { t: "The food", d: "Rotisserie chicken, pizza and poutine with a consistent, proven recipe system." },
-    fr: { t: "La nourriture", d: "Poulet rôti, pizza et poutine avec un système de recettes éprouvé." },
+    en: {
+      t: "The food",
+      d: "Rotisserie chicken, pizza and poutine with a consistent, proven recipe system.",
+    },
+    fr: {
+      t: "La nourriture",
+      d: "Poulet rôti, pizza et poutine avec un système de recettes éprouvé.",
+    },
   },
   {
-    en: { t: "The customer experience", d: "Fast pickup, reliable delivery and a store people come back to." },
-    fr: { t: "L'expérience client", d: "Cueillette rapide, livraison fiable et un commerce où l'on revient." },
+    en: {
+      t: "The customer experience",
+      d: "Fast pickup, reliable delivery and a store people come back to.",
+    },
+    fr: {
+      t: "L'expérience client",
+      d: "Cueillette rapide, livraison fiable et un commerce où l'on revient.",
+    },
   },
   {
-    en: { t: "The digital system", d: "Direct ordering, search, loyalty and account tools built in-house." },
-    fr: { t: "Le système numérique", d: "Commande directe, recherche, fidélité et compte bâtis à l'interne." },
+    en: {
+      t: "The digital system",
+      d: "Direct ordering, search, loyalty and account tools built in-house.",
+    },
+    fr: {
+      t: "Le système numérique",
+      d: "Commande directe, recherche, fidélité et compte bâtis à l'interne.",
+    },
   },
   {
-    en: { t: "Support", d: "Operational playbooks and a menu system built for multi-location consistency." },
-    fr: { t: "Soutien", d: "Guides opérationnels et un système de menu pensé pour plusieurs emplacements." },
+    en: {
+      t: "Support",
+      d: "Operational playbooks and a menu system built for multi-location consistency.",
+    },
+    fr: {
+      t: "Soutien",
+      d: "Guides opérationnels et un système de menu pensé pour plusieurs emplacements.",
+    },
   },
   {
-    en: { t: "Expansion", d: "Already growing beyond a single neighbourhood, with more kitchens ahead." },
-    fr: { t: "Expansion", d: "Déjà en croissance au-delà d'un seul quartier, avec plus de cuisines à venir." },
+    en: {
+      t: "Expansion",
+      d: "Already growing beyond a single neighbourhood, with more kitchens ahead.",
+    },
+    fr: {
+      t: "Expansion",
+      d: "Déjà en croissance au-delà d'un seul quartier, avec plus de cuisines à venir.",
+    },
   },
 ];
 
@@ -124,14 +157,25 @@ function FranchisePage() {
                 {t("Territory", "Territoire")}
               </p>
               <h2 className="mt-2 font-display text-4xl uppercase leading-[0.88] sm:text-6xl">
-                {t("Open, coming soon, and where we started", "Ouvert, bientôt, et là où tout a commencé")}
+                {t(
+                  "Open, coming soon, and where we started",
+                  "Ouvert, bientôt, et là où tout a commencé",
+                )}
               </h2>
             </Reveal>
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
               {[
                 { label: t("Open", "Ouvert"), rows: openLocations, dot: "bg-primary" },
-                { label: t("Coming soon", "Bientôt"), rows: comingSoonLocations, dot: "border border-primary bg-transparent" },
-                { label: t("History", "Historique"), rows: pastLocations, dot: "bg-muted-foreground/50" },
+                {
+                  label: t("Coming soon", "Bientôt"),
+                  rows: comingSoonLocations,
+                  dot: "border border-primary bg-transparent",
+                },
+                {
+                  label: t("History", "Historique"),
+                  rows: pastLocations,
+                  dot: "bg-muted-foreground/50",
+                },
               ].map((group) => (
                 <Reveal key={group.label} className="border border-border bg-background p-4">
                   <p className="flex items-center gap-1.5 font-display text-xs uppercase tracking-[0.3em] text-muted-foreground">

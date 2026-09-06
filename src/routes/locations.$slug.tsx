@@ -7,12 +7,7 @@ import { SearchOverlay } from "@/components/search/search-overlay";
 import { LocationSheet } from "@/components/layout/location-sheet";
 import { OrderSheet } from "@/components/layout/order-sheet";
 import { usePPP } from "@/context/ppp-store";
-import {
-  canOrder,
-  locationBySlug,
-  locationSocial,
-  restaurantLocations,
-} from "@/config/locations";
+import { canOrder, locationBySlug, locationSocial, restaurantLocations } from "@/config/locations";
 import { orderingChannels } from "@/config/external-presence";
 import { canonicalUrl } from "@/config/site";
 
@@ -107,7 +102,11 @@ function LocationDetailPage() {
                   : "border-primary text-primary"
             }`}
           >
-            {isClosed ? t("Closed", "Fermé") : isComingSoon ? t("Coming soon", "Bientôt ouvert") : t("Open", "Ouvert")}
+            {isClosed
+              ? t("Closed", "Fermé")
+              : isComingSoon
+                ? t("Coming soon", "Bientôt ouvert")
+                : t("Open", "Ouvert")}
           </span>
         </div>
 
@@ -166,7 +165,10 @@ function LocationDetailPage() {
 
             <p className="mt-4 text-sm text-muted-foreground">
               {loc.statusNote ??
-                t("Hours not confirmed for this location yet.", "Heures non confirmées pour cet emplacement.")}
+                t(
+                  "Hours not confirmed for this location yet.",
+                  "Heures non confirmées pour cet emplacement.",
+                )}
             </p>
 
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
@@ -225,28 +227,48 @@ function LocationDetailPage() {
               <ul className="mt-6 flex flex-wrap gap-2">
                 {social.instagram && (
                   <li>
-                    <a href={social.instagram} target="_blank" rel="noreferrer" className="border border-border px-3 py-2 text-xs font-bold uppercase tracking-widest focus-ppp hover:border-primary">
+                    <a
+                      href={social.instagram}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="border border-border px-3 py-2 text-xs font-bold uppercase tracking-widest focus-ppp hover:border-primary"
+                    >
                       Instagram
                     </a>
                   </li>
                 )}
                 {social.facebook && (
                   <li>
-                    <a href={social.facebook} target="_blank" rel="noreferrer" className="border border-border px-3 py-2 text-xs font-bold uppercase tracking-widest focus-ppp hover:border-primary">
+                    <a
+                      href={social.facebook}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="border border-border px-3 py-2 text-xs font-bold uppercase tracking-widest focus-ppp hover:border-primary"
+                    >
                       Facebook
                     </a>
                   </li>
                 )}
                 {social.tiktok && (
                   <li>
-                    <a href={social.tiktok} target="_blank" rel="noreferrer" className="border border-border px-3 py-2 text-xs font-bold uppercase tracking-widest focus-ppp hover:border-primary">
+                    <a
+                      href={social.tiktok}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="border border-border px-3 py-2 text-xs font-bold uppercase tracking-widest focus-ppp hover:border-primary"
+                    >
                       TikTok
                     </a>
                   </li>
                 )}
                 {social.x && (
                   <li>
-                    <a href={social.x} target="_blank" rel="noreferrer" className="border border-border px-3 py-2 text-xs font-bold uppercase tracking-widest focus-ppp hover:border-primary">
+                    <a
+                      href={social.x}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="border border-border px-3 py-2 text-xs font-bold uppercase tracking-widest focus-ppp hover:border-primary"
+                    >
                       X
                     </a>
                   </li>
@@ -266,7 +288,10 @@ function LocationDetailPage() {
               />
             ) : (
               <div className="flex h-72 items-center justify-center p-6 text-center text-sm text-muted-foreground lg:h-full">
-                {t("Map not available for this location yet.", "Carte non disponible pour cet emplacement.")}
+                {t(
+                  "Map not available for this location yet.",
+                  "Carte non disponible pour cet emplacement.",
+                )}
               </div>
             )}
           </div>

@@ -66,7 +66,9 @@ function SupportPage() {
             <div className="mt-5 flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => routerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                onClick={() =>
+                  routerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                }
                 className="press-tap inline-flex items-center gap-2 bg-primary px-5 py-3 font-display text-sm uppercase tracking-widest text-primary-foreground focus-ppp"
               >
                 {t("Start support", "Commencer")}
@@ -92,7 +94,11 @@ function SupportPage() {
         </section>
 
         <div className="mx-auto grid max-w-[80rem] gap-4 px-3 py-6 sm:px-6 sm:py-10 lg:grid-cols-2 lg:gap-6">
-          <AskPPP onEscalate={() => routerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })} />
+          <AskPPP
+            onEscalate={() =>
+              routerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+          />
           <div ref={routerRef}>
             <SupportRouter />
           </div>
