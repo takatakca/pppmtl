@@ -24,10 +24,16 @@ export interface GeneratedCategory {
   slug: string;
   nameEn: string;
   nameFr: string;
+  /** Optional Spanish name. Absent = the English name is shown. */
+  nameEs?: string;
   descriptionEn: string;
   descriptionFr: string;
+  /** Optional Spanish description. Absent = the English description is shown. */
+  descriptionEs?: string;
   aliasesEn: string[];
   aliasesFr: string[];
+  /** Optional Spanish search aliases; trilingual synonyms also come from food-terms. */
+  aliasesEs?: string[];
   image: string;
   sortOrder: number;
 }
@@ -37,10 +43,16 @@ export interface GeneratedItem {
   categoryId: string;
   nameEn: string;
   nameFr: string;
+  /** Optional Spanish name. Absent = the English name is shown. */
+  nameEs?: string;
   descriptionEn: string;
   descriptionFr: string;
+  /** Optional Spanish description. Absent = the English description is shown. */
+  descriptionEs?: string;
   aliasesEn: string[];
   aliasesFr: string[];
+  /** Optional Spanish search aliases; trilingual synonyms also come from food-terms. */
+  aliasesEs?: string[];
   price: number | null;
   compareAtPrice: number | null;
   image: string;

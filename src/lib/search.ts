@@ -1,4 +1,5 @@
 import { categories, menuItems, type Lang, type MenuCategory, type MenuItem } from "@/data/menu";
+import { expandFoodTerm } from "@/data/food-terms";
 
 export function normalize(value: string) {
   return value
@@ -57,6 +58,23 @@ const STOP_WORDS = new Set([
   "svp",
   "sil",
   "plait",
+  "yo",
+  "quiero",
+  "quisiera",
+  "dame",
+  "por",
+  "favor",
+  "el",
+  "los",
+  "las",
+  "una",
+  "unos",
+  "con",
+  "para",
+  "tienen",
+  "tiene",
+  "busco",
+  "que",
 ]);
 
 export function tokenize(query: string) {
@@ -113,9 +131,9 @@ const CATEGORY_INDEX = new Map<string, { names: string; aliases: string; desc: s
   categories.map((c) => [
     c.id,
     {
-      names: haystack([c.nameEn, c.nameFr]),
-      aliases: haystack([c.aliasesEn, c.aliasesFr]),
-      desc: haystack([c.descriptionEn, c.descriptionFr]),
+      names: haystack([c.nameEn, c.nameFr, c.nameEs ?? ""]),
+      aliases: haystack([c.aliasesEn, c.aliasesFr, c.aliasesEs ?? []]),
+      desc: haystack([c.descriptionEn, c.descriptionFr, c.descriptionEs ?? ""]),
     },
   ]),
 );
@@ -124,9 +142,9 @@ const ITEM_INDEX = new Map<string, ItemIndex>(
   menuItems.map((i) => [
     i.id,
     {
-      names: haystack([i.nameEn, i.nameFr]),
-      aliases: haystack([i.aliasesEn, i.aliasesFr]),
-      desc: haystack([i.descriptionEn, i.descriptionFr]),
+      names: haystack([i.nameEn, i.nameFr, i.nameEs ?? ""]),
+      aliases: haystack([i.aliasesEn, i.aliasesFr, i.aliasesEs ?? []]),
+      desc: haystack([i.descriptionEn, i.descriptionFr, i.descriptionEs ?? ""]),
       options: haystack(
         (i.modifierGroups ?? []).flatMap((g) => [
           g.labelEn,
@@ -138,16 +156,26 @@ const ITEM_INDEX = new Map<string, ItemIndex>(
   ]),
 );
 
+/**
+ * Each typed term is scored together with its EN/FR/ES equivalents, so a
+ * Spanish or French word finds the English catalog entry it refers to.
+ */
+function variantsOf(term: string) {
+  return expandFoodTerm(term);
+}
+
 function scoreCategory(cat: MenuCategory, terms: string[]) {
   const idx = CATEGORY_INDEX.get(cat.id);
   if (!idx) return 0;
   const { names, aliases, desc } = idx;
   let score = 0;
-  for (const term of terms) {
-    if (names === term) score += 12;
-    else if (names.includes(term)) score += 8;
-    if (aliases.includes(term)) score += 6;
-    if (desc.includes(term)) score += 2;
+  for (const typed of terms) {
+    for (const term of variantsOf(typed)) {
+      if (names === term) score += 12;
+      else if (names.includes(term)) score += 8;
+      if (aliases.includes(term)) score += 6;
+      if (desc.includes(term)) score += 2;
+    }
   }
   return score;
 }
@@ -156,12 +184,14 @@ function scoreItem(item: MenuItem, terms: string[]) {
   const idx = ITEM_INDEX.get(item.id);
   if (!idx) return 0;
   let score = 0;
-  for (const term of terms) {
-    if (idx.names.startsWith(term)) score += 10;
-    else if (idx.names.includes(term)) score += 7;
-    if (idx.aliases.includes(term)) score += 5;
-    if (idx.desc.includes(term)) score += 2;
-    if (idx.options.includes(term)) score += 3;
+  for (const typed of terms) {
+    for (const term of variantsOf(typed)) {
+      if (idx.names.startsWith(term)) score += 10;
+      else if (idx.names.includes(term)) score += 7;
+      if (idx.aliases.includes(term)) score += 5;
+      if (idx.desc.includes(term)) score += 2;
+      if (idx.options.includes(term)) score += 3;
+    }
   }
   return score;
 }
@@ -213,15 +243,22 @@ export function searchMenu(query: string, context: SearchContext): SearchResults
   };
 }
 
-export function localizedName(entity: { nameEn: string; nameFr: string }, lang: Lang) {
-  return lang === "fr" ? entity.nameFr : entity.nameEn;
+export function localizedName(
+  entity: { nameEn: string; nameFr: string; nameEs?: string },
+  lang: Lang,
+) {
+  if (lang === "fr") return entity.nameFr || entity.nameEn;
+  if (lang === "es") return entity.nameEs || entity.nameEn;
+  return entity.nameEn;
 }
 
 export function localizedDescription(
-  entity: { descriptionEn: string; descriptionFr: string },
+  entity: { descriptionEn: string; descriptionFr: string; descriptionEs?: string },
   lang: Lang,
 ) {
-  return lang === "fr" ? entity.descriptionFr : entity.descriptionEn;
+  if (lang === "fr") return entity.descriptionFr || entity.descriptionEn;
+  if (lang === "es") return entity.descriptionEs || entity.descriptionEn;
+  return entity.descriptionEn;
 }
 
 /** Splits a label so matched search terms can be emphasized without garish highlighting. */
