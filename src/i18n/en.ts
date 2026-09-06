@@ -40,6 +40,6 @@ export const en = {
   auth: {
     invalidEmail: "Enter a valid email address.",
   },
-} as const;
+};
 
 export type Dictionary = typeof en;
