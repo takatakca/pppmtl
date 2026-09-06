@@ -13,9 +13,6 @@ import popupFood from "@/assets/menu-rotisserie.jpg";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-/** Purely presentational region marks — never a claim about where you are. */
-const FLAG: Record<string, string> = { en: "🇨🇦", fr: "🇨🇦", es: "🇪🇸" };
-
 /**
  * The single PPP acquisition experience: language first (only when the customer
  * has never chosen one), then the join stage. No coupon, no reward promise, no
@@ -156,9 +153,6 @@ export function AcquisitionPopup() {
                         : "border-border hover:border-primary"
                     }`}
                   >
-                    <span aria-hidden="true" className="text-lg">
-                      {FLAG[l.code]}
-                    </span>
                     {l.label}
                     <span className="ml-auto text-[0.65rem] tracking-[0.3em] opacity-70">
                       {l.shortLabel}
