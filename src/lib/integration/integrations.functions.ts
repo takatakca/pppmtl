@@ -59,6 +59,9 @@ export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
     const { providerHealth } = await import("./core/registry");
     const { recentIntegrationEvents } = await import("./core/logging");
     const { locationIntegrationMappings } = await import("@/config/integration-locations");
+    const { mappingCoverage } = await import("@/config/integration-menu-map");
+    const { lastMenuSyncFor } = await import("./core/menu-sync-log");
+    const { urbanPiperMenuConfigured } = await import("./providers/urbanpiper/menu");
 
     const primary = locationIntegrationMappings[0]?.locationId ?? "";
 
