@@ -59,7 +59,9 @@ function OrdersIndexPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 pt-20 pb-24 sm:px-6 lg:pt-28">
-      <h1 className="font-display text-3xl uppercase leading-none sm:text-5xl">{tr("navigation.myOrders")}</h1>
+      <h1 className="font-display text-3xl uppercase leading-none sm:text-5xl">
+        {tr("navigation.myOrders")}
+      </h1>
 
       {orders && orders.length > 0 ? (
         <ul className="stagger mt-8 space-y-4">
@@ -72,8 +74,12 @@ function OrdersIndexPage() {
       ) : (
         <div className="mt-8 border border-dashed border-border p-10 text-center">
           <Receipt className="mx-auto h-8 w-8 text-muted-foreground" />
-          <p className="mt-3 font-display text-2xl uppercase leading-none">{tr("orders.noOrders")}</p>
-          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{tr("orders.noOrdersBody")}</p>
+          <p className="mt-3 font-display text-2xl uppercase leading-none">
+            {tr("orders.noOrders")}
+          </p>
+          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+            {tr("orders.noOrdersBody")}
+          </p>
           <Link
             to="/order"
             className="mt-5 inline-block bg-primary px-6 py-3.5 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"

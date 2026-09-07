@@ -106,7 +106,9 @@ function OrderReceiptPage() {
 
       <article className="panel-in border border-border bg-card">
         <div className="border-b border-border p-6">
-          <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">{tr("orders.receipt")}</p>
+          <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
+            {tr("orders.receipt")}
+          </p>
           <h1 className="mt-2 font-display text-4xl uppercase leading-none">
             {tr("orders.orderNumber")} #{order.orderNumber ?? order.id}
           </h1>
@@ -162,13 +164,20 @@ function OrderReceiptPage() {
             <div className="flex justify-between text-sm">
               <dt className="text-muted-foreground">{tr("orders.tax")}</dt>
               <dd className="text-muted-foreground">
-                {t("Confirmed by the restaurant", "Confirmées par le restaurant", "Confirmados por el restaurante")}
+                {t(
+                  "Confirmed by the restaurant",
+                  "Confirmées par le restaurant",
+                  "Confirmados por el restaurante",
+                )}
               </dd>
             </div>
             <div className="flex items-baseline justify-between border-t border-border pt-3">
               <dt className="font-display text-xl uppercase leading-none">{tr("orders.total")}</dt>
               <dd className="font-display text-3xl leading-none">
-                ${order.total !== null ? (order.total / 100).toFixed(2) : `${(order.subtotal / 100).toFixed(2)}+`}
+                $
+                {order.total !== null
+                  ? (order.total / 100).toFixed(2)
+                  : `${(order.subtotal / 100).toFixed(2)}+`}
               </dd>
             </div>
           </dl>
