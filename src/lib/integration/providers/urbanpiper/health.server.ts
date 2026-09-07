@@ -5,10 +5,7 @@
  * With no credentials it reports "not configured" — never a fake success.
  */
 
-import {
-  urbanPiperApiUrl,
-  optionalCredential,
-} from "@/lib/integration/core/credentials.server";
+import { urbanPiperApiUrl, optionalCredential } from "@/lib/integration/core/credentials.server";
 import { mappingForLocation } from "@/config/integration-locations";
 import {
   urbanPiperConfigured,
@@ -165,9 +162,7 @@ export interface ConnectionTestResult {
   report: ProviderHealthReport;
 }
 
-export async function testUrbanPiperConnection(
-  locationId: string,
-): Promise<ConnectionTestResult> {
+export async function testUrbanPiperConnection(locationId: string): Promise<ConnectionTestResult> {
   const report = await urbanPiperHealth(locationId);
   const failed = report.checks.filter((c) => c.state === "failed");
   const missing = report.checks.filter((c) => c.state === "not_configured");

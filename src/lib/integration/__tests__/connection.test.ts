@@ -99,15 +99,11 @@ describe("webhook security", () => {
 
 describe("provider gating without credentials", () => {
   it("blocks menu sync and ordering for every store", async () => {
-    const { urbanPiperConfigured, urbanPiperReadiness } = await import(
-      "@/lib/integration/providers/urbanpiper/config.server"
-    );
-    const { syncLocationMenu } = await import(
-      "@/lib/integration/providers/urbanpiper/menu-sync"
-    );
-    const { urbanPiperOrderingConfigured } = await import(
-      "@/lib/integration/providers/urbanpiper/order-submit"
-    );
+    const { urbanPiperConfigured, urbanPiperReadiness } =
+      await import("@/lib/integration/providers/urbanpiper/config.server");
+    const { syncLocationMenu } = await import("@/lib/integration/providers/urbanpiper/menu-sync");
+    const { urbanPiperOrderingConfigured } =
+      await import("@/lib/integration/providers/urbanpiper/order-submit");
 
     const ndg = firstConnectionMapping()!;
     expect(urbanPiperConfigured(ndg.locationId)).toBe(false);
@@ -120,9 +116,7 @@ describe("provider gating without credentials", () => {
   });
 
   it("fails fast on an unknown store", async () => {
-    const { syncLocationMenu } = await import(
-      "@/lib/integration/providers/urbanpiper/menu-sync"
-    );
+    const { syncLocationMenu } = await import("@/lib/integration/providers/urbanpiper/menu-sync");
     const result = await syncLocationMenu("loc-does-not-exist");
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.code).toBe("invalid_request");

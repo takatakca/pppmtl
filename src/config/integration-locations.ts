@@ -92,4 +92,3 @@ export function missingProviderFields(mapping: LocationIntegrationMapping): stri
   if (!mapping.merchantId) missing.push("merchantId");
   return missing;
 }
-

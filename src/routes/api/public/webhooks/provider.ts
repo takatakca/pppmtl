@@ -92,10 +92,8 @@ export const Route = createFileRoute("/api/public/webhooks/provider")({
           return Response.json({ received: true, duplicate: true });
         }
 
-        const { urbanPiperWebhookAdapter } = await import(
-          "@/lib/integration/providers/urbanpiper/webhook"
-        );
-
+        const { urbanPiperWebhookAdapter } =
+          await import("@/lib/integration/providers/urbanpiper/webhook");
 
         const parsed = urbanPiperWebhookAdapter.parseEvent(rawBody);
         if (!parsed.ok) {

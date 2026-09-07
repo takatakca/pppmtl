@@ -22,7 +22,6 @@ export const INTEGRATION_ENV_KEYS = [
   "TWILIO_AUTH_TOKEN",
 ] as const;
 
-
 export type IntegrationEnvKey = (typeof INTEGRATION_ENV_KEYS)[number];
 
 function read(key: IntegrationEnvKey): string | undefined {
@@ -43,7 +42,6 @@ export function hasAnyCredential(...keys: IntegrationEnvKey[]): boolean {
 export function urbanPiperApiUrl(): string | undefined {
   return read("URBANPIPER_API_URL") ?? read("URBANPIPER_BASE_URL");
 }
-
 
 export function requireCredential(key: IntegrationEnvKey): string {
   const value = read(key);

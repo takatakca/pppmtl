@@ -17,7 +17,6 @@ import {
   urbanPiperAccessChecklist,
 } from "@/config/integration-readiness";
 
-
 /**
  * Internal integrations status screen. Not a merchant dashboard: it only
  * reports what is truly configured. Nothing here is ever shown as connected

@@ -22,7 +22,6 @@ export interface ConnectionCard {
   missingProviderFields: string[];
 }
 
-
 export interface IntegrationSnapshot {
   generatedAt: string;
   credentials: Record<string, boolean>;
@@ -80,9 +79,8 @@ export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
     const { lastMenuSyncFor } = await import("./core/menu-sync-log");
     const { urbanPiperMenuConfigured } = await import("./providers/urbanpiper/menu");
     const { firstConnectionMapping } = await import("@/config/integration-locations");
-    const { urbanPiperReadiness, urbanPiperEnvironmentLabel } = await import(
-      "./providers/urbanpiper/config.server"
-    );
+    const { urbanPiperReadiness, urbanPiperEnvironmentLabel } =
+      await import("./providers/urbanpiper/config.server");
 
     const target = firstConnectionMapping() ?? locationIntegrationMappings[0];
     const primary = target?.locationId ?? "";
@@ -156,10 +154,12 @@ export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
 /** "Test Connection" — runs the real checks, never fakes a success. */
 export const testProviderConnection = createServerFn({ method: "POST" })
   .inputValidator((input: { locationId: string }) => input)
-  .handler(async ({ data }): Promise<{ ok: boolean; message: string; report: ProviderHealthReport }> => {
-    const { testUrbanPiperConnection } = await import("./providers/urbanpiper/health.server");
-    return testUrbanPiperConnection(data.locationId);
-  });
+  .handler(
+    async ({ data }): Promise<{ ok: boolean; message: string; report: ProviderHealthReport }> => {
+      const { testUrbanPiperConnection } = await import("./providers/urbanpiper/health.server");
+      return testUrbanPiperConnection(data.locationId);
+    },
+  );
 
 /** Live health snapshot for one store. */
 export const getProviderHealth = createServerFn({ method: "POST" })
@@ -206,8 +206,7 @@ export const runMenuSyncNow = createServerFn({ method: "POST" })
       };
     }
     const menu = result.data.menu;
-    const modifiers =
-      menu?.products.reduce((sum, p) => sum + p.modifierGroups.length, 0) ?? 0;
+    const modifiers = menu?.products.reduce((sum, p) => sum + p.modifierGroups.length, 0) ?? 0;
     return {
       ok: true,
       message: "Menu synced.",
