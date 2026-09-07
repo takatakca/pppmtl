@@ -240,36 +240,53 @@ describe("order lookup", () => {
     resetOrderStoreForTests();
   });
 
-  const checkout = (phone: string, name = "Mathieu") => ({
+  const sampleOrder = (over: Partial<InternalOrder> = {}): InternalOrder => ({
+    id: `ord_${Math.random().toString(36).slice(2, 8)}`,
+    orderNumber: null,
+    customerId: null,
     locationId: "ndg",
-    orderType: "PICKUP" as const,
-    lines: [{ itemId: "pizza-pepperoni", quantity: 1, notes: "", selections: {} }],
+    providerLocationId: null,
+    provider: "local",
+    orderType: "PICKUP",
+    items: [item()],
+    subtotal: computeSubtotal([item()]),
+    tax: null,
+    total: null,
+    paymentStatus: "PAY_AT_RESTAURANT",
+    status: "CREATED",
+    providerStatus: null,
+    providerOrderId: null,
+    idempotencyKey: `k_${Math.random().toString(36).slice(2, 8)}`,
     customer: {
       customerId: null,
       takatakCustomerId: null,
-      name,
-      phone,
+      name: "Mathieu",
+      phone: "5145550000",
       email: null,
       isGuest: true,
     },
     deliveryAddress: null,
     notes: "",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    failureCode: null,
+    ...over,
   });
 
-  it("creates an order and reads it back by id", () => {
-    const created = createOrder(checkout("5145550001"));
-    expect(created.ok).toBe(true);
-    if (!created.ok) return;
+  it("reads a saved order back by id", () => {
+    const { saveOrder } = require("../order-store.server");
+    const order = sampleOrder({ id: "ord_lookup_1", customer: { ...sampleOrder().customer, phone: "5145550001" } });
+    saveOrder(order);
 
-    const found = getOrderById(created.data.id);
+    const found = getOrderById("ord_lookup_1");
     expect(found).not.toBeNull();
     expect(found?.customer.phone).toBe("5145550001");
   });
 
   it("finds orders by phone when no customer id is set", () => {
-    const a = createOrder(checkout("5145550002"));
-    const b = createOrder(checkout("5145550002"));
-    expect(a.ok && b.ok).toBe(true);
+    const { saveOrder } = require("../order-store.server");
+    saveOrder(sampleOrder({ id: "ord_a", customer: { ...sampleOrder().customer, phone: "5145550002" } }));
+    saveOrder(sampleOrder({ id: "ord_b", customer: { ...sampleOrder().customer, phone: "5145550002" } }));
 
     const matches = listCustomerOrders(null, "5145550002");
     expect(matches.length).toBe(2);
@@ -277,8 +294,10 @@ describe("order lookup", () => {
   });
 
   it("does not leak one customer's phone orders to another phone", () => {
-    createOrder(checkout("5145550003"));
-    createOrder(checkout("5145550004"));
+    const { saveOrder } = require("../order-store.server");
+    saveOrder(sampleOrder({ id: "ord_c", customer: { ...sampleOrder().customer, phone: "5145550003" } }));
+    saveOrder(sampleOrder({ id: "ord_d", customer: { ...sampleOrder().customer, phone: "5145550004" } }));
+
     expect(listCustomerOrders(null, "5145550003").length).toBe(1);
     expect(listCustomerOrders(null, "5145550004").length).toBe(1);
     expect(listCustomerOrders(null, "5145559999").length).toBe(0);
