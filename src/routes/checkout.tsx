@@ -6,7 +6,9 @@ import { PPPFooter } from "@/components/layout/ppp-footer";
 import { LocationSheet } from "@/components/layout/location-sheet";
 import { DeliveryAddressForm } from "@/components/order/delivery-address-form";
 import { GoogleButton } from "@/components/auth/google-button";
+import { useServerFn } from "@tanstack/react-start";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
+import { placeOrder } from "@/lib/orders/orders.functions";
 import { useCustomerSession } from "@/lib/customer/session";
 import { cartTotals, selectionLabels } from "@/lib/cart";
 import { menuRepository } from "@/lib/menu-repository";
@@ -58,6 +60,68 @@ function CheckoutPage() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState<string | null>(null);
   const [verifyState, setVerifyState] = useState<"idle" | "unavailable">("idle");
+  const [submitting, setSubmitting] = useState(false);
+  const [orderMessage, setOrderMessage] = useState<string | null>(null);
+  const [orderNumber, setOrderNumber] = useState<string | null>(null);
+
+  const submitOrderFn = useServerFn(placeOrder);
+
+  /**
+   * Cart -> validate -> internal order -> provider. The browser sends ids and
+   * quantities only; every price and every decision happens on the server.
+   */
+  const finishOrder = async () => {
+    setSubmitting(true);
+    setOrderMessage(null);
+    track("checkout_finish_attempted", { mode, lines: cart.length });
+    try {
+      const response = await submitOrderFn({
+        data: {
+          locationId: location?.id ?? "",
+          orderType: mode === "delivery" ? ("DELIVERY" as const) : ("PICKUP" as const),
+          lines: cart.map((line) => ({
+            itemId: line.itemId,
+            quantity: line.quantity,
+            notes: line.instructions ?? "",
+            selections: line.selections ?? {},
+          })),
+          customer: {
+            customerId: customer?.id ?? null,
+            takatakCustomerId: null,
+            name: name.trim() || (customer?.preferredName ?? null),
+            phone: phone.trim() || null,
+            email: customer?.email ?? null,
+            isGuest: identity === "guest",
+          },
+          deliveryAddress: mode === "delivery" ? address : null,
+          notes: "",
+        },
+      });
+
+      if (response.ok && response.order) {
+        setOrderNumber(response.order.orderNumber ?? response.order.id);
+        setOrderMessage(null);
+      } else if (response.error) {
+        setOrderMessage(
+          lang === "fr"
+            ? response.error.messageFr
+            : lang === "es"
+              ? response.error.messageEs
+              : response.error.messageEn,
+        );
+      }
+    } catch {
+      setOrderMessage(
+        t(
+          "We could not finish your order. Please try again or call us.",
+          "Nous n'avons pas pu terminer votre commande. Réessayez ou appelez-nous.",
+          "No pudimos terminar tu pedido. Inténtalo de nuevo o llámanos.",
+        ),
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const lines = useMemo(
     () =>
@@ -366,15 +430,32 @@ function CheckoutPage() {
               </dl>
 
               <button
-                onClick={() => track("checkout_finish_attempted", { mode, lines: cart.length })}
-                className="cta-motion mt-5 w-full bg-primary px-5 py-4 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
+                onClick={() => void finishOrder()}
+                disabled={submitting}
+                className="cta-motion mt-5 w-full bg-primary px-5 py-4 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp disabled:opacity-60"
                 style={{ boxShadow: "var(--shadow-glow)" }}
               >
-                {t("Finish my order", "Terminer ma commande", "Terminar mi pedido")}
+                {submitting
+                  ? t("Sending…", "Envoi…", "Enviando…")
+                  : t("Finish my order", "Terminer ma commande", "Terminar mi pedido")}
               </button>
-              <p className="mt-2 text-center text-[0.6rem] uppercase tracking-widest text-muted-foreground">
-                {lang === "fr" ? orderStatus.reasonFr : orderStatus.reasonEn}
-              </p>
+              {orderNumber ? (
+                <p className="mt-3 border border-primary px-4 py-3 text-center text-sm">
+                  {t("Order", "Commande", "Pedido")} #{orderNumber}
+                </p>
+              ) : null}
+              {orderMessage ? (
+                <p
+                  role="status"
+                  className="mt-3 border border-border px-4 py-3 text-center text-sm text-muted-foreground"
+                >
+                  {orderMessage}
+                </p>
+              ) : (
+                <p className="mt-2 text-center text-[0.6rem] uppercase tracking-widest text-muted-foreground">
+                  {lang === "fr" ? orderStatus.reasonFr : orderStatus.reasonEn}
+                </p>
+              )}
               {location?.links.phoneOrderNumber && (
                 <a
                   href={`tel:${location.links.phoneOrderNumber}`}
