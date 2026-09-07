@@ -105,14 +105,15 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
         <section className="border border-border bg-card p-5">
           <div className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
-            <h2 className="font-display text-2xl uppercase leading-none">
-              {tr("account.orders")}
-            </h2>
+            <h2 className="font-display text-2xl uppercase leading-none">{tr("account.orders")}</h2>
           </div>
           {orders && orders.length > 0 ? (
             <ul className="mt-3 space-y-2">
               {orders.slice(0, 4).map((order) => (
-                <li key={order.id} className="flex items-center justify-between border border-border p-3">
+                <li
+                  key={order.id}
+                  className="flex items-center justify-between border border-border p-3"
+                >
                   <Link
                     to="/orders/$orderId"
                     params={{ orderId: order.id }}
@@ -165,7 +166,10 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
           {favouriteItems.length > 0 ? (
             <ul className="mt-3 space-y-2">
               {favouriteItems.slice(0, 6).map((item) => (
-                <li key={item.id} className="flex items-center justify-between border border-border p-3">
+                <li
+                  key={item.id}
+                  className="flex items-center justify-between border border-border p-3"
+                >
                   <Link to="/order" className="min-w-0 flex-1 focus-ppp">
                     <p className="font-display text-lg uppercase leading-none">
                       {localizedName(item, "en")}

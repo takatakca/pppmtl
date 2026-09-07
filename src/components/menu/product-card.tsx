@@ -51,7 +51,9 @@ export function ProductCard({
           <button
             type="button"
             aria-label={
-              favourited ? t("Remove from favourites", "Retirer des favoris") : t("Add to favourites", "Ajouter aux favoris")
+              favourited
+                ? t("Remove from favourites", "Retirer des favoris")
+                : t("Add to favourites", "Ajouter aux favoris")
             }
             onClick={(e) => {
               e.stopPropagation();

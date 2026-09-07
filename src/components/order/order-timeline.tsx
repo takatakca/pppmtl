@@ -46,9 +46,7 @@ export function OrderTimeline({
         <Icon className="h-5 w-5 shrink-0 text-destructive" />
         <div>
           <p className="font-display text-lg uppercase leading-none text-destructive">
-            {status === "CANCELLED"
-              ? tr("orders.cancelled")
-              : tr("orders.failed")}
+            {status === "CANCELLED" ? tr("orders.cancelled") : tr("orders.failed")}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             {t(

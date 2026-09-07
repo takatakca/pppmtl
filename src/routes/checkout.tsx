@@ -49,15 +49,7 @@ const SectionTitle = ({ n, children }: { n: number; children: React.ReactNode })
 );
 
 function CheckoutPage() {
-  const {
-    cart,
-    mode,
-    setMode,
-    lang,
-    t,
-    openLocationSheet,
-    addSavedAddress,
-  } = usePPP();
+  const { cart, mode, setMode, lang, t, openLocationSheet, addSavedAddress } = usePPP();
   const location = useSelectedLocation();
   const { accountsAvailable, customer } = useCustomerSession();
   const totals = cartTotals(cart);

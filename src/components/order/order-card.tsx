@@ -25,9 +25,7 @@ export function OrderCard({
     <article className="panel-in border border-border bg-card">
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border p-4">
         <div>
-          <p className="font-display text-2xl uppercase leading-none">
-            #{displayNumber}
-          </p>
+          <p className="font-display text-2xl uppercase leading-none">#{displayNumber}</p>
           <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
             {statusLabel(order.status, lang)} · {date}
           </p>
