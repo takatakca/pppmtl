@@ -77,25 +77,30 @@ const marketplaceMeta: Record<
 };
 
 function TrackPage() {
-  const { t } = usePPP();
+  const { t, lang } = usePPP();
   const location = useSelectedRestaurantLocation();
   const [provider, setProvider] = useState<Provider>(null);
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [lookupTried, setLookupTried] = useState(false);
   const [lookupError, setLookupError] = useState<string | null>(null);
+  const [foundOrder, setFoundOrder] = useState<OrderView | null>(null);
 
   function choose(p: Exclude<Provider, null>) {
     setProvider(p);
+    setFoundOrder(null);
+    setLookupError(null);
+    setLookupTried(false);
     trackProviderSelected(p);
     if (p === "uber_eats" || p === "doordash" || p === "skip") {
       trackExternalOrder(p, location.id, "/track");
     }
   }
 
-  function handleLookup(e: React.FormEvent) {
+  async function handleLookup(e: React.FormEvent) {
     e.preventDefault();
     setLookupTried(true);
+    setFoundOrder(null);
     const digits = phone.replace(/\D/g, "");
     if (digits.length < 10 || code.trim().length < 4) {
       setLookupError(
@@ -107,6 +112,17 @@ function TrackPage() {
       return;
     }
     setLookupError(null);
+    try {
+      const result = await listMyOrders({ data: { customerId: null, phone: digits } });
+      const match = result.orders.find(
+        (o) =>
+          o.orderNumber?.toLowerCase() === code.trim().toLowerCase() ||
+          o.id.toLowerCase().endsWith(code.trim().toLowerCase()),
+      );
+      if (match) setFoundOrder(match);
+    } catch {
+      /* leave not found */
+    }
   }
 
   return (
