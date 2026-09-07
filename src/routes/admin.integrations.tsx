@@ -167,6 +167,64 @@ function IntegrationsAdmin() {
           </section>
 
           <section className="mt-2 border border-border bg-card p-5">
+            <h2 className="font-display text-2xl uppercase leading-none">UrbanPiper menu sync</h2>
+            <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+              <StatusIcon available={snapshot.menuSync.connected} />
+              {snapshot.menuSync.connected ? "Connected" : "Not connected"} ·{" "}
+              {snapshot.menuSync.reason}
+            </p>
+            <p className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">
+              Mapping coverage: {snapshot.menuSync.coverage.categoriesMapped}/
+              {snapshot.menuSync.coverage.categoriesTotal} categories ·{" "}
+              {snapshot.menuSync.coverage.productsMapped} products ·{" "}
+              {snapshot.menuSync.coverage.modifiersMapped} modifiers
+            </p>
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="text-[0.6rem] uppercase tracking-widest text-muted-foreground">
+                  <tr>
+                    <th className="py-2 pr-4">Store</th>
+                    <th className="py-2 pr-4">Sync</th>
+                    <th className="py-2 pr-4">Last run</th>
+                    <th className="py-2 pr-4">Categories</th>
+                    <th className="py-2 pr-4">Products</th>
+                    <th className="py-2">Errors</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {snapshot.menuSync.stores.map((s) => (
+                    <tr key={s.internalId} className="border-t border-border align-top">
+                      <td className="py-2 pr-4">
+                        {s.name}
+                        <span className="block font-mono text-[0.65rem] text-muted-foreground">
+                          {s.internalId}
+                        </span>
+                      </td>
+                      <td className="py-2 pr-4">
+                        <StatusIcon available={s.connected} />
+                      </td>
+                      <td className="py-2 pr-4 text-xs text-muted-foreground">
+                        {s.lastSyncAt ?? "never run"}
+                        <span className="block uppercase tracking-widest">{s.lastStatus}</span>
+                      </td>
+                      <td className="py-2 pr-4">{s.categoriesReceived}</td>
+                      <td className="py-2 pr-4">
+                        {s.productsReceived}
+                        <span className="block text-xs text-muted-foreground">
+                          {s.itemsUpdated} published
+                        </span>
+                      </td>
+                      <td className="py-2 text-xs text-muted-foreground">
+                        {s.errors.length === 0 ? "—" : s.errors.slice(0, 3).join("; ")}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="mt-2 border border-border bg-card p-5">
             <h2 className="font-display text-2xl uppercase leading-none">Provider comparison</h2>
             <p className="mt-2 text-sm text-muted-foreground">
               Planned division of responsibility. This is intent, not connection state.
@@ -178,7 +236,9 @@ function IntegrationsAdmin() {
                   <p className="mt-2 text-sm text-muted-foreground">{p.role}</p>
                   <p className="mt-3 text-xs uppercase tracking-widest text-accent">PPP owns</p>
                   <p className="text-sm">{p.ppmOwns}</p>
-                  <p className="mt-2 text-xs uppercase tracking-widest text-accent">Provider owns</p>
+                  <p className="mt-2 text-xs uppercase tracking-widest text-accent">
+                    Provider owns
+                  </p>
                   <p className="text-sm">{p.providerOwns}</p>
                   <p className="mt-2 text-xs uppercase tracking-widest text-accent">
                     Required credentials
@@ -219,9 +279,7 @@ function IntegrationsAdmin() {
             </div>
 
             <div className="border border-border bg-card p-5">
-              <h2 className="font-display text-2xl uppercase leading-none">
-                Connection order
-              </h2>
+              <h2 className="font-display text-2xl uppercase leading-none">Connection order</h2>
               <ul className="mt-3 space-y-2 text-sm">
                 {integrationRoadmap.map((c) => (
                   <li key={c.label} className="border border-border p-3">

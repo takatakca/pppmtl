@@ -30,6 +30,27 @@ export interface IntegrationSnapshot {
     status: string;
     payloadReference: string;
   }>;
+  menuSync: {
+    connected: boolean;
+    reason: string;
+    coverage: {
+      categoriesMapped: number;
+      categoriesTotal: number;
+      productsMapped: number;
+      modifiersMapped: number;
+    };
+    stores: Array<{
+      internalId: string;
+      name: string;
+      connected: boolean;
+      lastSyncAt: string | null;
+      lastStatus: string;
+      categoriesReceived: number;
+      productsReceived: number;
+      itemsUpdated: number;
+      errors: string[];
+    }>;
+  };
 }
 
 export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
@@ -38,6 +59,9 @@ export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
     const { providerHealth } = await import("./core/registry");
     const { recentIntegrationEvents } = await import("./core/logging");
     const { locationIntegrationMappings } = await import("@/config/integration-locations");
+    const { mappingCoverage } = await import("@/config/integration-menu-map");
+    const { lastMenuSyncFor } = await import("./core/menu-sync-log");
+    const { urbanPiperMenuConfigured } = await import("./providers/urbanpiper/menu");
 
     const primary = locationIntegrationMappings[0]?.locationId ?? "";
 
@@ -64,6 +88,26 @@ export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
         status: e.status,
         payloadReference: e.payloadReference,
       })),
+      menuSync: {
+        connected: locationIntegrationMappings.some((m) => urbanPiperMenuConfigured(m.locationId)),
+        reason:
+          "Menu sync activates per store once UrbanPiper credentials and that store's provider id exist.",
+        coverage: mappingCoverage(),
+        stores: locationIntegrationMappings.map((m) => {
+          const last = lastMenuSyncFor(m.locationId);
+          return {
+            internalId: m.internalId,
+            name: m.name,
+            connected: urbanPiperMenuConfigured(m.locationId),
+            lastSyncAt: last?.completedAt ?? last?.startedAt ?? null,
+            lastStatus: last?.status ?? "never run",
+            categoriesReceived: last?.categoriesReceived ?? 0,
+            productsReceived: last?.productsReceived ?? 0,
+            itemsUpdated: last?.itemsUpdated ?? 0,
+            errors: last?.errors ?? [],
+          };
+        }),
+      },
     };
   },
 );
