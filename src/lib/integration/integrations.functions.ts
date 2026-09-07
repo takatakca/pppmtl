@@ -30,6 +30,27 @@ export interface IntegrationSnapshot {
     status: string;
     payloadReference: string;
   }>;
+  menuSync: {
+    connected: boolean;
+    reason: string;
+    coverage: {
+      categoriesMapped: number;
+      categoriesTotal: number;
+      productsMapped: number;
+      modifiersMapped: number;
+    };
+    stores: Array<{
+      internalId: string;
+      name: string;
+      connected: boolean;
+      lastSyncAt: string | null;
+      lastStatus: string;
+      categoriesReceived: number;
+      productsReceived: number;
+      itemsUpdated: number;
+      errors: string[];
+    }>;
+  };
 }
 
 export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
