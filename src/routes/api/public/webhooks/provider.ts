@@ -79,16 +79,36 @@ export const Route = createFileRoute("/api/public/webhooks/provider")({
           return new Response("Invalid payload", { status: 400 });
         }
 
+        // ORDER_ACCEPTED / ORDER_PREPARING / ORDER_READY / ORDER_COMPLETED /
+        // ORDER_CANCELLED map into the universal PPP lifecycle. Unknown events
+        // are logged and ignored — never guessed into a status.
+        const { statusForEvent, statusForProviderStatus } =
+          await import("@/lib/orders/status-mapping");
+        const status =
+          statusForEvent(parsed.data.eventType) ??
+          (parsed.data.status ? statusForProviderStatus(parsed.data.status) : null);
+
+        let applied = false;
+        if (status && parsed.data.externalOrderId) {
+          const { applyProviderStatusUpdate } = await import("@/lib/orders/order-service");
+          applied = Boolean(
+            applyProviderStatusUpdate(
+              parsed.data.externalOrderId,
+              status,
+              parsed.data.status ?? parsed.data.eventType,
+            ),
+          );
+        }
+
         logIntegrationEvent({
           provider,
           eventType: parsed.data.eventType,
-          status: "received",
+          status: applied ? "processed" : "received",
           payloadReference: parsed.data.payloadReference,
+          ...(status ? { detail: `mapped:${status}` } : { detail: "unmapped event" }),
         });
 
-        // No order store exists yet: the event is verified and logged, and
-        // order state stays owned by the provider until PPP Direct is live.
-        return Response.json({ received: true });
+        return Response.json({ received: true, applied });
       },
 
       GET: async () => new Response("Method not allowed", { status: 405 }),

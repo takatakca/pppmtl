@@ -33,6 +33,7 @@ import { Route as AccountForgotPasswordRouteImport } from './routes/account_.for
 import { Route as AccountSignInRouteImport } from './routes/account_.sign-in'
 import { Route as AccountSignUpRouteImport } from './routes/account_.sign-up'
 import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as DevMenuAuditRouteImport } from './routes/dev.menu-audit'
 import { Route as LocationsIndexRouteImport } from './routes/locations.index'
 import { Route as LocationsSlugRouteImport } from './routes/locations.$slug'
@@ -158,6 +159,11 @@ const AdminIntegrationsRoute = AdminIntegrationsRouteImport.update({
   path: '/admin/integrations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/admin/orders',
+  path: '/admin/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DevMenuAuditRoute = DevMenuAuditRouteImport.update({
   id: '/dev/menu-audit',
   path: '/dev/menu-audit',
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/account/sign-in': typeof AccountSignInRoute
   '/account/sign-up': typeof AccountSignUpRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
   '/locations/': typeof LocationsIndexRoute
@@ -235,6 +242,7 @@ export interface FileRoutesByTo {
   '/account/sign-in': typeof AccountSignInRoute
   '/account/sign-up': typeof AccountSignUpRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
   '/locations': typeof LocationsIndexRoute
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/account_/sign-in': typeof AccountSignInRoute
   '/account_/sign-up': typeof AccountSignUpRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
   '/locations/': typeof LocationsIndexRoute
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/account/sign-in'
     | '/account/sign-up'
     | '/admin/integrations'
+    | '/admin/orders'
     | '/dev/menu-audit'
     | '/locations/$slug'
     | '/locations/'
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/account/sign-in'
     | '/account/sign-up'
     | '/admin/integrations'
+    | '/admin/orders'
     | '/dev/menu-audit'
     | '/locations/$slug'
     | '/locations'
@@ -358,6 +369,7 @@ export interface FileRouteTypes {
     | '/account_/sign-in'
     | '/account_/sign-up'
     | '/admin/integrations'
+    | '/admin/orders'
     | '/dev/menu-audit'
     | '/locations/$slug'
     | '/locations/'
@@ -389,6 +401,7 @@ export interface RootRouteChildren {
   AccountSignInRoute: typeof AccountSignInRoute
   AccountSignUpRoute: typeof AccountSignUpRoute
   AdminIntegrationsRoute: typeof AdminIntegrationsRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
   DevMenuAuditRoute: typeof DevMenuAuditRoute
   LocationsSlugRoute: typeof LocationsSlugRoute
   LocationsIndexRoute: typeof LocationsIndexRoute
@@ -565,6 +578,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIntegrationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/admin/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dev/menu-audit': {
       id: '/dev/menu-audit'
       path: '/dev/menu-audit'
@@ -621,6 +641,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountSignInRoute: AccountSignInRoute,
   AccountSignUpRoute: AccountSignUpRoute,
   AdminIntegrationsRoute: AdminIntegrationsRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
   DevMenuAuditRoute: DevMenuAuditRoute,
   LocationsSlugRoute: LocationsSlugRoute,
   LocationsIndexRoute: LocationsIndexRoute,
