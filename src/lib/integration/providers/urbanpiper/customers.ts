@@ -10,7 +10,8 @@ import { notConfigured } from "@/lib/integration/core/contracts";
 import { hasCredentials } from "@/lib/integration/core/credentials.server";
 
 const REASON_EN = "Customer identity is owned by TAKATAK; provider mirroring is not enabled.";
-const REASON_FR = "L'identité client appartient à TAKATAK; la copie chez le fournisseur est inactive.";
+const REASON_FR =
+  "L'identité client appartient à TAKATAK; la copie chez le fournisseur est inactive.";
 
 export const urbanPiperCustomerAdapter: CustomerAdapter = {
   provider: "urbanpiper",

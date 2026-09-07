@@ -67,9 +67,7 @@ export const submitOrder = createServerFn({ method: "POST" })
 export const processPayment = createServerFn({ method: "POST" })
   .inputValidator((input: { locationId: string; orderId: string; amount: number }) => input)
   .handler(
-    async ({
-      data,
-    }): Promise<IntegrationResult<{ intentId: string; clientSecret: string }>> => {
+    async ({ data }): Promise<IntegrationResult<{ intentId: string; clientSecret: string }>> => {
       const { adaptersFor } = await import("./core/registry");
       const payments = adaptersFor("clover")?.payments;
       if (!payments) {

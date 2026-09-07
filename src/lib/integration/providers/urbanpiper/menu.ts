@@ -56,7 +56,11 @@ export const urbanPiperMenuAdapter: MenuAdapter = {
       headers: { Authorization: `apikey ${apiKey}`, Accept: "application/json" },
     });
     if (!response.ok) {
-      return { ok: false, code: "provider_error", message: `Menu sync failed (${response.status})` };
+      return {
+        ok: false,
+        code: "provider_error",
+        message: `Menu sync failed (${response.status})`,
+      };
     }
 
     const payload = (await response.json()) as {

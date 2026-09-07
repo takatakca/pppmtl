@@ -31,9 +31,8 @@ export const Route = createFileRoute("/api/public/webhooks/provider")({
             ? process.env["URBANPIPER_WEBHOOK_SECRET"]
             : process.env["CLOVER_WEBHOOK_SECRET"];
 
-        const { logIntegrationEvent, claimIdempotencyKey } = await import(
-          "@/lib/integration/core/logging"
-        );
+        const { logIntegrationEvent, claimIdempotencyKey } =
+          await import("@/lib/integration/core/logging");
 
         if (!secret) {
           logIntegrationEvent({
@@ -50,9 +49,8 @@ export const Route = createFileRoute("/api/public/webhooks/provider")({
         const signature =
           request.headers.get("x-webhook-signature") ?? request.headers.get("x-clover-signature");
 
-        const { urbanPiperWebhookAdapter } = await import(
-          "@/lib/integration/providers/urbanpiper/webhook"
-        );
+        const { urbanPiperWebhookAdapter } =
+          await import("@/lib/integration/providers/urbanpiper/webhook");
 
         if (!urbanPiperWebhookAdapter.verifySignature(rawBody, signature, secret)) {
           logIntegrationEvent({

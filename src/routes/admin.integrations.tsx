@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AlertTriangle, CheckCircle2, MinusCircle } from "lucide-react";
-import { getIntegrationSnapshot, type IntegrationSnapshot } from "@/lib/integration/integrations.functions";
+import {
+  getIntegrationSnapshot,
+  type IntegrationSnapshot,
+} from "@/lib/integration/integrations.functions";
 
 /**
  * Internal integrations status screen. Not a merchant dashboard: it only

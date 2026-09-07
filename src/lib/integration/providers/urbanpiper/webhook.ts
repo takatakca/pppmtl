@@ -43,7 +43,9 @@ export const urbanPiperWebhookAdapter: WebhookAdapter = {
           externalOrderId: payload.order_id ? String(payload.order_id) : null,
           status: payload.status ? mapOrderStatus(payload.status) : null,
           receivedAt: new Date().toISOString(),
-          payloadReference: payload.id ? String(payload.id) : `order:${payload.order_id ?? "unknown"}`,
+          payloadReference: payload.id
+            ? String(payload.id)
+            : `order:${payload.order_id ?? "unknown"}`,
         },
       };
     } catch {

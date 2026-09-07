@@ -10,22 +10,10 @@
  */
 
 export type IntegrationProviderId =
-  | "local"
-  | "urbanpiper"
-  | "ordermark"
-  | "clover"
-  | "takatak"
-  | "uber_eats"
-  | "doordash"
-  | "skip";
+  "local" | "urbanpiper" | "ordermark" | "clover" | "takatak" | "uber_eats" | "doordash" | "skip";
 
 export type IntegrationCapability =
-  | "menu"
-  | "orders"
-  | "customers"
-  | "locations"
-  | "payments"
-  | "webhooks";
+  "menu" | "orders" | "customers" | "locations" | "payments" | "webhooks";
 
 /** Why a capability is not usable yet, in customer-safe wording. */
 export interface CapabilityStatus {
@@ -115,20 +103,10 @@ export interface UniversalMenu {
 /* ----------------------------------------------------------------- order */
 
 export type UniversalOrderStatus =
-  | "CREATED"
-  | "CONFIRMED"
-  | "PREPARING"
-  | "READY"
-  | "COMPLETED"
-  | "CANCELLED";
+  "CREATED" | "CONFIRMED" | "PREPARING" | "READY" | "COMPLETED" | "CANCELLED";
 
 export type UniversalPaymentStatus =
-  | "UNPAID"
-  | "AUTHORIZED"
-  | "PAID"
-  | "REFUNDED"
-  | "FAILED"
-  | "PAY_AT_RESTAURANT";
+  "UNPAID" | "AUTHORIZED" | "PAID" | "REFUNDED" | "FAILED" | "PAY_AT_RESTAURANT";
 
 export type UniversalOrderType = "PICKUP" | "DELIVERY";
 

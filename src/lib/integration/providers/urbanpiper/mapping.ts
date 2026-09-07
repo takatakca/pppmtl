@@ -78,7 +78,11 @@ export function mapCategory(payload: UrbanPiperCategoryPayload): UniversalCatego
     nameFr: payload.title_fr ?? payload.title,
     descriptionEn: payload.description ?? "",
     descriptionFr: payload.description_fr ?? payload.description ?? "",
-    image: { url: payload.image_url ?? null, altEn: payload.title, altFr: payload.title_fr ?? payload.title },
+    image: {
+      url: payload.image_url ?? null,
+      altEn: payload.title,
+      altFr: payload.title_fr ?? payload.title,
+    },
     sortOrder: payload.sort_order ?? 0,
     available: payload.active !== false,
   };
@@ -116,7 +120,11 @@ export function mapProduct(payload: UrbanPiperItemPayload): UniversalProduct {
     nameFr: payload.title_fr ?? payload.title,
     descriptionEn: payload.description ?? "",
     descriptionFr: payload.description_fr ?? payload.description ?? "",
-    image: { url: payload.image_url ?? null, altEn: payload.title, altFr: payload.title_fr ?? payload.title },
+    image: {
+      url: payload.image_url ?? null,
+      altEn: payload.title,
+      altFr: payload.title_fr ?? payload.title,
+    },
     price: toCents(payload.price ?? null),
     compareAtPrice: toCents(payload.markup_price ?? null),
     modifierGroups: (payload.option_groups ?? []).map(mapModifierGroup),
