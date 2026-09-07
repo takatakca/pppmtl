@@ -1,15 +1,22 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { AlertTriangle, CheckCircle2, MinusCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, MinusCircle, XCircle } from "lucide-react";
 import {
   getIntegrationSnapshot,
+  previewTestOrder,
+  runMenuSyncNow,
+  testProviderConnection,
   type IntegrationSnapshot,
+  type MenuSyncRunResult,
+  type OrderTestPreview,
+  type ProviderHealthReport,
 } from "@/lib/integration/integrations.functions";
 import {
   integrationRoadmap,
   providerPlans,
   urbanPiperAccessChecklist,
 } from "@/config/integration-readiness";
+
 
 /**
  * Internal integrations status screen. Not a merchant dashboard: it only
