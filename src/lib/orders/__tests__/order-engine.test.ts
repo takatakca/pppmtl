@@ -233,3 +233,54 @@ describe("errors", () => {
     expect(classifyProviderFailure("500 internal")).toBe("provider_error");
   });
 });
+
+describe("order lookup", () => {
+  beforeEach(() => {
+    resetIdempotencyForTests();
+    resetOrderStoreForTests();
+  });
+
+  const checkout = (phone: string, name = "Mathieu") => ({
+    locationId: "ndg",
+    orderType: "PICKUP" as const,
+    lines: [{ itemId: "pizza-pepperoni", quantity: 1, notes: "", selections: {} }],
+    customer: {
+      customerId: null,
+      takatakCustomerId: null,
+      name,
+      phone,
+      email: null,
+      isGuest: true,
+    },
+    deliveryAddress: null,
+    notes: "",
+  });
+
+  it("creates an order and reads it back by id", () => {
+    const created = createOrder(checkout("5145550001"));
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+
+    const found = getOrderById(created.data.id);
+    expect(found).not.toBeNull();
+    expect(found?.customer.phone).toBe("5145550001");
+  });
+
+  it("finds orders by phone when no customer id is set", () => {
+    const a = createOrder(checkout("5145550002"));
+    const b = createOrder(checkout("5145550002"));
+    expect(a.ok && b.ok).toBe(true);
+
+    const matches = listCustomerOrders(null, "5145550002");
+    expect(matches.length).toBe(2);
+    expect(matches.every((o) => o.customer.phone === "5145550002")).toBe(true);
+  });
+
+  it("does not leak one customer's phone orders to another phone", () => {
+    createOrder(checkout("5145550003"));
+    createOrder(checkout("5145550004"));
+    expect(listCustomerOrders(null, "5145550003").length).toBe(1);
+    expect(listCustomerOrders(null, "5145550004").length).toBe(1);
+    expect(listCustomerOrders(null, "5145559999").length).toBe(0);
+  });
+});
