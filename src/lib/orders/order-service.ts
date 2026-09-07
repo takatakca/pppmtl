@@ -16,12 +16,13 @@ import { restaurantLocations } from "@/config/locations";
 import { mappingForLocation } from "@/config/integration-locations";
 import { menuRepository } from "@/lib/menu-repository";
 import { logIntegrationEvent } from "@/lib/integration/core/logging";
-import { orderFailure, type OrderErrorCode, type OrderResult } from "./errors";
+import { orderError, orderFailure, type OrderErrorCode, type OrderResult } from "./errors";
 import { claimOrderKey, deriveIdempotencyKey } from "./idempotency";
 import { orderToUniversalDraft } from "./order-mapping";
 import { validateOrderDraft, type ValidationReport } from "./validation";
 import {
   applyStatus,
+  findOrderByProviderId,
   getOrder as readOrder,
   listAllOrders,
   listOrdersForCustomer,
@@ -124,22 +125,10 @@ export function validateOrder(request: CheckoutRequest): ValidationReport {
     ),
   });
 
-  if (dropped > 0) {
-    return {
-      valid: false,
-      errors: [...report.errors, ...(report.valid ? [] : [])].concat(
-        report.errors.some((e) => e.code === "menu_changed")
-          ? []
-          : [{ ...menuChangedError() }],
-      ),
-    };
+  if (dropped > 0 && !report.errors.some((e) => e.code === "menu_changed")) {
+    return { valid: false, errors: [...report.errors, orderError("menu_changed")] };
   }
   return report;
-}
-
-function menuChangedError() {
-  const { orderError } = require("./errors") as typeof import("./errors");
-  return orderError("menu_changed");
 }
 
 /** 2 — CREATE. An internal order exists before any provider is contacted. */
@@ -150,7 +139,7 @@ export function createOrder(request: CheckoutRequest): OrderResult<InternalOrder
   const report = validateOrder(request);
   if (!report.valid) {
     const first = report.errors[0];
-    return { ok: false, error: first ?? menuChangedError() };
+    return { ok: false, error: first ?? orderError("menu_changed") };
   }
 
   const idempotencyKey = deriveIdempotencyKey(draft);
@@ -292,9 +281,6 @@ export function applyProviderStatusUpdate(
   status: OrderStatus,
   providerStatus: string,
 ): InternalOrder | null {
-  const { findOrderByProviderId } = require("./order-store.server") as typeof import(
-    "./order-store.server"
-  );
   const order = findOrderByProviderId(providerOrderId);
   if (!order) return null;
   return applyStatus(order.id, status, providerStatus);
