@@ -8,18 +8,14 @@
 import type { OrderAdapter } from "@/lib/integration/core/adapter";
 import type { CapabilityStatus } from "@/lib/integration/core/contracts";
 import { notConfigured } from "@/lib/integration/core/contracts";
-import { hasCredentials } from "@/lib/integration/core/credentials.server";
-import { mappingForLocation } from "@/config/integration-locations";
+import { urbanPiperConfigured } from "./config.server";
 
 const REASON_EN = "Online ordering is completed by phone or a delivery app until PPP Direct opens.";
 const REASON_FR =
   "La commande se termine par téléphone ou une app de livraison jusqu'à l'ouverture de PPP Direct.";
 
 export function urbanPiperOrdersConfigured(locationId: string): boolean {
-  return (
-    hasCredentials("URBANPIPER_API_KEY", "URBANPIPER_BASE_URL") &&
-    Boolean(mappingForLocation(locationId)?.providerLocationId)
-  );
+  return urbanPiperConfigured(locationId);
 }
 
 function statusFor(locationId: string): CapabilityStatus {

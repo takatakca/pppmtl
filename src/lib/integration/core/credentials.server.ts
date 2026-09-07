@@ -7,7 +7,10 @@
  */
 
 export const INTEGRATION_ENV_KEYS = [
+  "URBANPIPER_API_URL",
   "URBANPIPER_API_KEY",
+  "URBANPIPER_CLIENT_ID",
+  "URBANPIPER_CLIENT_SECRET",
   "URBANPIPER_BASE_URL",
   "URBANPIPER_LOCATION_ID",
   "URBANPIPER_WEBHOOK_SECRET",
@@ -28,6 +31,16 @@ function read(key: IntegrationEnvKey): string | undefined {
 
 export function hasCredentials(...keys: IntegrationEnvKey[]): boolean {
   return keys.every((k) => read(k) !== undefined);
+}
+
+/** True when at least one of the given keys is set (aliased credentials). */
+export function hasAnyCredential(...keys: IntegrationEnvKey[]): boolean {
+  return keys.some((k) => read(k) !== undefined);
+}
+
+/** UrbanPiper accepts either the new API url or the legacy base url. */
+export function urbanPiperApiUrl(): string | undefined {
+  return read("URBANPIPER_API_URL") ?? read("URBANPIPER_BASE_URL");
 }
 
 export function requireCredential(key: IntegrationEnvKey): string {

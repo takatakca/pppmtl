@@ -13,8 +13,8 @@ import type {
   UniversalMenu,
 } from "@/lib/integration/core/contracts";
 import { notConfigured } from "@/lib/integration/core/contracts";
-import { hasCredentials, requireCredential } from "@/lib/integration/core/credentials.server";
-import { mappingForLocation } from "@/config/integration-locations";
+import { requireCredential, urbanPiperApiUrl } from "@/lib/integration/core/credentials.server";
+import { urbanPiperConfigured, urbanPiperStoreRef } from "./config.server";
 import {
   mapCategory,
   mapProduct,
@@ -27,10 +27,7 @@ const REASON_FR =
   "La synchronisation du menu utilise le catalogue vérifié tant qu'UrbanPiper n'est pas connecté.";
 
 export function urbanPiperMenuConfigured(locationId: string): boolean {
-  return (
-    hasCredentials("URBANPIPER_API_KEY", "URBANPIPER_BASE_URL") &&
-    Boolean(mappingForLocation(locationId)?.providerLocationId)
-  );
+  return urbanPiperConfigured(locationId);
 }
 
 export const urbanPiperMenuAdapter: MenuAdapter = {
@@ -48,9 +45,9 @@ export const urbanPiperMenuAdapter: MenuAdapter = {
   async fetchMenu(locationId): Promise<IntegrationResult<UniversalMenu>> {
     if (!urbanPiperMenuConfigured(locationId)) return notConfigured(REASON_EN);
 
-    const baseUrl = requireCredential("URBANPIPER_BASE_URL");
+    const baseUrl = (urbanPiperApiUrl() ?? "").replace(/\/$/, "");
     const apiKey = requireCredential("URBANPIPER_API_KEY");
-    const storeRef = mappingForLocation(locationId)!.providerLocationId!;
+    const storeRef = urbanPiperStoreRef(locationId)!;
 
     const response = await fetch(`${baseUrl}/hub/api/v1/stores/${storeRef}/menu/`, {
       headers: { Authorization: `apikey ${apiKey}`, Accept: "application/json" },

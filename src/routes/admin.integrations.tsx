@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { AlertTriangle, CheckCircle2, MinusCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, MinusCircle, XCircle } from "lucide-react";
 import {
   getIntegrationSnapshot,
+  previewTestOrder,
+  runMenuSyncNow,
+  testProviderConnection,
   type IntegrationSnapshot,
+  type MenuSyncRunResult,
+  type OrderTestPreview,
+  type ProviderHealthReport,
 } from "@/lib/integration/integrations.functions";
 import {
   integrationRoadmap,
@@ -36,6 +42,157 @@ function StatusIcon({ available }: { available: boolean }) {
     <CheckCircle2 className="h-4 w-4 text-primary" />
   ) : (
     <MinusCircle className="h-4 w-4 text-muted-foreground" />
+  );
+}
+
+function stateIcon(state: "ok" | "failed" | "not_configured") {
+  if (state === "ok") return <CheckCircle2 className="h-4 w-4 text-primary" />;
+  if (state === "failed") return <XCircle className="h-4 w-4 text-destructive" />;
+  return <MinusCircle className="h-4 w-4 text-muted-foreground" />;
+}
+
+function ConnectionPanel({ connection }: { connection: IntegrationSnapshot["connection"] }) {
+  const [busy, setBusy] = useState<null | "test" | "sync" | "order">(null);
+  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [report, setReport] = useState<ProviderHealthReport | null>(null);
+  const [sync, setSync] = useState<MenuSyncRunResult | null>(null);
+  const [orderTest, setOrderTest] = useState<OrderTestPreview | null>(null);
+
+  const run = async (kind: "test" | "sync" | "order") => {
+    setBusy(kind);
+    try {
+      const data = { locationId: connection.locationId };
+      if (kind === "test") {
+        const r = await testProviderConnection({ data });
+        setResult({ ok: r.ok, message: r.message });
+        setReport(r.report);
+      } else if (kind === "sync") {
+        setSync(await runMenuSyncNow({ data }));
+      } else {
+        setOrderTest(await previewTestOrder({ data }));
+      }
+    } catch {
+      setResult({ ok: false, message: "Connection failed: the check could not be completed." });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <section className="mt-2 border border-border bg-card p-5">
+      <h2 className="font-display text-2xl uppercase leading-none">UrbanPiper connection</h2>
+      <p className="mt-2 text-sm">
+        Location: <span className="font-semibold">{connection.name}</span>
+        <span className="block text-xs text-muted-foreground">{connection.address}</span>
+      </p>
+      <p className="mt-2 flex items-center gap-2 text-sm">
+        {stateIcon(connection.connected ? "ok" : "not_configured")}
+        Status: {connection.connected ? "Connected" : "Not Connected"} · environment:{" "}
+        {connection.environment}
+      </p>
+      <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
+        Phase 1 rollout — this store only
+      </p>
+
+      <ul className="mt-3 grid gap-1 sm:grid-cols-2">
+        {connection.requirements.map((r) => (
+          <li key={r.label} className="flex items-center gap-2 text-sm">
+            <StatusIcon available={r.met} />
+            {r.label}
+          </li>
+        ))}
+      </ul>
+      {connection.missingProviderFields.length > 0 && (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Waiting on provider fields: {connection.missingProviderFields.join(", ")}
+        </p>
+      )}
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => void run("test")}
+          disabled={busy !== null}
+          className="border border-border px-4 py-2 text-xs uppercase tracking-widest disabled:opacity-50"
+        >
+          {busy === "test" ? "Testing…" : "Test connection"}
+        </button>
+        <button
+          type="button"
+          onClick={() => void run("sync")}
+          disabled={busy !== null}
+          className="border border-border px-4 py-2 text-xs uppercase tracking-widest disabled:opacity-50"
+        >
+          {busy === "sync" ? "Syncing…" : "Sync menu now"}
+        </button>
+        <button
+          type="button"
+          onClick={() => void run("order")}
+          disabled={busy !== null}
+          className="border border-border px-4 py-2 text-xs uppercase tracking-widest disabled:opacity-50"
+        >
+          {busy === "order" ? "Building…" : "Order test mode"}
+        </button>
+      </div>
+
+      {result && (
+        <p className="mt-3 flex items-start gap-2 border border-border p-3 text-sm">
+          {stateIcon(result.ok ? "ok" : "failed")}
+          {result.ok ? "Connected" : "Connection failed"} — {result.message}
+        </p>
+      )}
+
+      {report && (
+        <ul className="mt-2 space-y-1">
+          {report.checks.map((c) => (
+            <li key={c.id} className="flex items-start gap-2 text-sm">
+              {stateIcon(c.state)}
+              <span>
+                {c.label}
+                <span className="block text-xs text-muted-foreground">{c.detail}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {sync && (
+        <div className="mt-3 border border-border p-3 text-sm">
+          <p className="flex items-center gap-2">
+            {stateIcon(sync.ok ? "ok" : "not_configured")}
+            {sync.message}
+          </p>
+          {sync.ok && (
+            <p className="mt-1 text-xs text-muted-foreground">
+              Last sync {sync.lastSyncAt ?? "—"} · {sync.categories} categories · {sync.products}{" "}
+              products · {sync.modifiers} modifier groups
+            </p>
+          )}
+        </div>
+      )}
+
+      {orderTest && (
+        <div className="mt-3 border border-border p-3 text-sm">
+          <p className="uppercase tracking-widest text-xs text-muted-foreground">
+            Order test mode · environment {orderTest.environment} ·{" "}
+            {orderTest.sent ? "sent to sandbox" : "not transmitted"}
+          </p>
+          {orderTest.errors.length > 0 && (
+            <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+              {orderTest.errors.map((e) => (
+                <li key={e}>· {e}</li>
+              ))}
+            </ul>
+          )}
+          <pre className="mt-2 max-h-64 overflow-auto border border-border bg-background p-3 text-[0.7rem]">
+            {orderTest.payload}
+          </pre>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Provider response: {orderTest.providerResponse ?? "none"}
+          </p>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -98,6 +255,8 @@ function IntegrationsAdmin() {
               </div>
             ))}
           </section>
+
+          <ConnectionPanel connection={snapshot.connection} />
 
           <section className="mt-2 border border-border bg-card p-5">
             <h2 className="font-display text-2xl uppercase leading-none">Location mapping</h2>

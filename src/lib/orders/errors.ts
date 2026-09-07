@@ -82,10 +82,11 @@ const MESSAGES: Record<OrderErrorCode, Message> = {
     es: "Algo cambió en tu pedido. Revísalo, por favor.",
   },
   provider_unavailable: {
-    en: "Online ordering is completed by phone until PPP Direct opens.",
-    fr: "La commande se termine par téléphone jusqu'à l'ouverture de PPP Direct.",
-    es: "El pedido se completa por teléfono hasta que abra PPP Direct.",
+    en: "Online ordering is temporarily unavailable. Please choose another ordering method.",
+    fr: "La commande en ligne est temporairement indisponible. Veuillez choisir un autre mode de commande.",
+    es: "El pedido en línea no está disponible por el momento. Elija otro método de pedido.",
   },
+
   provider_error: {
     en: "We could not send your order to the kitchen. Please try again or call us.",
     fr: "Nous n'avons pas pu envoyer votre commande à la cuisine. Réessayez ou appelez-nous.",
