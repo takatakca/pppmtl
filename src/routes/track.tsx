@@ -257,16 +257,13 @@ function TrackPage() {
 
           {provider === "phone" && (
             <div className="mt-8 border border-border p-5">
-              <div className="mb-3 inline-flex items-center gap-2 border border-primary/40 bg-primary/5 px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-widest text-primary">
-                {t("Coming soon", "Bientôt disponible")}
-              </div>
               <h2 className="font-display text-2xl uppercase leading-none">
                 {t("Look up a phone order", "Consulter une commande téléphonique")}
               </h2>
               <p className="mt-2 max-w-xl text-sm text-muted-foreground">
                 {t(
-                  "Phone order lookup is coming soon. For a real-time answer on a phone order, please call the location directly.",
-                  "La consultation des commandes téléphoniques arrive bientôt. Pour une réponse en temps réel sur une commande téléphonique, veuillez appeler l'établissement directement.",
+                  "Phone orders are not stored in PPP online yet. For a real-time answer, please call the location directly.",
+                  "Les commandes téléphoniques ne sont pas encore enregistrées en ligne chez PPP. Pour une réponse en temps réel, veuillez appeler l'établissement directement.",
                 )}
               </p>
               <form onSubmit={handleLookup} className="mt-5 grid max-w-md gap-3">
@@ -287,7 +284,7 @@ function TrackPage() {
                   className="h-10 border border-border bg-background px-3 text-sm focus-ppp"
                 />
                 {lookupError && <p className="text-xs text-destructive">{lookupError}</p>}
-                {lookupTried && !lookupError && (
+                {lookupTried && !lookupError && !foundOrder && (
                   <p className="border border-border bg-card/50 p-3 text-xs text-muted-foreground">
                     {t(
                       "Thanks — phone order lookup isn't available yet, so we can't show a status here. Please call the location directly for an update.",
