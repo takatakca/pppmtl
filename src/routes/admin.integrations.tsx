@@ -167,9 +167,7 @@ function IntegrationsAdmin() {
           </section>
 
           <section className="mt-2 border border-border bg-card p-5">
-            <h2 className="font-display text-2xl uppercase leading-none">
-              UrbanPiper menu sync
-            </h2>
+            <h2 className="font-display text-2xl uppercase leading-none">UrbanPiper menu sync</h2>
             <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
               <StatusIcon available={snapshot.menuSync.connected} />
               {snapshot.menuSync.connected ? "Connected" : "Not connected"} ·{" "}
@@ -238,7 +236,9 @@ function IntegrationsAdmin() {
                   <p className="mt-2 text-sm text-muted-foreground">{p.role}</p>
                   <p className="mt-3 text-xs uppercase tracking-widest text-accent">PPP owns</p>
                   <p className="text-sm">{p.ppmOwns}</p>
-                  <p className="mt-2 text-xs uppercase tracking-widest text-accent">Provider owns</p>
+                  <p className="mt-2 text-xs uppercase tracking-widest text-accent">
+                    Provider owns
+                  </p>
                   <p className="text-sm">{p.providerOwns}</p>
                   <p className="mt-2 text-xs uppercase tracking-widest text-accent">
                     Required credentials
@@ -279,9 +279,7 @@ function IntegrationsAdmin() {
             </div>
 
             <div className="border border-border bg-card p-5">
-              <h2 className="font-display text-2xl uppercase leading-none">
-                Connection order
-              </h2>
+              <h2 className="font-display text-2xl uppercase leading-none">Connection order</h2>
               <ul className="mt-3 space-y-2 text-sm">
                 {integrationRoadmap.map((c) => (
                   <li key={c.label} className="border border-border p-3">

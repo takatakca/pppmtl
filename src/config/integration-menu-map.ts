@@ -70,16 +70,16 @@ export function pppCategoryForProviderRef(ref: string): string | null {
 }
 
 export function providerRefForPppCategory(pppCategoryId: string): string | null {
-  return categoryMappings.find((m) => m.pppCategoryId === pppCategoryId)?.providerCategoryRef ?? null;
+  return (
+    categoryMappings.find((m) => m.pppCategoryId === pppCategoryId)?.providerCategoryRef ?? null
+  );
 }
 
 export function pppProductForProviderRef(ref: string, locationId: string | null): string | null {
   const scoped = productMappings.find(
     (m) => m.providerProductRef === ref && m.locationId === locationId,
   );
-  const global = productMappings.find(
-    (m) => m.providerProductRef === ref && m.locationId === null,
-  );
+  const global = productMappings.find((m) => m.providerProductRef === ref && m.locationId === null);
   return scoped?.pppProductId ?? global?.pppProductId ?? null;
 }
 

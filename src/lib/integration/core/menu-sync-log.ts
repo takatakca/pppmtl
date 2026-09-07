@@ -28,10 +28,7 @@ export interface MenuSyncEvent {
 const MAX_EVENTS = 100;
 const syncEvents: MenuSyncEvent[] = [];
 
-export function startMenuSync(
-  provider: IntegrationProviderId,
-  locationId: string,
-): MenuSyncEvent {
+export function startMenuSync(provider: IntegrationProviderId, locationId: string): MenuSyncEvent {
   const record: MenuSyncEvent = {
     id: `sync_${Date.now().toString(36)}_${syncEvents.length.toString(36)}`,
     provider,
