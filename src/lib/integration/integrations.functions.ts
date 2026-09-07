@@ -6,6 +6,22 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import type { CapabilityStatus, IntegrationProviderId } from "./core/contracts";
+import type { ProviderHealthReport } from "./providers/urbanpiper/health.server";
+
+export type { ProviderHealthReport, HealthCheck } from "./providers/urbanpiper/health.server";
+
+export interface ConnectionCard {
+  locationId: string;
+  internalId: string;
+  name: string;
+  address: string;
+  inRollout: boolean;
+  connected: boolean;
+  environment: "sandbox" | "production" | "not set";
+  requirements: Array<{ label: string; met: boolean }>;
+  missingProviderFields: string[];
+}
+
 
 export interface IntegrationSnapshot {
   generatedAt: string;
