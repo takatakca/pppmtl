@@ -274,8 +274,10 @@ describe("order lookup", () => {
   });
 
   it("reads a saved order back by id", () => {
-    const { saveOrder } = require("../order-store.server");
-    const order = sampleOrder({ id: "ord_lookup_1", customer: { ...sampleOrder().customer, phone: "5145550001" } });
+    const order = sampleOrder({
+      id: "ord_lookup_1",
+      customer: { ...sampleOrder().customer, phone: "5145550001" },
+    });
     saveOrder(order);
 
     const found = getOrderById("ord_lookup_1");
@@ -284,9 +286,18 @@ describe("order lookup", () => {
   });
 
   it("finds orders by phone when no customer id is set", () => {
-    const { saveOrder } = require("../order-store.server");
-    saveOrder(sampleOrder({ id: "ord_a", customer: { ...sampleOrder().customer, phone: "5145550002" } }));
-    saveOrder(sampleOrder({ id: "ord_b", customer: { ...sampleOrder().customer, phone: "5145550002" } }));
+    saveOrder(
+      sampleOrder({
+        id: "ord_a",
+        customer: { ...sampleOrder().customer, phone: "5145550002" },
+      }),
+    );
+    saveOrder(
+      sampleOrder({
+        id: "ord_b",
+        customer: { ...sampleOrder().customer, phone: "5145550002" },
+      }),
+    );
 
     const matches = listCustomerOrders(null, "5145550002");
     expect(matches.length).toBe(2);
@@ -294,9 +305,18 @@ describe("order lookup", () => {
   });
 
   it("does not leak one customer's phone orders to another phone", () => {
-    const { saveOrder } = require("../order-store.server");
-    saveOrder(sampleOrder({ id: "ord_c", customer: { ...sampleOrder().customer, phone: "5145550003" } }));
-    saveOrder(sampleOrder({ id: "ord_d", customer: { ...sampleOrder().customer, phone: "5145550004" } }));
+    saveOrder(
+      sampleOrder({
+        id: "ord_c",
+        customer: { ...sampleOrder().customer, phone: "5145550003" },
+      }),
+    );
+    saveOrder(
+      sampleOrder({
+        id: "ord_d",
+        customer: { ...sampleOrder().customer, phone: "5145550004" },
+      }),
+    );
 
     expect(listCustomerOrders(null, "5145550003").length).toBe(1);
     expect(listCustomerOrders(null, "5145550004").length).toBe(1);
