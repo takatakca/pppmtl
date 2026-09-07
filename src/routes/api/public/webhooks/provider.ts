@@ -47,19 +47,43 @@ export const Route = createFileRoute("/api/public/webhooks/provider")({
 
         const rawBody = await request.text();
         const signature =
-          request.headers.get("x-webhook-signature") ?? request.headers.get("x-clover-signature");
+          request.headers.get("x-webhook-signature") ??
+          request.headers.get("x-up-signature") ??
+          request.headers.get("x-clover-signature");
+        const timestamp =
+          request.headers.get("x-webhook-timestamp") ?? request.headers.get("x-up-timestamp");
+        const deliveryId =
+          request.headers.get("x-webhook-id") ??
+          request.headers.get("idempotency-key") ??
+          request.headers.get("x-idempotency-key");
 
-        const { urbanPiperWebhookAdapter } =
-          await import("@/lib/integration/providers/urbanpiper/webhook");
+        const { verifyWebhookRequest } = await import("@/lib/integration/core/webhook-security");
+        const verification = verifyWebhookRequest({
+          rawBody,
+          signature,
+          timestamp,
+          secret,
+          deliveryId: deliveryId ? `${provider}:${deliveryId}` : null,
+        });
 
-        if (!urbanPiperWebhookAdapter.verifySignature(rawBody, signature, secret)) {
+        if (!verification.ok) {
+          if (verification.reason === "replayed") {
+            logIntegrationEvent({
+              provider,
+              eventType: "webhook.duplicate",
+              status: "received",
+              payloadReference: "replay",
+            });
+            return Response.json({ received: true, duplicate: true });
+          }
           logIntegrationEvent({
             provider,
-            eventType: "webhook.invalid_signature",
+            eventType: `webhook.${verification.reason}`,
             status: "rejected",
             payloadReference: "signature",
           });
-          return new Response("Invalid signature", { status: 401 });
+          const status = verification.reason === "stale_timestamp" ? 400 : 401;
+          return new Response("Rejected", { status });
         }
 
         const idempotencyKey =
@@ -67,6 +91,11 @@ export const Route = createFileRoute("/api/public/webhooks/provider")({
         if (idempotencyKey && !claimIdempotencyKey(`${provider}:${idempotencyKey}`)) {
           return Response.json({ received: true, duplicate: true });
         }
+
+        const { urbanPiperWebhookAdapter } = await import(
+          "@/lib/integration/providers/urbanpiper/webhook"
+        );
+
 
         const parsed = urbanPiperWebhookAdapter.parseEvent(rawBody);
         if (!parsed.ok) {
