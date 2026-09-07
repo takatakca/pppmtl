@@ -6,6 +6,8 @@ import { statusForEvent, statusForProviderStatus, normalizeEventName } from "../
 import { orderToUniversalDraft, draftToUniversalDraft } from "../order-mapping";
 import { classifyProviderFailure, orderError } from "../errors";
 import { mapDraftToUrbanPiperOrder } from "@/lib/integration/providers/urbanpiper/mapping";
+import { createOrder, getOrderById, listCustomerOrders } from "../order-service";
+import { resetOrderStoreForTests } from "../order-store.server";
 import type { InternalOrder } from "../types";
 
 const item = (over: Partial<OrderItem> = {}): OrderItem => ({
