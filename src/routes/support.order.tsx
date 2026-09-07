@@ -117,13 +117,13 @@ function OrderSupportPage() {
             <p className="font-display text-lg uppercase leading-none">
               {t("Talk to the restaurant", "Parler au restaurant", "Hable con el restaurante")}
             </p>
-            {store && (
+            {store?.phone && (
               <a
-                href={`tel:${store.phone.replace(/[^0-9+]/g, "")}`}
+                href={`tel:${store.phone.e164}`}
                 className="mt-2 inline-flex items-center gap-2 text-sm text-flame"
               >
                 <Phone className="h-4 w-4" />
-                {store.phone}
+                {store.phone.display}
               </a>
             )}
             <p className="mt-3 text-xs text-muted-foreground">
