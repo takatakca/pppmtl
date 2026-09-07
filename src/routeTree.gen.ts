@@ -32,6 +32,7 @@ import { Route as TrackRouteImport } from './routes/track'
 import { Route as AccountForgotPasswordRouteImport } from './routes/account_.forgot-password'
 import { Route as AccountSignInRouteImport } from './routes/account_.sign-in'
 import { Route as AccountSignUpRouteImport } from './routes/account_.sign-up'
+import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
 import { Route as DevMenuAuditRouteImport } from './routes/dev.menu-audit'
 import { Route as LocationsIndexRouteImport } from './routes/locations.index'
 import { Route as LocationsSlugRouteImport } from './routes/locations.$slug'
@@ -152,6 +153,11 @@ const AccountSignUpRoute = AccountSignUpRouteImport.update({
   path: '/account/sign-up',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIntegrationsRoute = AdminIntegrationsRouteImport.update({
+  id: '/admin/integrations',
+  path: '/admin/integrations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DevMenuAuditRoute = DevMenuAuditRouteImport.update({
   id: '/dev/menu-audit',
   path: '/dev/menu-audit',
@@ -198,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/account/forgot-password': typeof AccountForgotPasswordRoute
   '/account/sign-in': typeof AccountSignInRoute
   '/account/sign-up': typeof AccountSignUpRoute
+  '/admin/integrations': typeof AdminIntegrationsRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
   '/locations/': typeof LocationsIndexRoute
@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
   '/account/forgot-password': typeof AccountForgotPasswordRoute
   '/account/sign-in': typeof AccountSignInRoute
   '/account/sign-up': typeof AccountSignUpRoute
+  '/admin/integrations': typeof AdminIntegrationsRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
   '/locations': typeof LocationsIndexRoute
@@ -257,6 +265,7 @@ export interface FileRoutesById {
   '/account_/forgot-password': typeof AccountForgotPasswordRoute
   '/account_/sign-in': typeof AccountSignInRoute
   '/account_/sign-up': typeof AccountSignUpRoute
+  '/admin/integrations': typeof AdminIntegrationsRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
   '/locations/': typeof LocationsIndexRoute
@@ -288,6 +297,7 @@ export interface FileRouteTypes {
     | '/account/forgot-password'
     | '/account/sign-in'
     | '/account/sign-up'
+    | '/admin/integrations'
     | '/dev/menu-audit'
     | '/locations/$slug'
     | '/locations/'
@@ -317,6 +327,7 @@ export interface FileRouteTypes {
     | '/account/forgot-password'
     | '/account/sign-in'
     | '/account/sign-up'
+    | '/admin/integrations'
     | '/dev/menu-audit'
     | '/locations/$slug'
     | '/locations'
@@ -346,6 +357,7 @@ export interface FileRouteTypes {
     | '/account_/forgot-password'
     | '/account_/sign-in'
     | '/account_/sign-up'
+    | '/admin/integrations'
     | '/dev/menu-audit'
     | '/locations/$slug'
     | '/locations/'
@@ -376,6 +388,7 @@ export interface RootRouteChildren {
   AccountForgotPasswordRoute: typeof AccountForgotPasswordRoute
   AccountSignInRoute: typeof AccountSignInRoute
   AccountSignUpRoute: typeof AccountSignUpRoute
+  AdminIntegrationsRoute: typeof AdminIntegrationsRoute
   DevMenuAuditRoute: typeof DevMenuAuditRoute
   LocationsSlugRoute: typeof LocationsSlugRoute
   LocationsIndexRoute: typeof LocationsIndexRoute
@@ -545,6 +558,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountSignUpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/integrations': {
+      id: '/admin/integrations'
+      path: '/admin/integrations'
+      fullPath: '/admin/integrations'
+      preLoaderRoute: typeof AdminIntegrationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dev/menu-audit': {
       id: '/dev/menu-audit'
       path: '/dev/menu-audit'
@@ -600,6 +620,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountForgotPasswordRoute: AccountForgotPasswordRoute,
   AccountSignInRoute: AccountSignInRoute,
   AccountSignUpRoute: AccountSignUpRoute,
+  AdminIntegrationsRoute: AdminIntegrationsRoute,
   DevMenuAuditRoute: DevMenuAuditRoute,
   LocationsSlugRoute: LocationsSlugRoute,
   LocationsIndexRoute: LocationsIndexRoute,
