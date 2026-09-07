@@ -4,7 +4,9 @@ import { ChefHat, CheckCircle2, PackageCheck, Receipt } from "lucide-react";
 import { PPPHeader } from "@/components/layout/ppp-header";
 import { PPPFooter } from "@/components/layout/ppp-footer";
 import { usePPP } from "@/context/ppp-store";
-import { orderingIntegration, type PlacedOrder } from "@/lib/integration";
+import { useCustomerSession } from "@/lib/customer/session";
+import { listMyOrders, type OrderView } from "@/lib/orders/orders.functions";
+import { statusLabel } from "@/lib/orders/status-mapping";
 import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/orders")({
@@ -35,18 +37,22 @@ const STAGES = [
 
 function OrdersPage() {
   const { t, lang } = usePPP();
-  const [orders, setOrders] = useState<PlacedOrder[] | null>(null);
-  const status = orderingIntegration.customerOrders.status();
+  const { customer } = useCustomerSession();
+  const [orders, setOrders] = useState<OrderView[] | null>(null);
 
   useEffect(() => {
     let alive = true;
-    void orderingIntegration.customerOrders.listOrders().then((list) => {
-      if (alive) setOrders(list);
-    });
+    listMyOrders({ data: { customerId: customer?.id ?? null, phone: null } })
+      .then((result) => {
+        if (alive) setOrders(result.orders);
+      })
+      .catch(() => {
+        if (alive) setOrders([]);
+      });
     return () => {
       alive = false;
     };
-  }, []);
+  }, [customer?.id]);
 
   const stageLabel = (id: (typeof STAGES)[number]["id"]) =>
     id === "preparing"
@@ -96,16 +102,29 @@ function OrdersPage() {
           <ul className="mt-8 space-y-3">
             {orders.map((o) => (
               <li key={o.id} className="border border-border p-4">
-                <p className="font-display text-lg uppercase leading-none">#{o.id}</p>
+                <p className="font-display text-lg uppercase leading-none">
+                  #{o.orderNumber ?? o.id}
+                </p>
                 <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
-                  {stageLabel(
-                    o.status === "completed"
-                      ? "completed"
-                      : o.status === "ready"
-                        ? "ready"
-                        : "preparing",
+                  {statusLabel(o.status, lang)} ·{" "}
+                  {new Date(o.createdAt).toLocaleDateString(
+                    lang === "fr" ? "fr-CA" : lang === "es" ? "es" : "en-CA",
                   )}
                 </p>
+                <ul className="mt-2 text-sm text-muted-foreground">
+                  {o.items.map((line, i) => (
+                    <li key={`${o.id}-${i}`}>
+                      {line.quantity} × {line.name}
+                      {line.options.length > 0 && ` · ${line.options.join(", ")}`}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  to="/support"
+                  className="mt-3 inline-block border border-border px-4 py-2 text-[0.65rem] font-bold uppercase tracking-widest focus-ppp"
+                >
+                  {t("Get help", "Obtenir de l'aide", "Obtener ayuda")}
+                </Link>
               </li>
             ))}
           </ul>
@@ -116,7 +135,11 @@ function OrdersPage() {
               {t("No orders yet", "Aucune commande", "Sin pedidos todavía")}
             </p>
             <p className="mt-2 text-sm text-muted-foreground">
-              {lang === "fr" ? status.reasonFr : status.reasonEn}
+              {t(
+                "Your PPP orders will appear here as soon as online ordering opens.",
+                "Vos commandes PPP apparaîtront ici dès l'ouverture de la commande en ligne.",
+                "Tus pedidos PPP aparecerán aquí en cuanto abra el pedido en línea.",
+              )}
             </p>
             <Link
               to="/order"
