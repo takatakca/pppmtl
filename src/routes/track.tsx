@@ -177,33 +177,72 @@ function TrackPage() {
 
           {provider === "ppp_direct" && (
             <div className="mt-8 border border-border p-5">
-              <div className="mb-3 inline-flex items-center gap-2 border border-primary/40 bg-primary/5 px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-widest text-primary">
-                {t("Coming soon", "Bientôt disponible")}
-              </div>
               <h2 className="font-display text-2xl uppercase leading-none">
                 {t("Live PPP Direct tracking", "Suivi PPP Direct en direct")}
               </h2>
               <p className="mt-2 max-w-xl text-sm text-muted-foreground">
                 {t(
-                  "This shows the steps a PPP Direct order moves through in the kitchen. Live order status isn't available here yet — check back soon.",
-                  "Voici les étapes que suit une commande PPP Direct en cuisine. Le statut en direct n'est pas encore disponible ici — revenez bientôt.",
+                  "Enter the phone number and order code from your receipt to see the current status.",
+                  "Entrez le numéro de téléphone et le code de commande de votre reçu pour voir l'état actuel.",
                 )}
               </p>
-              <ol className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-5">
-                {statusLadder.map((s, i) => (
-                  <li
-                    key={s.key}
-                    className={`flex flex-col items-center gap-2 border border-border p-3 text-center ${
-                      i === 0 ? "border-primary/50 bg-primary/5" : "opacity-60"
-                    }`}
+              <form onSubmit={handleLookup} className="mt-5 grid max-w-md gap-3">
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  type="tel"
+                  placeholder={t(
+                    "Phone number used for the order",
+                    "Numéro utilisé pour la commande",
+                  )}
+                  className="h-10 border border-border bg-background px-3 text-sm focus-ppp"
+                />
+                <input
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder={t("Order code", "Code de commande")}
+                  className="h-10 border border-border bg-background px-3 text-sm focus-ppp"
+                />
+                {lookupError && <p className="text-xs text-destructive">{lookupError}</p>}
+                {lookupTried && !lookupError && !foundOrder && (
+                  <p className="border border-border bg-card/50 p-3 text-xs text-muted-foreground">
+                    {t(
+                      "We couldn't find a PPP Direct order with those details. Phone and marketplace orders are tracked in the app you used.",
+                      "Nous n'avons pas trouvé de commande PPP Direct avec ces détails. Les commandes téléphoniques et par plateforme se suivent dans l'application utilisée.",
+                    )}
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  className="press-tap h-10 bg-primary font-display text-sm uppercase leading-none text-primary-foreground focus-ppp"
+                >
+                  {t("Check status", "Vérifier l'état")}
+                </button>
+              </form>
+
+              {foundOrder && (
+                <div className="mt-6 border border-border bg-card p-5">
+                  <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
+                    {t("Order", "Commande")} #{foundOrder.orderNumber ?? foundOrder.id}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {new Date(foundOrder.createdAt).toLocaleString(
+                      lang === "fr" ? "fr-CA" : lang === "es" ? "es" : "en-CA",
+                    )}
+                  </p>
+                  <div className="mt-4">
+                    <OrderTimeline status={foundOrder.status} />
+                  </div>
+                  <Link
+                    to="/orders/$orderId"
+                    params={{ orderId: foundOrder.id }}
+                    className="mt-4 inline-block border border-border px-4 py-2 font-display text-sm uppercase leading-none focus-ppp hover:border-primary"
                   >
-                    <s.icon className="h-5 w-5 text-primary" />
-                    <span className="font-display text-xs uppercase leading-none">
-                      {t(s.en, s.fr)}
-                    </span>
-                  </li>
-                ))}
-              </ol>
+                    {t("View receipt", "Voir le reçu")}
+                  </Link>
+                </div>
+              )}
+
               <div className="mt-6 flex flex-wrap gap-2">
                 <Link
                   to="/order"
