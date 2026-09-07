@@ -23,6 +23,8 @@ export type PPPEvent =
   | "cart_item_added"
   | "cart_item_removed"
   | "cart_checkout_continued"
+  | "checkout_started"
+  | "checkout_finish_attempted"
   | "external_order_clicked"
   | "social_link_clicked"
   | "external_presence_clicked"

@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AroundTheWebRouteImport } from './routes/around-the-web'
 import { Route as CareersRouteImport } from './routes/careers'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FaqRouteImport } from './routes/faq'
@@ -23,6 +24,7 @@ import { Route as HelpRouteImport } from './routes/help'
 import { Route as MenuRouteImport } from './routes/menu'
 import { Route as OffersRouteImport } from './routes/offers'
 import { Route as OrderRouteImport } from './routes/order'
+import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as PhoneOrderRouteImport } from './routes/phone-order'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SupportRouteImport } from './routes/support'
@@ -57,6 +59,11 @@ const AroundTheWebRoute = AroundTheWebRouteImport.update({
 const CareersRoute = CareersRouteImport.update({
   id: '/careers',
   path: '/careers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConnectRoute = ConnectRouteImport.update({
@@ -102,6 +109,11 @@ const OffersRoute = OffersRouteImport.update({
 const OrderRoute = OrderRouteImport.update({
   id: '/order',
   path: '/order',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdersRoute = OrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PhoneOrderRoute = PhoneOrderRouteImport.update({
@@ -161,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/around-the-web': typeof AroundTheWebRoute
   '/careers': typeof CareersRoute
+  '/checkout': typeof CheckoutRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
@@ -170,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
+  '/orders': typeof OrdersRoute
   '/phone-order': typeof PhoneOrderRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
@@ -187,6 +201,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/around-the-web': typeof AroundTheWebRoute
   '/careers': typeof CareersRoute
+  '/checkout': typeof CheckoutRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
@@ -196,6 +211,7 @@ export interface FileRoutesByTo {
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
+  '/orders': typeof OrdersRoute
   '/phone-order': typeof PhoneOrderRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
@@ -214,6 +230,7 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/around-the-web': typeof AroundTheWebRoute
   '/careers': typeof CareersRoute
+  '/checkout': typeof CheckoutRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
@@ -223,6 +240,7 @@ export interface FileRoutesById {
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
+  '/orders': typeof OrdersRoute
   '/phone-order': typeof PhoneOrderRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
@@ -242,6 +260,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/around-the-web'
     | '/careers'
+    | '/checkout'
     | '/connect'
     | '/contact'
     | '/faq'
@@ -251,6 +270,7 @@ export interface FileRouteTypes {
     | '/menu'
     | '/offers'
     | '/order'
+    | '/orders'
     | '/phone-order'
     | '/sitemap.xml'
     | '/support'
@@ -268,6 +288,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/around-the-web'
     | '/careers'
+    | '/checkout'
     | '/connect'
     | '/contact'
     | '/faq'
@@ -277,6 +298,7 @@ export interface FileRouteTypes {
     | '/menu'
     | '/offers'
     | '/order'
+    | '/orders'
     | '/phone-order'
     | '/sitemap.xml'
     | '/support'
@@ -294,6 +316,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/around-the-web'
     | '/careers'
+    | '/checkout'
     | '/connect'
     | '/contact'
     | '/faq'
@@ -303,6 +326,7 @@ export interface FileRouteTypes {
     | '/menu'
     | '/offers'
     | '/order'
+    | '/orders'
     | '/phone-order'
     | '/sitemap.xml'
     | '/support'
@@ -321,6 +345,7 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   AroundTheWebRoute: typeof AroundTheWebRoute
   CareersRoute: typeof CareersRoute
+  CheckoutRoute: typeof CheckoutRoute
   ConnectRoute: typeof ConnectRoute
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
@@ -330,6 +355,7 @@ export interface RootRouteChildren {
   MenuRoute: typeof MenuRoute
   OffersRoute: typeof OffersRoute
   OrderRoute: typeof OrderRoute
+  OrdersRoute: typeof OrdersRoute
   PhoneOrderRoute: typeof PhoneOrderRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRoute
@@ -377,6 +403,13 @@ declare module '@tanstack/react-router' {
       path: '/careers'
       fullPath: '/careers'
       preLoaderRoute: typeof CareersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connect': {
@@ -440,6 +473,13 @@ declare module '@tanstack/react-router' {
       path: '/order'
       fullPath: '/order'
       preLoaderRoute: typeof OrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orders': {
+      id: '/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof OrdersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/phone-order': {
@@ -521,6 +561,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   AroundTheWebRoute: AroundTheWebRoute,
   CareersRoute: CareersRoute,
+  CheckoutRoute: CheckoutRoute,
   ConnectRoute: ConnectRoute,
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
@@ -530,6 +571,7 @@ const rootRouteChildren: RootRouteChildren = {
   MenuRoute: MenuRoute,
   OffersRoute: OffersRoute,
   OrderRoute: OrderRoute,
+  OrdersRoute: OrdersRoute,
   PhoneOrderRoute: PhoneOrderRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRoute,
