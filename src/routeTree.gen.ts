@@ -37,6 +37,9 @@ import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as DevMenuAuditRouteImport } from './routes/dev.menu-audit'
 import { Route as LocationsIndexRouteImport } from './routes/locations.index'
 import { Route as LocationsSlugRouteImport } from './routes/locations.$slug'
+import { Route as OrdersIndexRouteImport } from './routes/orders.index'
+import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
+import { Route as SupportIndexRouteImport } from './routes/support.index'
 import { Route as SupportOrderRouteImport } from './routes/support.order'
 import { Route as ApiPublicWebhooksProviderRouteImport } from './routes/api/public/webhooks/provider'
 
@@ -180,6 +183,21 @@ const LocationsSlugRoute = LocationsSlugRouteImport.update({
   path: '/locations/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OrdersIndexRoute = OrdersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => OrdersRoute,
+} as any)
+const OrdersOrderIdRoute = OrdersOrderIdRouteImport.update({
+  id: '/$orderId',
+  path: '/$orderId',
+  getParentRoute: () => OrdersRoute,
+} as any)
+const SupportIndexRoute = SupportIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SupportRoute,
+} as any)
 const SupportOrderRoute = SupportOrderRouteImport.update({
   id: '/order',
   path: '/order',
@@ -208,7 +226,7 @@ export interface FileRoutesByFullPath {
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
-  '/orders': typeof OrdersRoute
+  '/orders': typeof OrdersRouteWithChildren
   '/phone-order': typeof PhoneOrderRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRouteWithChildren
@@ -220,8 +238,11 @@ export interface FileRoutesByFullPath {
   '/admin/orders': typeof AdminOrdersRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
+  '/orders/$orderId': typeof OrdersOrderIdRoute
   '/support/order': typeof SupportOrderRoute
   '/locations/': typeof LocationsIndexRoute
+  '/orders/': typeof OrdersIndexRoute
+  '/support/': typeof SupportIndexRoute
   '/api/public/webhooks/provider': typeof ApiPublicWebhooksProviderRoute
 }
 export interface FileRoutesByTo {
@@ -240,10 +261,8 @@ export interface FileRoutesByTo {
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
-  '/orders': typeof OrdersRoute
   '/phone-order': typeof PhoneOrderRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/support': typeof SupportRouteWithChildren
   '/track': typeof TrackRoute
   '/account/forgot-password': typeof AccountForgotPasswordRoute
   '/account/sign-in': typeof AccountSignInRoute
@@ -252,8 +271,11 @@ export interface FileRoutesByTo {
   '/admin/orders': typeof AdminOrdersRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
+  '/orders/$orderId': typeof OrdersOrderIdRoute
   '/support/order': typeof SupportOrderRoute
   '/locations': typeof LocationsIndexRoute
+  '/orders': typeof OrdersIndexRoute
+  '/support': typeof SupportIndexRoute
   '/api/public/webhooks/provider': typeof ApiPublicWebhooksProviderRoute
 }
 export interface FileRoutesById {
@@ -273,7 +295,7 @@ export interface FileRoutesById {
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
-  '/orders': typeof OrdersRoute
+  '/orders': typeof OrdersRouteWithChildren
   '/phone-order': typeof PhoneOrderRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRouteWithChildren
@@ -285,8 +307,11 @@ export interface FileRoutesById {
   '/admin/orders': typeof AdminOrdersRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
+  '/orders/$orderId': typeof OrdersOrderIdRoute
   '/support/order': typeof SupportOrderRoute
   '/locations/': typeof LocationsIndexRoute
+  '/orders/': typeof OrdersIndexRoute
+  '/support/': typeof SupportIndexRoute
   '/api/public/webhooks/provider': typeof ApiPublicWebhooksProviderRoute
 }
 export interface FileRouteTypes {
@@ -319,8 +344,11 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/dev/menu-audit'
     | '/locations/$slug'
+    | '/orders/$orderId'
     | '/support/order'
     | '/locations/'
+    | '/orders/'
+    | '/support/'
     | '/api/public/webhooks/provider'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -339,10 +367,8 @@ export interface FileRouteTypes {
     | '/menu'
     | '/offers'
     | '/order'
-    | '/orders'
     | '/phone-order'
     | '/sitemap.xml'
-    | '/support'
     | '/track'
     | '/account/forgot-password'
     | '/account/sign-in'
@@ -351,8 +377,11 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/dev/menu-audit'
     | '/locations/$slug'
+    | '/orders/$orderId'
     | '/support/order'
     | '/locations'
+    | '/orders'
+    | '/support'
     | '/api/public/webhooks/provider'
   id:
     | '__root__'
@@ -383,8 +412,11 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/dev/menu-audit'
     | '/locations/$slug'
+    | '/orders/$orderId'
     | '/support/order'
     | '/locations/'
+    | '/orders/'
+    | '/support/'
     | '/api/public/webhooks/provider'
   fileRoutesById: FileRoutesById
 }
@@ -404,7 +436,7 @@ export interface RootRouteChildren {
   MenuRoute: typeof MenuRoute
   OffersRoute: typeof OffersRoute
   OrderRoute: typeof OrderRoute
-  OrdersRoute: typeof OrdersRoute
+  OrdersRoute: typeof OrdersRouteWithChildren
   PhoneOrderRoute: typeof PhoneOrderRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRouteWithChildren
@@ -618,6 +650,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LocationsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/orders/': {
+      id: '/orders/'
+      path: '/'
+      fullPath: '/orders/'
+      preLoaderRoute: typeof OrdersIndexRouteImport
+      parentRoute: typeof OrdersRoute
+    }
+    '/orders/$orderId': {
+      id: '/orders/$orderId'
+      path: '/$orderId'
+      fullPath: '/orders/$orderId'
+      preLoaderRoute: typeof OrdersOrderIdRouteImport
+      parentRoute: typeof OrdersRoute
+    }
+    '/support/': {
+      id: '/support/'
+      path: '/'
+      fullPath: '/support/'
+      preLoaderRoute: typeof SupportIndexRouteImport
+      parentRoute: typeof SupportRoute
+    }
     '/support/order': {
       id: '/support/order'
       path: '/order'
@@ -635,12 +688,27 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface OrdersRouteChildren {
+  OrdersOrderIdRoute: typeof OrdersOrderIdRoute
+  OrdersIndexRoute: typeof OrdersIndexRoute
+}
+
+const OrdersRouteChildren: OrdersRouteChildren = {
+  OrdersOrderIdRoute: OrdersOrderIdRoute,
+  OrdersIndexRoute: OrdersIndexRoute,
+}
+
+const OrdersRouteWithChildren =
+  OrdersRoute._addFileChildren(OrdersRouteChildren)
+
 interface SupportRouteChildren {
   SupportOrderRoute: typeof SupportOrderRoute
+  SupportIndexRoute: typeof SupportIndexRoute
 }
 
 const SupportRouteChildren: SupportRouteChildren = {
   SupportOrderRoute: SupportOrderRoute,
+  SupportIndexRoute: SupportIndexRoute,
 }
 
 const SupportRouteWithChildren =
@@ -662,7 +730,7 @@ const rootRouteChildren: RootRouteChildren = {
   MenuRoute: MenuRoute,
   OffersRoute: OffersRoute,
   OrderRoute: OrderRoute,
-  OrdersRoute: OrdersRoute,
+  OrdersRoute: OrdersRouteWithChildren,
   PhoneOrderRoute: PhoneOrderRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRouteWithChildren,

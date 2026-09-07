@@ -107,8 +107,8 @@ export function DeliveryAddressForm({
 
       <p className="border border-dashed border-border p-3 text-[0.65rem] uppercase tracking-widest text-muted-foreground">
         {t(
-          "Saved addresses and delivery-zone checks are coming soon.",
-          "Les adresses enregistrées et la vérification de zone arrivent bientôt.",
+          "This address is saved on this device until your PPP account is connected.",
+          "Cette adresse est enregistrée sur cet appareil jusqu'à la connexion de votre compte PPP.",
         )}
       </p>
 

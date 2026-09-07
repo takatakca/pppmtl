@@ -20,6 +20,17 @@ const KEY = "ppp.session.v1";
 export type SupportOrderChannel =
   "direct" | "phone" | "uber_eats" | "doordash" | "skip" | "not_yet";
 
+export interface SavedAddress {
+  id: string;
+  label?: string;
+  street: string;
+  unit?: string;
+  city: string;
+  province: string;
+  postalCode: string;
+  instructions?: string;
+}
+
 interface Persisted {
   lang: Lang;
   /** Set only once the customer has explicitly picked a language. */
@@ -33,6 +44,10 @@ interface Persisted {
   /** Last order channel + location picked in the Support decision tree. */
   lastSupportChannel: SupportOrderChannel | null;
   lastSupportLocationId: string | null;
+  /** Item ids the customer has favourited. Stored locally until TAKATAK identity is ready. */
+  favourites: string[];
+  /** Delivery addresses saved from checkout. Stored locally until TAKATAK identity is ready. */
+  savedAddresses: SavedAddress[];
 }
 
 interface Store extends Persisted {
@@ -73,6 +88,20 @@ interface Store extends Persisted {
    * Spanish copy yet the customer sees English, never an empty string.
    */
   t: (en: string, fr: string, es?: string) => string;
+  addFavourite: (itemId: string) => void;
+  removeFavourite: (itemId: string) => void;
+  isFavourite: (itemId: string) => boolean;
+  addSavedAddress: (address: Omit<SavedAddress, "id">) => void;
+  removeSavedAddress: (id: string) => void;
+  /** Adds every reorderable line to the cart. Lines with unknown items are skipped. */
+  reorderToCart: (
+    lines: Array<{
+      itemId: string;
+      quantity: number;
+      notes: string;
+      selections: Record<string, string>;
+    }>,
+  ) => void;
 }
 
 const defaults: Persisted = {
@@ -84,6 +113,8 @@ const defaults: Persisted = {
   cart: [],
   lastSupportChannel: null,
   lastSupportLocationId: null,
+  favourites: [],
+  savedAddresses: [],
 };
 
 const PPPContext = createContext<Store | null>(null);
@@ -209,6 +240,48 @@ export function PPPProvider({ children }: { children: ReactNode }) {
         if (state.lang === "fr") return fr;
         if (state.lang === "es") return es && es.length > 0 ? es : en;
         return en;
+      },
+      addFavourite: (itemId) => {
+        if (state.favourites.includes(itemId)) return;
+        track("favourite_added", { itemId });
+        persist({ ...state, favourites: [...state.favourites, itemId] });
+      },
+      removeFavourite: (itemId) => {
+        track("favourite_removed", { itemId });
+        persist({ ...state, favourites: state.favourites.filter((id) => id !== itemId) });
+      },
+      isFavourite: (itemId) => state.favourites.includes(itemId),
+      addSavedAddress: (address) => {
+        const id = `addr_${Date.now().toString(36)}`;
+        track("saved_address_added", { id });
+        persist({ ...state, savedAddresses: [...state.savedAddresses, { ...address, id }] });
+      },
+      removeSavedAddress: (id) => {
+        track("saved_address_removed", { id });
+        persist({
+          ...state,
+          savedAddresses: state.savedAddresses.filter((a) => a.id !== id),
+        });
+      },
+      reorderToCart: (lines) => {
+        const added: string[] = [];
+        for (const line of lines) {
+          const item = menuRepository.getItem(line.itemId);
+          if (!item) continue;
+          const selections: Record<string, string> = {};
+          for (const [groupId, choiceId] of Object.entries(line.selections)) {
+            const group = item.modifierGroups?.find((g) => g.id === groupId);
+            const choice = group?.choices.find((c) => c.id === choiceId);
+            if (group && choice) selections[groupId] = choiceId;
+          }
+          state.cart.push(newLine(item, line.quantity, line.notes, selections));
+          added.push(item.id);
+        }
+        if (added.length > 0) {
+          track("reorder_added", { itemIds: added });
+          persist({ ...state, cart: [...state.cart] });
+          setCartOpen(true);
+        }
       },
     };
   }, [state, persist, searchOpen, searchSeed, locationSheetOpen, orderSheetOpen, cartOpen]);

@@ -41,7 +41,17 @@ export interface OrderView {
   createdAt: string;
   subtotal: number;
   total: number | null;
-  items: Array<{ name: string; quantity: number; options: string[] }>;
+  customerName: string | null;
+  deliveryAddress: string | null;
+  notes: string | null;
+  items: Array<{
+    productId: string;
+    name: string;
+    quantity: number;
+    options: string[];
+    selections: Record<string, string>;
+    notes: string;
+  }>;
 }
 
 export interface PlaceOrderResponse {
@@ -60,10 +70,16 @@ function toView(order: InternalOrder): OrderView {
     createdAt: order.createdAt,
     subtotal: order.subtotal,
     total: order.total,
+    customerName: order.customer.name,
+    deliveryAddress: order.deliveryAddress,
+    notes: order.notes,
     items: order.items.map((i) => ({
+      productId: i.productId,
       name: i.name,
       quantity: i.quantity,
       options: i.modifiers.map((m) => m.label),
+      selections: Object.fromEntries(i.modifiers.map((m) => [m.groupId, m.choiceId])),
+      notes: i.notes,
     })),
   };
 }
@@ -108,6 +124,14 @@ export const listMyOrders = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<{ orders: OrderView[] }> => {
     const { listCustomerOrders } = await import("./order-service");
     return { orders: listCustomerOrders(data.customerId, data.phone).map(toView) };
+  });
+
+export const getOrderById = createServerFn({ method: "POST" })
+  .inputValidator((input: { orderId: string }) => input)
+  .handler(async ({ data }): Promise<{ order: OrderView | null }> => {
+    const { getOrderById: findOrder } = await import("./order-service");
+    const order = findOrder(data.orderId);
+    return { order: order ? toView(order) : null };
   });
 
 export interface AdminOrderRow {

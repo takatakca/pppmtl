@@ -30,7 +30,12 @@ export type PPPEvent =
   | "external_presence_clicked"
   | "track_provider_selected"
   | "support_route_selected"
-  | "callback_requested";
+  | "callback_requested"
+  | "favourite_added"
+  | "favourite_removed"
+  | "saved_address_added"
+  | "saved_address_removed"
+  | "reorder_added";
 
 export function track(event: PPPEvent, payload: Record<string, unknown> = {}) {
   if (import.meta.env.DEV) {

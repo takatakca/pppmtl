@@ -16,10 +16,12 @@ import { SearchOverlay } from "@/components/search/search-overlay";
 import { LocationSheet } from "@/components/layout/location-sheet";
 import { OrderSheet } from "@/components/layout/order-sheet";
 import { CallbackSheet } from "@/components/support/callback-sheet";
+import { OrderTimeline } from "@/components/order/order-timeline";
 import { usePPP, useSelectedRestaurantLocation } from "@/context/ppp-store";
 import { trackExternalOrder, trackProviderSelected } from "@/lib/analytics";
 import { orderingChannels } from "@/config/external-presence";
 import { canonicalUrl } from "@/config/site";
+import { listMyOrders, type OrderView } from "@/lib/orders/orders.functions";
 
 export const Route = createFileRoute("/track")({
   head: () => ({
@@ -75,25 +77,30 @@ const marketplaceMeta: Record<
 };
 
 function TrackPage() {
-  const { t } = usePPP();
+  const { t, lang } = usePPP();
   const location = useSelectedRestaurantLocation();
   const [provider, setProvider] = useState<Provider>(null);
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [lookupTried, setLookupTried] = useState(false);
   const [lookupError, setLookupError] = useState<string | null>(null);
+  const [foundOrder, setFoundOrder] = useState<OrderView | null>(null);
 
   function choose(p: Exclude<Provider, null>) {
     setProvider(p);
+    setFoundOrder(null);
+    setLookupError(null);
+    setLookupTried(false);
     trackProviderSelected(p);
     if (p === "uber_eats" || p === "doordash" || p === "skip") {
       trackExternalOrder(p, location.id, "/track");
     }
   }
 
-  function handleLookup(e: React.FormEvent) {
+  async function handleLookup(e: React.FormEvent) {
     e.preventDefault();
     setLookupTried(true);
+    setFoundOrder(null);
     const digits = phone.replace(/\D/g, "");
     if (digits.length < 10 || code.trim().length < 4) {
       setLookupError(
@@ -105,6 +112,17 @@ function TrackPage() {
       return;
     }
     setLookupError(null);
+    try {
+      const result = await listMyOrders({ data: { customerId: null, phone: digits } });
+      const match = result.orders.find(
+        (o) =>
+          o.orderNumber?.toLowerCase() === code.trim().toLowerCase() ||
+          o.id.toLowerCase().endsWith(code.trim().toLowerCase()),
+      );
+      if (match) setFoundOrder(match);
+    } catch {
+      /* leave not found */
+    }
   }
 
   return (
@@ -159,57 +177,13 @@ function TrackPage() {
 
           {provider === "ppp_direct" && (
             <div className="mt-8 border border-border p-5">
-              <div className="mb-3 inline-flex items-center gap-2 border border-primary/40 bg-primary/5 px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-widest text-primary">
-                {t("Coming soon", "Bientôt disponible")}
-              </div>
               <h2 className="font-display text-2xl uppercase leading-none">
                 {t("Live PPP Direct tracking", "Suivi PPP Direct en direct")}
               </h2>
               <p className="mt-2 max-w-xl text-sm text-muted-foreground">
                 {t(
-                  "This shows the steps a PPP Direct order moves through in the kitchen. Live order status isn't available here yet — check back soon.",
-                  "Voici les étapes que suit une commande PPP Direct en cuisine. Le statut en direct n'est pas encore disponible ici — revenez bientôt.",
-                )}
-              </p>
-              <ol className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-5">
-                {statusLadder.map((s, i) => (
-                  <li
-                    key={s.key}
-                    className={`flex flex-col items-center gap-2 border border-border p-3 text-center ${
-                      i === 0 ? "border-primary/50 bg-primary/5" : "opacity-60"
-                    }`}
-                  >
-                    <s.icon className="h-5 w-5 text-primary" />
-                    <span className="font-display text-xs uppercase leading-none">
-                      {t(s.en, s.fr)}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-              <div className="mt-6 flex flex-wrap gap-2">
-                <Link
-                  to="/order"
-                  className="press-tap inline-flex items-center border border-border px-4 py-2.5 font-display text-sm uppercase leading-none hover:border-primary focus-ppp"
-                >
-                  {t("Place a PPP Direct order", "Passer une commande PPP Direct")}
-                </Link>
-                <CallbackSheet defaultReason="order_issue" />
-              </div>
-            </div>
-          )}
-
-          {provider === "phone" && (
-            <div className="mt-8 border border-border p-5">
-              <div className="mb-3 inline-flex items-center gap-2 border border-primary/40 bg-primary/5 px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-widest text-primary">
-                {t("Coming soon", "Bientôt disponible")}
-              </div>
-              <h2 className="font-display text-2xl uppercase leading-none">
-                {t("Look up a phone order", "Consulter une commande téléphonique")}
-              </h2>
-              <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-                {t(
-                  "Phone order lookup is coming soon. For a real-time answer on a phone order, please call the location directly.",
-                  "La consultation des commandes téléphoniques arrive bientôt. Pour une réponse en temps réel sur une commande téléphonique, veuillez appeler l'établissement directement.",
+                  "Enter the phone number and order code from your receipt to see the current status.",
+                  "Entrez le numéro de téléphone et le code de commande de votre reçu pour voir l'état actuel.",
                 )}
               </p>
               <form onSubmit={handleLookup} className="mt-5 grid max-w-md gap-3">
@@ -230,7 +204,87 @@ function TrackPage() {
                   className="h-10 border border-border bg-background px-3 text-sm focus-ppp"
                 />
                 {lookupError && <p className="text-xs text-destructive">{lookupError}</p>}
-                {lookupTried && !lookupError && (
+                {lookupTried && !lookupError && !foundOrder && (
+                  <p className="border border-border bg-card/50 p-3 text-xs text-muted-foreground">
+                    {t(
+                      "We couldn't find a PPP Direct order with those details. Phone and marketplace orders are tracked in the app you used.",
+                      "Nous n'avons pas trouvé de commande PPP Direct avec ces détails. Les commandes téléphoniques et par plateforme se suivent dans l'application utilisée.",
+                    )}
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  className="press-tap h-10 bg-primary font-display text-sm uppercase leading-none text-primary-foreground focus-ppp"
+                >
+                  {t("Check status", "Vérifier l'état")}
+                </button>
+              </form>
+
+              {foundOrder && (
+                <div className="mt-6 border border-border bg-card p-5">
+                  <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
+                    {t("Order", "Commande")} #{foundOrder.orderNumber ?? foundOrder.id}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {new Date(foundOrder.createdAt).toLocaleString(
+                      lang === "fr" ? "fr-CA" : lang === "es" ? "es" : "en-CA",
+                    )}
+                  </p>
+                  <div className="mt-4">
+                    <OrderTimeline status={foundOrder.status} />
+                  </div>
+                  <Link
+                    to="/orders/$orderId"
+                    params={{ orderId: foundOrder.id }}
+                    className="mt-4 inline-block border border-border px-4 py-2 font-display text-sm uppercase leading-none focus-ppp hover:border-primary"
+                  >
+                    {t("View receipt", "Voir le reçu")}
+                  </Link>
+                </div>
+              )}
+
+              <div className="mt-6 flex flex-wrap gap-2">
+                <Link
+                  to="/order"
+                  className="press-tap inline-flex items-center border border-border px-4 py-2.5 font-display text-sm uppercase leading-none hover:border-primary focus-ppp"
+                >
+                  {t("Place a PPP Direct order", "Passer une commande PPP Direct")}
+                </Link>
+                <CallbackSheet defaultReason="order_issue" />
+              </div>
+            </div>
+          )}
+
+          {provider === "phone" && (
+            <div className="mt-8 border border-border p-5">
+              <h2 className="font-display text-2xl uppercase leading-none">
+                {t("Look up a phone order", "Consulter une commande téléphonique")}
+              </h2>
+              <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+                {t(
+                  "Phone orders are not stored in PPP online yet. For a real-time answer, please call the location directly.",
+                  "Les commandes téléphoniques ne sont pas encore enregistrées en ligne chez PPP. Pour une réponse en temps réel, veuillez appeler l'établissement directement.",
+                )}
+              </p>
+              <form onSubmit={handleLookup} className="mt-5 grid max-w-md gap-3">
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  type="tel"
+                  placeholder={t(
+                    "Phone number used for the order",
+                    "Numéro utilisé pour la commande",
+                  )}
+                  className="h-10 border border-border bg-background px-3 text-sm focus-ppp"
+                />
+                <input
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder={t("Order code", "Code de commande")}
+                  className="h-10 border border-border bg-background px-3 text-sm focus-ppp"
+                />
+                {lookupError && <p className="text-xs text-destructive">{lookupError}</p>}
+                {lookupTried && !lookupError && !foundOrder && (
                   <p className="border border-border bg-card/50 p-3 text-xs text-muted-foreground">
                     {t(
                       "Thanks — phone order lookup isn't available yet, so we can't show a status here. Please call the location directly for an update.",

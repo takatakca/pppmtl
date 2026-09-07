@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Heart, Plus } from "lucide-react";
 import type { MenuItem } from "@/data/menu";
 import { usePPP } from "@/context/ppp-store";
 import { MenuImage } from "@/components/menu/menu-item-image";
@@ -19,8 +19,9 @@ export function ProductCard({
   badge?: string;
   index?: number;
 }) {
-  const { lang, t } = usePPP();
+  const { lang, t, isFavourite, addFavourite, removeFavourite } = usePPP();
   const name = localizedName(item, lang);
+  const favourited = isFavourite(item.id);
   const discount =
     item.price !== null && item.compareAtPrice != null && item.compareAtPrice > item.price
       ? Math.round((1 - item.price / item.compareAtPrice) * 100)
@@ -47,6 +48,26 @@ export function ProductCard({
             variant="hero"
             className="h-32 w-full transition-transform duration-500 ease-out group-hover:-translate-y-1.5 group-hover:scale-[1.10] sm:h-36"
           />
+          <button
+            type="button"
+            aria-label={
+              favourited
+                ? t("Remove from favourites", "Retirer des favoris")
+                : t("Add to favourites", "Ajouter aux favoris")
+            }
+            onClick={(e) => {
+              e.stopPropagation();
+              if (favourited) removeFavourite(item.id);
+              else addFavourite(item.id);
+            }}
+            className="absolute right-2 top-2 z-20 flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-black/60 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110 focus-ppp active:scale-95"
+          >
+            <Heart
+              className={`h-3.5 w-3.5 transition-all duration-200 ${
+                favourited ? "fill-primary text-primary" : "fill-transparent text-white"
+              }`}
+            />
+          </button>
           {(discount ?? badge) && (
             <span className="absolute left-0 top-0 flex flex-col items-start gap-0.5">
               {discount && (
