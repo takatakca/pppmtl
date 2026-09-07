@@ -13,5 +13,5 @@ export const uberEatsChannel: MarketplaceChannel = {
   id: "uber_eats",
   label: "Uber Eats",
   aggregatedBy: "urbanpiper",
-  storefrontUrl: (locationId) => locationById(locationId)?.ordering.uberEats ?? null,
+  storefrontUrl: (locationId: string) => locationById(locationId)?.ordering.uberEats ?? null,
 };
