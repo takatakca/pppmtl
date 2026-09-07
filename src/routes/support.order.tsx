@@ -10,6 +10,7 @@ import { OrderSheet } from "@/components/layout/order-sheet";
 import { usePPP } from "@/context/ppp-store";
 import { restaurantLocations } from "@/config/locations";
 import { canonicalUrl } from "@/config/site";
+import { listMyOrders, type OrderView } from "@/lib/orders/orders.functions";
 
 export const Route = createFileRoute("/support/order")({
   head: () => ({
@@ -34,20 +35,36 @@ export const Route = createFileRoute("/support/order")({
 });
 
 function OrderSupportPage() {
-  const { t } = usePPP();
+  const { t, lang } = usePPP();
   const [phone, setPhone] = useState("");
   const [orderNumber, setOrderNumber] = useState("");
-  const [answer, setAnswer] = useState<string | null>(null);
+  const [found, setFound] = useState<OrderView | null>(null);
+  const [notFound, setNotFound] = useState(false);
+  const [loading, setLoading] = useState(false);
   const store = restaurantLocations.find((l) => l.lifecycleStatus === "open");
 
-  const lookup = () => {
-    setAnswer(
-      t(
-        "We could not find that order online. Call the restaurant with your order number and we will find it right away.",
-        "Nous n'avons pas trouvé cette commande en ligne. Appelez le restaurant avec votre numéro de commande et nous la retrouverons tout de suite.",
-        "No encontramos ese pedido en línea. Llame al restaurante con su número de pedido y lo encontraremos enseguida.",
-      ),
-    );
+  const lookup = async () => {
+    setLoading(true);
+    setFound(null);
+    setNotFound(false);
+    try {
+      const digits = phone.replace(/\D/g, "");
+      const result = await listMyOrders({ data: { customerId: null, phone: digits } });
+      const match = result.orders.find(
+        (o) =>
+          o.orderNumber?.toLowerCase() === orderNumber.trim().toLowerCase() ||
+          o.id.toLowerCase().endsWith(orderNumber.trim().toLowerCase()),
+      );
+      if (match) {
+        setFound(match);
+      } else {
+        setNotFound(true);
+      }
+    } catch {
+      setNotFound(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -99,7 +116,7 @@ function OrderSupportPage() {
             <button
               type="button"
               onClick={lookup}
-              disabled={phone.trim().length < 7 || orderNumber.trim().length < 3}
+              disabled={phone.trim().length < 7 || orderNumber.trim().length < 3 || loading}
               className="lift-btn flex items-center justify-center gap-2 bg-primary px-5 py-3 font-display text-sm uppercase tracking-widest text-primary-foreground disabled:opacity-50"
             >
               <Search className="h-4 w-4" />
@@ -107,9 +124,34 @@ function OrderSupportPage() {
             </button>
           </div>
 
-          {answer && (
+          {found && (
+            <div className="mt-4 border border-border bg-card p-4">
+              <p className="font-display text-lg uppercase leading-none">
+                {t("Found it", "Trouvée", "Encontrado")}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t("Order", "Commande", "Pedido")} #{found.orderNumber ?? found.id} ·{" "}
+                {new Date(found.createdAt).toLocaleDateString(
+                  lang === "fr" ? "fr-CA" : lang === "es" ? "es" : "en-CA",
+                )}
+              </p>
+              <Link
+                to="/orders/$orderId"
+                params={{ orderId: found.id }}
+                className="mt-3 inline-block bg-primary px-5 py-3 font-display text-sm uppercase leading-none text-primary-foreground focus-ppp"
+              >
+                {t("View receipt", "Voir le reçu", "Ver recibo")}
+              </Link>
+            </div>
+          )}
+
+          {notFound && (
             <p className="mt-4 border border-border bg-card p-4 text-sm text-muted-foreground">
-              {answer}
+              {t(
+                "We could not find that order online. Call the restaurant with your order number and we will find it right away.",
+                "Nous n'avons pas trouvé cette commande en ligne. Appelez le restaurant avec votre numéro de commande et nous la retrouverons tout de suite.",
+                "No encontramos ese pedido en línea. Llame al restaurante con su número de pedido y lo encontraremos enseguida.",
+              )}
             </p>
           )}
 

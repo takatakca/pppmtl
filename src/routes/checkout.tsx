@@ -49,7 +49,15 @@ const SectionTitle = ({ n, children }: { n: number; children: React.ReactNode })
 );
 
 function CheckoutPage() {
-  const { cart, mode, setMode, lang, t, openLocationSheet } = usePPP();
+  const {
+    cart,
+    mode,
+    setMode,
+    lang,
+    t,
+    openLocationSheet,
+    addSavedAddress,
+  } = usePPP();
   const location = useSelectedLocation();
   const { accountsAvailable, customer } = useCustomerSession();
   const totals = cartTotals(cart);
@@ -211,13 +219,21 @@ function CheckoutPage() {
                     ) : (
                       <DeliveryAddressForm
                         authenticated={false}
-                        onSubmit={(d) =>
+                        onSubmit={(d) => {
                           setAddress(
                             [d.street, d.unit, d.city, d.province, d.postalCode]
                               .filter(Boolean)
                               .join(", "),
-                          )
-                        }
+                          );
+                          addSavedAddress({
+                            street: d.street,
+                            unit: d.unit,
+                            city: d.city,
+                            province: d.province,
+                            postalCode: d.postalCode,
+                            instructions: d.instructions,
+                          });
+                        }}
                       />
                     )}
                   </div>

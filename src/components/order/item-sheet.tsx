@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Minus, Plus, X } from "lucide-react";
+import { Heart, Minus, Plus, X } from "lucide-react";
 import type { MenuItem } from "@/data/menu";
 import { usePPP } from "@/context/ppp-store";
 import { MenuImage } from "@/components/menu/menu-item-image";
@@ -20,10 +20,11 @@ export function ItemSheet({
   /** Swap the sheet to a paired item without leaving the flow. */
   onSelectItem?: (item: MenuItem) => void;
 }) {
-  const { lang, t, addToCart, locationId } = usePPP();
+  const { lang, t, addToCart, locationId, isFavourite, addFavourite, removeFavourite } = usePPP();
   const [qty, setQty] = useState(1);
   const [notes, setNotes] = useState("");
   const [selections, setSelections] = useState<LineSelections>({});
+  const favourited = isFavourite(item?.id ?? "");
 
   useEffect(() => {
     setQty(1);
@@ -58,13 +59,34 @@ export function ItemSheet({
       >
         <div className="relative">
           <MenuImage src={item.image} alt={name} variant="promo" priority />
-          <button
-            onClick={onClose}
-            aria-label={t("Close", "Fermer")}
-            className="absolute right-3 top-3 border border-border bg-background/85 p-2 focus-ppp"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <div className="absolute right-3 top-3 flex gap-2">
+            <button
+              type="button"
+              aria-label={
+                favourited
+                  ? t("Remove from favourites", "Retirer des favoris")
+                  : t("Add to favourites", "Ajouter aux favoris")
+              }
+              onClick={() => {
+                if (favourited) removeFavourite(item.id);
+                else addFavourite(item.id);
+              }}
+              className="flex h-9 w-9 items-center justify-center border border-border bg-background/85 backdrop-blur-sm focus-ppp hover:border-primary"
+            >
+              <Heart
+                className={`h-4 w-4 transition-all duration-200 ${
+                  favourited ? "fill-primary text-primary" : "fill-transparent text-foreground"
+                }`}
+              />
+            </button>
+            <button
+              onClick={onClose}
+              aria-label={t("Close", "Fermer")}
+              className="border border-border bg-background/85 p-2 focus-ppp"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">

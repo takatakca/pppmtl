@@ -1,59 +1,51 @@
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Clock, Gift, Heart, LogOut, MapPin, Star } from "lucide-react";
+import { Clock, Gift, Heart, LogOut, MapPin, Star, Trash2 } from "lucide-react";
 import { LocationPreference } from "@/components/account/location-preference";
 import { MarketingPreferencesPanel } from "@/components/account/marketing-preferences";
 import { usePPP } from "@/context/ppp-store";
 import { useCustomerSession } from "@/lib/customer/session";
 import { pppBusiness } from "@/config/business";
 import type { RestaurantCustomer } from "@/lib/customer/types";
+import { listMyOrders, type OrderView } from "@/lib/orders/orders.functions";
+import { menuRepository } from "@/lib/menu-repository";
+import { localizedName } from "@/lib/search";
 
-/**
- * Signed-in "My PPP" dashboard. Empty states say plainly that there is
- * nothing yet instead of inventing points, orders or favourites.
- */
 export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) {
-  const { t } = usePPP();
+  const { t, tr, favourites, savedAddresses, removeFavourite, removeSavedAddress, reorderToCart } =
+    usePPP();
   const { signOut } = useCustomerSession();
   const name = customer.preferredName ?? customer.firstName ?? customer.username ?? "";
+  const [orders, setOrders] = useState<OrderView[] | null>(null);
 
-  const empties = [
-    {
-      icon: Clock,
-      title: t("Order again", "Recommander", "Pedir de nuevo"),
-      body: t(
-        "No PPP Direct orders yet. Your first one lands here for one-tap reordering.",
-        "Aucune commande PPP Direct. La première apparaîtra ici pour recommander en une touche.",
-        "Aún no hay pedidos PPP Direct. El primero aparecerá aquí para repetirlo con un toque.",
-      ),
-    },
-    {
-      icon: Heart,
-      title: t("Favourites", "Favoris", "Favoritos"),
-      body: t(
-        "Tap the heart on any item to pin it here.",
-        "Touchez le cœur d'un article pour l'épingler ici.",
-        "Toca el corazón de un plato para fijarlo aquí.",
-      ),
-    },
-    {
-      icon: MapPin,
-      title: t("Saved addresses", "Adresses enregistrées", "Direcciones guardadas"),
-      body: t(
-        "Add a delivery address at checkout and it stays saved here.",
-        "Ajoutez une adresse au paiement et elle sera enregistrée ici.",
-        "Agrega una dirección al pagar y quedará guardada aquí.",
-      ),
-    },
-    {
-      icon: Gift,
-      title: t("Gift cards", "Cartes-cadeaux", "Tarjetas de regalo"),
-      body: t(
-        "Buy, send and redeem PPP gift cards.",
-        "Achetez, offrez et utilisez des cartes PPP.",
-        "Compra, envía y usa tarjetas de regalo PPP.",
-      ),
-    },
-  ];
+  useEffect(() => {
+    let alive = true;
+    listMyOrders({ data: { customerId: customer.id ?? null, phone: customer.phone ?? null } })
+      .then((result) => {
+        if (alive) setOrders(result.orders);
+      })
+      .catch(() => {
+        if (alive) setOrders([]);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [customer.id, customer.phone]);
+
+  const favouriteItems = favourites
+    .map((id) => menuRepository.getItem(id))
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+
+  const handleReorder = (order: OrderView) => {
+    reorderToCart(
+      order.items.map((i) => ({
+        itemId: i.productId,
+        quantity: i.quantity,
+        notes: i.notes,
+        selections: i.selections,
+      })),
+    );
+  };
 
   return (
     <>
@@ -108,14 +100,158 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
         </div>
       </section>
 
-      <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-        {empties.map((p) => (
-          <section key={p.title} className="border border-border bg-card p-5">
-            <p.icon className="h-5 w-5 text-primary" />
-            <h2 className="mt-3 font-display text-2xl uppercase leading-none">{p.title}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{p.body}</p>
-          </section>
-        ))}
+      <div className="mt-2 grid gap-2 lg:grid-cols-2">
+        {/* Orders */}
+        <section className="border border-border bg-card p-5">
+          <div className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-primary" />
+            <h2 className="font-display text-2xl uppercase leading-none">
+              {tr("account.orders")}
+            </h2>
+          </div>
+          {orders && orders.length > 0 ? (
+            <ul className="mt-3 space-y-2">
+              {orders.slice(0, 4).map((order) => (
+                <li key={order.id} className="flex items-center justify-between border border-border p-3">
+                  <Link
+                    to="/orders/$orderId"
+                    params={{ orderId: order.id }}
+                    className="min-w-0 flex-1 focus-ppp"
+                  >
+                    <p className="font-display text-lg uppercase leading-none">
+                      #{order.orderNumber ?? order.id}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </p>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => handleReorder(order)}
+                    className="ml-3 border border-border px-3 py-2 text-[0.6rem] font-bold uppercase tracking-widest focus-ppp hover:border-primary"
+                  >
+                    {tr("orders.reorder")}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="mt-3 border border-dashed border-border p-4 text-center">
+              <p className="text-sm text-muted-foreground">{tr("orders.noOrders")}</p>
+              <Link
+                to="/order"
+                className="mt-2 inline-block text-sm font-bold uppercase tracking-widest text-primary"
+              >
+                {tr("orders.startOrder")}
+              </Link>
+            </div>
+          )}
+          <Link
+            to="/orders"
+            className="mt-3 inline-block text-[0.65rem] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground"
+          >
+            {tr("orders.viewReceipt")} →
+          </Link>
+        </section>
+
+        {/* Favourites */}
+        <section className="border border-border bg-card p-5">
+          <div className="flex items-center gap-2">
+            <Heart className="h-5 w-5 text-primary" />
+            <h2 className="font-display text-2xl uppercase leading-none">
+              {tr("favourites.title")}
+            </h2>
+          </div>
+          {favouriteItems.length > 0 ? (
+            <ul className="mt-3 space-y-2">
+              {favouriteItems.slice(0, 6).map((item) => (
+                <li key={item.id} className="flex items-center justify-between border border-border p-3">
+                  <Link to="/order" className="min-w-0 flex-1 focus-ppp">
+                    <p className="font-display text-lg uppercase leading-none">
+                      {localizedName(item, "en")}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {item.price !== null ? `$${item.price.toFixed(2)}` : ""}
+                    </p>
+                  </Link>
+                  <button
+                    type="button"
+                    aria-label={tr("favourites.remove")}
+                    onClick={() => removeFavourite(item.id)}
+                    className="ml-3 p-2 text-muted-foreground focus-ppp hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="mt-3 border border-dashed border-border p-4 text-center">
+              <p className="text-sm text-muted-foreground">{tr("favourites.empty")}</p>
+              <p className="text-xs text-muted-foreground">{tr("favourites.emptyBody")}</p>
+            </div>
+          )}
+        </section>
+
+        {/* Saved addresses */}
+        <section className="border border-border bg-card p-5 lg:col-span-2">
+          <div className="flex items-center gap-2">
+            <MapPin className="h-5 w-5 text-primary" />
+            <h2 className="font-display text-2xl uppercase leading-none">
+              {tr("addresses.title")}
+            </h2>
+          </div>
+          {savedAddresses.length > 0 ? (
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {savedAddresses.map((address) => (
+                <li key={address.id} className="border border-border p-3">
+                  <p className="font-display text-lg uppercase leading-none">
+                    {address.label ?? address.street}
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {address.street}
+                    {address.unit ? `, ${address.unit}` : ""}
+                    <br />
+                    {address.city}, {address.province} {address.postalCode}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => removeSavedAddress(address.id)}
+                    className="mt-2 inline-flex items-center gap-1 text-[0.6rem] font-bold uppercase tracking-widest text-muted-foreground focus-ppp hover:text-destructive"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    {tr("addresses.remove")}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="mt-3 border border-dashed border-border p-4 text-center">
+              <p className="text-sm text-muted-foreground">{tr("addresses.empty")}</p>
+              <p className="text-xs text-muted-foreground">{tr("addresses.emptyBody")}</p>
+            </div>
+          )}
+        </section>
+
+        {/* Gift cards */}
+        <section className="border border-border bg-card p-5 lg:col-span-2">
+          <div className="flex items-center gap-2">
+            <Gift className="h-5 w-5 text-primary" />
+            <h2 className="font-display text-2xl uppercase leading-none">
+              {t("Gift cards", "Cartes-cadeaux", "Tarjetas de regalo")}
+            </h2>
+          </div>
+          <div className="mt-3 flex items-center gap-4 border border-dashed border-border p-4">
+            <Gift className="h-8 w-8 shrink-0 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              {t(
+                "Buy, send and redeem PPP gift cards.",
+                "Achetez, offrez et utilisez des cartes PPP.",
+                "Compra, envía y usa tarjetas de regalo PPP.",
+              )}
+            </p>
+          </div>
+        </section>
       </div>
 
       <div className="mt-2 grid gap-2 lg:grid-cols-2">
