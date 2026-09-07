@@ -29,6 +29,7 @@ export const en = {
     support: "Help",
     help: "Help centre",
     trackOrder: "Track order",
+    myOrders: "My orders",
     aroundTheWeb: "Around the web",
     findUsOnline: "Find us online",
     fullMenu: "Full menu",
