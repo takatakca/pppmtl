@@ -41,6 +41,7 @@ export const fr: DeepPartial<Dictionary> = {
     orderNow: "Commander",
     support: "Aide",
     trackOrder: "Suivre ma commande",
+    myOrders: "Mes commandes",
   },
   popup: {
     welcomeBack: "Content de vous revoir chez PPP",

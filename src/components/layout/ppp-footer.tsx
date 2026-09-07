@@ -33,6 +33,7 @@ const helpLinks: Array<{ key: TranslationKey; href: string }> = [
   { key: "footer.faq", href: "/faq" },
   { key: "navigation.support", href: "/support" },
   { key: "navigation.trackOrder", href: "/track" },
+  { key: "navigation.myOrders", href: "/orders" },
 ];
 
 export function PPPFooter() {
