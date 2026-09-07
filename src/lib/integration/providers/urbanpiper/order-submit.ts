@@ -13,15 +13,11 @@ import type {
 } from "@/lib/orders/provider-order-adapter";
 import type { OrderResult } from "@/lib/orders/errors";
 import { orderFailure } from "@/lib/orders/errors";
-import { hasCredentials } from "@/lib/integration/core/credentials.server";
-import { mappingForLocation } from "@/config/integration-locations";
 import { mapDraftToUrbanPiperOrder } from "./mapping";
+import { urbanPiperConfigured } from "./config.server";
 
 export function urbanPiperOrderingConfigured(locationId: string): boolean {
-  return (
-    hasCredentials("URBANPIPER_API_KEY", "URBANPIPER_BASE_URL") &&
-    Boolean(mappingForLocation(locationId)?.providerLocationId)
-  );
+  return urbanPiperConfigured(locationId);
 }
 
 export const urbanPiperOrderSubmitAdapter: ProviderOrderAdapter = {
