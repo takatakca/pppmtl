@@ -1,5 +1,7 @@
-import { ArrowUpRight, Bike, Phone, ShoppingBag, Sparkles, X } from "lucide-react";
+import { useState } from "react";
+import { ArrowUpRight, Bike, MapPin, Phone, ShoppingBag, Sparkles, X } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import { DeliveryAddressSheet } from "@/components/order/delivery-address-sheet";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { orderChannels } from "@/lib/channels";
 import { orderingChannels } from "@/config/external-presence";
@@ -15,6 +17,8 @@ export function OrderSheet() {
     usePPP();
   const location = useSelectedLocation();
   const navigate = useNavigate();
+  const [addressOpen, setAddressOpen] = useState(false);
+  const [address, setAddress] = useState<string | null>(null);
   if (!orderSheetOpen) return null;
 
   const channels = orderChannels(location, mode);
@@ -53,24 +57,58 @@ export function OrderSheet() {
         </div>
 
         <div className="px-5 py-5">
-          <div className="grid grid-cols-2 gap-1 border border-border p-1">
+          <p className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
+            {t(
+              "How would you like your order?",
+              "Comment voulez-vous votre commande ?",
+              "¿Cómo quieres tu pedido?",
+            )}
+          </p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
             {(["pickup", "delivery"] as const).map((m) => (
               <button
                 key={m}
-                onClick={() => setMode(m)}
-                className={`inline-flex items-center justify-center gap-2 py-2.5 text-xs font-bold uppercase tracking-widest transition-colors focus-ppp ${
-                  mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                onClick={() => {
+                  setMode(m);
+                  if (m === "delivery") setAddressOpen(true);
+                }}
+                aria-pressed={mode === m}
+                className={`lift-btn flex flex-col items-start gap-2 border p-4 text-left focus-ppp ${
+                  mode === m ? "border-primary" : "border-border"
                 }`}
               >
                 {m === "pickup" ? (
-                  <ShoppingBag className="h-4 w-4" />
+                  <ShoppingBag className="h-5 w-5 text-primary" />
                 ) : (
-                  <Bike className="h-4 w-4" />
+                  <Bike className="h-5 w-5 text-primary" />
                 )}
-                {m === "pickup" ? t("Pickup", "Cueillette") : t("Delivery", "Livraison")}
+                <span className="font-display text-xl uppercase leading-none">
+                  {m === "pickup"
+                    ? t("Pickup", "Cueillette", "Para recoger")
+                    : t("Delivery", "Livraison", "Entrega")}
+                </span>
+                <span className="text-[0.65rem] leading-snug text-muted-foreground">
+                  {m === "pickup"
+                    ? t("Pick it up at the counter.", "Ramassez au comptoir.", "Recoge en el mostrador.")
+                    : t("Brought to your door.", "Livrée à votre porte.", "La llevamos a tu puerta.")}
+                </span>
               </button>
             ))}
           </div>
+
+          <button
+            onClick={() => (mode === "delivery" ? setAddressOpen(true) : openLocationSheet())}
+            className="mt-2 flex w-full items-center gap-2 border border-dashed border-border px-4 py-2.5 text-left text-[0.62rem] font-bold uppercase tracking-widest text-muted-foreground focus-ppp"
+          >
+            <MapPin className="h-3.5 w-3.5 text-primary" />
+            <span className="truncate">
+              {mode === "delivery"
+                ? address
+                  ? `${t("Delivering to", "Livraison à", "Entrega a")} · ${address}`
+                  : t("Add a delivery address", "Ajouter une adresse", "Añadir una dirección")
+                : (location?.name ?? t("Choose a location", "Choisir un emplacement", "Elegir un local"))}
+            </span>
+          </button>
 
           <button
             onClick={beginDirect}
@@ -137,6 +175,11 @@ export function OrderSheet() {
           </ul>
         </div>
       </div>
+      <DeliveryAddressSheet
+        open={addressOpen}
+        onClose={() => setAddressOpen(false)}
+        onConfirm={(summary) => setAddress(summary)}
+      />
     </div>
   );
 }
