@@ -69,12 +69,8 @@ function OrderReceiptPage() {
         <PPPHeader />
         <main className="mx-auto max-w-3xl px-4 pt-24 pb-24 sm:px-6 lg:pt-32">
           <div className="border border-border bg-card p-8 text-center">
-            <p className="font-display text-2xl uppercase leading-none">
-              {tr("orders.notFound")}
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {tr("orders.lookupHint")}
-            </p>
+            <p className="font-display text-2xl uppercase leading-none">{tr("orders.notFound")}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{tr("orders.lookupHint")}</p>
             <Link
               to="/orders"
               className="mt-5 inline-flex items-center gap-2 border border-border px-5 py-3 font-display text-sm uppercase leading-none focus-ppp hover:border-primary"
@@ -140,20 +136,16 @@ function OrderReceiptPage() {
                 <dt className="text-[0.6rem] font-bold uppercase tracking-widest text-muted-foreground">
                   {t("Name", "Nom", "Nombre")}
                 </dt>
-                <dd className="mt-1 font-display text-xl uppercase">
-                  {order.customerName ?? "—"}
-                </dd>
+                <dd className="mt-1 font-display text-xl uppercase">{order.customerName ?? "—"}</dd>
               </div>
               <div>
                 <dt className="text-[0.6rem] font-bold uppercase tracking-widest text-muted-foreground">
-                  {order.orderType === "DELIVERY"
-                    ? tr("orders.deliveryTo")
-                    : tr("orders.pickupAt")}
+                  {order.orderType === "DELIVERY" ? tr("orders.deliveryTo") : tr("orders.pickupAt")}
                 </dt>
                 <dd className="mt-1 text-sm text-muted-foreground">
                   {order.orderType === "DELIVERY"
-                    ? order.deliveryAddress ?? "—"
-                    : location?.displayName ?? order.locationId}
+                    ? (order.deliveryAddress ?? "—")
+                    : (location?.displayName ?? order.locationId)}
                 </dd>
               </div>
             </dl>
@@ -171,9 +163,7 @@ function OrderReceiptPage() {
                     {line.options.length > 0 && (
                       <p className="text-xs text-muted-foreground">{line.options.join(" · ")}</p>
                     )}
-                    {line.notes && (
-                      <p className="text-xs text-muted-foreground">“{line.notes}”</p>
-                    )}
+                    {line.notes && <p className="text-xs text-muted-foreground">“{line.notes}”</p>}
                   </div>
                 </li>
               ))}
@@ -187,13 +177,22 @@ function OrderReceiptPage() {
               <div className="flex justify-between text-sm">
                 <dt className="text-muted-foreground">{tr("orders.tax")}</dt>
                 <dd className="text-muted-foreground">
-                  {t("Confirmed by the restaurant", "Confirmées par le restaurant", "Confirmados por el restaurante")}
+                  {t(
+                    "Confirmed by the restaurant",
+                    "Confirmées par le restaurant",
+                    "Confirmados por el restaurante",
+                  )}
                 </dd>
               </div>
               <div className="flex items-baseline justify-between border-t border-border pt-3">
-                <dt className="font-display text-xl uppercase leading-none">{tr("orders.total")}</dt>
+                <dt className="font-display text-xl uppercase leading-none">
+                  {tr("orders.total")}
+                </dt>
                 <dd className="font-display text-3xl leading-none">
-                  ${order.total !== null ? (order.total / 100).toFixed(2) : `${(order.subtotal / 100).toFixed(2)}+`}
+                  $
+                  {order.total !== null
+                    ? (order.total / 100).toFixed(2)
+                    : `${(order.subtotal / 100).toFixed(2)}+`}
                 </dd>
               </div>
             </dl>
