@@ -103,7 +103,9 @@ function SupportIndexPage() {
           </p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div className="border border-border bg-background p-4">
-              <p className="font-display text-sm uppercase leading-tight">{t("PPP handles", "PPP s'occupe de")}</p>
+              <p className="font-display text-sm uppercase leading-tight">
+                {t("PPP handles", "PPP s'occupe de")}
+              </p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {t(
                   "PPP Direct orders, phone orders, restaurant/food questions, rewards, gift cards and location questions.",
