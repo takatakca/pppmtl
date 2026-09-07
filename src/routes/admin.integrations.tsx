@@ -5,6 +5,11 @@ import {
   getIntegrationSnapshot,
   type IntegrationSnapshot,
 } from "@/lib/integration/integrations.functions";
+import {
+  integrationRoadmap,
+  providerPlans,
+  urbanPiperAccessChecklist,
+} from "@/config/integration-readiness";
 
 /**
  * Internal integrations status screen. Not a merchant dashboard: it only
