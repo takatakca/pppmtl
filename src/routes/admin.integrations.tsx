@@ -165,6 +165,73 @@ function IntegrationsAdmin() {
               )}
             </div>
           </section>
+
+          <section className="mt-2 border border-border bg-card p-5">
+            <h2 className="font-display text-2xl uppercase leading-none">Provider comparison</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Planned division of responsibility. This is intent, not connection state.
+            </p>
+            <div className="mt-3 grid gap-2 lg:grid-cols-3">
+              {providerPlans.map((p) => (
+                <div key={p.id} className="border border-border p-4">
+                  <h3 className="font-display text-xl uppercase leading-none">{p.label}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{p.role}</p>
+                  <p className="mt-3 text-xs uppercase tracking-widest text-accent">PPP owns</p>
+                  <p className="text-sm">{p.ppmOwns}</p>
+                  <p className="mt-2 text-xs uppercase tracking-widest text-accent">Provider owns</p>
+                  <p className="text-sm">{p.providerOwns}</p>
+                  <p className="mt-2 text-xs uppercase tracking-widest text-accent">
+                    Required credentials
+                  </p>
+                  {p.requiredCredentials.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">None — storefront links only.</p>
+                  ) : (
+                    <ul className="mt-1 space-y-1">
+                      {p.requiredCredentials.map((key) => (
+                        <li key={key} className="flex items-center gap-2">
+                          <StatusIcon available={snapshot.credentials[key] === true} />
+                          <span className="font-mono text-xs">{key}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="mt-2 grid gap-2 lg:grid-cols-2">
+            <div className="border border-border bg-card p-5">
+              <h2 className="font-display text-2xl uppercase leading-none">
+                UrbanPiper access checklist
+              </h2>
+              <ul className="mt-3 space-y-2 text-sm">
+                {urbanPiperAccessChecklist.map((c) => (
+                  <li key={c.label} className="flex items-start gap-2">
+                    <MinusCircle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span>
+                      {c.label}
+                      <span className="block text-xs text-muted-foreground">{c.detail}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="border border-border bg-card p-5">
+              <h2 className="font-display text-2xl uppercase leading-none">
+                Connection order
+              </h2>
+              <ul className="mt-3 space-y-2 text-sm">
+                {integrationRoadmap.map((c) => (
+                  <li key={c.label} className="border border-border p-3">
+                    {c.label}
+                    <span className="block text-xs text-muted-foreground">{c.detail}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
         </>
       )}
     </main>
