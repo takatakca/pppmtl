@@ -82,7 +82,11 @@ function OrdersPage() {
                     "Lista para recoger o en camino.",
                   )}
                 {id === "completed" &&
-                  t("Enjoy — see you soon.", "Bon appétit — à bientôt.", "Buen provecho — hasta pronto.")}
+                  t(
+                    "Enjoy — see you soon.",
+                    "Bon appétit — à bientôt.",
+                    "Buen provecho — hasta pronto.",
+                  )}
               </p>
             </li>
           ))}
@@ -94,7 +98,13 @@ function OrdersPage() {
               <li key={o.id} className="border border-border p-4">
                 <p className="font-display text-lg uppercase leading-none">#{o.id}</p>
                 <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
-                  {stageLabel(o.status === "completed" ? "completed" : o.status === "ready" ? "ready" : "preparing")}
+                  {stageLabel(
+                    o.status === "completed"
+                      ? "completed"
+                      : o.status === "ready"
+                        ? "ready"
+                        : "preparing",
+                  )}
                 </p>
               </li>
             ))}

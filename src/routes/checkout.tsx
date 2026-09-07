@@ -103,7 +103,9 @@ function CheckoutPage() {
             <div className="space-y-8">
               {/* 1 — order type */}
               <section className="panel-in border border-border p-5">
-                <SectionTitle n={1}>{t("Order type", "Type de commande", "Tipo de pedido")}</SectionTitle>
+                <SectionTitle n={1}>
+                  {t("Order type", "Type de commande", "Tipo de pedido")}
+                </SectionTitle>
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   {(["pickup", "delivery"] as const).map((m) => (
                     <button
@@ -295,7 +297,11 @@ function CheckoutPage() {
                 </p>
                 <div className="mt-4 flex items-center gap-2 border border-dashed border-border px-4 py-3 text-xs uppercase tracking-widest text-muted-foreground">
                   <CreditCard className="h-4 w-4" />
-                  {t("Card payment opens here", "Le paiement par carte s'ouvrira ici", "El pago con tarjeta se abrirá aquí")}
+                  {t(
+                    "Card payment opens here",
+                    "Le paiement par carte s'ouvrira ici",
+                    "El pago con tarjeta se abrirá aquí",
+                  )}
                 </div>
               </section>
             </div>
@@ -334,13 +340,19 @@ function CheckoutPage() {
 
               <dl className="mt-5 space-y-1.5 border-t border-border pt-4 text-sm">
                 <div className="flex justify-between">
-                  <dt className="text-muted-foreground">{t("Subtotal", "Sous-total", "Subtotal")}</dt>
+                  <dt className="text-muted-foreground">
+                    {t("Subtotal", "Sous-total", "Subtotal")}
+                  </dt>
                   <dd>${totals.knownSubtotal.toFixed(2)}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">{t("Taxes", "Taxes", "Impuestos")}</dt>
                   <dd className="text-muted-foreground">
-                    {t("Confirmed by the restaurant", "Confirmées par le restaurant", "Confirmados por el restaurante")}
+                    {t(
+                      "Confirmed by the restaurant",
+                      "Confirmées par le restaurant",
+                      "Confirmados por el restaurante",
+                    )}
                   </dd>
                 </div>
                 <div className="flex items-baseline justify-between border-t border-border pt-3">

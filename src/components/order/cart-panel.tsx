@@ -156,7 +156,11 @@ export function CartPanel() {
                 {t("Taxes", "Taxes", "Impuestos")}
               </span>
               <span className="text-muted-foreground">
-                {t("Confirmed by the restaurant", "Confirmées par le restaurant", "Confirmados por el restaurante")}
+                {t(
+                  "Confirmed by the restaurant",
+                  "Confirmées par le restaurant",
+                  "Confirmados por el restaurante",
+                )}
               </span>
             </div>
 

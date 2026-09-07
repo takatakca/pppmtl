@@ -77,13 +77,14 @@ export interface PlacedOrder {
 }
 
 export type SubmitOrderResult =
-  | { status: "unavailable"; detail: IntegrationStatus }
-  | { status: "accepted"; order: PlacedOrder };
+  { status: "unavailable"; detail: IntegrationStatus } | { status: "accepted"; order: PlacedOrder };
 
 export interface OrderAdapter {
   status(locationId: string): IntegrationStatus;
   /** Price the draft server-side (taxes, fees, promos) — never computed in the UI. */
-  quote(draft: DraftOrder): Promise<
+  quote(
+    draft: DraftOrder,
+  ): Promise<
     | { status: "unavailable"; detail: IntegrationStatus }
     | { status: "quoted"; subtotal: number; taxes: number; fees: number; total: number }
   >;

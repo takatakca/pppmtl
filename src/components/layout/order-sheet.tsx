@@ -89,8 +89,16 @@ export function OrderSheet() {
                 </span>
                 <span className="text-[0.65rem] leading-snug text-muted-foreground">
                   {m === "pickup"
-                    ? t("Pick it up at the counter.", "Ramassez au comptoir.", "Recoge en el mostrador.")
-                    : t("Brought to your door.", "Livrée à votre porte.", "La llevamos a tu puerta.")}
+                    ? t(
+                        "Pick it up at the counter.",
+                        "Ramassez au comptoir.",
+                        "Recoge en el mostrador.",
+                      )
+                    : t(
+                        "Brought to your door.",
+                        "Livrée à votre porte.",
+                        "La llevamos a tu puerta.",
+                      )}
                 </span>
               </button>
             ))}
@@ -106,7 +114,8 @@ export function OrderSheet() {
                 ? address
                   ? `${t("Delivering to", "Livraison à", "Entrega a")} · ${address}`
                   : t("Add a delivery address", "Ajouter une adresse", "Añadir una dirección")
-                : (location?.name ?? t("Choose a location", "Choisir un emplacement", "Elegir un local"))}
+                : (location?.name ??
+                  t("Choose a location", "Choisir un emplacement", "Elegir un local"))}
             </span>
           </button>
 
