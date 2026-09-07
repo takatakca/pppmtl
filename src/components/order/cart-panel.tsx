@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router";
 import { Minus, Phone, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { menuRepository } from "@/lib/menu-repository";
@@ -13,6 +14,7 @@ import { track } from "@/lib/analytics";
 export function CartPanel() {
   const { cart, cartOpen, closeCart, setLineQuantity, removeLine, clearCart, mode, lang, t } =
     usePPP();
+  const navigate = useNavigate();
   const location = useSelectedLocation();
   const totals = cartTotals(cart);
   const marketplaces = marketplaceChannels(location, mode).filter((c) => c.href);
@@ -149,17 +151,31 @@ export function CartPanel() {
               )}
             </p>
 
+            <div className="mt-3 flex items-baseline justify-between text-xs">
+              <span className="uppercase tracking-widest text-muted-foreground">
+                {t("Taxes", "Taxes", "Impuestos")}
+              </span>
+              <span className="text-muted-foreground">
+                {t("Confirmed by the restaurant", "Confirmées par le restaurant", "Confirmados por el restaurante")}
+              </span>
+            </div>
+
             <button
-              onClick={() => track("cart_checkout_continued", { mode, lines: cart.length })}
+              onClick={() => {
+                track("cart_checkout_continued", { mode, lines: cart.length });
+                closeCart();
+                void navigate({ to: "/checkout" });
+              }}
               className="cta-motion mt-4 w-full bg-primary px-5 py-4 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
               style={{ boxShadow: "var(--shadow-glow)" }}
             >
-              {t("Continue to direct order", "Continuer vers la commande directe")}
+              {t("Continue", "Continuer", "Continuar")}
             </button>
             <p className="mt-2 text-center text-[0.6rem] uppercase tracking-widest text-muted-foreground">
               {t(
-                "Direct online payment is not live yet — finish by phone or an app below.",
-                "Le paiement en ligne direct n'est pas actif — terminez par téléphone ou via une app ci-dessous.",
+                "Review your details next — payment is confirmed with the restaurant.",
+                "Vérifiez vos informations ensuite — le paiement se confirme avec le restaurant.",
+                "Revisa tus datos — el pago se confirma con el restaurante.",
               )}
             </p>
 
