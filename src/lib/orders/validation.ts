@@ -51,9 +51,7 @@ export function validateOrderDraft(
   if (!draft.customer.phone?.trim()) push(codes, "missing_phone");
 
   if (context.availability) {
-    const unavailable = draft.items.some(
-      (i) => context.availability?.[i.productId] === false,
-    );
+    const unavailable = draft.items.some((i) => context.availability?.[i.productId] === false);
     if (unavailable) push(codes, "item_unavailable");
   }
 

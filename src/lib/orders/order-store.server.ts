@@ -47,7 +47,9 @@ export function listOrdersForCustomer(customerId: string | null, phone: string |
 }
 
 export function listAllOrders(limit = 50): InternalOrder[] {
-  return [...orders.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, limit);
+  return [...orders.values()]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, limit);
 }
 
 export function updateOrder(id: string, patch: Partial<InternalOrder>): InternalOrder | null {

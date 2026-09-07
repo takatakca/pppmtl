@@ -28,9 +28,11 @@ export const urbanPiperOrderSubmitAdapter: ProviderOrderAdapter = {
   provider: "urbanpiper",
   isConfigured: urbanPiperOrderingConfigured,
 
-  async createOrder(draft, providerLocationId, idempotencyKey): Promise<
-    OrderResult<ProviderOrderRef>
-  > {
+  async createOrder(
+    draft,
+    providerLocationId,
+    idempotencyKey,
+  ): Promise<OrderResult<ProviderOrderRef>> {
     if (!urbanPiperOrderingConfigured(draft.locationId)) {
       return orderFailure("provider_unavailable");
     }

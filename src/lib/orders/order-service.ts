@@ -188,9 +188,8 @@ export function createOrder(request: CheckoutRequest): OrderResult<InternalOrder
 
 async function adapterFor(order: InternalOrder) {
   if (order.provider !== "urbanpiper") return null;
-  const { urbanPiperOrderSubmitAdapter } = await import(
-    "@/lib/integration/providers/urbanpiper/order-submit"
-  );
+  const { urbanPiperOrderSubmitAdapter } =
+    await import("@/lib/integration/providers/urbanpiper/order-submit");
   return urbanPiperOrderSubmitAdapter;
 }
 

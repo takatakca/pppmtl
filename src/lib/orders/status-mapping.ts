@@ -25,7 +25,10 @@ const EVENT_MAP: Record<ProviderOrderEvent, OrderStatus> = {
 
 /** Accepts `order.accepted`, `ORDER_ACCEPTED`, `order_accepted`, etc. */
 export function normalizeEventName(raw: string): ProviderOrderEvent | null {
-  const key = raw.trim().toUpperCase().replace(/[.\-\s]/g, "_");
+  const key = raw
+    .trim()
+    .toUpperCase()
+    .replace(/[.\-\s]/g, "_");
   return key in EVENT_MAP ? (key as ProviderOrderEvent) : null;
 }
 

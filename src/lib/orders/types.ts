@@ -56,12 +56,7 @@ export function canTransition(from: OrderStatus, to: OrderStatus): boolean {
 }
 
 export type OrderPaymentStatus =
-  | "UNPAID"
-  | "AUTHORIZED"
-  | "PAID"
-  | "REFUNDED"
-  | "FAILED"
-  | "PAY_AT_RESTAURANT";
+  "UNPAID" | "AUTHORIZED" | "PAID" | "REFUNDED" | "FAILED" | "PAY_AT_RESTAURANT";
 
 export interface OrderItemModifier {
   groupId: string;
