@@ -88,6 +88,26 @@ export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
         status: e.status,
         payloadReference: e.payloadReference,
       })),
+      menuSync: {
+        connected: locationIntegrationMappings.some((m) => urbanPiperMenuConfigured(m.locationId)),
+        reason:
+          "Menu sync activates per store once UrbanPiper credentials and that store's provider id exist.",
+        coverage: mappingCoverage(),
+        stores: locationIntegrationMappings.map((m) => {
+          const last = lastMenuSyncFor(m.locationId);
+          return {
+            internalId: m.internalId,
+            name: m.name,
+            connected: urbanPiperMenuConfigured(m.locationId),
+            lastSyncAt: last?.completedAt ?? last?.startedAt ?? null,
+            lastStatus: last?.status ?? "never run",
+            categoriesReceived: last?.categoriesReceived ?? 0,
+            productsReceived: last?.productsReceived ?? 0,
+            itemsUpdated: last?.itemsUpdated ?? 0,
+            errors: last?.errors ?? [],
+          };
+        }),
+      },
     };
   },
 );
