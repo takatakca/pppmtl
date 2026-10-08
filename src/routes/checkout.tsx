@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CreditCard, Lock, Phone, ShieldCheck, ShoppingBag, Bike, UserRound } from "lucide-react";
 import { PPPHeader } from "@/components/layout/ppp-header";
@@ -12,7 +12,6 @@ import { placeOrder } from "@/lib/orders/orders.functions";
 import { useCustomerSession } from "@/lib/customer/session";
 import { cartTotals, selectionLabels } from "@/lib/cart";
 import { menuRepository } from "@/lib/menu-repository";
-import { orderingIntegration } from "@/lib/integration";
 import { GOOGLE_SIGN_IN_ENABLED } from "@/config/auth-flags";
 import { canonicalUrl } from "@/config/site";
 import { track } from "@/lib/analytics";
@@ -53,7 +52,12 @@ function CheckoutPage() {
   const location = useSelectedLocation();
   const { accountsAvailable, customer } = useCustomerSession();
   const totals = cartTotals(cart);
-  const orderStatus = orderingIntegration.orders.status(location?.id ?? "");
+  /** Card payment happens on Clover's own secure page (Clover Hosted Checkout); PPP never sees the card. */
+  const paymentCopy = t(
+    "You pay on Clover's secure page, then come back here. Your order goes straight to the restaurant's Clover register.",
+    "Vous payez sur la page sécurisée de Clover, puis vous revenez ici. Votre commande va directement à la caisse Clover du restaurant.",
+    "Pagas en la página segura de Clover y vuelves aquí. Tu pedido va directo a la caja Clover del restaurante.",
+  );
 
   const [identity, setIdentity] = useState<"guest" | "account">("guest");
   const [name, setName] = useState(customer?.preferredName ?? "");
@@ -65,6 +69,30 @@ function CheckoutPage() {
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
 
   const submitOrderFn = useServerFn(placeOrder);
+
+  // Back from Clover's payment page without paying: the cart is still here.
+  useEffect(() => {
+    const payment = new URLSearchParams(window.location.search).get("payment");
+    if (payment === "cancelled") {
+      setOrderMessage(
+        t(
+          "Payment cancelled — your order is still here.",
+          "Paiement annulé — votre commande est toujours là.",
+          "Pago cancelado — tu pedido sigue aquí.",
+        ),
+      );
+    } else if (payment === "failed") {
+      setOrderMessage(
+        t(
+          "The card was not accepted. Try again or use another card.",
+          "La carte n'a pas été acceptée. Réessayez ou utilisez une autre carte.",
+          "La tarjeta no fue aceptada. Inténtalo de nuevo o usa otra tarjeta.",
+        ),
+      );
+    }
+    // Only on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
    * Cart -> validate -> internal order -> provider. The browser sends ids and
@@ -98,6 +126,12 @@ function CheckoutPage() {
         },
       });
 
+      if (response.ok && response.order?.paymentUrl) {
+        // Clover Hosted Checkout: the customer pays on Clover's page, then comes back to the order page.
+        track("checkout_payment_redirect", { lines: cart.length });
+        window.location.assign(response.order.paymentUrl);
+        return;
+      }
       if (response.ok && response.order) {
         setOrderNumber(response.order.orderNumber ?? response.order.id);
         setOrderMessage(null);
@@ -365,15 +399,21 @@ function CheckoutPage() {
                 <SectionTitle n={3}>{t("Payment", "Paiement", "Pago")}</SectionTitle>
                 <p className="mt-3 flex items-start gap-2 text-sm text-muted-foreground">
                   <Lock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  {lang === "fr" ? orderStatus.reasonFr : orderStatus.reasonEn}
+                  {paymentCopy}
                 </p>
                 <div className="mt-4 flex items-center gap-2 border border-dashed border-border px-4 py-3 text-xs uppercase tracking-widest text-muted-foreground">
                   <CreditCard className="h-4 w-4" />
-                  {t(
-                    "Card payment opens here",
-                    "Le paiement par carte s'ouvrira ici",
-                    "El pago con tarjeta se abrirá aquí",
-                  )}
+                  {mode === "delivery"
+                    ? t(
+                        "Online payment is for pickup. For delivery, use Uber Eats, DoorDash or Skip.",
+                        "Le paiement en ligne est pour la cueillette. Pour la livraison : Uber Eats, DoorDash ou Skip.",
+                        "El pago en línea es para recoger. Para entrega: Uber Eats, DoorDash o Skip.",
+                      )
+                    : t(
+                        "Card payment opens on Clover's secure page",
+                        "Le paiement par carte s'ouvre sur la page sécurisée de Clover",
+                        "El pago con tarjeta se abre en la página segura de Clover",
+                      )}
                 </div>
               </section>
             </div>
@@ -421,9 +461,9 @@ function CheckoutPage() {
                   <dt className="text-muted-foreground">{t("Taxes", "Taxes", "Impuestos")}</dt>
                   <dd className="text-muted-foreground">
                     {t(
-                      "Confirmed by the restaurant",
-                      "Confirmées par le restaurant",
-                      "Confirmados por el restaurante",
+                      "Added on Clover's payment page",
+                      "Ajoutées sur la page de paiement Clover",
+                      "Se suman en la página de pago de Clover",
                     )}
                   </dd>
                 </div>
@@ -445,7 +485,7 @@ function CheckoutPage() {
               >
                 {submitting
                   ? t("Sending…", "Envoi…", "Enviando…")
-                  : t("Finish my order", "Terminer ma commande", "Terminar mi pedido")}
+                  : t("Pay with Clover", "Payer avec Clover", "Pagar con Clover")}
               </button>
               {orderNumber ? (
                 <p className="mt-3 border border-primary px-4 py-3 text-center text-sm">
@@ -461,7 +501,11 @@ function CheckoutPage() {
                 </p>
               ) : (
                 <p className="mt-2 text-center text-[0.6rem] uppercase tracking-widest text-muted-foreground">
-                  {lang === "fr" ? orderStatus.reasonFr : orderStatus.reasonEn}
+                  {t(
+                    "Secure payment by Clover · pickup",
+                    "Paiement sécurisé par Clover · cueillette",
+                    "Pago seguro con Clover · para recoger",
+                  )}
                 </p>
               )}
               {location?.links.phoneOrderNumber && (

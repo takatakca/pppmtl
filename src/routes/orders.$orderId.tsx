@@ -26,23 +26,46 @@ export const Route = createFileRoute("/orders/$orderId")({
 
 function OrderReceiptPage() {
   const { orderId } = Route.useParams();
-  const { lang, t, tr, reorderToCart } = usePPP();
+  const { lang, t, tr, reorderToCart, clearCart } = usePPP();
   const [order, setOrder] = useState<OrderView | null>(null);
   const [error, setError] = useState(false);
+  /** Back from Clover's payment page (`?paid=1`). */
+  const [paidReturn, setPaidReturn] = useState(false);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("paid") === "1") {
+      setPaidReturn(true);
+      clearCart();
+    }
+    // Only on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     let alive = true;
-    getOrderById({ data: { orderId } })
-      .then((result) => {
-        if (!alive) return;
-        if (result.order) setOrder(result.order);
-        else setError(true);
-      })
-      .catch(() => {
-        if (alive) setError(true);
-      });
+    let tries = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const load = () => {
+      getOrderById({ data: { orderId } })
+        .then((result) => {
+          if (!alive) return;
+          if (result.order) {
+            setOrder(result.order);
+            // Clover confirms the payment by webhook a few seconds after the customer comes back.
+            if (result.order.paymentStatus === "UNPAID" && tries < 30) {
+              tries += 1;
+              timer = setTimeout(load, 4000);
+            }
+          } else setError(true);
+        })
+        .catch(() => {
+          if (alive) setError(true);
+        });
+    };
+    load();
     return () => {
       alive = false;
+      if (timer) clearTimeout(timer);
     };
   }, [orderId]);
 
@@ -57,6 +80,37 @@ function OrderReceiptPage() {
       })),
     );
   };
+
+  // Paid on Clover, but this server does not hold the order (another instance or a restart): Clover has it.
+  if (error && paidReturn) {
+    return (
+      <main className="mx-auto max-w-3xl px-4 pt-24 pb-24 sm:px-6 lg:pt-32">
+        <div className="border border-primary bg-card p-8 text-center">
+          <p className="font-display text-3xl uppercase leading-none">
+            {t(
+              "Payment received — thank you!",
+              "Paiement reçu — merci!",
+              "Pago recibido — ¡gracias!",
+            )}
+          </p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            {t(
+              "Your order is in the restaurant's Clover register. Clover emails your receipt. Pick it up at the counter.",
+              "Votre commande est dans la caisse Clover du restaurant. Clover vous envoie le reçu par courriel. Récupérez-la au comptoir.",
+              "Tu pedido está en la caja Clover del restaurante. Clover te envía el recibo por correo. Recógelo en el mostrador.",
+            )}
+          </p>
+          <Link
+            to="/"
+            className="mt-5 inline-flex items-center gap-2 border border-border px-5 py-3 font-display text-sm uppercase leading-none focus-ppp hover:border-primary"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {t("Back to the menu", "Retour au menu", "Volver al menú")}
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   if (error || (!order && !error)) {
     return (
@@ -115,6 +169,31 @@ function OrderReceiptPage() {
           <p className="mt-2 text-sm text-muted-foreground">
             {statusLabel(order.status, lang)} · {date}
           </p>
+          {order.paymentStatus === "PAID" && (
+            <p className="mt-2 text-sm text-primary">
+              {t(
+                "Paid online with Clover",
+                "Payée en ligne avec Clover",
+                "Pagado en línea con Clover",
+              )}
+            </p>
+          )}
+          {order.paymentStatus === "UNPAID" && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              {paidReturn
+                ? t(
+                    "Clover is confirming your payment…",
+                    "Clover confirme votre paiement…",
+                    "Clover está confirmando tu pago…",
+                  )
+                : t("Waiting for payment", "En attente du paiement", "Esperando el pago")}
+              {!paidReturn && order.paymentUrl && (
+                <a href={order.paymentUrl} className="ml-2 underline focus-ppp">
+                  {t("Pay now", "Payer maintenant", "Pagar ahora")}
+                </a>
+              )}
+            </p>
+          )}
         </div>
 
         <div className="p-6">
