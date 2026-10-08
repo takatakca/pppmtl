@@ -43,8 +43,13 @@ Living note, updated as the work goes. Last update: 2026-10-08 (task 12 of the F
   e.g. Clover's "(P. FRITS)" staff suffix). 168 have one of the owner's photos; 7 keep the site's category photo.
 - [x] `src/lib/integration/providers/clover/catalog.ts`: pure normaliser (internal categories / hidden / variable
   price left out, cents, option slugs, display names for groups and options).
-- [ ] Snapshot + map file + photos · [ ] item sheet modifiers · [ ] Clover provider (quote, Hosted Checkout,
-  webhook, print) · [ ] tests · [ ] docs/integrations/clover.md (hosting, env vars, Clover clicks).
+- [x] Snapshot (`src/data/clover/inventory.snapshot.json`, 175 items / 17 categories / 218 option groups),
+  map (`src/config/clover-item-map.ts`, 175/175), photos (`public/menu/clover/`, 168 items, 1200 + 400 px webp).
+- [x] Overlay `src/data/clover/overlay.ts` applied in `src/data/menu.ts`: Clover price, options, photo,
+  availability, French description from Clover; site names/rails/placement unchanged. Offers read the real
+  item price (their "20 % off" wording was removed: it was the Uber promo). 4 site typos fixed (ids unchanged).
+- [x] `src/lib/modifiers.ts` (min/max, multi-choice as "a,b", option prices) + item sheet + cart re-pricing.
+- [ ] Clover provider (quote, Hosted Checkout, webhook, print) · [ ] tests · [ ] docs/integrations/clover.md.
 
 ## Important constraint
 The build targets Cloudflare Workers (Nitro, Lovable hosting): the in-memory order store is per isolate, so the
@@ -52,9 +57,10 @@ Clover webhook must work without it (payment id → Clover order → title + not
 show "paid" even when the order is not in memory (`?paid=1`).
 
 ## Next step
-1. `scripts/clover/snapshot.ts` → `src/data/clover/inventory.snapshot.json` (input: the Clover export JSON kept
-   outside the repo, or the live API with `CLOVER_API_TOKEN` + `CLOVER_MERCHANT_ID`).
-2. `src/config/clover-item-map.ts` (site slot → Clover item id, 175 rows) and `scripts/clover/photos.ts`
-   (sharp, 1200 + 400 px webp in `public/menu/clover/`).
-3. Overlay in `src/data/menu.ts`, then `src/lib/modifiers.ts` + `src/components/order/item-sheet.tsx`.
-Files to read first: this note, `src/lib/integration/providers/clover/catalog.ts`, `src/data/menu.ts`.
+1. Server side in `src/lib/integration/providers/clover/`: `config.server.ts` (env), `checkout.ts` (pure: price the
+   cart from the inventory, Hosted Checkout body, taxes, webhook signature), `api.server.ts` (fetch: live inventory,
+   tax rates, create checkout, payment → order, title/note, print), `orders.ts`, `menu.ts`, `webhook.ts`.
+2. `src/lib/orders/order-service.ts`: provider "clover" (pickup only), `paymentUrl` on the order; checkout page
+   redirects to it; `/orders/$orderId?paid=1` return page.
+3. Tests (`src/lib/integration/__tests__/clover.test.ts`), docs/integrations/clover.md.
+Files to read first: this note, `src/data/clover/overlay.ts`, `src/lib/orders/order-service.ts`.

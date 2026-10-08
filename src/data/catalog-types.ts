@@ -5,17 +5,22 @@ export interface ModifierChoice {
   labelEn: string;
   labelFr: string;
   /**
-   * Always `null` today: the published menu states the choices but never the
-   * surcharge, and the prototype must never invent a price.
+   * Dollars added by this option, from Clover. `null` only when no price is
+   * published for it (never invented).
    */
   priceDelta: number | null;
 }
 
 export interface ModifierGroup {
+  /** Clover option-group id for Clover items. */
   id: string;
   labelEn: string;
   labelFr: string;
   required: boolean;
+  /** Options to choose at least (Clover `minRequired`). Absent = 1 when required, else 0. */
+  min?: number;
+  /** Options allowed at most (Clover `maxAllowed`). Absent = 1. */
+  max?: number;
   choices: ModifierChoice[];
 }
 

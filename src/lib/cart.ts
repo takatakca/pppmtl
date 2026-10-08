@@ -1,7 +1,8 @@
 import type { MenuItem, OrderMode } from "@/data/menu";
+import { optionsTotal, selectionSummary, type LineSelections } from "@/lib/modifiers";
 
-/** Chosen option per modifier group: `{ [groupId]: choiceId }`. */
-export type LineSelections = Record<string, string>;
+/** Chosen option per modifier group: `{ [groupId]: choiceId }` (several options: comma-separated). */
+export type { LineSelections };
 
 export interface CartLine {
   lineId: string;
@@ -9,9 +10,12 @@ export interface CartLine {
   quantity: number;
   /** Free-text kitchen note. Empty string when the guest left it blank. */
   instructions: string;
-  /** Snapshot of the price at add time. null when the item has no published price. */
+  /**
+   * Price of one unit at add time: the item plus its chosen options (Clover prices). null when the item has no
+   * published price. The server prices the order again from Clover before payment.
+   */
   unitPrice: number | null;
-  /** Published option choices. Never carries a price: none is published. */
+  /** Chosen options. */
   selections: LineSelections;
 }
 
@@ -21,6 +25,12 @@ export interface CartTotals {
   /** How many lines could not be priced from the published menu. */
   unpricedLines: number;
   itemCount: number;
+}
+
+/** One unit of the item with these options, in dollars (null without a published price). */
+export function unitPriceFor(item: MenuItem, selections: LineSelections): number | null {
+  if (item.price === null) return null;
+  return Math.round((item.price + optionsTotal(item.modifierGroups ?? [], selections)) * 100) / 100;
 }
 
 export function newLine(
@@ -34,7 +44,7 @@ export function newLine(
     itemId: item.id,
     quantity,
     instructions,
-    unitPrice: item.price,
+    unitPrice: unitPriceFor(item, selections),
     selections,
   };
 }
@@ -42,17 +52,12 @@ export function newLine(
 /** Human-readable summary of a line's chosen options, in the active language. */
 export function selectionLabels(item: MenuItem | null, selections: LineSelections, fr: boolean) {
   if (!item?.modifierGroups) return [];
-  return item.modifierGroups.flatMap((group) => {
-    const choice = group.choices.find((c) => c.id === selections[group.id]);
-    if (!choice) return [];
-    return [`${fr ? group.labelFr : group.labelEn}: ${fr ? choice.labelFr : choice.labelEn}`];
-  });
+  return selectionSummary(item.modifierGroups, selections, fr);
 }
 
 /**
- * Totals are derived only from published prices. Tax, delivery, service fees
- * and tips are intentionally absent — none of them are modelled yet, and the
- * prototype must never show a number it cannot justify.
+ * Totals are derived only from published prices. Taxes are added on Clover's payment page; the site never shows
+ * a number it cannot justify.
  */
 export function cartTotals(lines: CartLine[]): CartTotals {
   let knownSubtotal = 0;

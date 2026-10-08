@@ -145,12 +145,16 @@ const ITEM_INDEX = new Map<string, ItemIndex>(
       names: haystack([i.nameEn, i.nameFr, i.nameEs ?? ""]),
       aliases: haystack([i.aliasesEn, i.aliasesFr, i.aliasesEs ?? []]),
       desc: haystack([i.descriptionEn, i.descriptionFr, i.descriptionEs ?? ""]),
+      // Only the choices that define the item (required groups): Clover's add-on groups (extra drink,
+      // suggested desserts…) are offered on almost every item and would make every search match everything.
       options: haystack(
-        (i.modifierGroups ?? []).flatMap((g) => [
-          g.labelEn,
-          g.labelFr,
-          ...g.choices.flatMap((c) => [c.labelEn, c.labelFr]),
-        ]),
+        (i.modifierGroups ?? [])
+          .filter((g) => g.required)
+          .flatMap((g) => [
+            g.labelEn,
+            g.labelFr,
+            ...g.choices.flatMap((c) => [c.labelEn, c.labelFr]),
+          ]),
       ),
     },
   ]),

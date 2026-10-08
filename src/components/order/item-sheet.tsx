@@ -5,10 +5,18 @@ import { usePPP } from "@/context/ppp-store";
 import { MenuImage } from "@/components/menu/menu-item-image";
 import type { LineSelections } from "@/lib/cart";
 import { menuRepository } from "@/lib/menu-repository";
+import {
+  checkSelections,
+  chosenIds,
+  defaultSelections,
+  groupRule,
+  optionsTotal,
+  toggleChoice,
+} from "@/lib/modifiers";
 
 /**
- * Mobile: full-height bottom sheet. Desktop: centred panel. No modifier group
- * is invented — options are only described in the item's published text.
+ * Mobile: full-height bottom sheet. Desktop: centred panel. The option groups are the item's real Clover
+ * modifier groups (required ones first, with Clover's minimum, maximum and option prices).
  */
 export function ItemSheet({
   item,
@@ -29,8 +37,8 @@ export function ItemSheet({
   useEffect(() => {
     setQty(1);
     setNotes("");
-    setSelections({});
-  }, [item?.id]);
+    setSelections(defaultSelections(item?.modifierGroups ?? []));
+  }, [item?.id, item?.modifierGroups]);
 
   useEffect(() => {
     if (!item) return undefined;
@@ -40,7 +48,9 @@ export function ItemSheet({
   }, [item, onClose]);
 
   const groups = useMemo(() => item?.modifierGroups ?? [], [item]);
-  const missing = groups.filter((g) => g.required && !selections[g.id]);
+  const missing = checkSelections(groups, selections).missing;
+  const unitPrice = item?.price != null ? item.price + optionsTotal(groups, selections) : null;
+  const unpricedOptions = groups.some((g) => g.choices.some((c) => c.priceDelta === null));
   const pairings = useMemo(
     () => (item ? menuRepository.getRelatedItems(item.id, locationId, 6) : []),
     [item, locationId],
@@ -115,21 +125,17 @@ export function ItemSheet({
                 <fieldset key={group.id}>
                   <legend className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
                     {lang === "fr" ? group.labelFr : group.labelEn}
-                    <span className="ml-2 text-primary">
-                      {group.required
-                        ? t("Required · choose 1", "Requis · choisissez 1")
-                        : t("Optional", "Optionnel")}
-                    </span>
+                    <span className="ml-2 text-primary">{groupRule(group, lang === "fr")}</span>
                   </legend>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {group.choices.map((choice) => {
-                      const active = selections[group.id] === choice.id;
+                      const active = chosenIds(selections, group.id).includes(choice.id);
                       return (
                         <button
                           key={choice.id}
                           type="button"
                           aria-pressed={active}
-                          onClick={() => setSelections((s) => ({ ...s, [group.id]: choice.id }))}
+                          onClick={() => setSelections((s) => toggleChoice(s, group, choice.id))}
                           className={`border px-3 py-2 text-[0.7rem] font-bold uppercase tracking-widest transition-colors focus-ppp ${
                             active
                               ? "border-primary bg-primary text-primary-foreground"
@@ -137,18 +143,25 @@ export function ItemSheet({
                           }`}
                         >
                           {lang === "fr" ? choice.labelFr : choice.labelEn}
+                          {choice.priceDelta !== null && choice.priceDelta > 0 && (
+                            <span className="ml-1.5 normal-case tracking-normal opacity-80">
+                              +${choice.priceDelta.toFixed(2)}
+                            </span>
+                          )}
                         </button>
                       );
                     })}
                   </div>
                 </fieldset>
               ))}
-              <p className="text-xs text-muted-foreground">
-                {t(
-                  "Option pricing is not published for this item, so no surcharge is shown or added.",
-                  "Le prix des options n'est pas publié pour cet item : aucun supplément n'est affiché ni ajouté.",
-                )}
-              </p>
+              {unpricedOptions && (
+                <p className="text-xs text-muted-foreground">
+                  {t(
+                    "Some option prices are not published, so no surcharge is shown or added for them.",
+                    "Certains prix d'options ne sont pas publiés : aucun supplément n'est affiché ni ajouté pour eux.",
+                  )}
+                </p>
+              )}
             </div>
           )}
 
@@ -261,7 +274,7 @@ export function ItemSheet({
                   `Choisissez ${missing[0]!.labelFr.toLowerCase()}`,
                 )
               : t("Add to order", "Ajouter à la commande")}
-            {missing.length === 0 && item.price !== null && ` · $${(item.price * qty).toFixed(2)}`}
+            {missing.length === 0 && unitPrice !== null && ` · $${(unitPrice * qty).toFixed(2)}`}
           </button>
         </div>
       </div>

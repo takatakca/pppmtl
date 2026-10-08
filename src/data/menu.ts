@@ -12,6 +12,7 @@ import { pppBusiness } from "@/config/business";
 import { externalPresence } from "@/config/external-presence";
 import { generatedCategories, generatedItems } from "@/data/catalog.generated";
 import { mostOrderedItemIds } from "@/data/collections.generated";
+import { withClover } from "@/data/clover/overlay";
 import type { ModifierChoice, ModifierGroup } from "@/data/catalog-types";
 
 export type { ModifierChoice, ModifierGroup };
@@ -61,11 +62,13 @@ export interface MenuItem {
   isAvailable: boolean;
   badges: Array<"popular" | "new" | "deal">;
   locationIds: string[];
-  /**
-   * Choice groups published by the restaurant. Price deltas are intentionally
-   * `null`: the published menu never states them, so the UI must not invent one.
-   */
+  /** Clover's option groups for this item (min / max and option prices from Clover). */
   modifierGroups?: ModifierGroup[];
+  /**
+   * The Clover inventory item behind this site slot (`src/config/clover-item-map.ts`); null when the slot has
+   * none, and then the item cannot be ordered online.
+   */
+  cloverItemId?: string | null;
 }
 
 export interface Offer {
@@ -125,27 +128,37 @@ export const categories: MenuCategory[] = generatedCategories.map((c) => ({ ...c
  */
 const popularSet = new Set(mostOrderedItemIds);
 
-export const menuItems: MenuItem[] = generatedItems.map((i) => ({
-  ...i,
-  compareAtPrice: i.compareAtPrice,
-  isAvailable: true,
-  badges: [
-    ...(popularSet.has(i.id) ? (["popular"] as const) : []),
-    ...(i.compareAtPrice ? (["deal"] as const) : []),
-  ] as MenuItem["badges"],
-  locationIds: [NDG],
-}));
+/**
+ * Every site item carries its Clover item's real price, options, photo and availability (`withClover`); the
+ * names, categories and placement stay the site's own.
+ */
+export const menuItems: MenuItem[] = generatedItems.map((generated) => {
+  const i = withClover(generated);
+  return {
+    ...i,
+    badges: [
+      ...(popularSet.has(i.id) ? (["popular"] as const) : []),
+      ...(i.compareAtPrice ? (["deal"] as const) : []),
+    ] as MenuItem["badges"],
+    locationIds: [NDG],
+  };
+});
+
+/** Offer cards show the real Clover price and photo of the item they promote. */
+function fromItem(itemId: string, fallbackImage: string) {
+  const item = menuItems.find((i) => i.id === itemId);
+  return { price: item?.price ?? null, image: item?.image ?? fallbackImage };
+}
 
 export const offers: Offer[] = [
   {
     id: "off-3mcx",
     titleEn: "3 pc chicken + fries + coleslaw + Pepsi",
     titleFr: "3 MCX poulet + frites + salade de chou + Pepsi",
-    descriptionEn: "20% off the published price on the 3-piece fried chicken combo.",
-    descriptionFr: "20 % de rabais sur le combo poulet frit 3 morceaux.",
-    image: foodChicken,
-    price: 14.39,
-    compareAtPrice: 17.99,
+    descriptionEn: "The 3-piece fried chicken combo: fries, sauce, coleslaw and a Pepsi.",
+    descriptionFr: "Le combo poulet frit 3 morceaux : frites, sauce, salade de chou et Pepsi.",
+    ...fromItem("3-mcx-frites-sauce-salade-de-chou-pepsi", foodChicken),
+    compareAtPrice: null,
     locationIds: [NDG],
     modes: ["pickup", "delivery"],
     startsAt: null,
@@ -155,11 +168,10 @@ export const offers: Offer[] = [
     id: "off-4mcx",
     titleEn: "4 pc chicken + fries + coleslaw + Pepsi",
     titleFr: "4 MCX poulet + frites + salade de chou + Pepsi",
-    descriptionEn: "20% off the published price on the 4-piece fried chicken combo.",
-    descriptionFr: "20 % de rabais sur le combo poulet frit 4 morceaux.",
-    image: foodChicken,
-    price: 17.27,
-    compareAtPrice: 21.59,
+    descriptionEn: "The 4-piece fried chicken combo: fries, sauce, coleslaw and a Pepsi.",
+    descriptionFr: "Le combo poulet frit 4 morceaux : frites, sauce, salade de chou et Pepsi.",
+    ...fromItem("4-mcx-frites-sauce-salade-de-chou-pepsi", foodChicken),
+    compareAtPrice: null,
     locationIds: [NDG],
     modes: ["pickup", "delivery"],
     startsAt: null,
@@ -171,8 +183,7 @@ export const offers: Offer[] = [
     titleFr: "Poutine classique",
     descriptionEn: "Fries, cheese curds and gravy — mini to large.",
     descriptionFr: "Frites, fromage en grains et sauce — mini à grande.",
-    image: foodPoutine,
-    price: 8.39,
+    ...fromItem("poutine-classique", foodPoutine),
     compareAtPrice: null,
     locationIds: [NDG],
     modes: ["pickup", "delivery"],
