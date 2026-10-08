@@ -7,64 +7,33 @@ import snapshotJson from "./inventory.snapshot.json";
 import { cloverPhotoIds } from "./photos.generated";
 import { cloverItemMap } from "@/config/clover-item-map";
 import type { GeneratedItem, ModifierGroup } from "@/data/catalog-types";
-import {
-  displayGroupName,
-  displayName,
-  groupNameEn,
-  type CloverInventory,
-  type CloverItem,
-} from "@/lib/integration/providers/clover/catalog";
+import type { CloverInventory, CloverItem } from "@/lib/integration/providers/clover/catalog";
+import { siteGroupsFor } from "@/lib/integration/providers/clover/site-groups";
 
 export const cloverSnapshot = snapshotJson as CloverInventory;
 
 const itemsById = new Map(cloverSnapshot.items.map((i) => [i.id, i]));
-const groupsById = new Map(cloverSnapshot.modifierGroups.map((g) => [g.id, g]));
 const slotBySite = new Map(cloverItemMap.map((s) => [s.site, s]));
 const photos = new Set(cloverPhotoIds);
 
+/** The Clover item id a site item is sold as, or undefined when the slot is not mapped. */
+export function cloverSlotFor(siteItemId: string): string | undefined {
+  return slotBySite.get(siteItemId)?.clover;
+}
+
 /** The Clover item behind a site item, or undefined when the slot is not mapped. */
 export function cloverItemForSite(siteItemId: string): CloverItem | undefined {
-  const slot = slotBySite.get(siteItemId);
-  return slot ? itemsById.get(slot.clover) : undefined;
+  const id = cloverSlotFor(siteItemId);
+  return id ? itemsById.get(id) : undefined;
 }
 
 export function cloverPhotoUrl(cloverItemId: string, size: 1200 | 400 = 1200): string | null {
   return photos.has(cloverItemId) ? `/menu/clover/${cloverItemId}-${size}.webp` : null;
 }
 
-const SUGGESTED = /sugg[ée]r/i;
-
-/**
- * Clover option groups as the site's modifier groups: required ones first, suggested add-ons last, Clover's order
- * otherwise. Options Clover marks unavailable are left out.
- */
+/** The item's Clover option groups, as the site shows them (see site-groups.ts). */
 export function siteModifierGroups(cloverItemId: string): ModifierGroup[] {
-  const item = itemsById.get(cloverItemId);
-  if (!item) return [];
-  const groups = item.modifierGroupIds.flatMap((id) => {
-    const g = groupsById.get(id);
-    if (!g) return [];
-    const choices = g.modifiers
-      .filter((m) => m.available)
-      .map((m) => ({
-        id: m.slug,
-        labelFr: displayName(m.name),
-        labelEn: displayName(m.name),
-        priceDelta: m.price / 100,
-      }));
-    if (!choices.length) return [];
-    const labelFr = displayGroupName(g.name);
-    const max = Math.min(g.max, choices.length);
-    const min = Math.min(g.min, max);
-    return [
-      { id: g.id, labelFr, labelEn: groupNameEn(labelFr), required: min > 0, min, max, choices },
-    ];
-  });
-  const rank = (g: ModifierGroup) => (g.required ? 0 : SUGGESTED.test(g.labelFr) ? 2 : 1);
-  return groups
-    .map((g, i) => ({ g, i }))
-    .sort((a, b) => rank(a.g) - rank(b.g) || a.i - b.i)
-    .map(({ g }) => g);
+  return siteGroupsFor(cloverSnapshot, cloverItemId);
 }
 
 /** The old copy promised the kitchen would price the extras; Clover prices them now. */

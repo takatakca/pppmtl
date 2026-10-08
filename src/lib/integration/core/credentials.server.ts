@@ -17,6 +17,18 @@ export const INTEGRATION_ENV_KEYS = [
   "CLOVER_API_KEY",
   "CLOVER_MERCHANT_ID",
   "CLOVER_WEBHOOK_SECRET",
+  /** Clover: "sandbox" or "production" (default). */
+  "CLOVER_ENV",
+  /** Clover REST API token (inventory read, orders read/write, payments read). Alias: CLOVER_API_KEY. */
+  "CLOVER_API_TOKEN",
+  /** Clover Ecommerce private key of a "Hosted Checkout" API token. */
+  "CLOVER_ECOMM_PRIVATE_KEY",
+  /** Optional JSON tax rates, e.g. [{"name":"TPS","rate":500000},{"name":"TVQ","rate":997500}]. */
+  "CLOVER_TAX_RATES",
+  /** "off" = do not print paid website orders on the Clover order printer. */
+  "CLOVER_PRINT_WEB_ORDERS",
+  /** Public address of this site for Clover's return links (default https://pppmtl.com). */
+  "PUBLIC_SITE_URL",
   "STRIPE_SECRET_KEY",
   "TWILIO_ACCOUNT_SID",
   "TWILIO_AUTH_TOKEN",

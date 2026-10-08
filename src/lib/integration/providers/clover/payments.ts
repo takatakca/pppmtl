@@ -1,29 +1,33 @@
 /**
  * Clover payment adapter. SERVER ONLY.
  *
- * PPP never touches card data: a payment intent is created provider-side and
- * only an opaque client secret crosses back. Disabled until credentials exist.
+ * PPP never touches card data. Payment happens on Clover's Hosted Checkout page: placeOrder returns its link
+ * (orders.ts) and Clover's webhook confirms the payment (webhook.ts). There is no payment intent to create here.
  */
 
 import type { PaymentAdapter } from "@/lib/integration/core/adapter";
-import { notConfigured } from "@/lib/integration/core/contracts";
-import { hasCredentials } from "@/lib/integration/core/credentials.server";
+import { cloverCheckoutConfigured } from "./config.server";
 
-const REASON_EN = "Online payment is not enabled; payment is confirmed with the restaurant.";
-const REASON_FR = "Le paiement en ligne n'est pas activé; le paiement se confirme au restaurant.";
+const REASON_EN = "Card payment happens on Clover's secure Hosted Checkout page.";
+const REASON_FR = "Le paiement par carte se fait sur la page sécurisée Hosted Checkout de Clover.";
 
-export function cloverPaymentsConfigured(): boolean {
-  return hasCredentials("CLOVER_API_KEY", "CLOVER_MERCHANT_ID");
+export function cloverPaymentsConfigured(locationId: string): boolean {
+  return cloverCheckoutConfigured(locationId);
 }
 
 export const cloverPaymentAdapter: PaymentAdapter = {
   provider: "clover",
-  status: () => ({
+  status: (locationId) => ({
     provider: "clover",
     capability: "payments",
-    available: cloverPaymentsConfigured(),
+    available: cloverPaymentsConfigured(locationId),
     reasonEn: REASON_EN,
     reasonFr: REASON_FR,
   }),
-  createPaymentIntent: async () => notConfigured(REASON_EN),
+  createPaymentIntent: async () => ({
+    ok: false,
+    code: "invalid_request",
+    message:
+      "Clover Hosted Checkout: the customer pays on Clover's page (placeOrder returns its link).",
+  }),
 };

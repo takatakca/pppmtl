@@ -19,6 +19,14 @@ export interface ProviderOrderRef {
   subtotal: number | null;
   tax: number | null;
   total: number | null;
+  /** Provider-hosted payment page the customer is sent to (Clover Hosted Checkout). */
+  paymentUrl?: string;
+}
+
+/** What the order service knows about the order being sent. */
+export interface ProviderOrderContext {
+  /** PPP order id (used in the provider's return links). */
+  orderId: string;
 }
 
 export interface ProviderStatusRef {
@@ -39,6 +47,7 @@ export interface ProviderOrderAdapter {
     draft: UniversalOrderDraft,
     providerLocationId: string,
     idempotencyKey: string,
+    context?: ProviderOrderContext,
   ): Promise<OrderResult<ProviderOrderRef>>;
   updateOrder(providerOrderId: string, patch: ProviderOrderPatch): Promise<OrderResult<true>>;
   cancelOrder(providerOrderId: string, reason: string): Promise<OrderResult<true>>;
