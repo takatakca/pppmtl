@@ -1,7 +1,7 @@
 /**
  * Clover Hosted Checkout webhook. SERVER ONLY.
  * URL to set in Clover (Settings → Ecommerce → Hosted Checkout → Webhook):
- *   https://pppmtl.com/api/public/webhooks/provider?provider=clover
+ *   https://pppmtl.com/api/public/webhooks/clover  (or /api/public/webhooks/provider?provider=clover)
  *
  * 1. `Clover-Signature: t=…,v1=…` is checked with CLOVER_WEBHOOK_SECRET (5-minute window, replays ignored).
  * 2. APPROVED: the PPP order (when this server holds it) becomes paid + confirmed.

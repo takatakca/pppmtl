@@ -95,8 +95,8 @@ Clover side.
    [docs](https://docs.clover.com/dev/docs/create-ecommerce-api-tokens)) Your login needs the permission
    *Access Authorizations → Initiate a Token Request*.
 2. **Hosted Checkout page** — Settings → *View all settings* → **Ecommerce** → **Hosted Checkout**:
-   - *Webhook URL*: `https://pppmtl.com/api/public/webhooks/provider?provider=clover` → **Generate** → copy the
-     **Signing secret** → `CLOVER_WEBHOOK_SECRET` → Save.
+   - *Webhook URL*: `https://pppmtl.com/api/public/webhooks/clover` → **Generate** → copy the **Signing secret** →
+     `CLOVER_WEBHOOK_SECRET` → Save. (`…/webhooks/provider?provider=clover` works too.)
    - *Redirect URLs*: **leave empty** (the dashboard values override the site's own return links).
    - Logo / colours: PPP's, as you like. Tips: off (pickup).
 3. **Taxes** — Settings → Taxes: TPS 5 % and TVQ 9.975 % must exist (Hosted Checkout only charges rates the merchant

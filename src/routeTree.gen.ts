@@ -41,6 +41,7 @@ import { Route as OrdersIndexRouteImport } from './routes/orders.index'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 import { Route as SupportIndexRouteImport } from './routes/support.index'
 import { Route as SupportOrderRouteImport } from './routes/support.order'
+import { Route as ApiPublicWebhooksCloverRouteImport } from './routes/api/public/webhooks/clover'
 import { Route as ApiPublicWebhooksProviderRouteImport } from './routes/api/public/webhooks/provider'
 
 const IndexRoute = IndexRouteImport.update({
@@ -203,6 +204,11 @@ const SupportOrderRoute = SupportOrderRouteImport.update({
   path: '/order',
   getParentRoute: () => SupportRoute,
 } as any)
+const ApiPublicWebhooksCloverRoute = ApiPublicWebhooksCloverRouteImport.update({
+  id: '/api/public/webhooks/clover',
+  path: '/api/public/webhooks/clover',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicWebhooksProviderRoute =
   ApiPublicWebhooksProviderRouteImport.update({
     id: '/api/public/webhooks/provider',
@@ -243,6 +249,7 @@ export interface FileRoutesByFullPath {
   '/locations/': typeof LocationsIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/support/': typeof SupportIndexRoute
+  '/api/public/webhooks/clover': typeof ApiPublicWebhooksCloverRoute
   '/api/public/webhooks/provider': typeof ApiPublicWebhooksProviderRoute
 }
 export interface FileRoutesByTo {
@@ -276,6 +283,7 @@ export interface FileRoutesByTo {
   '/locations': typeof LocationsIndexRoute
   '/orders': typeof OrdersIndexRoute
   '/support': typeof SupportIndexRoute
+  '/api/public/webhooks/clover': typeof ApiPublicWebhooksCloverRoute
   '/api/public/webhooks/provider': typeof ApiPublicWebhooksProviderRoute
 }
 export interface FileRoutesById {
@@ -312,6 +320,7 @@ export interface FileRoutesById {
   '/locations/': typeof LocationsIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/support/': typeof SupportIndexRoute
+  '/api/public/webhooks/clover': typeof ApiPublicWebhooksCloverRoute
   '/api/public/webhooks/provider': typeof ApiPublicWebhooksProviderRoute
 }
 export interface FileRouteTypes {
@@ -349,6 +358,7 @@ export interface FileRouteTypes {
     | '/locations/'
     | '/orders/'
     | '/support/'
+    | '/api/public/webhooks/clover'
     | '/api/public/webhooks/provider'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -382,6 +392,7 @@ export interface FileRouteTypes {
     | '/locations'
     | '/orders'
     | '/support'
+    | '/api/public/webhooks/clover'
     | '/api/public/webhooks/provider'
   id:
     | '__root__'
@@ -417,6 +428,7 @@ export interface FileRouteTypes {
     | '/locations/'
     | '/orders/'
     | '/support/'
+    | '/api/public/webhooks/clover'
     | '/api/public/webhooks/provider'
   fileRoutesById: FileRoutesById
 }
@@ -449,6 +461,7 @@ export interface RootRouteChildren {
   DevMenuAuditRoute: typeof DevMenuAuditRoute
   LocationsSlugRoute: typeof LocationsSlugRoute
   LocationsIndexRoute: typeof LocationsIndexRoute
+  ApiPublicWebhooksCloverRoute: typeof ApiPublicWebhooksCloverRoute
   ApiPublicWebhooksProviderRoute: typeof ApiPublicWebhooksProviderRoute
 }
 
@@ -678,6 +691,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SupportOrderRouteImport
       parentRoute: typeof SupportRoute
     }
+    '/api/public/webhooks/clover': {
+      id: '/api/public/webhooks/clover'
+      path: '/api/public/webhooks/clover'
+      fullPath: '/api/public/webhooks/clover'
+      preLoaderRoute: typeof ApiPublicWebhooksCloverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/webhooks/provider': {
       id: '/api/public/webhooks/provider'
       path: '/api/public/webhooks/provider'
@@ -743,6 +763,7 @@ const rootRouteChildren: RootRouteChildren = {
   DevMenuAuditRoute: DevMenuAuditRoute,
   LocationsSlugRoute: LocationsSlugRoute,
   LocationsIndexRoute: LocationsIndexRoute,
+  ApiPublicWebhooksCloverRoute: ApiPublicWebhooksCloverRoute,
   ApiPublicWebhooksProviderRoute: ApiPublicWebhooksProviderRoute,
 }
 export const routeTree = rootRouteImport
