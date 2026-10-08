@@ -39,10 +39,22 @@ Living note, updated as the work goes. Last update: 2026-10-08 (task 12 of the F
 4. **Pickup only** through Clover for now (no courier is wired for site orders).
 
 ## Status
-- [x] Research (above). Mapping analysis: all 175 site items map to a Clover item (163 same name, 12 near-name).
+- [x] Research (above). Mapping analysis: all 175 site items map to a Clover item (163 same name, 12 near-name,
+  e.g. Clover's "(P. FRITS)" staff suffix). 168 have one of the owner's photos; 7 keep the site's category photo.
+- [x] `src/lib/integration/providers/clover/catalog.ts`: pure normaliser (internal categories / hidden / variable
+  price left out, cents, option slugs, display names for groups and options).
 - [ ] Snapshot + map file + photos · [ ] item sheet modifiers · [ ] Clover provider (quote, Hosted Checkout,
   webhook, print) · [ ] tests · [ ] docs/integrations/clover.md (hosting, env vars, Clover clicks).
 
+## Important constraint
+The build targets Cloudflare Workers (Nitro, Lovable hosting): the in-memory order store is per isolate, so the
+Clover webhook must work without it (payment id → Clover order → title + note + one print). The return page must
+show "paid" even when the order is not in memory (`?paid=1`).
+
 ## Next step
-Generate `src/data/clover/inventory.snapshot.json`, `src/config/clover-item-map.ts` and the photos with
-`scripts/clover/` (see the script headers), then wire the overlay in `src/data/menu.ts`.
+1. `scripts/clover/snapshot.ts` → `src/data/clover/inventory.snapshot.json` (input: the Clover export JSON kept
+   outside the repo, or the live API with `CLOVER_API_TOKEN` + `CLOVER_MERCHANT_ID`).
+2. `src/config/clover-item-map.ts` (site slot → Clover item id, 175 rows) and `scripts/clover/photos.ts`
+   (sharp, 1200 + 400 px webp in `public/menu/clover/`).
+3. Overlay in `src/data/menu.ts`, then `src/lib/modifiers.ts` + `src/components/order/item-sheet.tsx`.
+Files to read first: this note, `src/lib/integration/providers/clover/catalog.ts`, `src/data/menu.ts`.
