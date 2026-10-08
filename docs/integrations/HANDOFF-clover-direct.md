@@ -49,18 +49,25 @@ Living note, updated as the work goes. Last update: 2026-10-08 (task 12 of the F
   availability, French description from Clover; site names/rails/placement unchanged. Offers read the real
   item price (their "20 % off" wording was removed: it was the Uber promo). 4 site typos fixed (ids unchanged).
 - [x] `src/lib/modifiers.ts` (min/max, multi-choice as "a,b", option prices) + item sheet + cart re-pricing.
-- [ ] Clover provider (quote, Hosted Checkout, webhook, print) · [ ] tests · [ ] docs/integrations/clover.md.
+- [x] Clover provider in `src/lib/integration/providers/clover/` (config, pure checkout logic, API calls, order
+  adapters, menu adapter, webhook) + order service (NDG → Clover, pickup only, `paymentUrl`) + checkout redirect +
+  return page `/orders/$orderId?paid=1`.
+- [x] Tests `src/lib/integration/__tests__/clover.test.ts` (18; full suite 79/79), lint 0 errors, `vite build` OK,
+  tsc clean except the pre-existing `src/routes/__root.tsx` error (on main too).
+- [x] Owner doc `docs/integrations/clover.md` (hosting, env vars, Clover clicks, how to swap a slot).
+- [ ] Visual check of the item sheet in a browser (dev server).
 
 ## Important constraint
 The build targets Cloudflare Workers (Nitro, Lovable hosting): the in-memory order store is per isolate, so the
-Clover webhook must work without it (payment id → Clover order → title + note + one print). The return page must
-show "paid" even when the order is not in memory (`?paid=1`).
+Clover webhook works without it (payment id → Clover order → title + note + one print). The return page shows
+"paid" even when the order is not in memory (`?paid=1`).
+
+## Open decision (owner)
+`CLOVER_API_TOKEN` (live menu, title + print): Clover documents dashboard API tokens for testing and OAuth tokens for
+production. If Clover refuses it, move the "title + print" step to Food Hub (it holds the merchant's OAuth token).
 
 ## Next step
-1. Server side in `src/lib/integration/providers/clover/`: `config.server.ts` (env), `checkout.ts` (pure: price the
-   cart from the inventory, Hosted Checkout body, taxes, webhook signature), `api.server.ts` (fetch: live inventory,
-   tax rates, create checkout, payment → order, title/note, print), `orders.ts`, `menu.ts`, `webhook.ts`.
-2. `src/lib/orders/order-service.ts`: provider "clover" (pickup only), `paymentUrl` on the order; checkout page
-   redirects to it; `/orders/$orderId?paid=1` return page.
-3. Tests (`src/lib/integration/__tests__/clover.test.ts`), docs/integrations/clover.md.
-Files to read first: this note, `src/data/clover/overlay.ts`, `src/lib/orders/order-service.ts`.
+Owner: section 5 of docs/integrations/clover.md (Ecommerce key, Hosted Checkout webhook, REST token), choose the host
+(section 4), set the variables, then one real test order + refund. Code: open the PR
+https://github.com/takatakca/pppmtl/compare/main...clover-direct?expand=1 (Lovable syncs main on merge).
+Files to read first: docs/integrations/clover.md, `src/lib/integration/providers/clover/webhook.ts`.
