@@ -3077,8 +3077,8 @@ export const generatedItems: GeneratedItem[] = [
   {
     id: "tacos-boeuf-viande-hache",
     categoryId: "cat-mexican",
-    nameEn: "Tacos Boeuf (Meat Hache)",
-    nameFr: "Tacos Boeuf (Viande Hache)",
+    nameEn: "Ground Beef Taco",
+    nameFr: "Tacos Bœuf (viande hachée)",
     descriptionEn:
       "Built with tacos Bœuf — 1 taco. Includes 1 taco with toppings of your choice. Sauce no included; extra sauce available. Extras are confirmed and priced by the kitchen.",
     descriptionFr:
@@ -3141,8 +3141,8 @@ export const generatedItems: GeneratedItem[] = [
   {
     id: "tacos-haricots-noir",
     categoryId: "cat-mexican",
-    nameEn: "Tacos Haricots Noir",
-    nameFr: "Tacos Haricots Noir",
+    nameEn: "Black Bean Taco",
+    nameFr: "Tacos Haricots Noirs",
     descriptionEn:
       "Built with tacos Black beans — 1 taco. Includes 1 taco with toppings of your choice. Sauce no included; extra sauce available. Extras are confirmed and priced by the kitchen.",
     descriptionFr:
@@ -3907,8 +3907,8 @@ export const generatedItems: GeneratedItem[] = [
   {
     id: "1-ail-de-poulet",
     categoryId: "cat-extras",
-    nameEn: "(1) Wings Of Chicken",
-    nameFr: "(1) AIL DE POULET",
+    nameEn: "(1) Chicken Wing",
+    nameFr: "(1) AILE DE POULET",
     descriptionEn:
       "Built with chicken wings glazed with a savory sauce, accompanied by crisp celery and carrot sticks.",
     descriptionFr:
@@ -3923,8 +3923,8 @@ export const generatedItems: GeneratedItem[] = [
   {
     id: "salade-de-choux",
     categoryId: "cat-extras",
-    nameEn: "ColeslawX",
-    nameFr: "SALADE DE CHOUX",
+    nameEn: "Coleslaw",
+    nameFr: "SALADE DE CHOU",
     descriptionEn:
       "Built with shredded cabbage salad with a light dressing, featuring crisp cabbage and carrots.",
     descriptionFr:

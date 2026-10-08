@@ -9,7 +9,11 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "clover:snapshot": "node --experimental-strip-types scripts/clover/snapshot.ts",
+    "clover:photos": "node --experimental-strip-types scripts/clover/photos.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
