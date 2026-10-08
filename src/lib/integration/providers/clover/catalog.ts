@@ -69,12 +69,14 @@ export function slugify(value: string): string {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
+    .replace(/[^ -~]/g, "") // "œ", "—", "’" are dropped, as in the site's ids ("quesadillas-buf")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 }
 
+/** The site's item id rule: the slug cut at 52 characters (a cut can leave a final "-", as the site's ids do). */
 export function siteSlug(name: string): string {
-  return slugify(name).slice(0, 52).replace(/-+$/, "");
+  return slugify(name).slice(0, 52);
 }
 
 type Raw = Record<string, unknown>;
@@ -227,13 +229,11 @@ export function displayGroupName(name: string): string {
     // Keep the qualifier when it is the only meaning left ("Choix (PITA/WRAP)" -> "Choix pita / wrap").
     s = without.split(" ").length >= 2 ? without : `${without} ${inner[1]!.toLowerCase()}`;
   }
-  s = s
-    .replace(/\bINCLUS\b/gi, "incluse")
-    .replace(/\s+/g, " ")
-    .trim();
-  s = s.replace(/\s*\/\s*/g, " / ");
-  const lowered = s === s.toUpperCase() ? s.charAt(0) + s.slice(1).toLowerCase() : s;
-  return lowered.charAt(0).toUpperCase() + lowered.slice(1);
+  s = s.replace(/\s+/g, " ").trim();
+  // ALL-CAPS names read as a sentence ("BOISSON EXTRA" -> "Boisson extra").
+  if (s === s.toUpperCase()) s = s.charAt(0) + s.slice(1).toLowerCase();
+  s = s.replace(/\binclus\b/gi, "incluse").replace(/\s*\/\s*/g, " / ");
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 /** English for the group names customers see most; anything else keeps its French name. */

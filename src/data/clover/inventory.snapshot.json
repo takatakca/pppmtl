@@ -3621,7 +3621,7 @@
     },
     {
      "id": null,
-     "slug": "bouteille-d-eau",
+     "slug": "bouteille-deau",
      "name": "Bouteille d’eau",
      "price": 0,
      "available": true
@@ -3714,7 +3714,7 @@
     },
     {
      "id": null,
-     "slug": "bouteille-d-eau",
+     "slug": "bouteille-deau",
      "name": "Bouteille d’eau",
      "price": 0,
      "available": true
@@ -3829,7 +3829,7 @@
     },
     {
      "id": null,
-     "slug": "bouteille-d-eau",
+     "slug": "bouteille-deau",
      "name": "Bouteille d’eau",
      "price": 0,
      "available": true
@@ -4503,7 +4503,7 @@
     },
     {
      "id": null,
-     "slug": "bouteille-d-eau",
+     "slug": "bouteille-deau",
      "name": "Bouteille d’eau",
      "price": 0,
      "available": true
@@ -4574,7 +4574,7 @@
     },
     {
      "id": null,
-     "slug": "bouteille-d-eau",
+     "slug": "bouteille-deau",
      "name": "Bouteille d’eau",
      "price": 0,
      "available": true
@@ -4817,7 +4817,7 @@
     },
     {
      "id": null,
-     "slug": "bouteille-d-eau",
+     "slug": "bouteille-deau",
      "name": "Bouteille d’eau",
      "price": 0,
      "available": true
@@ -4888,7 +4888,7 @@
     },
     {
      "id": null,
-     "slug": "bouteille-d-eau",
+     "slug": "bouteille-deau",
      "name": "Bouteille d’eau",
      "price": 0,
      "available": true
@@ -5304,7 +5304,7 @@
     },
     {
      "id": null,
-     "slug": "bouteille-d-eau",
+     "slug": "bouteille-deau",
      "name": "Bouteille d’eau",
      "price": 0,
      "available": true
@@ -5460,7 +5460,7 @@
     },
     {
      "id": null,
-     "slug": "bouteille-d-eau",
+     "slug": "bouteille-deau",
      "name": "Bouteille d’eau",
      "price": 0,
      "available": true
@@ -5531,7 +5531,7 @@
     },
     {
      "id": null,
-     "slug": "bouteille-d-eau",
+     "slug": "bouteille-deau",
      "name": "Bouteille d’eau",
      "price": 0,
      "available": true
@@ -7089,7 +7089,7 @@
     },
     {
      "id": null,
-     "slug": "poutine-classique-bouteille-d-eau",
+     "slug": "poutine-classique-bouteille-deau",
      "name": "Poutine classique + Bouteille d’eau",
      "price": 758,
      "available": true
@@ -7247,7 +7247,7 @@
     },
     {
      "id": null,
-     "slug": "rondelles-d-oignon",
+     "slug": "rondelles-doignon",
      "name": "Rondelles d’oignon",
      "price": 599,
      "available": true
@@ -8188,7 +8188,7 @@
    "modifiers": [
     {
      "id": null,
-     "slug": "extra-sauce-a-l-ail",
+     "slug": "extra-sauce-a-lail",
      "name": "Extra sauce à l’ail",
      "price": 167,
      "available": true
@@ -10462,7 +10462,7 @@
     },
     {
      "id": null,
-     "slug": "sauce-a-l-ail",
+     "slug": "sauce-a-lail",
      "name": "Sauce à l’Ail",
      "price": 0,
      "available": true
@@ -10584,7 +10584,7 @@
     },
     {
      "id": null,
-     "slug": "sauce-a-l-ail",
+     "slug": "sauce-a-lail",
      "name": "Sauce à l’ail",
      "price": 0,
      "available": true
@@ -10620,7 +10620,7 @@
     },
     {
      "id": null,
-     "slug": "sauce-a-l-ail",
+     "slug": "sauce-a-lail",
      "name": "Sauce à l’ail",
      "price": 0,
      "available": true
@@ -10656,7 +10656,7 @@
     },
     {
      "id": null,
-     "slug": "sauce-a-l-ail",
+     "slug": "sauce-a-lail",
      "name": "Sauce à l’ail",
      "price": 0,
      "available": true
@@ -10692,7 +10692,7 @@
     },
     {
      "id": null,
-     "slug": "sauce-a-l-ail",
+     "slug": "sauce-a-lail",
      "name": "Sauce à l’ail",
      "price": 0,
      "available": true
@@ -10728,7 +10728,7 @@
     },
     {
      "id": null,
-     "slug": "sauce-a-l-ail",
+     "slug": "sauce-a-lail",
      "name": "Sauce à l’ail",
      "price": 0,
      "available": true
@@ -10764,7 +10764,7 @@
     },
     {
      "id": null,
-     "slug": "sauce-a-l-ail",
+     "slug": "sauce-a-lail",
      "name": "Sauce à l’ail",
      "price": 0,
      "available": true
@@ -11235,7 +11235,7 @@
     },
     {
      "id": null,
-     "slug": "frites-bouteille-d-eau",
+     "slug": "frites-bouteille-deau",
      "name": "Frites + Bouteille d’eau",
      "price": 542,
      "available": true
