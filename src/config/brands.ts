@@ -566,17 +566,17 @@ export const BRANDS: Brand[] = [
     },
     hook: { en: ["Craving", "something fresh?"], fr: ["Envie de", "fraîcheur ?"] },
     description: {
-      fr: `Nutrition Shake prépare des repas légers et protéinés : salades au poulet, au shish taouk, grecque et César, assiettes et wraps végétariens, eau et boissons froides, ${KITCHENS_FR}.`,
-      en: `Nutrition Shake makes light, protein-rich meals: chicken, shish taouk, Greek and Caesar salads, vegetarian plates and wraps, water and cold drinks, ${KITCHENS_EN}.`,
+      fr: `Nutrition Shake prépare des repas légers et protéinés : salades au poulet, au steak, au gyros, César et maison, le duo de salades protéinées, un sous-marin végétarien, des tacos aux haricots noirs, de l’eau et des boissons froides, ${KITCHENS_FR}.`,
+      en: `Nutrition Shake makes light, protein-rich meals: chicken, steak, gyros, Caesar and house salads, the two protein salads deal, a vegetarian sub, black bean tacos, water and cold drinks, ${KITCHENS_EN}.`,
     },
     about: {
       fr: [
-        "Salade au poulet, au shish taouk, grecque, César ou maison : de quoi manger frais, au dîner comme au souper. Le duo de salades protéinées se partage à deux.",
-        "Pour un repas plus complet : l’assiette souvlaki poulet, l’assiette végétarienne ou le wrap végétarien, avec la salade de votre choix.",
+        "Salade au poulet, au steak, au gyros, César ou maison : de quoi manger frais, au dîner comme au souper. Le duo de salades protéinées se partage à deux.",
+        "Côté végétarien : le sous-marin végétarien et les tacos aux haricots noirs. Pour boire : de l’eau ou une boisson froide.",
       ],
       en: [
-        "Chicken, shish taouk, Greek, Caesar or house salad: fresh food for lunch or dinner. The two protein salads deal is made to share.",
-        "For a fuller meal: the chicken souvlaki plate, the vegetarian plate or the vegetarian wrap, with the salad you choose.",
+        "Chicken, steak, gyros, Caesar or house salad: fresh food for lunch or dinner. The two protein salads deal is made to share.",
+        "Vegetarian: the vegetarian sub and black bean tacos. To drink: water or a cold drink.",
       ],
     },
     menu: [
@@ -584,19 +584,19 @@ export const BRANDS: Brand[] = [
         title: { fr: "Salades protéinées", en: "Protein salads" },
         items: [
           "Q0RJH1DDQEEVY",
-          "9WJ119FVZ9CZG",
-          "3X7W15NDS9YK4",
+          "QE2Q885XFFT0A",
+          "NTAAMAH1JP1YR",
           "QHACT24KE119P",
           "WRYSANG402512",
           "KHQHQGJ4A8RH8",
         ],
       },
       {
-        title: { fr: "Assiettes, wraps et eau", en: "Plates, wraps and water" },
-        items: ["D74FME072WNFE", "TZJTHVQVKRHBR", "2XP0YDZVBPT94", "5187NBRCYT454"],
+        title: { fr: "Végétarien et boissons", en: "Vegetarian and drinks" },
+        items: ["Z2T5680QW33EA", "9VT50FXQ4RFA6", "5187NBRCYT454", "NPJQXA39K0QNA"],
       },
     ],
-    heroItems: ["Q0RJH1DDQEEVY", "D74FME072WNFE", "3X7W15NDS9YK4"],
+    heroItems: ["Q0RJH1DDQEEVY", "QE2Q885XFFT0A", "NTAAMAH1JP1YR"],
     kitchens: both(
       [
         {
@@ -638,17 +638,17 @@ export const BRANDS: Brand[] = [
     cuisine: { en: ["Ice cream shop", "Desserts"], fr: ["Crèmerie", "Desserts"] },
     hook: { en: ["Craving", "dessert?"], fr: ["Envie d’un", "dessert ?"] },
     description: {
-      fr: `Bin Molle & Bin Dure, c’est la crèmerie et le comptoir à desserts du quartier : slush glacée, gaufres, crêpes, cheesecakes et gâteaux, préparés ${KITCHENS_FR}.`,
-      en: `Bin Molle & Bin Dure is the neighbourhood ice cream and dessert counter: icy slush, waffles, crêpes, cheesecakes and cakes, made ${KITCHENS_EN}.`,
+      fr: `Bin Molle & Bin Dure, c’est le comptoir à desserts glacés du quartier : slush, gaufres, crêpes, cheesecakes Oreo et aux brisures de chocolat, et boissons gazeuses bien froides, préparés ${KITCHENS_FR}.`,
+      en: `Bin Molle & Bin Dure is the neighbourhood icy dessert counter: slush, waffles, crêpes, Oreo and chocolate chip cheesecakes, and ice-cold soft drinks, made ${KITCHENS_EN}.`,
     },
     about: {
       fr: [
         "Une slush bleue ou rouge, du petit au grand format, une gaufre ou une crêpe avec le coulis de votre choix : le dessert parfait après le souper.",
-        "Pour fêter : cheesecake Oreo, pistache, amaretto ou aux brisures de chocolat, gâteau Skor ou red velvet, à la pointe ou en gâteau complet. Et un root beer ou un cream soda bien froid.",
+        "Pour fêter : cheesecake Oreo ou aux brisures de chocolat, à la pointe ou en gâteau complet. Et un root beer, un cream soda ou une boisson gazeuse bien froide.",
       ],
       en: [
         "A blue or red slush, small to large, a waffle or a crêpe with the sauce you choose: the perfect dessert after dinner.",
-        "To celebrate: Oreo, pistachio, amaretto or chocolate chip cheesecake, Skor or red velvet cake, by the slice or whole. And an ice-cold root beer or cream soda.",
+        "To celebrate: Oreo or chocolate chip cheesecake, by the slice or whole. And an ice-cold root beer, cream soda or soft drink.",
       ],
     },
     menu: [
@@ -658,19 +658,18 @@ export const BRANDS: Brand[] = [
           "XBC44J0XGW846",
           "4RZHQEWZ5EZ8W",
           "FM3GRQBRXJT5M",
-          "BMVW3SX774K7G",
-          "E2D6NW8BY4ZNR",
+          "9BH4C37D32D98",
+          "XKXMJ1EQ0XT9T",
         ],
       },
       {
-        title: { fr: "Cheesecakes et gâteaux", en: "Cheesecakes and cakes" },
+        title: { fr: "Boissons froides", en: "Cold drinks" },
         items: [
-          "9BH4C37D32D98",
-          "6JV0JDXBMS79A",
-          "CN917JJCM514Y",
-          "XKXMJ1EQ0XT9T",
-          "9VT6C1M23DNAR",
-          "Z68DXWMMA7B6W",
+          "BMVW3SX774K7G",
+          "E2D6NW8BY4ZNR",
+          "SVDF5RFFFHAPY",
+          "96JJ7KK0059J6",
+          "6CE1CW5KW31MT",
         ],
       },
     ],
@@ -1046,39 +1045,34 @@ export const BRANDS: Brand[] = [
     },
     hook: { en: ["Craving", "fried chicken?"], fr: ["Envie de", "poulet frit ?"] },
     description: {
-      fr: "Po Poulet, c’est le poulet frit croustillant à Saint-Léonard : poulet frit en 3, 4, 9 ou 15 morceaux avec frites, salade de chou et sauce, ailes et croquettes, burgers au poulet et salade poulet, au 5839 rue Jean-Talon Est, à Montréal.",
-      en: "Po Poulet is crispy fried chicken in Saint-Léonard: 3, 4, 9 or 15 pieces with fries, coleslaw and gravy, wings and nuggets, chicken burgers and chicken salad, at 5839 Jean-Talon Street East, Montréal.",
+      fr: "Po Poulet, c’est le poulet frit croustillant à Saint-Léonard : poulet frit en 3, 4, 9 ou 15 morceaux avec frites, salade de chou et sauce, ailes et croquettes, et burgers au poulet, au 5839 rue Jean-Talon Est, à Montréal.",
+      en: "Po Poulet is crispy fried chicken in Saint-Léonard: 3, 4, 9 or 15 pieces with fries, coleslaw and gravy, wings and nuggets, and chicken burgers, at 5839 Jean-Talon Street East, Montréal.",
     },
     about: {
       fr: [
-        "Du repas solo de 3 morceaux au festin de 15 morceaux avec frites, sauces, salades de chou et Pepsi. Ailes ou croquettes : 10 morceaux avec frites, sauce et Pepsi.",
-        "Aussi : le burger poulet, les trios burgers poulet avec frites ou rondelles d’oignon, et la salade poulet.",
+        "Du repas solo de 3 morceaux au festin de 15 morceaux avec frites, sauces, salades de chou et Pepsi. Ailes ou croquettes : 6 ou 10 morceaux avec frites, sauce et Pepsi.",
+        "Aussi : le burger poulet et les trios burgers poulet avec frites ou rondelles d’oignon.",
       ],
       en: [
-        "From a 3-piece meal for one to a 15-piece feast with fries, gravy, coleslaw and Pepsi. Wings or nuggets: 10 pieces with fries, sauce and Pepsi.",
-        "Also: the chicken burger, chicken burger combos with fries or onion rings, and the chicken salad.",
+        "From a 3-piece meal for one to a 15-piece feast with fries, gravy, coleslaw and Pepsi. Wings or nuggets: 6 or 10 pieces with fries, sauce and Pepsi.",
+        "Also: the chicken burger and chicken burger combos with fries or onion rings.",
       ],
     },
     menu: [
       {
-        title: { fr: "Poulet frit", en: "Fried chicken" },
+        title: { fr: "Poulet frit, ailes et croquettes", en: "Fried chicken, wings and nuggets" },
         items: [
           "1Z3Q6Z3XD36J8",
           "5632F0AR37HG4",
           "JE8906EWHC53T",
           "J7ANNVEQHJDKE",
+          "PQTJ2AABECNZG",
           "9M2JQR3HE1VD4",
         ],
       },
       {
-        title: { fr: "Burgers et salades", en: "Burgers and salads" },
-        items: [
-          "HT19ENNG0E2QA",
-          "ZMJFXFG7DZZJ4",
-          "1FWV6D7D22ZA8",
-          "Q0RJH1DDQEEVY",
-          "YR956YC5NHQQG",
-        ],
+        title: { fr: "Burgers et à-côté", en: "Burgers and side" },
+        items: ["HT19ENNG0E2QA", "ZMJFXFG7DZZJ4", "1FWV6D7D22ZA8", "YR956YC5NHQQG"],
       },
     ],
     heroItems: ["1Z3Q6Z3XD36J8", "HT19ENNG0E2QA", "J7ANNVEQHJDKE"],
@@ -1188,17 +1182,17 @@ export const BRANDS: Brand[] = [
     },
     hook: { en: ["Craving", "empanadas?"], fr: ["Envie", "d’empanadas ?"] },
     description: {
-      fr: `Café Bolon propose des bouchées d’inspiration latino-américaine : empanadas, quesadillas, nachos et burritos au bœuf, au steak ou aux haricots noirs, poutine et sous-marin tacos, et des crêpes et gaufres pour le dessert, ${KITCHENS_FR}.`,
-      en: `Café Bolon offers Latin American-inspired bites: empanadas, quesadillas, nachos and burritos with beef, steak or black beans, taco poutine and taco sub, and crêpes and waffles for dessert, ${KITCHENS_EN}.`,
+      fr: `Café Bolon propose des bouchées d’inspiration latino-américaine : empanadas, quesadillas, nachos, burritos et tacos au bœuf, au steak ou aux haricots noirs, pita et poutine tacos, ${KITCHENS_FR}.`,
+      en: `Café Bolon offers Latin American-inspired bites: empanadas, quesadillas, nachos, burritos and tacos with beef, steak or black beans, taco pita and taco poutine, ${KITCHENS_EN}.`,
     },
     about: {
       fr: [
-        "Pour grignoter : empanadas, nachos au steak ou aux haricots noirs, quesadillas au bœuf ou aux haricots noirs. Pour un repas : burrito aux haricots noirs, assiette de viande à tacos, sous-marin ou poutine tacos.",
-        "Pour le dessert : une crêpe ou une gaufre avec le coulis de votre choix.",
+        "Pour grignoter : empanadas, nachos au steak ou aux haricots noirs, quesadillas au bœuf ou aux haricots noirs, tacos au steak.",
+        "Pour un repas : burrito aux haricots noirs, assiette ou pita de viande à tacos, sous-marin ou poutine tacos.",
       ],
       en: [
-        "To snack: empanadas, steak or black bean nachos, beef or black bean quesadillas. For a meal: black bean burrito, taco meat plate, taco sub or taco poutine.",
-        "For dessert: a crêpe or a waffle with the sauce you choose.",
+        "To snack: empanadas, steak or black bean nachos, beef or black bean quesadillas, steak tacos.",
+        "For a meal: black bean burrito, taco meat plate or pita, taco sub or taco poutine.",
       ],
     },
     menu: [
@@ -1210,17 +1204,17 @@ export const BRANDS: Brand[] = [
           "PSV66A91RNA7E",
           "XN2YG06BHX63W",
           "TQ3WPBPYVFH20",
-          "CSH40D9HQ784J",
+          "CC2JG7EYN9QTG",
         ],
       },
       {
-        title: { fr: "Repas tacos et desserts", en: "Taco meals and desserts" },
+        title: { fr: "Repas tacos", en: "Taco meals" },
         items: [
+          "CSH40D9HQ784J",
           "XTQBFGSREN6WP",
+          "NN9J8JNZM6F6P",
           "9CJ0N85E1WPNY",
           "BGMKG4QVXZXV2",
-          "FM3GRQBRXJT5M",
-          "4RZHQEWZ5EZ8W",
         ],
       },
     ],
