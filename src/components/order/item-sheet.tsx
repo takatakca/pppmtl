@@ -291,7 +291,7 @@ export function ItemSheet({
                     `Choisissez ${missing[0]!.labelFr.toLowerCase()}`,
                   )
                 : t("Add to order", "Ajouter à la commande")}
-              {missing.length === 0 && unitPrice !== null && ` · ${(unitPrice * qty).toFixed(2)}`}
+              {missing.length === 0 && unitPrice !== null && ` · $${(unitPrice * qty).toFixed(2)}`}
             </button>
           </div>
         )}

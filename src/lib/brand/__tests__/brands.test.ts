@@ -13,6 +13,8 @@ import {
 } from "@/config/brands";
 import { cloverPhotoIds } from "@/data/clover/photos.generated";
 import {
+  brandExtras,
+  brandSeo,
   brandsInKitchen,
   factualAbout,
   itemForClover,
@@ -70,6 +72,43 @@ describe("brand registry", () => {
     expect(listKitchens(popoulet)).toEqual(["st-leonard"]);
     expect(defaultKitchen(popoulet, "ndg")).toBe("st-leonard");
     expect(defaultKitchen(BRANDS.find((b) => b.id === "ppp")!)).toBe("ndg");
+  });
+});
+
+describe("fast food, late hours, dishes not in Clover yet", () => {
+  it("never claims 24-hour opening anywhere", () => {
+    const never = /24\s*h\b|24\s*\/\s*7|24-7|24 heures|24 hours|jour et nuit|day and night/i;
+    for (const b of BRANDS) {
+      const text = [
+        JSON.stringify(b),
+        llmsTxt(b),
+        JSON.stringify(brandSeo(b)),
+        JSON.stringify(brandJsonLd(b)),
+      ].join(" ");
+      expect(never.test(text), b.id).toBe(false);
+    }
+    expect(never.test(hubLlmsTxt())).toBe(false);
+  });
+
+  it("puts the money words in every franchise title and description", () => {
+    for (const b of franchise) {
+      const seo = brandSeo(b);
+      expect(seo.title, b.id).toContain("fast food");
+      expect(seo.description, b.id).toMatch(/livraison/i);
+      expect(seo.description, b.id).toMatch(/ouvert/i);
+    }
+  });
+
+  it("shows OOEUF's breakfast and Nutrition Shake's drinks with real prices, in llms.txt and schema.org", () => {
+    for (const id of ["ooeuf", "nutrishake"]) {
+      const b = BRANDS.find((x) => x.id === id)!;
+      const extras = brandExtras(b);
+      expect(extras.length, id).toBeGreaterThan(4);
+      for (const x of extras)
+        for (const size of x.sizes) expect(size.price, x.id).toBeGreaterThan(0);
+      expect(llmsTxt(b)).toContain(extras[0]!.nameFr);
+      expect(JSON.stringify(brandJsonLd(b))).toContain(extras[0]!.nameFr);
+    }
   });
 });
 

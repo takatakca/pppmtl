@@ -3,6 +3,7 @@ import { FranchiseShell } from "@/components/franchise/franchise-shell";
 import { BrandStorePage } from "@/components/franchise/brand-store";
 import { BRANDS, brandOrigin, type Brand } from "@/config/brands";
 import { brandJsonLd } from "@/lib/brand/schema";
+import { brandSeo } from "@/lib/brand/facts";
 import { currentOrigin } from "@/lib/brand/current";
 
 function findBrand(id: string): Brand | undefined {
@@ -20,14 +21,14 @@ export const Route = createFileRoute("/marques/$brandId")({
   head: ({ params }) => {
     const brand = findBrand(params.brandId);
     if (!brand) return {};
-    const title = `${brand.name} | ${brand.cuisine.fr.join(", ")} · Montréal`;
+    const { title, description } = brandSeo(brand);
     const canonical = `${brandOrigin(brand)}/`;
     return {
       meta: [
         { title },
-        { name: "description", content: brand.description.fr },
+        { name: "description", content: description },
         { property: "og:title", content: title },
-        { property: "og:description", content: brand.description.fr },
+        { property: "og:description", content: description },
         { property: "og:url", content: canonical },
       ],
       links: [{ rel: "canonical", href: canonical }],

@@ -18,6 +18,7 @@ import { htmlLangFor } from "../i18n/types";
 import { BrandProvider } from "../context/brand";
 import { currentBrand, currentBrandId, currentIsPreview } from "../lib/brand/current";
 import { brandMarkDataUrl } from "../components/brand/brand-mark";
+import { brandSeo } from "../lib/brand/facts";
 import type { Brand, BrandId } from "../config/brands";
 
 function NotFoundComponent() {
@@ -91,17 +92,17 @@ function brandCss(brand: Brand): string {
 
 /** Head of a franchise brand (PPP keeps its own head, pppHead below). */
 function franchiseHead(brand: Brand, preview: boolean) {
-  const title = `${brand.name} | ${brand.cuisine.fr.join(", ")} · Montréal`;
+  const { title, description } = brandSeo(brand);
   return {
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title },
-      { name: "description", content: brand.description.fr },
+      { name: "description", content: description },
       { name: "author", content: brand.name },
       { property: "og:site_name", content: brand.name },
       { property: "og:title", content: title },
-      { property: "og:description", content: brand.description.fr },
+      { property: "og:description", content: description },
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "fr_CA" },
       { name: "twitter:card", content: "summary_large_image" },

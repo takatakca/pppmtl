@@ -74,10 +74,29 @@ export interface BrandText {
   fr: string;
 }
 
+/**
+ * A dish the brand sells that is not in Clover yet (so it cannot go in the site's cart). Shown with its real menu
+ * price and "call us to order" until it is added to Clover
+ * (private/menu/CLOVER_ADD_ITEMS.csv is the import file for the owner).
+ */
+export interface ExtraItem {
+  id: string;
+  nameFr: string;
+  nameEn: string;
+  /** One price, or one per size (e.g. petit / grand). CAD, before taxes. */
+  sizes: Array<{ labelFr: string; labelEn: string; price: number }>;
+  /** Category to create in Clover. */
+  cloverCategory: string;
+  /** Where the name and price come from. */
+  source: string;
+}
+
 export interface BrandRail {
   title: BrandText;
   /** Clover item ids, in display order. */
   items: string[];
+  /** Dishes not in Clover yet (shown after the Clover ones, never in the cart). */
+  extras?: ExtraItem[];
 }
 
 export interface Brand {
@@ -94,6 +113,8 @@ export interface Brand {
   accent: string;
   accent2: string;
   cuisine: { en: string[]; fr: string[] };
+  /** Search words for its food (titles, meta, llms.txt, schema keywords), e.g. "shawarma et shish taouk". */
+  seoDish: BrandText;
   /** Home-page headline after the name, e.g. ["Craving a", "pita?"]. */
   hook: { en: [string, string]; fr: [string, string] };
   description: BrandText;
@@ -177,6 +198,7 @@ export const BRANDS: Brand[] = [
     accent: "",
     accent2: "",
     cuisine: { en: ["Pizza", "Rotisserie chicken", "Poutine"], fr: ["Pizza", "Poulet", "Poutine"] },
+    seoDish: { fr: "pizza, poulet et poutine", en: "pizza, chicken and poutine" },
     hook: { en: ["Craving", "PPP?"], fr: ["Envie de", "PPP?"] },
     description: {
       en: "Chicken, pizza and poutine from our NDG kitchen, pickup or delivery.",
@@ -214,6 +236,7 @@ export const BRANDS: Brand[] = [
       en: ["Snack bar", "Burgers", "Hot dogs", "Poutine"],
       fr: ["Casse-croûte", "Burgers", "Hot-dogs", "Poutine"],
     },
+    seoDish: { fr: "burgers, hot-dogs et poutine", en: "burgers, hot dogs and poutine" },
     hook: { en: ["Craving a", "Big Matt?"], fr: ["Envie d’un", "Big Matt ?"] },
     description: {
       fr: `OOEUF, c’est le casse-croûte de quartier : burgers, hot-dogs Michigan, poutines et rondelles d’oignon, préparés ${KITCHENS_FR}.`,
@@ -250,6 +273,105 @@ export const BRANDS: Brand[] = [
           "7BF0CQ2WDEY2R",
           "0JWAY1VMJ2M2J",
           "RT6HGTMYT1F6E",
+        ],
+      },
+      {
+        title: { fr: "Déjeuners", en: "Breakfast" },
+        items: [],
+        extras: [
+          {
+            id: "ooeuf-bagel-oeuf-fromage",
+            nameFr: "Bagel matin œuf et fromage",
+            nameEn: "Breakfast bagel, egg and cheese",
+            sizes: [{ labelFr: "", labelEn: "", price: 3.99 }],
+            cloverCategory: "Déjeuner OOEUF",
+            source:
+              "ancien menu en ligne O'Œuf (boutique WooCommerce sur bolon.ca), lu le 2026-10-09",
+          },
+          {
+            id: "ooeuf-bagel-bacon-oeuf",
+            nameFr: "Bagel matin bacon et œuf",
+            nameEn: "Breakfast bagel, bacon and egg",
+            sizes: [{ labelFr: "", labelEn: "", price: 6 }],
+            cloverCategory: "Déjeuner OOEUF",
+            source:
+              "ancien menu en ligne O'Œuf (boutique WooCommerce sur bolon.ca), lu le 2026-10-09",
+          },
+          {
+            id: "ooeuf-croissant-jambon-fromage",
+            nameFr: "Croissant jambon et fromage",
+            nameEn: "Ham and cheese croissant",
+            sizes: [{ labelFr: "", labelEn: "", price: 7.5 }],
+            cloverCategory: "Déjeuner OOEUF",
+            source:
+              "ancien menu en ligne O'Œuf (boutique WooCommerce sur bolon.ca), lu le 2026-10-09",
+          },
+          {
+            id: "ooeuf-muffin-saucisse-oeuf",
+            nameFr: "Muffin anglais saucisse et œuf",
+            nameEn: "English muffin, sausage and egg",
+            sizes: [{ labelFr: "", labelEn: "", price: 4.5 }],
+            cloverCategory: "Déjeuner OOEUF",
+            source:
+              "ancien menu en ligne O'Œuf (boutique WooCommerce sur bolon.ca), lu le 2026-10-09",
+          },
+          {
+            id: "ooeuf-wrap-bacon-oeuf",
+            nameFr: "Wrap déjeuner bacon et œuf",
+            nameEn: "Breakfast wrap, bacon and egg",
+            sizes: [{ labelFr: "", labelEn: "", price: 6 }],
+            cloverCategory: "Déjeuner OOEUF",
+            source:
+              "ancien menu en ligne O'Œuf (boutique WooCommerce sur bolon.ca), lu le 2026-10-09",
+          },
+          {
+            id: "ooeuf-pain-dore",
+            nameFr: "Pain doré nature (3 tranches)",
+            nameEn: "French toast (3 slices)",
+            sizes: [{ labelFr: "", labelEn: "", price: 13.99 }],
+            cloverCategory: "Déjeuner OOEUF",
+            source:
+              "ancien menu en ligne O'Œuf (boutique WooCommerce sur bolon.ca), lu le 2026-10-09",
+          },
+          {
+            id: "ooeuf-poutine-dejeuner",
+            nameFr: "Poutine déjeuner",
+            nameEn: "Breakfast poutine",
+            sizes: [{ labelFr: "", labelEn: "", price: 4.5 }],
+            cloverCategory: "Déjeuner OOEUF",
+            source:
+              "ancien menu en ligne O'Œuf (boutique WooCommerce sur bolon.ca), lu le 2026-10-09",
+          },
+          {
+            id: "ooeuf-patates-maison",
+            nameFr: "Patates maison",
+            nameEn: "Home fries",
+            sizes: [{ labelFr: "", labelEn: "", price: 3.99 }],
+            cloverCategory: "Déjeuner OOEUF",
+            source:
+              "ancien menu en ligne O'Œuf (boutique WooCommerce sur bolon.ca), lu le 2026-10-09",
+          },
+          {
+            id: "ooeuf-cafe-maison",
+            nameFr: "Café maison",
+            nameEn: "House coffee",
+            sizes: [
+              { labelFr: "petit", labelEn: "small", price: 2.5 },
+              { labelFr: "grand", labelEn: "large", price: 3.25 },
+            ],
+            cloverCategory: "Déjeuner OOEUF",
+            source:
+              "ancien menu en ligne O'Œuf (boutique WooCommerce sur bolon.ca), lu le 2026-10-09",
+          },
+          {
+            id: "ooeuf-jus-orange",
+            nameFr: "Jus d’orange (petit)",
+            nameEn: "Orange juice (small)",
+            sizes: [{ labelFr: "", labelEn: "", price: 3 }],
+            cloverCategory: "Déjeuner OOEUF",
+            source:
+              "ancien menu en ligne O'Œuf (boutique WooCommerce sur bolon.ca), lu le 2026-10-09",
+          },
         ],
       },
     ],
@@ -293,6 +415,7 @@ export const BRANDS: Brand[] = [
     accent: "#ffd166",
     accent2: "#f4a259",
     cuisine: { en: ["Snack bar", "Combos", "Poutine"], fr: ["Casse-croûte", "Trios", "Poutine"] },
+    seoDish: { fr: "trios burger, hot-dog et poutine", en: "burger, hot dog and poutine combos" },
     hook: { en: ["Craving a", "combo?"], fr: ["Envie d’un", "bon trio ?"] },
     description: {
       fr: `Déjeuner Montréal sert les trios du casse-croûte : hamburgers, cheeseburgers, hot-dogs vapeur ou Michigan, frites et poutines garnies, préparés ${KITCHENS_FR}.`,
@@ -349,6 +472,7 @@ export const BRANDS: Brand[] = [
       en: ["Lebanese", "Shawarma", "Shish taouk"],
       fr: ["Libanais", "Shawarma", "Shish taouk"],
     },
+    seoDish: { fr: "shawarma et shish taouk", en: "shawarma and shish taouk" },
     hook: { en: ["Craving a", "shawarma?"], fr: ["Envie d’un", "shawarma ?"] },
     description: {
       fr: `Pi Pita sert la cuisine de rue libanaise : pitas et wraps shawarma, shish taouk et mixte, assiettes libanaises avec salade au choix, salades shish taouk et shawarma, et des options végétariennes, ${KITCHENS_FR}.`,
@@ -419,6 +543,7 @@ export const BRANDS: Brand[] = [
       en: ["Lebanese", "Family meals", "Shish taouk"],
       fr: ["Libanais", "Repas familiaux", "Shish taouk"],
     },
+    seoDish: { fr: "shish taouk et shawarma libanais", en: "Lebanese shish taouk and shawarma" },
     hook: { en: ["Lebanese", "to share?"], fr: ["Libanais", "à partager ?"] },
     description: {
       fr: `Pita Libanais, ce sont les repas libanais à partager : quatre assiettes ou quatre pitas pour la famille, trios pour deux, et le shish taouk et le shawarma en sous-marin, en poutine ou sur pizza, ${KITCHENS_FR}.`,
@@ -488,6 +613,7 @@ export const BRANDS: Brand[] = [
     accent: "#8cc8ff",
     accent2: "#ffffff",
     cuisine: { en: ["Greek", "Gyros", "Souvlaki"], fr: ["Grec", "Gyros", "Souvlaki"] },
+    seoDish: { fr: "gyros et souvlaki", en: "gyros and souvlaki" },
     hook: { en: ["Craving", "gyros?"], fr: ["Envie d’un", "gyros ?"] },
     description: {
       fr: `Mythos & Go sert la cuisine de rue grecque : pitas et assiettes gyros et souvlaki, brochettes, salade grecque, poutine, sous-marin et pizza gyros, ${KITCHENS_FR}.`,
@@ -564,6 +690,7 @@ export const BRANDS: Brand[] = [
       en: ["Healthy", "Protein salads", "Vegetarian"],
       fr: ["Santé", "Salades protéinées", "Végétarien"],
     },
+    seoDish: { fr: "salades protéinées et shakes", en: "protein salads and shakes" },
     hook: { en: ["Craving", "something fresh?"], fr: ["Envie de", "fraîcheur ?"] },
     description: {
       fr: `Nutrition Shake prépare des repas légers et protéinés : salades au poulet, au steak, au gyros, César et maison, le duo de salades protéinées, un sous-marin végétarien, des tacos aux haricots noirs, de l’eau et des boissons froides, ${KITCHENS_FR}.`,
@@ -594,6 +721,84 @@ export const BRANDS: Brand[] = [
       {
         title: { fr: "Végétarien et boissons", en: "Vegetarian and drinks" },
         items: ["Z2T5680QW33EA", "9VT50FXQ4RFA6", "5187NBRCYT454", "NPJQXA39K0QNA"],
+      },
+      {
+        title: { fr: "Frappés et rafraîchissements", en: "Frappés and refreshers" },
+        items: [],
+        extras: [
+          {
+            id: "nutri-frappe-attack",
+            nameFr: "Frappé Attack",
+            nameEn: "Frappé Attack",
+            sizes: [
+              { labelFr: "petit", labelEn: "small", price: 3.99 },
+              { labelFr: "grand", labelEn: "large", price: 4.99 },
+            ],
+            cloverCategory: "Shakes Nutrition Shake",
+            source:
+              "ancien menu en ligne O'Œuf (boutique WooCommerce sur bolon.ca), lu le 2026-10-09",
+          },
+          {
+            id: "nutri-fraise",
+            nameFr: "Rafraîchissement fraise",
+            nameEn: "Strawberry refresher",
+            sizes: [
+              { labelFr: "petit", labelEn: "small", price: 3.99 },
+              { labelFr: "grand", labelEn: "large", price: 4.5 },
+            ],
+            cloverCategory: "Shakes Nutrition Shake",
+            source:
+              "ancien menu en ligne O'Œuf (boutique WooCommerce sur bolon.ca), lu le 2026-10-09",
+          },
+          {
+            id: "nutri-mure",
+            nameFr: "Rafraîchissement mûre",
+            nameEn: "Blackberry refresher",
+            sizes: [
+              { labelFr: "petit", labelEn: "small", price: 3.99 },
+              { labelFr: "grand", labelEn: "large", price: 3.99 },
+            ],
+            cloverCategory: "Shakes Nutrition Shake",
+            source:
+              "ancien menu en ligne O'Œuf (boutique WooCommerce sur bolon.ca), lu le 2026-10-09",
+          },
+          {
+            id: "nutri-orange",
+            nameFr: "Rafraîchissement orange",
+            nameEn: "Orange refresher",
+            sizes: [
+              { labelFr: "petit", labelEn: "small", price: 3.99 },
+              { labelFr: "grand", labelEn: "large", price: 4.5 },
+            ],
+            cloverCategory: "Shakes Nutrition Shake",
+            source:
+              "ancien menu en ligne O'Œuf (boutique WooCommerce sur bolon.ca), lu le 2026-10-09",
+          },
+          {
+            id: "nutri-limonade",
+            nameFr: "Limonade",
+            nameEn: "Lemonade",
+            sizes: [
+              { labelFr: "petit", labelEn: "small", price: 3.5 },
+              { labelFr: "grand", labelEn: "large", price: 4 },
+            ],
+            cloverCategory: "Shakes Nutrition Shake",
+            source:
+              "ancien menu en ligne O'Œuf (boutique WooCommerce sur bolon.ca), lu le 2026-10-09",
+          },
+          {
+            id: "nutri-chocolat-froid",
+            nameFr: "Chocolat froid",
+            nameEn: "Iced chocolate",
+            sizes: [
+              { labelFr: "petit", labelEn: "small", price: 3.75 },
+              { labelFr: "grand", labelEn: "large", price: 4.25 },
+            ],
+            cloverCategory: "Shakes Nutrition Shake",
+            source:
+              "ancien menu en ligne O'Œuf (boutique WooCommerce sur bolon.ca), lu le 2026-10-09",
+          },
+        ],
       },
     ],
     heroItems: ["Q0RJH1DDQEEVY", "QE2Q885XFFT0A", "NTAAMAH1JP1YR"],
@@ -636,6 +841,7 @@ export const BRANDS: Brand[] = [
     accent: "#ffb3d4",
     accent2: "#9fe3ff",
     cuisine: { en: ["Ice cream shop", "Desserts"], fr: ["Crèmerie", "Desserts"] },
+    seoDish: { fr: "desserts glacés, gaufres et slush", en: "icy desserts, waffles and slush" },
     hook: { en: ["Craving", "dessert?"], fr: ["Envie d’un", "dessert ?"] },
     description: {
       fr: `Bin Molle & Bin Dure, c’est le comptoir à desserts glacés du quartier : slush, gaufres, crêpes, cheesecakes Oreo et aux brisures de chocolat, et boissons gazeuses bien froides, préparés ${KITCHENS_FR}.`,
@@ -708,6 +914,7 @@ export const BRANDS: Brand[] = [
     accent: "#ffa8d8",
     accent2: "#ffd38a",
     cuisine: { en: ["Crêpes", "Waffles", "Desserts"], fr: ["Crêpes", "Gaufres", "Desserts"] },
+    seoDish: { fr: "crêpes et gaufres", en: "crêpes and waffles" },
     hook: { en: ["Craving a", "crêpe?"], fr: ["Envie d’une", "crêpe ?"] },
     description: {
       fr: `OCRÊPE prépare des crêpes et des gaufres avec le coulis de votre choix, des gâteaux Nutella, Ferrero Rocher et Oréo, ${KITCHENS_FR}.`,
@@ -771,6 +978,7 @@ export const BRANDS: Brand[] = [
       en: ["Pastry", "Cakes", "Cheesecakes"],
       fr: ["Pâtisserie", "Gâteaux", "Cheesecakes"],
     },
+    seoDish: { fr: "gâteaux et cheesecakes", en: "cakes and cheesecakes" },
     hook: { en: ["Craving", "cake?"], fr: ["Envie d’un", "gâteau ?"] },
     description: {
       fr: `Gâteau Montréal (La Viennoise), c’est la pâtisserie du quartier : gâteaux Ferrero Rocher, red velvet, carotte, citron, Skor et cheesecakes, à la pointe ou entiers, préparés ${KITCHENS_FR}.`,
@@ -848,6 +1056,7 @@ export const BRANDS: Brand[] = [
       en: ["Mexican", "Tacos", "Burritos", "Nachos"],
       fr: ["Mexicain", "Tacos", "Burritos", "Nachos"],
     },
+    seoDish: { fr: "tacos, burritos et nachos", en: "tacos, burritos and nachos" },
     hook: { en: ["Craving", "tacos?"], fr: ["Envie de", "tacos ?"] },
     description: {
       fr: `Taco Mexican prépare tacos, burritos, quesadillas et nachos au poulet, au steak, au bœuf ou aux haricots noirs, ${KITCHENS_FR}.`,
@@ -916,6 +1125,7 @@ export const BRANDS: Brand[] = [
     accent: "#ffb703",
     accent2: "#ff8a3d",
     cuisine: { en: ["Pizzeria", "Pizza"], fr: ["Pizzeria", "Pizza"] },
+    seoDish: { fr: "pizza", en: "pizza" },
     hook: { en: ["Craving", "pizza?"], fr: ["Envie de", "pizza ?"] },
     description: {
       fr: `Pizza Inntime sort du four des pizzas toute garnie, pepperonata, napolitaine, végétarienne, au poulet ou au bacon, et des combos pizza-poutine, ${KITCHENS_FR}.`,
@@ -981,6 +1191,7 @@ export const BRANDS: Brand[] = [
     accent: "#ffffff",
     accent2: "#ff6b6b",
     cuisine: { en: ["Pizza", "Pizza combos"], fr: ["Pizza", "Combos pizza"] },
+    seoDish: { fr: "combos pizza et poulet", en: "pizza and chicken combos" },
     hook: { en: ["Craving a", "pizza combo?"], fr: ["Envie d’un", "combo pizza ?"] },
     description: {
       fr: "Pizza Algérie, ce sont des combos pizza avec pilons frits, ailes ou sous-marin, la pizza Philly steak et le pain magique, préparés dans notre cuisine de Notre-Dame-de-Grâce (NDG), au 6280 avenue Somerled, à Montréal.",
@@ -1043,6 +1254,7 @@ export const BRANDS: Brand[] = [
       en: ["Fried chicken", "Wings", "Chicken burgers"],
       fr: ["Poulet frit", "Ailes", "Burgers poulet"],
     },
+    seoDish: { fr: "poulet frit et ailes", en: "fried chicken and wings" },
     hook: { en: ["Craving", "fried chicken?"], fr: ["Envie de", "poulet frit ?"] },
     description: {
       fr: "Po Poulet, c’est le poulet frit croustillant à Saint-Léonard : poulet frit en 3, 4, 9 ou 15 morceaux avec frites, salade de chou et sauce, ailes et croquettes, et burgers au poulet, au 5839 rue Jean-Talon Est, à Montréal.",
@@ -1096,12 +1308,14 @@ export const BRANDS: Brand[] = [
     id: "pouletpoulet",
     domain: "pouletpoulet.popoulet.ca",
     name: "Poulet Poulet",
-    alternateNames: ["Poulet Express", "Poulet 24/7"],
+    // Never advertise "24/7": the kitchens close at 3:15 at NDG and 23:00 at Saint-Léonard.
+    alternateNames: ["Poulet Express"],
     icon: "drumstick",
     primary: "#b45309",
     accent: "#fde047",
     accent2: "#fb923c",
     cuisine: { en: ["Chicken wings", "Nuggets"], fr: ["Ailes de poulet", "Croquettes"] },
+    seoDish: { fr: "ailes de poulet et croquettes", en: "chicken wings and nuggets" },
     hook: { en: ["Craving", "wings?"], fr: ["Envie", "d’ailes ?"] },
     description: {
       fr: `Poulet Poulet, ce sont les ailes de poulet et les croquettes avec frites, sauce et Pepsi, de 6 à 25 morceaux, et les trios burger ou cheeseburger avec ailes, ${KITCHENS_FR}.`,
@@ -1180,6 +1394,7 @@ export const BRANDS: Brand[] = [
       en: ["Latin American", "Empanadas", "Nachos"],
       fr: ["Latino-américain", "Empanadas", "Nachos"],
     },
+    seoDish: { fr: "empanadas, nachos et quesadillas", en: "empanadas, nachos and quesadillas" },
     hook: { en: ["Craving", "empanadas?"], fr: ["Envie", "d’empanadas ?"] },
     description: {
       fr: `Café Bolon propose des bouchées d’inspiration latino-américaine : empanadas, quesadillas, nachos, burritos et tacos au bœuf, au steak ou aux haricots noirs, pita et poutine tacos, ${KITCHENS_FR}.`,
@@ -1253,6 +1468,7 @@ export const BRANDS: Brand[] = [
     accent: "#fbbf24",
     accent2: "#4ade80",
     cuisine: { en: ["Grill", "Snacks"], fr: ["Grillades", "Bouchées"] },
+    seoDish: { fr: "brochettes, samoussas et pâtés", en: "skewers, samosas and patties" },
     hook: { en: ["Craving", "skewers?"], fr: ["Envie de", "brochettes ?"] },
     description: {
       fr: `Place Afrique propose samoussas, pâtés jamaïcains, empanadas et assiettes de brochettes et de souvlaki grillés, préparés ${KITCHENS_FR}.`,

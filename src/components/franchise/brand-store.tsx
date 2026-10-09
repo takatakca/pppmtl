@@ -20,13 +20,16 @@ import {
   hoursText,
   formatTime,
   type Brand,
+  type ExtraItem,
   type KitchenId,
 } from "@/config/brands";
 import {
   brandItems,
   brandsInKitchen,
+  extraPrice,
   factualAbout,
   itemForClover,
+  kitchenNames,
   primaryOrderUrl,
 } from "@/lib/brand/facts";
 import { brandMarkSvg } from "@/components/brand/brand-mark";
@@ -104,6 +107,29 @@ function DishRow({ item, onOpen }: { item: MenuItem; onOpen: (i: MenuItem) => vo
           </span>
         </span>
       </button>
+    </li>
+  );
+}
+
+/** A dish not in Clover yet: real name and price, ordered on the delivery apps or by phone (no cart). */
+function ExtraRow({ item, brand }: { item: ExtraItem; brand: Brand }) {
+  const { lang } = usePPP();
+  const l = lang === "fr" ? "fr" : "en";
+  const phone = brandPhone(brand);
+  return (
+    <li className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-border bg-card/60 p-3">
+      <span className="min-w-0">
+        <span className="block font-semibold leading-snug">
+          {l === "fr" ? item.nameFr : item.nameEn}
+        </span>
+        <span className="mt-1 block text-sm font-semibold text-accent">{extraPrice(item, l)}</span>
+      </span>
+      <a
+        href={`tel:${phone.e164}`}
+        className="shrink-0 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground focus-ppp"
+      >
+        {l === "fr" ? "Appeler" : "Call"}
+      </a>
     </li>
   );
 }
@@ -210,8 +236,8 @@ export function BrandStorePage({ brand, origin }: { brand: Brand; origin: string
             {brand.name}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {brand.cuisine[l].join(" · ")} · $ ·{" "}
-            {kitchens.map((k) => (l === "fr" ? k.labelFr : k.labelEn)).join(" · ")}
+            {t("Fast-food restaurant", "Restaurant fast food")} · {brand.cuisine[l].join(" · ")} · $
+            · {kitchens.map((k) => (l === "fr" ? k.labelFr : k.labelEn)).join(" · ")}
           </p>
           <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
             {kitchens.map((k) => (
@@ -275,12 +301,26 @@ export function BrandStorePage({ brand, origin }: { brand: Brand; origin: string
             >
               {rail.title[l]}
               <span className="font-sans text-xs font-semibold normal-case tracking-normal text-muted-foreground">
-                {t(`${items.length} dishes`, `${items.length} plats`)}
+                {t(
+                  `${items.length + (rail.extras?.length ?? 0)} dishes`,
+                  `${items.length + (rail.extras?.length ?? 0)} plats`,
+                )}
               </span>
             </h2>
+            {rail.extras?.length ? (
+              <p className="mt-2 text-sm text-muted-foreground">
+                {t(
+                  "Not in online ordering yet: call us to order them.",
+                  "Pas encore dans la commande en ligne : appelez-nous pour les commander.",
+                )}
+              </p>
+            ) : null}
             <ul className="mt-4 grid gap-3 md:grid-cols-2">
               {items.map((item) => (
                 <DishRow key={item.id} item={item} onOpen={setActive} />
+              ))}
+              {(rail.extras ?? []).map((x) => (
+                <ExtraRow key={x.id} item={x} brand={brand} />
               ))}
             </ul>
           </section>
@@ -291,8 +331,11 @@ export function BrandStorePage({ brand, origin }: { brand: Brand; origin: string
           aria-labelledby="a-propos-title"
           className="scroll-mt-32 pt-10 lg:scroll-mt-44"
         >
-          <h2 id="a-propos-title" className="sr-only">
-            {t("About and addresses", "À propos et adresses")}
+          <h2 id="a-propos-title" className="mb-3 text-sm font-semibold text-muted-foreground">
+            {t(
+              `${brand.name}, fast-food restaurant in ${kitchenNames(brand, "en")} (Montréal)`,
+              `${brand.name}, restaurant fast food à ${kitchenNames(brand, "fr")} (Montréal)`,
+            )}
           </h2>
           <div className="divide-y divide-border rounded-xl border border-border bg-card">
             <details className="group p-4 sm:p-5">

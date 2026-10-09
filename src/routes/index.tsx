@@ -34,18 +34,19 @@ import { brandJsonLd } from "@/lib/brand/schema";
 import { itemForClover } from "@/lib/brand/facts";
 import { FranchiseShell } from "@/components/franchise/franchise-shell";
 import { BrandStorePage } from "@/components/franchise/brand-store";
+import { brandSeo } from "@/lib/brand/facts";
 import type { Brand } from "@/config/brands";
 
 /** Home of a franchise domain: the brand's store page, its schema.org and its own canonical address. */
 function franchiseHomeHead(brand: Brand) {
-  const title = `${brand.name} | ${brand.cuisine.fr.join(", ")} · Montréal`;
+  const { title, description } = brandSeo(brand);
   const image = itemForClover(brand.heroItems[0] ?? "")?.image;
   return {
     meta: [
       { title },
-      { name: "description", content: brand.description.fr },
+      { name: "description", content: description },
       { property: "og:title", content: title },
-      { property: "og:description", content: brand.description.fr },
+      { property: "og:description", content: description },
       { property: "og:url", content: canonicalUrl("/") },
       ...(image ? [{ property: "og:image", content: `${currentOrigin()}${image}` }] : []),
     ],

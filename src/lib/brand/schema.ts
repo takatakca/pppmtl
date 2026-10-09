@@ -9,8 +9,15 @@ import {
   liveLinks,
   orderLinkUrl,
   type Brand,
+  type ExtraItem,
 } from "@/config/brands";
-import { googleMapsUrl, itemForClover, primaryOrderUrl } from "@/lib/brand/facts";
+import {
+  brandKeywords,
+  brandSeo,
+  googleMapsUrl,
+  itemForClover,
+  primaryOrderUrl,
+} from "@/lib/brand/facts";
 import type { MenuItem } from "@/data/menu";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -31,6 +38,20 @@ function menuItemLd(origin: string, item: MenuItem) {
   };
 }
 
+/** A dish not in Clover yet: same MenuItem, one Offer per size. */
+function extraItemLd(item: ExtraItem) {
+  return {
+    "@type": "MenuItem",
+    name: item.nameFr,
+    offers: item.sizes.map((size) => ({
+      "@type": "Offer",
+      ...(size.labelFr ? { name: size.labelFr } : {}),
+      price: size.price.toFixed(2),
+      priceCurrency: "CAD",
+    })),
+  };
+}
+
 export function brandJsonLd(brand: Brand) {
   const origin = brandOrigin(brand);
   const phone = brandPhone(brand);
@@ -48,11 +69,12 @@ export function brandJsonLd(brand: Brand) {
       "@id": `${origin}/#${id}`,
       name: brand.name,
       ...(brand.alternateNames?.length ? { alternateName: brand.alternateNames } : {}),
-      description: brand.description.fr,
+      description: brandSeo(brand).description,
+      keywords: brandKeywords(brand).join(", "),
       url: `${origin}/`,
       telephone: phone.e164,
       ...(heroImages.length ? { image: heroImages } : {}),
-      servesCuisine: brand.cuisine.fr,
+      servesCuisine: ["Fast food", ...brand.cuisine.fr],
       priceRange: "$",
       address: {
         "@type": "PostalAddress",
@@ -91,10 +113,13 @@ export function brandJsonLd(brand: Brand) {
     hasMenuSection: brand.menu.map((rail) => ({
       "@type": "MenuSection",
       name: rail.title.fr,
-      hasMenuItem: rail.items
-        .map(itemForClover)
-        .filter((i): i is MenuItem => i !== null)
-        .map((i) => menuItemLd(origin, i)),
+      hasMenuItem: [
+        ...rail.items
+          .map(itemForClover)
+          .filter((i): i is MenuItem => i !== null)
+          .map((i) => menuItemLd(origin, i)),
+        ...(rail.extras ?? []).map(extraItemLd),
+      ],
     })),
   };
 

@@ -10,10 +10,12 @@ import {
   brandOrigin,
   brandPhone,
   hoursText,
+  formatTime,
   liveLinks,
   orderLinkUrl,
   PLATFORM_NAMES,
   type Brand,
+  type ExtraItem,
   type Kitchen,
   type KitchenId,
 } from "@/config/brands";
@@ -62,6 +64,67 @@ export function primaryOrderUrl(origin: string): { url: string; external: boolea
 const price = (n: number | null, lang: "fr" | "en") =>
   n === null ? "" : lang === "fr" ? `${n.toFixed(2).replace(".", ",")} $` : `$${n.toFixed(2)}`;
 
+/** Dishes the brand sells that are not in Clover yet (shown, never in the cart). */
+export function brandExtras(brand: Brand): ExtraItem[] {
+  return brand.menu.flatMap((r) => r.extras ?? []);
+}
+
+/** "3,99 $" or "petit 3,99 $ · grand 4,99 $". */
+export function extraPrice(item: ExtraItem, lang: "fr" | "en"): string {
+  return item.sizes
+    .map((s) => {
+      const label = lang === "fr" ? s.labelFr : s.labelEn;
+      return `${label ? `${label} ` : ""}${price(s.price, lang)}`;
+    })
+    .join(" · ");
+}
+
+/** "NDG et Saint-Léonard" / "NDG and Saint-Léonard". */
+export function kitchenNames(brand: Brand, lang: "fr" | "en"): string {
+  const names = brand.kitchens.map((k) =>
+    lang === "fr" ? KITCHENS[k.kitchen].labelFr : KITCHENS[k.kitchen].labelEn,
+  );
+  return names.join(lang === "fr" ? " et " : " and ");
+}
+
+/** "ouvert tard (jusqu’à 3 h 15 à NDG)": the latest closing time, never "24 h". */
+export function lateText(brand: Brand, lang: "fr" | "en"): string {
+  const ndg = brand.kitchens.some((k) => k.kitchen === "ndg");
+  const k = KITCHENS[ndg ? "ndg" : "st-leonard"];
+  const at = formatTime(k.hours.closes, lang);
+  if (lang === "fr") return ndg ? `ouvert tard (jusqu’à ${at} à NDG)` : `ouvert jusqu’à ${at}`;
+  return ndg ? `open late (until ${at} in NDG)` : `open until ${at}`;
+}
+
+function cap(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/** Title and meta description with the money words: fast food, restaurant, livraison, ouvert tard, près de chez vous. */
+export function brandSeo(brand: Brand): { title: string; description: string } {
+  const where = kitchenNames(brand, "fr");
+  return {
+    title: `${brand.name} | ${cap(brand.seoDish.fr)} · restaurant fast food à ${where}, Montréal`,
+    description:
+      `${brand.name}, restaurant fast food à ${where} (Montréal) : ${brand.seoDish.fr}. ` +
+      `Livraison et cueillette, ${lateText(brand, "fr")}. Commandez en ligne, près de chez vous.`,
+  };
+}
+
+/** Search words for schema.org keywords. */
+export function brandKeywords(brand: Brand): string[] {
+  const where = brand.kitchens.map((k) => KITCHENS[k.kitchen].area);
+  return [
+    ...brand.seoDish.fr.split(/,\s*|\s+et\s+/).filter(Boolean),
+    "fast food",
+    "restaurant",
+    "livraison",
+    "ouvert tard",
+    ...where,
+    "Montréal",
+  ];
+}
+
 /** One factual paragraph: real restaurant, addresses, hours, phone, dishes. */
 export function factualAbout(brand: Brand, lang: "fr" | "en"): string {
   const kitchens = brand.kitchens.map((k) => KITCHENS[k.kitchen]);
@@ -69,19 +132,24 @@ export function factualAbout(brand: Brand, lang: "fr" | "en"): string {
   const dishes = brandItems(brand)
     .slice(0, 6)
     .map((i) => (lang === "fr" ? i.nameFr : i.nameEn));
+  const extras = brandExtras(brand)
+    .slice(0, 4)
+    .map((i) => (lang === "fr" ? i.nameFr : i.nameEn).toLowerCase());
   if (lang === "fr") {
     const where = kitchens.map((k) => `au ${k.street} (${k.area}, ${k.postalCode})`).join(" et ");
     return (
-      `${brand.name} est un restaurant de Montréal avec sa cuisine sur place, ${where}. ` +
-      `Ouvert tous les jours. Téléphone : ${phone}. Pour emporter ou en livraison.` +
-      (dishes.length ? ` Au menu : ${dishes.join(", ")}.` : "")
+      `${brand.name} est un restaurant fast food de Montréal avec sa cuisine sur place, ${where}. ` +
+      `Ouvert tous les jours, ${lateText(brand, "fr")}. Téléphone : ${phone}. Livraison et cueillette.` +
+      (dishes.length ? ` Au menu : ${dishes.join(", ")}.` : "") +
+      (extras.length ? ` Aussi : ${extras.join(", ")}.` : "")
     );
   }
   const where = kitchens.map((k) => `${k.street} (${k.area}, ${k.postalCode})`).join(" and ");
   return (
-    `${brand.name} is a Montréal restaurant with its own kitchen at ${where}. ` +
-    `Open every day. Phone: ${phone}. Pickup or delivery.` +
-    (dishes.length ? ` On the menu: ${dishes.join(", ")}.` : "")
+    `${brand.name} is a fast-food restaurant in Montréal with its own kitchen at ${where}. ` +
+    `Open every day, ${lateText(brand, "en")}. Phone: ${phone}. Delivery and pickup.` +
+    (dishes.length ? ` On the menu: ${dishes.join(", ")}.` : "") +
+    (extras.length ? ` Also: ${extras.join(", ")}.` : "")
   );
 }
 
@@ -92,6 +160,10 @@ export function llmsTxt(brand: Brand): string {
   const lines: string[] = [];
   lines.push(`# ${brand.name}`, "");
   lines.push(`> ${brand.description.fr}`, "");
+  lines.push(
+    `Type : restaurant fast food (${brand.seoDish.fr}) · livraison et cueillette · ${lateText(brand, "fr")} · ${kitchenNames(brand, "fr")}, Montréal.`,
+    "",
+  );
   lines.push(factualAbout(brand, "fr"), "");
   lines.push(`English: ${factualAbout(brand, "en")}`, "");
   if (brand.alternateNames?.length)
@@ -124,6 +196,11 @@ export function llmsTxt(brand: Brand): string {
       lines.push(
         `- ${i.nameFr} : ${price(i.price, "fr")}${i.descriptionFr ? ` — ${i.descriptionFr}` : ""}`,
       );
+  }
+  const extras = brandExtras(brand);
+  if (extras.length) {
+    lines.push("", "## Aussi au menu (pas encore dans la commande en ligne : par téléphone)");
+    for (const x of extras) lines.push(`- ${x.nameFr} : ${extraPrice(x, "fr")}`);
   }
   lines.push("", "## Pages");
   lines.push(`- Accueil et menu : ${origin}/`);
