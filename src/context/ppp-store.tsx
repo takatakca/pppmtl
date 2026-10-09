@@ -10,7 +10,8 @@ import {
 import { locations, type Lang, type OrderMode } from "@/data/menu";
 import { NDG_LOCATION_ID, locationById, restaurantLocations } from "@/config/locations";
 import { track } from "@/lib/analytics";
-import { newLine, type CartLine, type LineSelections } from "@/lib/cart";
+import { newLine, unitPriceFor, type CartLine, type LineSelections } from "@/lib/cart";
+import { keepKnownSelections } from "@/lib/modifiers";
 import { menuRepository } from "@/lib/menu-repository";
 import { isLang } from "@/i18n/types";
 import { translate, type TranslationKey } from "@/i18n";
@@ -147,6 +148,18 @@ export function PPPProvider({ children }: { children: ReactNode }) {
         ) {
           stored.selectedLocationId = defaults.selectedLocationId;
         }
+        // A saved cart is priced again from today's menu (Clover prices and options); gone items are dropped.
+        if (Array.isArray(stored.cart)) {
+          stored.cart = stored.cart.flatMap((line) => {
+            const item = menuRepository.getItem(line.itemId);
+            if (!item) return [];
+            const selections = keepKnownSelections(
+              item.modifierGroups ?? [],
+              line.selections ?? {},
+            );
+            return [{ ...line, selections, unitPrice: unitPriceFor(item, selections) }];
+          });
+        }
         setState((s) => ({ ...s, ...stored }));
       }
     } catch {
@@ -268,12 +281,7 @@ export function PPPProvider({ children }: { children: ReactNode }) {
         for (const line of lines) {
           const item = menuRepository.getItem(line.itemId);
           if (!item) continue;
-          const selections: Record<string, string> = {};
-          for (const [groupId, choiceId] of Object.entries(line.selections)) {
-            const group = item.modifierGroups?.find((g) => g.id === groupId);
-            const choice = group?.choices.find((c) => c.id === choiceId);
-            if (group && choice) selections[groupId] = choiceId;
-          }
+          const selections = keepKnownSelections(item.modifierGroups ?? [], line.selections);
           state.cart.push(newLine(item, line.quantity, line.notes, selections));
           added.push(item.id);
         }

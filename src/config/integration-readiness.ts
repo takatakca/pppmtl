@@ -31,10 +31,15 @@ export const providerPlans: ProviderPlan[] = [
   {
     id: "clover",
     label: "Clover",
-    role: "In-store POS and card payments where UrbanPiper does not process.",
-    ppmOwns: "Checkout experience and order summary.",
-    providerOwns: "Payment capture and in-store ticket.",
-    requiredCredentials: ["CLOVER_API_KEY", "CLOVER_MERCHANT_ID", "CLOVER_WEBHOOK_SECRET"],
+    role: "NDG ordering engine: the real Clover menu, Clover Hosted Checkout, the order printed in Clover.",
+    ppmOwns: "Layout, rails, placement (src/config/clover-item-map.ts), wording, photos, cart.",
+    providerOwns: "Prices, options, availability, card payment, register ticket and KDS.",
+    requiredCredentials: [
+      "CLOVER_MERCHANT_ID",
+      "CLOVER_ECOMM_PRIVATE_KEY",
+      "CLOVER_WEBHOOK_SECRET",
+      "CLOVER_API_TOKEN",
+    ],
   },
   {
     id: "marketplaces",

@@ -43,14 +43,25 @@ export interface LocationIntegrationMapping {
 /** The single store prepared for the first UrbanPiper connection. */
 export const FIRST_CONNECTION_LOCATION_SLUG = "ndg";
 
+/**
+ * Stores whose menu and orders are the restaurant's own Clover (real items, Clover Hosted Checkout, ticket in
+ * Clover). The Clover merchant and keys are server settings (docs/integrations/clover.md), never in this file.
+ * UrbanPiper stays in the code for the other stores, switched off until its credentials exist.
+ */
+export const CLOVER_LOCATION_SLUGS = ["ndg"];
+
 export const locationIntegrationMappings: LocationIntegrationMapping[] = restaurantLocations.map(
   (l) => ({
     internalId: `PPP-${l.slug.toUpperCase()}`,
     locationId: l.id,
     name: l.displayName,
     address: `${l.address}, ${l.city}`,
-    menuSource: "local" as IntegrationProviderId,
-    orderingProvider: "urbanpiper" as IntegrationProviderId,
+    menuSource: (CLOVER_LOCATION_SLUGS.includes(l.slug)
+      ? "clover"
+      : "local") as IntegrationProviderId,
+    orderingProvider: (CLOVER_LOCATION_SLUGS.includes(l.slug)
+      ? "clover"
+      : "urbanpiper") as IntegrationProviderId,
     providerLocationId: null,
     urbanPiperLocationId: null,
     urbanPiperStoreId: null,

@@ -26,6 +26,13 @@ export const Route = createFileRoute("/api/public/webhooks/provider")({
         const provider = providerFromRequest(request);
         if (!provider) return new Response("Unknown provider", { status: 400 });
 
+        // Clover Hosted Checkout signs with `Clover-Signature: t=…,v1=…` and sends payment events: its own handler.
+        if (provider === "clover") {
+          const { handleCloverHostedCheckoutWebhook } =
+            await import("@/lib/integration/providers/clover/webhook");
+          return handleCloverHostedCheckoutWebhook(request);
+        }
+
         const secret =
           provider === "urbanpiper"
             ? process.env["URBANPIPER_WEBHOOK_SECRET"]

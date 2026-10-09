@@ -132,6 +132,10 @@ export interface InternalOrder {
   notes: string;
   /** Set when the order ends in FAILED, so support can explain it. */
   failureCode: string | null;
+  /** Clover Hosted Checkout page while the order waits for payment (providerOrderId = the session id). */
+  paymentUrl?: string | null;
+  /** Clover payment id once Clover confirmed the payment. */
+  providerPaymentId?: string | null;
   createdAt: string;
   updatedAt: string;
 }

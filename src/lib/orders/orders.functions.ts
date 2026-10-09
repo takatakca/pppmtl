@@ -44,6 +44,9 @@ export interface OrderView {
   customerName: string | null;
   deliveryAddress: string | null;
   notes: string | null;
+  paymentStatus: InternalOrder["paymentStatus"];
+  /** Clover's payment page while the order waits for payment; null otherwise. */
+  paymentUrl: string | null;
   items: Array<{
     productId: string;
     name: string;
@@ -73,12 +76,19 @@ function toView(order: InternalOrder): OrderView {
     customerName: order.customer.name,
     deliveryAddress: order.deliveryAddress,
     notes: order.notes,
+    paymentStatus: order.paymentStatus,
+    paymentUrl: order.paymentStatus === "UNPAID" ? (order.paymentUrl ?? null) : null,
     items: order.items.map((i) => ({
       productId: i.productId,
       name: i.name,
       quantity: i.quantity,
       options: i.modifiers.map((m) => m.label),
-      selections: Object.fromEntries(i.modifiers.map((m) => [m.groupId, m.choiceId])),
+      // Several options of one group are kept comma-separated, like the cart.
+      selections: i.modifiers.reduce<Record<string, string>>((acc, m) => {
+        const prev = acc[m.groupId];
+        acc[m.groupId] = prev ? `${prev},${m.choiceId}` : m.choiceId;
+        return acc;
+      }, {}),
       notes: i.notes,
     })),
   };

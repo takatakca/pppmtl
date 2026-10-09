@@ -15,7 +15,11 @@
 import { restaurantLocations } from "@/config/locations";
 import { mappingForLocation } from "@/config/integration-locations";
 import { menuRepository } from "@/lib/menu-repository";
+import { checkSelections, chosenOptions } from "@/lib/modifiers";
+import type { IntegrationProviderId } from "@/lib/integration/core/contracts";
 import { logIntegrationEvent } from "@/lib/integration/core/logging";
+import { cloverCheckoutConfigured } from "@/lib/integration/providers/clover/config.server";
+import type { ProviderOrderAdapter } from "./provider-order-adapter";
 import { orderError, orderFailure, type OrderErrorCode, type OrderResult } from "./errors";
 import { claimOrderKey, deriveIdempotencyKey } from "./idempotency";
 import { orderToUniversalDraft } from "./order-mapping";
@@ -58,7 +62,10 @@ export interface CheckoutRequest {
 const toCents = (dollars: number | null): number | null =>
   dollars === null ? null : Math.round(dollars * 100);
 
-/** Rebuild priced items from the verified catalog. Unknown ids are dropped. */
+/**
+ * Rebuild priced items from the verified catalog. Unknown ids are dropped; a line whose options break the
+ * item's rules (a required choice missing, too many, an option it does not offer) counts as dropped too.
+ */
 function buildItems(request: CheckoutRequest): { items: OrderItem[]; dropped: number } {
   const items: OrderItem[] = [];
   let dropped = 0;
@@ -69,25 +76,23 @@ function buildItems(request: CheckoutRequest): { items: OrderItem[]; dropped: nu
       dropped += 1;
       return;
     }
-    const modifiers = Object.entries(line.selections ?? {}).flatMap(([groupId, choiceId]) => {
-      const group = item.modifierGroups?.find((g) => g.id === groupId);
-      const choice = group?.choices.find((c) => c.id === choiceId);
-      if (!group || !choice) return [];
-      return [
-        {
-          groupId,
-          choiceId,
-          providerModifierId: null,
-          label: `${group.labelEn}: ${choice.labelEn}`,
-          priceDelta: null,
-        },
-      ];
-    });
+    const groups = item.modifierGroups ?? [];
+    const selections = line.selections ?? {};
+    if (!checkSelections(groups, selections).ok) dropped += 1;
+    const modifiers = chosenOptions(groups, selections).flatMap(({ group, choices }) =>
+      choices.map((choice) => ({
+        groupId: group.id,
+        choiceId: choice.id,
+        providerModifierId: null,
+        label: `${group.labelEn}: ${choice.labelEn}`,
+        priceDelta: toCents(choice.priceDelta),
+      })),
+    );
 
     items.push({
       lineId: `${line.itemId}:${index}`,
       productId: item.id,
-      providerProductId: null,
+      providerProductId: item.cloverItemId ?? null,
       name: item.nameEn,
       quantity: Math.max(1, Math.floor(line.quantity)),
       unitPrice: toCents(item.price),
@@ -97,6 +102,25 @@ function buildItems(request: CheckoutRequest): { items: OrderItem[]; dropped: nu
   });
 
   return { items, dropped };
+}
+
+/**
+ * Which engine takes this store's orders, and its store reference. Clover needs no store id in the code: the
+ * merchant comes from the server environment, so the store counts as connected once the Clover keys are set.
+ */
+function routeFor(locationId: string): {
+  provider: IntegrationProviderId;
+  providerLocationId: string | null;
+} {
+  const mapping = mappingForLocation(locationId);
+  if (!mapping) return { provider: "local", providerLocationId: null };
+  if (mapping.orderingProvider === "clover") {
+    return {
+      provider: "clover",
+      providerLocationId: cloverCheckoutConfigured(locationId) ? mapping.internalId : null,
+    };
+  }
+  return { provider: mapping.orderingProvider, providerLocationId: mapping.providerLocationId };
 }
 
 function toDraft(request: CheckoutRequest, items: OrderItem[]): OrderDraft {
@@ -115,11 +139,10 @@ export function validateOrder(request: CheckoutRequest): ValidationReport {
   const { items, dropped } = buildItems(request);
   const draft = toDraft(request, items);
   const location = restaurantLocations.find((l) => l.id === request.locationId);
-  const mapping = mappingForLocation(request.locationId);
 
   const report = validateOrderDraft(draft, {
     locationKnown: Boolean(location),
-    locationMapped: Boolean(mapping?.providerLocationId),
+    locationMapped: Boolean(routeFor(request.locationId).providerLocationId),
     availability: Object.fromEntries(
       menuRepository.getItems(request.locationId).map((i) => [i.id, i.isAvailable]),
     ),
@@ -147,7 +170,7 @@ export function createOrder(request: CheckoutRequest): OrderResult<InternalOrder
   const existing = existingId.fresh ? null : readOrder(existingId.orderId);
   if (existing) return { ok: true, data: existing };
 
-  const mapping = mappingForLocation(request.locationId);
+  const route = routeFor(request.locationId);
   const now = new Date().toISOString();
 
   const order: InternalOrder = {
@@ -155,14 +178,15 @@ export function createOrder(request: CheckoutRequest): OrderResult<InternalOrder
     orderNumber: null,
     customerId: request.customer.customerId,
     locationId: request.locationId,
-    providerLocationId: mapping?.providerLocationId ?? null,
-    provider: mapping?.orderingProvider ?? "local",
+    providerLocationId: route.providerLocationId,
+    provider: route.provider,
     orderType: request.orderType,
     items,
     subtotal: computeSubtotal(items),
     tax: null,
     total: null,
-    paymentStatus: "PAY_AT_RESTAURANT",
+    // Clover orders are paid online on Clover's page before the kitchen gets them.
+    paymentStatus: route.provider === "clover" ? "UNPAID" : "PAY_AT_RESTAURANT",
     status: "CREATED",
     providerStatus: null,
     providerOrderId: null,
@@ -186,7 +210,11 @@ export function createOrder(request: CheckoutRequest): OrderResult<InternalOrder
   return { ok: true, data: order };
 }
 
-async function adapterFor(order: InternalOrder) {
+async function adapterFor(order: InternalOrder): Promise<ProviderOrderAdapter | null> {
+  if (order.provider === "clover") {
+    const { cloverOrderSubmitAdapter } = await import("@/lib/integration/providers/clover/orders");
+    return cloverOrderSubmitAdapter;
+  }
   if (order.provider !== "urbanpiper") return null;
   const { urbanPiperOrderSubmitAdapter } =
     await import("@/lib/integration/providers/urbanpiper/order-submit");
@@ -222,6 +250,7 @@ export async function submitOrder(orderId: string): Promise<OrderResult<Internal
     orderToUniversalDraft(order),
     order.providerLocationId,
     order.idempotencyKey,
+    { orderId: order.id },
   );
   if (!result.ok) return fail(order, result.error.code);
 
@@ -233,8 +262,30 @@ export async function submitOrder(orderId: string): Promise<OrderResult<Internal
     subtotal: result.data.subtotal ?? order.subtotal,
     tax: result.data.tax,
     total: result.data.total,
+    ...(result.data.paymentUrl ? { paymentUrl: result.data.paymentUrl } : {}),
   });
   return updated ? { ok: true, data: updated } : orderFailure("order_not_found");
+}
+
+/**
+ * Clover's Hosted Checkout webhook said the payment for this checkout session went through (or was declined).
+ * Null when this server does not hold the order (another instance, or a restart): the Clover side is handled
+ * by the webhook anyway.
+ */
+export function applyCloverPayment(
+  checkoutSessionId: string,
+  paymentId: string | null,
+  approved: boolean,
+): InternalOrder | null {
+  const order = findOrderByProviderId(checkoutSessionId);
+  if (!order) return null;
+  if (!approved) return updateOrder(order.id, { providerStatus: "payment_declined" });
+  updateOrder(order.id, {
+    paymentStatus: "PAID",
+    paymentUrl: null,
+    ...(paymentId ? { providerPaymentId: paymentId } : {}),
+  });
+  return applyStatus(order.id, "ACCEPTED", "paid");
 }
 
 /** 4 — CANCEL. */
