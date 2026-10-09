@@ -239,8 +239,8 @@ export const BRANDS: Brand[] = [
     seoDish: { fr: "burgers, hot-dogs et poutine", en: "burgers, hot dogs and poutine" },
     hook: { en: ["Craving a", "Big Matt?"], fr: ["Envie d’un", "Big Matt ?"] },
     description: {
-      fr: `OOEUF, c’est le casse-croûte de quartier : burgers, hot-dogs Michigan, poutines et rondelles d’oignon, préparés ${KITCHENS_FR}.`,
-      en: `OOEUF is the neighbourhood snack bar: burgers, Michigan hot dogs, poutines and onion rings, made ${KITCHENS_EN}.`,
+      fr: `OOEUF, c’est le casse-croûte fast food du quartier : burgers, hot-dogs Michigan, poutines et rondelles d’oignon, et des déjeuners (bagels, croissants et muffins anglais à l’œuf, pain doré), préparés ${KITCHENS_FR}.`,
+      en: `OOEUF is the neighbourhood fast-food snack bar: burgers, Michigan hot dogs, poutines and onion rings, plus breakfast (egg bagels, croissants and English muffins, French toast), made ${KITCHENS_EN}.`,
     },
     about: {
       fr: [
@@ -693,8 +693,8 @@ export const BRANDS: Brand[] = [
     seoDish: { fr: "salades protéinées et shakes", en: "protein salads and shakes" },
     hook: { en: ["Craving", "something fresh?"], fr: ["Envie de", "fraîcheur ?"] },
     description: {
-      fr: `Nutrition Shake prépare des repas légers et protéinés : salades au poulet, au steak, au gyros, César et maison, le duo de salades protéinées, un sous-marin végétarien, des tacos aux haricots noirs, de l’eau et des boissons froides, ${KITCHENS_FR}.`,
-      en: `Nutrition Shake makes light, protein-rich meals: chicken, steak, gyros, Caesar and house salads, the two protein salads deal, a vegetarian sub, black bean tacos, water and cold drinks, ${KITCHENS_EN}.`,
+      fr: `Nutrition Shake prépare des repas légers et protéinés : salades au poulet, au steak, au gyros, César et maison, le duo de salades protéinées, un sous-marin végétarien, des tacos aux haricots noirs, et des frappés et rafraîchissements, ${KITCHENS_FR}.`,
+      en: `Nutrition Shake makes light, protein-rich meals: chicken, steak, gyros, Caesar and house salads, the two protein salads deal, a vegetarian sub, black bean tacos, plus frappés and refreshers, ${KITCHENS_EN}.`,
     },
     about: {
       fr: [
