@@ -15,6 +15,8 @@ import { cloverPhotoIds } from "@/data/clover/photos.generated";
 import {
   brandExtras,
   brandSeo,
+  h1Line,
+  hasDelivery,
   brandsInKitchen,
   factualAbout,
   itemForClover,
@@ -90,13 +92,19 @@ describe("fast food, late hours, dishes not in Clover yet", () => {
     expect(never.test(hubLlmsTxt())).toBe(false);
   });
 
-  it("puts the money words in every franchise title and description", () => {
+  it("follows the keyword template: title ≤ 60, description ≤ 155, fast food in the H1 line, livraison only with a visible store", () => {
     for (const b of franchise) {
       const seo = brandSeo(b);
-      expect(seo.title, b.id).toContain("fast food");
-      expect(seo.description, b.id).toMatch(/livraison/i);
+      expect(seo.title.length, b.id).toBeLessThanOrEqual(60);
+      expect(seo.title, b.id).toContain(b.name);
+      expect(seo.description.length, b.id).toBeLessThanOrEqual(155);
       expect(seo.description, b.id).toMatch(/ouvert/i);
+      expect(h1Line(b, "fr"), b.id).toContain("fast food");
+      expect(/livraison/i.test(seo.description), b.id).toBe(hasDelivery(b));
+      expect(b.keywords.length, b.id).toBeGreaterThan(5);
     }
+    const popoulet = BRANDS.find((x) => x.id === "popoulet")!;
+    expect(brandSeo(popoulet).description).not.toMatch(/à 3 h|tard/);
   });
 
   it("shows OOEUF's breakfast and Nutrition Shake's drinks with real prices, in llms.txt and schema.org", () => {

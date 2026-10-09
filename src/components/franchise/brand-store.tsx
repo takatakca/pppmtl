@@ -29,6 +29,7 @@ import {
   extraPrice,
   factualAbout,
   itemForClover,
+  h1Line,
   kitchenNames,
   primaryOrderUrl,
 } from "@/lib/brand/facts";
@@ -234,6 +235,9 @@ export function BrandStorePage({ brand, origin }: { brand: Brand; origin: string
             className="mt-3 font-display text-4xl uppercase leading-none sm:text-6xl"
           >
             {brand.name}
+            <span className="mt-2 block font-sans text-base font-semibold normal-case leading-snug text-accent sm:text-lg">
+              {h1Line(brand, l)}
+            </span>
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {t("Fast-food restaurant", "Restaurant fast food")} · {brand.cuisine[l].join(" · ")} · $

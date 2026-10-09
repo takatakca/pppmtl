@@ -12,6 +12,7 @@ import {
   type ExtraItem,
 } from "@/config/brands";
 import {
+  AREA_SERVED,
   brandKeywords,
   brandSeo,
   googleMapsUrl,
@@ -75,6 +76,7 @@ export function brandJsonLd(brand: Brand) {
       telephone: phone.e164,
       ...(heroImages.length ? { image: heroImages } : {}),
       servesCuisine: ["Fast food", ...brand.cuisine.fr],
+      areaServed: AREA_SERVED[id].map((name) => ({ "@type": "Place", name })),
       priceRange: "$",
       address: {
         "@type": "PostalAddress",

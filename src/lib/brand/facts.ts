@@ -100,30 +100,80 @@ function cap(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-/** Title and meta description with the money words: fast food, restaurant, livraison, ouvert tard, près de chez vous. */
-export function brandSeo(brand: Brand): { title: string; description: string } {
-  const where = kitchenNames(brand, "fr");
-  return {
-    title: `${brand.name} | ${cap(brand.seoDish.fr)} · restaurant fast food à ${where}, Montréal`,
-    description:
-      `${brand.name}, restaurant fast food à ${where} (Montréal) : ${brand.seoDish.fr}. ` +
-      `Livraison et cueillette, ${lateText(brand, "fr")}. Commandez en ligne, près de chez vous.`,
-  };
+/** True when a delivery app shows one of the brand's stores today ("livraison" only then). */
+export function hasDelivery(brand: Brand): boolean {
+  return brand.kitchens.some((k) => liveLinks(brand, k.kitchen).length > 0);
 }
 
-/** Search words for schema.org keywords. */
-export function brandKeywords(brand: Brand): string[] {
-  const where = brand.kitchens.map((k) => KITCHENS[k.kitchen].area);
-  return [
-    ...brand.seoDish.fr.split(/,\s*|\s+et\s+/).filter(Boolean),
-    "fast food",
-    "restaurant",
-    "livraison",
-    "ouvert tard",
-    ...where,
-    "Montréal",
-  ];
+/** Where the brand is, for titles: NDG when it cooks there, else "Saint-Léonard" (always with Montréal nearby). */
+function mainPlace(brand: Brand): "NDG" | "Saint-Léonard" {
+  return brand.kitchens.some((k) => k.kitchen === "ndg") ? "NDG" : "Saint-Léonard";
 }
+
+/** "NDG et Saint-Léonard, Montréal": the line under the H1 (KEYWORDS_MASTER §9: "OOEUF, fast food à NDG"). */
+export function h1Line(brand: Brand, lang: "fr" | "en"): string {
+  const where = kitchenNames(brand, lang);
+  return lang === "fr"
+    ? `${cap(brand.titleHead)} · fast food à ${where}, Montréal`
+    : `${cap(brand.seoDish.en)} · fast food in ${where}, Montréal`;
+}
+
+/**
+ * Title (≤ 60 characters) and meta description (≤ 155) from KEYWORDS_MASTER §9:
+ * "OOEUF : fast food à NDG, ouvert tard | Commander", "Fast food ouvert tard à NDG, jusqu'à 3 h : Big Matt, …".
+ * Saint-Léonard alone closes at 23 h: never "ouvert tard" there.
+ */
+export function brandSeo(brand: Brand): { title: string; description: string } {
+  const place = mainPlace(brand);
+  const ndg = place === "NDG";
+  const late = ndg ? "ouvert tard" : "ouvert jusqu’à 23 h";
+  let title = `${brand.name} : ${brand.titleHead} à ${place}, ${late} | Commander`;
+  if (title.length > 60) title = `${brand.name} : ${brand.titleHead} à ${place}, ${late}`;
+  if (title.length > 60) title = `${brand.name} : ${brand.titleHead} à ${place}`;
+
+  const where = ndg
+    ? "à NDG, jusqu’à 3 h"
+    : "tous les jours jusqu’à 23 h, à Saint-Léonard (Montréal)";
+  const lead = ndg
+    ? `${cap(brand.titleHead)} ouvert tard ${where}`
+    : `${cap(brand.titleHead)} ouvert ${where}`;
+  const order = ndg
+    ? `Commandez en ligne, cueillette${hasDelivery(brand) ? " ou livraison" : ""}.`
+    : hasDelivery(brand)
+      ? "Pour emporter ou en livraison."
+      : "Commandez par téléphone, pour emporter.";
+  // Its signature dishes when their names read well (not combo formulas like "6 MCX + Frites + …"),
+  // else its food words (seoDish).
+  const readable = (n: string) => n.length <= 28 && !/[+#(]/.test(n) && n !== n.toUpperCase();
+  const dishes = brand.heroItems
+    .map(itemForClover)
+    .filter((i): i is MenuItem => i !== null)
+    .map((i) => i.nameFr)
+    .filter(readable);
+  const candidates =
+    dishes.length >= 2 ? [dishes.slice(0, 3).join(", "), dishes.slice(0, 2).join(", ")] : [];
+  candidates.push(brand.seoDish.fr);
+  let description = `${lead}. ${order}`;
+  for (const list of candidates) {
+    const text = `${lead} : ${list}. ${order}`;
+    if (text.length <= 155) {
+      description = text;
+      break;
+    }
+  }
+  return { title, description };
+}
+
+/** Search words for schema.org keywords and llms.txt (KEYWORDS_MASTER §8). */
+export function brandKeywords(brand: Brand): string[] {
+  return brand.keywords;
+}
+
+/** Neighbourhoods each kitchen really serves (KEYWORDS_MASTER §5, under 4 km). */
+export const AREA_SERVED: Record<KitchenId, string[]> = {
+  ndg: ["Notre-Dame-de-Grâce", "Côte-des-Neiges", "Westmount", "Côte-Saint-Luc"],
+  "st-leonard": ["Saint-Léonard", "Anjou", "Montréal-Nord", "Saint-Michel"],
+};
 
 /** One factual paragraph: real restaurant, addresses, hours, phone, dishes. */
 export function factualAbout(brand: Brand, lang: "fr" | "en"): string {
@@ -139,7 +189,7 @@ export function factualAbout(brand: Brand, lang: "fr" | "en"): string {
     const where = kitchens.map((k) => `au ${k.street} (${k.area}, ${k.postalCode})`).join(" et ");
     return (
       `${brand.name} est un restaurant fast food de Montréal avec sa cuisine sur place, ${where}. ` +
-      `Ouvert tous les jours, ${lateText(brand, "fr")}. Téléphone : ${phone}. Livraison et cueillette.` +
+      `Ouvert tous les jours, ${lateText(brand, "fr")}. Téléphone : ${phone}. ${hasDelivery(brand) ? "Livraison et cueillette." : "Pour emporter."}` +
       (dishes.length ? ` Au menu : ${dishes.join(", ")}.` : "") +
       (extras.length ? ` Aussi : ${extras.join(", ")}.` : "")
     );
@@ -147,7 +197,7 @@ export function factualAbout(brand: Brand, lang: "fr" | "en"): string {
   const where = kitchens.map((k) => `${k.street} (${k.area}, ${k.postalCode})`).join(" and ");
   return (
     `${brand.name} is a fast-food restaurant in Montréal with its own kitchen at ${where}. ` +
-    `Open every day, ${lateText(brand, "en")}. Phone: ${phone}. Delivery and pickup.` +
+    `Open every day, ${lateText(brand, "en")}. Phone: ${phone}. ${hasDelivery(brand) ? "Delivery and pickup." : "Takeout."}` +
     (dishes.length ? ` On the menu: ${dishes.join(", ")}.` : "") +
     (extras.length ? ` Also: ${extras.join(", ")}.` : "")
   );
@@ -161,7 +211,9 @@ export function llmsTxt(brand: Brand): string {
   lines.push(`# ${brand.name}`, "");
   lines.push(`> ${brand.description.fr}`, "");
   lines.push(
-    `Type : restaurant fast food (${brand.seoDish.fr}) · livraison et cueillette · ${lateText(brand, "fr")} · ${kitchenNames(brand, "fr")}, Montréal.`,
+    `Type : restaurant fast food (${brand.seoDish.fr}) · ${hasDelivery(brand) ? "livraison et cueillette" : "pour emporter"} · ${lateText(brand, "fr")} · ${kitchenNames(brand, "fr")}, Montréal.`,
+    "",
+    `Mots-clés : ${brandKeywords(brand).join(", ")}.`,
     "",
   );
   lines.push(factualAbout(brand, "fr"), "");
