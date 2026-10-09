@@ -4,7 +4,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { DeliveryAddressSheet } from "@/components/order/delivery-address-sheet";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { orderChannels } from "@/lib/channels";
-import { orderingChannels } from "@/config/external-presence";
+import { useBrand, useOrderingChannels } from "@/context/brand";
+import { brandPhone } from "@/config/brands";
 import { trackExternalOrder } from "@/lib/analytics";
 import { startOrder } from "@/lib/order";
 
@@ -13,8 +14,11 @@ import { startOrder } from "@/lib/order";
  * marketplace, with phone ordering kept as a first-class fallback.
  */
 export function OrderSheet() {
-  const { orderSheetOpen, closeOrderSheet, mode, setMode, openLocationSheet, locationId, t } =
+  const { orderSheetOpen, closeOrderSheet, mode, setMode, openLocationSheet, locationId, t, lang } =
     usePPP();
+  const brand = useBrand();
+  // PPP's own store links on pppmtl.com; the brand's live store pages on a franchise domain.
+  const orderingChannels = useOrderingChannels(lang);
   const location = useSelectedLocation();
   const navigate = useNavigate();
   const [addressOpen, setAddressOpen] = useState(false);
@@ -23,7 +27,9 @@ export function OrderSheet() {
 
   const channels = orderChannels(location, mode);
   const direct = channels.find((c) => c.id === "direct");
-  const phone = channels.find((c) => c.id === "phone");
+  const pppPhone = channels.find((c) => c.id === "phone");
+  const phone =
+    brand.id === "ppp" ? pppPhone : { ...pppPhone, href: `tel:${brandPhone(brand).e164}` };
 
   const beginDirect = () => {
     const result = startOrder({ locationId, mode, channel: "direct" });

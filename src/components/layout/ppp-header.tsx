@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronDown, MapPin, Menu, Mic, Search, User, X } from "lucide-react";
 import { usePPP, useSelectedRestaurantLocation } from "@/context/ppp-store";
-import { orderingChannels } from "@/config/external-presence";
+import { useBrand, useOrderingChannels } from "@/context/brand";
+import { KITCHENS } from "@/config/brands";
 import { trackExternalOrder, trackSocialLink } from "@/lib/analytics";
 import { pppSocials } from "@/components/home/follow-ppp";
 import { PPPLogo } from "@/components/brand/ppp-logo";
@@ -43,6 +44,13 @@ export function PPPHeader() {
   const location = useSelectedRestaurantLocation();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const brand = useBrand();
+  const isPPP = brand.id === "ppp";
+  const { lang } = usePPP();
+  const orderingChannels = useOrderingChannels(lang);
+  const kitchenLabel = isPPP
+    ? "NDG"
+    : brand.kitchens.map((k) => KITCHENS[k.kitchen].labelFr).join(" · ");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -95,13 +103,13 @@ export function PPPHeader() {
           <Link
             to="/"
             className="flex shrink-0 items-center gap-2 focus-ppp"
-            aria-label="PPP Pizzeria"
+            aria-label={brand.name}
           >
             <PPPLogo variant="header" />
             <span className="hidden font-display text-lg uppercase leading-none tracking-wide sm:inline">
-              PPP Pizzeria
+              {brand.name}
               <span className="block text-[0.55rem] tracking-[0.3em] text-muted-foreground">
-                NDG
+                {kitchenLabel}
               </span>
             </span>
           </Link>
@@ -238,11 +246,13 @@ export function PPPHeader() {
               </li>
             ))}
           </ul>
-          <p className="mt-5 text-[0.6rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
-            {t("Follow", "Suivre", "Síguenos")}
-          </p>
+          {isPPP && (
+            <p className="mt-5 text-[0.6rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
+              {t("Follow", "Suivre", "Síguenos")}
+            </p>
+          )}
           <ul className="mt-2 flex flex-wrap gap-2">
-            {pppSocials.map((s) => (
+            {(isPPP ? pppSocials : []).map((s) => (
               <li key={s.id}>
                 <a
                   href={s.href}

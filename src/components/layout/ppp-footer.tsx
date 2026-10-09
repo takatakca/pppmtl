@@ -8,6 +8,8 @@ import { trackExternalOrder, trackSocialLink } from "@/lib/analytics";
 import { pppSocials } from "@/components/home/follow-ppp";
 import { GoogleGlyph } from "@/components/brand/social-icons";
 import { PPPLogo } from "@/components/brand/ppp-logo";
+import { useBrand } from "@/context/brand";
+import { BrandFooter } from "@/components/franchise/brand-footer";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 
 import type { TranslationKey } from "@/i18n";
@@ -36,7 +38,13 @@ const helpLinks: Array<{ key: TranslationKey; href: string }> = [
   { key: "navigation.myOrders", href: "/orders" },
 ];
 
+/** PPP's footer on pppmtl.com; the franchise footer (its own kitchens and links) on a brand domain. */
 export function PPPFooter() {
+  const brand = useBrand();
+  return brand.id === "ppp" ? <PPPOwnFooter /> : <BrandFooter />;
+}
+
+function PPPOwnFooter() {
   const { t, tr, openOrderSheet } = usePPP();
   const location = useSelectedRestaurantLocation();
   const social = locationSocial(location);

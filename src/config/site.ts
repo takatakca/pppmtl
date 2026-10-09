@@ -1,9 +1,15 @@
-/** Production site configuration — single source of truth for absolute URLs. */
+import { currentOrigin } from "@/lib/brand/current";
+
+/** PPP's own address (the default brand). Other brands: `src/config/brands.ts`. */
 export const SITE_URL = "https://pppmtl.com";
 
-/** Builds an absolute URL for a given site-relative path, e.g. "/menu" -> "https://pppmtl.com/menu". */
+/**
+ * Absolute URL on the site the visitor is on: the brand picked by the domain (`src/config/brands.ts`), e.g.
+ * "/menu" -> "https://pppmtl.com/menu" on pppmtl.com, "https://ooeuf.ca/menu" on ooeuf.ca.
+ */
 export function canonicalUrl(path: string): string {
-  if (path === "/" || path === "") return `${SITE_URL}/`;
+  const origin = currentOrigin();
+  if (path === "/" || path === "") return `${origin}/`;
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  return `${SITE_URL}${normalized}`;
+  return `${origin}${normalized}`;
 }
