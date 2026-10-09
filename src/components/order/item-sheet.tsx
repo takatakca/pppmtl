@@ -22,11 +22,14 @@ export function ItemSheet({
   item,
   onClose,
   onSelectItem,
+  orderAlternative,
 }: {
   item: MenuItem | null;
   onClose: () => void;
   /** Swap the sheet to a paired item without leaving the flow. */
   onSelectItem?: (item: MenuItem) => void;
+  /** When set, the dish is shown without "Add to order" (a kitchen without online ordering): call or apps instead. */
+  orderAlternative?: { note: string; href: string; label: string };
 }) {
   const { lang, t, addToCart, locationId, isFavourite, addFavourite, removeFavourite } = usePPP();
   const [qty, setQty] = useState(1);
@@ -238,45 +241,60 @@ export function ItemSheet({
           )}
         </div>
 
-        <div className="flex items-center gap-2 border-t border-border p-4">
-          <div className="flex items-center border border-border">
-            <button
-              onClick={() => setQty((q) => Math.max(1, q - 1))}
-              aria-label={t("Decrease quantity", "Diminuer la quantité")}
-              className="p-3 focus-ppp"
+        {orderAlternative ? (
+          <div className="flex flex-wrap items-center gap-3 border-t border-border p-4">
+            <p className="min-w-0 flex-1 text-xs text-muted-foreground">{orderAlternative.note}</p>
+            <a
+              href={orderAlternative.href}
+              className="bg-primary px-5 py-3 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
             >
-              <Minus className="h-4 w-4" />
-            </button>
-            <span aria-live="polite" className="w-8 text-center font-display text-xl leading-none">
-              {qty}
-            </span>
+              {orderAlternative.label}
+            </a>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 border-t border-border p-4">
+            <div className="flex items-center border border-border">
+              <button
+                onClick={() => setQty((q) => Math.max(1, q - 1))}
+                aria-label={t("Decrease quantity", "Diminuer la quantité")}
+                className="p-3 focus-ppp"
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <span
+                aria-live="polite"
+                className="w-8 text-center font-display text-xl leading-none"
+              >
+                {qty}
+              </span>
+              <button
+                onClick={() => setQty((q) => Math.min(20, q + 1))}
+                aria-label={t("Increase quantity", "Augmenter la quantité")}
+                className="p-3 focus-ppp"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
             <button
-              onClick={() => setQty((q) => Math.min(20, q + 1))}
-              aria-label={t("Increase quantity", "Augmenter la quantité")}
-              className="p-3 focus-ppp"
+              onClick={() => {
+                if (missing.length > 0) return;
+                addToCart(item.id, qty, notes.trim(), selections);
+                onClose();
+              }}
+              disabled={missing.length > 0}
+              className="flex-1 bg-primary px-5 py-3.5 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp disabled:cursor-not-allowed disabled:opacity-50"
+              style={missing.length > 0 ? undefined : { boxShadow: "var(--shadow-glow)" }}
             >
-              <Plus className="h-4 w-4" />
+              {missing.length > 0
+                ? t(
+                    `Choose ${lang === "fr" ? missing[0]!.labelFr : missing[0]!.labelEn}`,
+                    `Choisissez ${missing[0]!.labelFr.toLowerCase()}`,
+                  )
+                : t("Add to order", "Ajouter à la commande")}
+              {missing.length === 0 && unitPrice !== null && ` · $${(unitPrice * qty).toFixed(2)}`}
             </button>
           </div>
-          <button
-            onClick={() => {
-              if (missing.length > 0) return;
-              addToCart(item.id, qty, notes.trim(), selections);
-              onClose();
-            }}
-            disabled={missing.length > 0}
-            className="flex-1 bg-primary px-5 py-3.5 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp disabled:cursor-not-allowed disabled:opacity-50"
-            style={missing.length > 0 ? undefined : { boxShadow: "var(--shadow-glow)" }}
-          >
-            {missing.length > 0
-              ? t(
-                  `Choose ${lang === "fr" ? missing[0]!.labelFr : missing[0]!.labelEn}`,
-                  `Choisissez ${missing[0]!.labelFr.toLowerCase()}`,
-                )
-              : t("Add to order", "Ajouter à la commande")}
-            {missing.length === 0 && unitPrice !== null && ` · $${(unitPrice * qty).toFixed(2)}`}
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );

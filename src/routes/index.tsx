@@ -28,9 +28,43 @@ import { OrderSheet } from "@/components/layout/order-sheet";
 import { usePPP } from "@/context/ppp-store";
 import { businessJsonLd, pppBusiness } from "@/config/business";
 import { canonicalUrl } from "@/config/site";
+import { useBrand } from "@/context/brand";
+import { currentBrand, currentOrigin } from "@/lib/brand/current";
+import { brandJsonLd } from "@/lib/brand/schema";
+import { itemForClover } from "@/lib/brand/facts";
+import { FranchiseShell } from "@/components/franchise/franchise-shell";
+import { BrandStorePage } from "@/components/franchise/brand-store";
+import { brandSeo } from "@/lib/brand/facts";
+import type { Brand } from "@/config/brands";
+
+/** Home of a franchise domain: the brand's store page, its schema.org and its own canonical address. */
+function franchiseHomeHead(brand: Brand) {
+  const { title, description } = brandSeo(brand);
+  const image = itemForClover(brand.heroItems[0] ?? "")?.image;
+  return {
+    meta: [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:url", content: canonicalUrl("/") },
+      ...(image ? [{ property: "og:image", content: `${currentOrigin()}${image}` }] : []),
+    ],
+    links: [{ rel: "canonical", href: canonicalUrl("/") }],
+    scripts: [{ type: "application/ld+json", children: JSON.stringify(brandJsonLd(brand)) }],
+  };
+}
 
 export const Route = createFileRoute("/")({
-  head: () => ({
+  head: () => {
+    const brand = currentBrand();
+    return brand.id === "ppp" ? pppHomeHead() : franchiseHomeHead(brand);
+  },
+  component: Index,
+});
+
+function pppHomeHead() {
+  return {
     meta: [
       { title: "PPP Pizzeria Montreal | Pizza, Chicken & Poutine in NDG" },
       {
@@ -50,11 +84,22 @@ export const Route = createFileRoute("/")({
     ],
     links: [{ rel: "canonical", href: canonicalUrl("/") }],
     scripts: [{ type: "application/ld+json", children: JSON.stringify(businessJsonLd()) }],
-  }),
-  component: Index,
-});
+  };
+}
 
 function Index() {
+  const brand = useBrand();
+  if (brand.id !== "ppp") {
+    return (
+      <FranchiseShell>
+        <BrandStorePage brand={brand} origin={currentOrigin()} />
+      </FranchiseShell>
+    );
+  }
+  return <PPPIndex />;
+}
+
+function PPPIndex() {
   return (
     <div id="top" className="min-h-screen bg-background pb-16 lg:pb-0">
       <PromoTicker />

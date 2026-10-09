@@ -15,6 +15,11 @@ import { PPPProvider, usePPP } from "../context/ppp-store";
 import { CustomerSessionProvider } from "../lib/customer/session";
 import { AcquisitionPopup } from "../components/acquisition/acquisition-popup";
 import { htmlLangFor } from "../i18n/types";
+import { BrandProvider } from "../context/brand";
+import { currentBrand, currentBrandId, currentIsPreview } from "../lib/brand/current";
+import { brandMarkDataUrl } from "../components/brand/brand-mark";
+import { brandSeo } from "../lib/brand/facts";
+import type { Brand, BrandId } from "../config/brands";
 
 function NotFoundComponent() {
   return (
@@ -76,8 +81,69 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
+/** Brand colours over the PPP theme (styles.css): buttons, focus ring, gradient words. */
+function brandCss(brand: Brand): string {
+  return (
+    `:root{--primary:${brand.primary};--ring:${brand.primary};--accent:${brand.accent};` +
+    `--gradient-flame:linear-gradient(100deg,${brand.accent},${brand.accent2});` +
+    `--shadow-glow:0 0 0 1px ${brand.primary}59,0 18px 50px -18px ${brand.primary}99}`
+  );
+}
+
+/** Head of a franchise brand (PPP keeps its own head, pppHead below). */
+function franchiseHead(brand: Brand, preview: boolean) {
+  const { title, description } = brandSeo(brand);
+  return {
+    meta: [
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title },
+      { name: "description", content: description },
+      { name: "author", content: brand.name },
+      { property: "og:site_name", content: brand.name },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:type", content: "website" },
+      { property: "og:locale", content: "fr_CA" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "theme-color", content: "#0a0a0a" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: brand.name },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      ...(preview ? [{ name: "robots", content: "noindex, nofollow" }] : []),
+    ],
+    links: [
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" as const },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700;800&display=swap",
+      },
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/svg+xml", href: brandMarkDataUrl(brand) },
+    ],
+    styles: [{ children: brandCss(brand) }],
+  };
+}
+
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient; brandId?: BrandId }>()({
+  // The domain picks the brand (src/config/brands.ts); every page reads it from the router context.
+  beforeLoad: () => ({ brandId: currentBrandId() }),
+  // Preview addresses (sslip.io, preview.<domain>, localhost) are never indexed.
+  headers: () => (currentIsPreview() ? { "X-Robots-Tag": "noindex, nofollow" } : undefined),
+  head: () => {
+    const brand = currentBrand();
+    if (brand.id !== "ppp") return franchiseHead(brand, currentIsPreview());
+    return pppHead();
+  },
+  shellComponent: RootShell,
+  component: RootComponent,
+  notFoundComponent: NotFoundComponent,
+  errorComponent: ErrorComponent,
+});
+
+function pppHead() {
+  return {
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -103,7 +169,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" as const },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700;800&display=swap",
@@ -116,16 +182,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/icons/ppp-512.png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
     ],
-  }),
-  shellComponent: RootShell,
-  component: RootComponent,
-  notFoundComponent: NotFoundComponent,
-  errorComponent: ErrorComponent,
-});
+  };
+}
 
 function RootShell({ children }: { children: ReactNode }) {
+  // French first on the franchise domains (Québec); PPP's site keeps English first.
+  const { brandId } = Route.useRouteContext();
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={brandId && brandId !== "ppp" ? "fr-CA" : "en"} suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
@@ -138,18 +202,21 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+  const { queryClient, brandId } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PPPProvider>
-        <CustomerSessionProvider>
-          <HtmlLangSync />
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-          <AcquisitionPopup />
-        </CustomerSessionProvider>
-      </PPPProvider>
+      <BrandProvider brandId={brandId ?? "ppp"}>
+        <PPPProvider>
+          <CustomerSessionProvider>
+            <HtmlLangSync />
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+            {/* PPP's own sign-up offer: only on PPP's domain. */}
+            {(brandId ?? "ppp") === "ppp" && <AcquisitionPopup />}
+          </CustomerSessionProvider>
+        </PPPProvider>
+      </BrandProvider>
     </QueryClientProvider>
   );
 }

@@ -11,6 +11,7 @@ import { locations, type Lang, type OrderMode } from "@/data/menu";
 import { NDG_LOCATION_ID, locationById, restaurantLocations } from "@/config/locations";
 import { track } from "@/lib/analytics";
 import { newLine, unitPriceFor, type CartLine, type LineSelections } from "@/lib/cart";
+import { useBrand } from "@/context/brand";
 import { keepKnownSelections } from "@/lib/modifiers";
 import { menuRepository } from "@/lib/menu-repository";
 import { isLang } from "@/i18n/types";
@@ -121,7 +122,11 @@ const defaults: Persisted = {
 const PPPContext = createContext<Store | null>(null);
 
 export function PPPProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<Persisted>(defaults);
+  // Franchise domains start in French (Québec); PPP keeps English. A saved choice still wins.
+  const brand = useBrand();
+  const [state, setState] = useState<Persisted>(() =>
+    brand.id === "ppp" ? defaults : { ...defaults, lang: "fr" },
+  );
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchSeed, setSearchSeed] = useState("");
   const [locationSheetOpen, setLocationSheetOpen] = useState(false);
