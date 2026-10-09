@@ -54,7 +54,9 @@ export function PPPLogo({
         />
       )}
       {withWordmark && (
-        <span className="font-display text-lg uppercase leading-none tracking-wide">{brand.name}</span>
+        <span className="font-display text-lg uppercase leading-none tracking-wide">
+          {brand.name}
+        </span>
       )}
     </span>
   );

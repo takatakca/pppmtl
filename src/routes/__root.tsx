@@ -113,7 +113,7 @@ function franchiseHead(brand: Brand, preview: boolean) {
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" as const },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700;800&display=swap",
@@ -168,7 +168,7 @@ function pppHead() {
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" as const },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700;800&display=swap",
@@ -185,8 +185,10 @@ function pppHead() {
 }
 
 function RootShell({ children }: { children: ReactNode }) {
+  // French first on the franchise domains (Québec); PPP's site keeps English first.
+  const { brandId } = Route.useRouteContext();
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={brandId && brandId !== "ppp" ? "fr-CA" : "en"} suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
@@ -205,12 +207,13 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <BrandProvider brandId={brandId ?? "ppp"}>
         <PPPProvider>
-        <CustomerSessionProvider>
-          <HtmlLangSync />
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-          <AcquisitionPopup />
-        </CustomerSessionProvider>
+          <CustomerSessionProvider>
+            <HtmlLangSync />
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+            {/* PPP's own sign-up offer: only on PPP's domain. */}
+            {(brandId ?? "ppp") === "ppp" && <AcquisitionPopup />}
+          </CustomerSessionProvider>
         </PPPProvider>
       </BrandProvider>
     </QueryClientProvider>

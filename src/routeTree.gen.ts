@@ -21,11 +21,13 @@ import { Route as FaqRouteImport } from './routes/faq'
 import { Route as FranchiseRouteImport } from './routes/franchise'
 import { Route as GiftCardsRouteImport } from './routes/gift-cards'
 import { Route as HelpRouteImport } from './routes/help'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as MenuRouteImport } from './routes/menu'
 import { Route as OffersRouteImport } from './routes/offers'
 import { Route as OrderRouteImport } from './routes/order'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as PhoneOrderRouteImport } from './routes/phone-order'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TrackRouteImport } from './routes/track'
@@ -37,6 +39,8 @@ import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as DevMenuAuditRouteImport } from './routes/dev.menu-audit'
 import { Route as LocationsIndexRouteImport } from './routes/locations.index'
 import { Route as LocationsSlugRouteImport } from './routes/locations.$slug'
+import { Route as MarquesIndexRouteImport } from './routes/marques.index'
+import { Route as MarquesBrandIdRouteImport } from './routes/marques.$brandId'
 import { Route as OrdersIndexRouteImport } from './routes/orders.index'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 import { Route as SupportIndexRouteImport } from './routes/support.index'
@@ -104,6 +108,11 @@ const HelpRoute = HelpRouteImport.update({
   path: '/help',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MenuRoute = MenuRouteImport.update({
   id: '/menu',
   path: '/menu',
@@ -127,6 +136,11 @@ const OrdersRoute = OrdersRouteImport.update({
 const PhoneOrderRoute = PhoneOrderRouteImport.update({
   id: '/phone-order',
   path: '/phone-order',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -184,6 +198,16 @@ const LocationsSlugRoute = LocationsSlugRouteImport.update({
   path: '/locations/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarquesIndexRoute = MarquesIndexRouteImport.update({
+  id: '/marques/',
+  path: '/marques/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarquesBrandIdRoute = MarquesBrandIdRouteImport.update({
+  id: '/marques/$brandId',
+  path: '/marques/$brandId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrdersIndexRoute = OrdersIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -229,11 +253,13 @@ export interface FileRoutesByFullPath {
   '/franchise': typeof FranchiseRoute
   '/gift-cards': typeof GiftCardsRoute
   '/help': typeof HelpRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
   '/orders': typeof OrdersRouteWithChildren
   '/phone-order': typeof PhoneOrderRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRouteWithChildren
   '/track': typeof TrackRoute
@@ -244,9 +270,11 @@ export interface FileRoutesByFullPath {
   '/admin/orders': typeof AdminOrdersRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
+  '/marques/$brandId': typeof MarquesBrandIdRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/support/order': typeof SupportOrderRoute
   '/locations/': typeof LocationsIndexRoute
+  '/marques/': typeof MarquesIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/support/': typeof SupportIndexRoute
   '/api/public/webhooks/clover': typeof ApiPublicWebhooksCloverRoute
@@ -265,10 +293,12 @@ export interface FileRoutesByTo {
   '/franchise': typeof FranchiseRoute
   '/gift-cards': typeof GiftCardsRoute
   '/help': typeof HelpRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
   '/phone-order': typeof PhoneOrderRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track': typeof TrackRoute
   '/account/forgot-password': typeof AccountForgotPasswordRoute
@@ -278,9 +308,11 @@ export interface FileRoutesByTo {
   '/admin/orders': typeof AdminOrdersRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
+  '/marques/$brandId': typeof MarquesBrandIdRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/support/order': typeof SupportOrderRoute
   '/locations': typeof LocationsIndexRoute
+  '/marques': typeof MarquesIndexRoute
   '/orders': typeof OrdersIndexRoute
   '/support': typeof SupportIndexRoute
   '/api/public/webhooks/clover': typeof ApiPublicWebhooksCloverRoute
@@ -300,11 +332,13 @@ export interface FileRoutesById {
   '/franchise': typeof FranchiseRoute
   '/gift-cards': typeof GiftCardsRoute
   '/help': typeof HelpRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/order': typeof OrderRoute
   '/orders': typeof OrdersRouteWithChildren
   '/phone-order': typeof PhoneOrderRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRouteWithChildren
   '/track': typeof TrackRoute
@@ -315,9 +349,11 @@ export interface FileRoutesById {
   '/admin/orders': typeof AdminOrdersRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
+  '/marques/$brandId': typeof MarquesBrandIdRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/support/order': typeof SupportOrderRoute
   '/locations/': typeof LocationsIndexRoute
+  '/marques/': typeof MarquesIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/support/': typeof SupportIndexRoute
   '/api/public/webhooks/clover': typeof ApiPublicWebhooksCloverRoute
@@ -338,11 +374,13 @@ export interface FileRouteTypes {
     | '/franchise'
     | '/gift-cards'
     | '/help'
+    | '/llms.txt'
     | '/menu'
     | '/offers'
     | '/order'
     | '/orders'
     | '/phone-order'
+    | '/robots.txt'
     | '/sitemap.xml'
     | '/support'
     | '/track'
@@ -353,9 +391,11 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/dev/menu-audit'
     | '/locations/$slug'
+    | '/marques/$brandId'
     | '/orders/$orderId'
     | '/support/order'
     | '/locations/'
+    | '/marques/'
     | '/orders/'
     | '/support/'
     | '/api/public/webhooks/clover'
@@ -374,10 +414,12 @@ export interface FileRouteTypes {
     | '/franchise'
     | '/gift-cards'
     | '/help'
+    | '/llms.txt'
     | '/menu'
     | '/offers'
     | '/order'
     | '/phone-order'
+    | '/robots.txt'
     | '/sitemap.xml'
     | '/track'
     | '/account/forgot-password'
@@ -387,9 +429,11 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/dev/menu-audit'
     | '/locations/$slug'
+    | '/marques/$brandId'
     | '/orders/$orderId'
     | '/support/order'
     | '/locations'
+    | '/marques'
     | '/orders'
     | '/support'
     | '/api/public/webhooks/clover'
@@ -408,11 +452,13 @@ export interface FileRouteTypes {
     | '/franchise'
     | '/gift-cards'
     | '/help'
+    | '/llms.txt'
     | '/menu'
     | '/offers'
     | '/order'
     | '/orders'
     | '/phone-order'
+    | '/robots.txt'
     | '/sitemap.xml'
     | '/support'
     | '/track'
@@ -423,9 +469,11 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/dev/menu-audit'
     | '/locations/$slug'
+    | '/marques/$brandId'
     | '/orders/$orderId'
     | '/support/order'
     | '/locations/'
+    | '/marques/'
     | '/orders/'
     | '/support/'
     | '/api/public/webhooks/clover'
@@ -445,11 +493,13 @@ export interface RootRouteChildren {
   FranchiseRoute: typeof FranchiseRoute
   GiftCardsRoute: typeof GiftCardsRoute
   HelpRoute: typeof HelpRoute
+  LlmsDottxtRoute: typeof LlmsDottxtRoute
   MenuRoute: typeof MenuRoute
   OffersRoute: typeof OffersRoute
   OrderRoute: typeof OrderRoute
   OrdersRoute: typeof OrdersRouteWithChildren
   PhoneOrderRoute: typeof PhoneOrderRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRouteWithChildren
   TrackRoute: typeof TrackRoute
@@ -460,7 +510,9 @@ export interface RootRouteChildren {
   AdminOrdersRoute: typeof AdminOrdersRoute
   DevMenuAuditRoute: typeof DevMenuAuditRoute
   LocationsSlugRoute: typeof LocationsSlugRoute
+  MarquesBrandIdRoute: typeof MarquesBrandIdRoute
   LocationsIndexRoute: typeof LocationsIndexRoute
+  MarquesIndexRoute: typeof MarquesIndexRoute
   ApiPublicWebhooksCloverRoute: typeof ApiPublicWebhooksCloverRoute
   ApiPublicWebhooksProviderRoute: typeof ApiPublicWebhooksProviderRoute
 }
@@ -551,6 +603,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/menu': {
       id: '/menu'
       path: '/menu'
@@ -584,6 +643,13 @@ declare module '@tanstack/react-router' {
       path: '/phone-order'
       fullPath: '/phone-order'
       preLoaderRoute: typeof PhoneOrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -661,6 +727,20 @@ declare module '@tanstack/react-router' {
       path: '/locations/$slug'
       fullPath: '/locations/$slug'
       preLoaderRoute: typeof LocationsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marques/': {
+      id: '/marques/'
+      path: '/marques'
+      fullPath: '/marques/'
+      preLoaderRoute: typeof MarquesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marques/$brandId': {
+      id: '/marques/$brandId'
+      path: '/marques/$brandId'
+      fullPath: '/marques/$brandId'
+      preLoaderRoute: typeof MarquesBrandIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/orders/': {
@@ -747,11 +827,13 @@ const rootRouteChildren: RootRouteChildren = {
   FranchiseRoute: FranchiseRoute,
   GiftCardsRoute: GiftCardsRoute,
   HelpRoute: HelpRoute,
+  LlmsDottxtRoute: LlmsDottxtRoute,
   MenuRoute: MenuRoute,
   OffersRoute: OffersRoute,
   OrderRoute: OrderRoute,
   OrdersRoute: OrdersRouteWithChildren,
   PhoneOrderRoute: PhoneOrderRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRouteWithChildren,
   TrackRoute: TrackRoute,
@@ -762,7 +844,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminOrdersRoute: AdminOrdersRoute,
   DevMenuAuditRoute: DevMenuAuditRoute,
   LocationsSlugRoute: LocationsSlugRoute,
+  MarquesBrandIdRoute: MarquesBrandIdRoute,
   LocationsIndexRoute: LocationsIndexRoute,
+  MarquesIndexRoute: MarquesIndexRoute,
   ApiPublicWebhooksCloverRoute: ApiPublicWebhooksCloverRoute,
   ApiPublicWebhooksProviderRoute: ApiPublicWebhooksProviderRoute,
 }

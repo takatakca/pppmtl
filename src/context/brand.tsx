@@ -12,9 +12,10 @@ import {
   type Kitchen,
   type OrderLink,
 } from "@/config/brands";
-import { cloverItemMap } from "@/config/clover-item-map";
-import { menuRepository } from "@/lib/menu-repository";
+import { itemForClover } from "@/lib/brand/facts";
 import type { MenuItem } from "@/data/menu";
+
+export { itemForClover };
 import { orderingChannels, type OrderingChannelConfig } from "@/config/external-presence";
 
 const BrandContext = createContext<Brand>(getBrand(DEFAULT_BRAND_ID));
@@ -32,14 +33,6 @@ export function useBrand(): Brand {
 /** PPP keeps its own home page and links; every other brand uses the franchise front. */
 export function useIsPPP(): boolean {
   return useBrand().id === DEFAULT_BRAND_ID;
-}
-
-const siteIdByClover = new Map(cloverItemMap.map((s) => [s.clover, s.site]));
-
-/** Site menu item behind a Clover id (null when the slot does not exist). */
-export function itemForClover(cloverId: string): MenuItem | null {
-  const site = siteIdByClover.get(cloverId);
-  return site ? menuRepository.getItem(site) : null;
 }
 
 export function railItems(rail: BrandRail): MenuItem[] {

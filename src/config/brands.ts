@@ -118,7 +118,8 @@ export const GROUP_PHONE = { display: "(450) 999-4999", e164: "+14509994999" } a
  * before the delivery apps). null until the exact public address is confirmed: the button then opens the site's own
  * order page, which also pays on Clover (Hosted Checkout).
  */
-export const CLOVER_ONLINE_ORDERING_URL: string | null = null;
+export const CLOVER_ONLINE_ORDERING_URL: string | null =
+  (import.meta.env?.["VITE_CLOVER_ONLINE_ORDERING_URL"] as string | undefined)?.trim() || null;
 
 /** Hours from Uber Eats Manager (2026-10-07): NDG stores 4:30 PM–3:15 AM, Jean-Talon stores 9 AM–11 PM, daily. */
 export const KITCHENS: Record<KitchenId, Kitchen> = {
@@ -151,11 +152,16 @@ const both = (
   stLeonard: OrderLink[],
   google: { ndg?: string; stLeonard?: string } = {},
 ): Brand["kitchens"] => [
-  { kitchen: "ndg", orderLinks: ndg, googleCid: google.ndg },
-  { kitchen: "st-leonard", orderLinks: stLeonard, googleCid: google.stLeonard },
+  { kitchen: "ndg", orderLinks: ndg, ...(google.ndg ? { googleCid: google.ndg } : {}) },
+  {
+    kitchen: "st-leonard",
+    orderLinks: stLeonard,
+    ...(google.stLeonard ? { googleCid: google.stLeonard } : {}),
+  },
 ];
 
-const KITCHENS_FR = "dans nos cuisines de Notre-Dame-de-Grâce (NDG) et de Saint-Léonard, à Montréal";
+const KITCHENS_FR =
+  "dans nos cuisines de Notre-Dame-de-Grâce (NDG) et de Saint-Léonard, à Montréal";
 const KITCHENS_EN = "in our kitchens in Notre-Dame-de-Grâce (NDG) and Saint-Léonard, Montréal";
 
 export const BRANDS: Brand[] = [
@@ -177,7 +183,20 @@ export const BRANDS: Brand[] = [
     about: { en: [], fr: [] },
     menu: [],
     heroItems: [],
-    kitchens: [{ kitchen: "ndg", orderLinks: [], googleCid: "6093103527698124139" }],
+    kitchens: [
+      { kitchen: "ndg", orderLinks: [], googleCid: "6093103527698124139" },
+      {
+        kitchen: "st-leonard",
+        orderLinks: [
+          {
+            platform: "ubereats",
+            uuid: "627d09f0-8fb4-57f2-8ec1-6a71984ad267",
+            slug: "ppp-pizzeria-hochelaga",
+            live: true,
+          },
+        ],
+      },
+    ],
     phone: null,
     email: null,
   },
@@ -189,7 +208,10 @@ export const BRANDS: Brand[] = [
     primary: "#a3400c",
     accent: "#ffc93c",
     accent2: "#ff9a52",
-    cuisine: { en: ["Snack bar", "Burgers", "Hot dogs", "Poutine"], fr: ["Casse-croûte", "Burgers", "Hot-dogs", "Poutine"] },
+    cuisine: {
+      en: ["Snack bar", "Burgers", "Hot dogs", "Poutine"],
+      fr: ["Casse-croûte", "Burgers", "Hot-dogs", "Poutine"],
+    },
     hook: { en: ["Craving a", "Big Matt?"], fr: ["Envie d’un", "Big Matt ?"] },
     description: {
       fr: `OOEUF, c’est le casse-croûte de quartier : burgers, hot-dogs Michigan, poutines et rondelles d’oignon, préparés ${KITCHENS_FR}.`,
@@ -208,22 +230,52 @@ export const BRANDS: Brand[] = [
     menu: [
       {
         title: { fr: "Burgers", en: "Burgers" },
-        items: ["GEXZQ53GK93C0", "HM49MB9XYVMWT", "TNHW4S2PJPDET", "8RRW243269DSP", "DRWRTRPHWEBSG", "QXSABG94QS1F0"],
+        items: [
+          "GEXZQ53GK93C0",
+          "HM49MB9XYVMWT",
+          "TNHW4S2PJPDET",
+          "8RRW243269DSP",
+          "DRWRTRPHWEBSG",
+          "QXSABG94QS1F0",
+        ],
       },
       {
         title: { fr: "Hot-dogs et poutines", en: "Hot dogs and poutines" },
-        items: ["BCFQM8RZZ9GMP", "43472J9YW6ZA0", "H22MA0YY0R4TW", "7BF0CQ2WDEY2R", "0JWAY1VMJ2M2J", "RT6HGTMYT1F6E"],
+        items: [
+          "BCFQM8RZZ9GMP",
+          "43472J9YW6ZA0",
+          "H22MA0YY0R4TW",
+          "7BF0CQ2WDEY2R",
+          "0JWAY1VMJ2M2J",
+          "RT6HGTMYT1F6E",
+        ],
       },
     ],
     heroItems: ["GEXZQ53GK93C0", "0JWAY1VMJ2M2J", "BCFQM8RZZ9GMP"],
     kitchens: both(
       [
-        { platform: "ubereats", uuid: "6cbb374c-c3a2-5951-b88c-11142bd5121a", slug: "ooeufs-express-ndg", live: true },
+        {
+          platform: "ubereats",
+          uuid: "6cbb374c-c3a2-5951-b88c-11142bd5121a",
+          slug: "ooeufs-express-ndg",
+          live: true,
+        },
         { platform: "doordash", store: "34525477", live: true },
       ],
       [
-        { platform: "ubereats", uuid: "c5585882-ab06-5a2f-bbc2-66fe5ec9179c", slug: "ooeufs-express", live: false, note: "not visible" },
-        { platform: "doordash", store: "33597929", live: false, note: "inactive, reactivation asked" },
+        {
+          platform: "ubereats",
+          uuid: "c5585882-ab06-5a2f-bbc2-66fe5ec9179c",
+          slug: "ooeufs-express",
+          live: false,
+          note: "not visible",
+        },
+        {
+          platform: "doordash",
+          store: "33597929",
+          live: false,
+          note: "inactive, reactivation asked",
+        },
       ],
       { ndg: "8027317480379740171" },
     ),
@@ -257,11 +309,25 @@ export const BRANDS: Brand[] = [
     menu: [
       {
         title: { fr: "Trios", en: "Combos" },
-        items: ["ZR4DKS7XCBB06", "V04ZTAZFAJHER", "HAB6C0ZVQCY2E", "E98EWT00ES3FP", "XYC8N674P8Q2M"],
+        items: [
+          "ZR4DKS7XCBB06",
+          "V04ZTAZFAJHER",
+          "HAB6C0ZVQCY2E",
+          "E98EWT00ES3FP",
+          "XYC8N674P8Q2M",
+        ],
       },
       {
         title: { fr: "Frites et poutines", en: "Fries and poutines" },
-        items: ["N27C2RAXVV4Y8", "48BQ2M1BCYXWP", "A5D88EY1G2B1P", "GHMMXTN9XTCEW", "V8SW1SPAEYF5P", "AA5T55NBBQSCM", "JJRB835A5C4V2"],
+        items: [
+          "N27C2RAXVV4Y8",
+          "48BQ2M1BCYXWP",
+          "A5D88EY1G2B1P",
+          "GHMMXTN9XTCEW",
+          "V8SW1SPAEYF5P",
+          "AA5T55NBBQSCM",
+          "JJRB835A5C4V2",
+        ],
       },
     ],
     heroItems: ["V04ZTAZFAJHER", "JJRB835A5C4V2", "E98EWT00ES3FP"],
@@ -277,7 +343,10 @@ export const BRANDS: Brand[] = [
     primary: "#17633a",
     accent: "#9be08f",
     accent2: "#f3e19a",
-    cuisine: { en: ["Lebanese", "Shawarma", "Shish taouk"], fr: ["Libanais", "Shawarma", "Shish taouk"] },
+    cuisine: {
+      en: ["Lebanese", "Shawarma", "Shish taouk"],
+      fr: ["Libanais", "Shawarma", "Shish taouk"],
+    },
     hook: { en: ["Craving a", "shawarma?"], fr: ["Envie d’un", "shawarma ?"] },
     description: {
       fr: `Pi Pita sert la cuisine de rue libanaise : pitas et wraps shawarma, shish taouk et mixte, assiettes libanaises avec salade au choix, salades shish taouk et shawarma, et des options végétariennes, ${KITCHENS_FR}.`,
@@ -300,17 +369,35 @@ export const BRANDS: Brand[] = [
       },
       {
         title: { fr: "Assiettes et salades", en: "Plates and salads" },
-        items: ["4MY54W143VJKA", "KAHRY3GB43ZR8", "727Z9F3YVT1HW", "TZJTHVQVKRHBR", "9WJ119FVZ9CZG", "4BZ1WR4YF7QDT"],
+        items: [
+          "4MY54W143VJKA",
+          "KAHRY3GB43ZR8",
+          "727Z9F3YVT1HW",
+          "TZJTHVQVKRHBR",
+          "9WJ119FVZ9CZG",
+          "4BZ1WR4YF7QDT",
+        ],
       },
     ],
     heroItems: ["597X8A3860936", "727Z9F3YVT1HW", "9WJ119FVZ9CZG"],
     kitchens: both(
       [
-        { platform: "ubereats", uuid: "c8390129-1c18-5c51-800e-d9be32a865a3", slug: "pi-pita-ndg", live: true },
+        {
+          platform: "ubereats",
+          uuid: "c8390129-1c18-5c51-800e-d9be32a865a3",
+          slug: "pi-pita-ndg",
+          live: true,
+        },
         { platform: "doordash", store: "27986352", live: false, note: "inactive" },
       ],
       [
-        { platform: "ubereats", uuid: "b6b36ca0-bc57-50d0-a184-1d28bf74771f", slug: "pi-pita-hochelaga", live: false, note: "not visible" },
+        {
+          platform: "ubereats",
+          uuid: "b6b36ca0-bc57-50d0-a184-1d28bf74771f",
+          slug: "pi-pita-hochelaga",
+          live: false,
+          note: "not visible",
+        },
         { platform: "doordash", store: "33598679", live: false, note: "inactive" },
       ],
       { ndg: "2408837339277880870" },
@@ -326,7 +413,10 @@ export const BRANDS: Brand[] = [
     primary: "#b3261e",
     accent: "#8fe39a",
     accent2: "#ffffff",
-    cuisine: { en: ["Lebanese", "Family meals", "Shish taouk"], fr: ["Libanais", "Repas familiaux", "Shish taouk"] },
+    cuisine: {
+      en: ["Lebanese", "Family meals", "Shish taouk"],
+      fr: ["Libanais", "Repas familiaux", "Shish taouk"],
+    },
     hook: { en: ["Lebanese", "to share?"], fr: ["Libanais", "à partager ?"] },
     description: {
       fr: `Pita Libanais, ce sont les repas libanais à partager : quatre assiettes ou quatre pitas pour la famille, trios pour deux, et le shish taouk et le shawarma en sous-marin, en poutine ou sur pizza, ${KITCHENS_FR}.`,
@@ -348,17 +438,41 @@ export const BRANDS: Brand[] = [
         items: ["G52E2A8PG9WZC", "PJE3BX3HBY6XM", "4ZTKJ0YEVXXYP", "A9J45QQ10ZFD8"],
       },
       {
-        title: { fr: "Shish taouk et shawarma autrement", en: "Shish taouk and shawarma, other ways" },
-        items: ["8QY1VZ96HGJKR", "DMXXWSMB26250", "TFF125JTRPYZ6", "VNDJXW31BYDV8", "GQD4RH1JXB79R", "3KEZ2GZT59MC2"],
+        title: {
+          fr: "Shish taouk et shawarma autrement",
+          en: "Shish taouk and shawarma, other ways",
+        },
+        items: [
+          "8QY1VZ96HGJKR",
+          "DMXXWSMB26250",
+          "TFF125JTRPYZ6",
+          "VNDJXW31BYDV8",
+          "GQD4RH1JXB79R",
+          "3KEZ2GZT59MC2",
+        ],
       },
     ],
     heroItems: ["G52E2A8PG9WZC", "PJE3BX3HBY6XM", "TFF125JTRPYZ6"],
     kitchens: both(
       [
         { platform: "doordash", store: "28719391", live: false, note: "inactive (POS outage)" },
-        { platform: "ubereats", uuid: "ad89eb6f-9244-53fc-b6a7-cd0086e70b43", slug: "pita-libanais-montreal", live: false, note: "hidden" },
+        {
+          platform: "ubereats",
+          uuid: "ad89eb6f-9244-53fc-b6a7-cd0086e70b43",
+          slug: "pita-libanais-montreal",
+          live: false,
+          note: "hidden",
+        },
       ],
-      [{ platform: "ubereats", uuid: "c6b9e38d-15da-4771-9bcc-7cfa9f9abea9", slug: "pita-libanais-hochelaga", live: false, note: "hidden" }],
+      [
+        {
+          platform: "ubereats",
+          uuid: "c6b9e38d-15da-4771-9bcc-7cfa9f9abea9",
+          slug: "pita-libanais-hochelaga",
+          live: false,
+          note: "hidden",
+        },
+      ],
     ),
     phone: null,
     email: null,
@@ -390,20 +504,47 @@ export const BRANDS: Brand[] = [
     menu: [
       {
         title: { fr: "Assiettes et pitas", en: "Plates and pitas" },
-        items: ["1JBFM5YK1MSGT", "93A61ZY15KTWY", "D74FME072WNFE", "H5QAG8XDM7KC0", "R06FJ1J754K70", "DJY7QBZW0SCCG", "143A5SF8PBW3G"],
+        items: [
+          "1JBFM5YK1MSGT",
+          "93A61ZY15KTWY",
+          "D74FME072WNFE",
+          "H5QAG8XDM7KC0",
+          "R06FJ1J754K70",
+          "DJY7QBZW0SCCG",
+          "143A5SF8PBW3G",
+        ],
       },
       {
         title: { fr: "Gyros à votre façon", en: "Gyros your way" },
-        items: ["3X7W15NDS9YK4", "H9Q6YDCSNF218", "YVZKRHA5SZWCP", "GDW759EPRDWHW", "SH6288Z189A7W"],
+        items: [
+          "3X7W15NDS9YK4",
+          "H9Q6YDCSNF218",
+          "YVZKRHA5SZWCP",
+          "GDW759EPRDWHW",
+          "SH6288Z189A7W",
+        ],
       },
     ],
     heroItems: ["1JBFM5YK1MSGT", "R06FJ1J754K70", "3X7W15NDS9YK4"],
     kitchens: both(
       [
         { platform: "doordash", store: "32501513", live: false, note: "deactivated (tablet)" },
-        { platform: "ubereats", uuid: "f54cdb63-78cb-5ea3-b967-1b58d18c83cf", slug: "mythos-and-go-montreal", live: false, note: "hidden" },
+        {
+          platform: "ubereats",
+          uuid: "f54cdb63-78cb-5ea3-b967-1b58d18c83cf",
+          slug: "mythos-and-go-montreal",
+          live: false,
+          note: "hidden",
+        },
       ],
-      [{ platform: "ubereats", uuid: "203c8294-81e6-4fde-ad04-e7158a66f4b4", slug: "mythos-and-go-montreal", live: true }],
+      [
+        {
+          platform: "ubereats",
+          uuid: "203c8294-81e6-4fde-ad04-e7158a66f4b4",
+          slug: "mythos-and-go-montreal",
+          live: true,
+        },
+      ],
     ),
     phone: null,
     email: null,
@@ -417,7 +558,10 @@ export const BRANDS: Brand[] = [
     primary: "#0c6355",
     accent: "#6fe3c8",
     accent2: "#d4f57a",
-    cuisine: { en: ["Healthy", "Protein salads", "Vegetarian"], fr: ["Santé", "Salades protéinées", "Végétarien"] },
+    cuisine: {
+      en: ["Healthy", "Protein salads", "Vegetarian"],
+      fr: ["Santé", "Salades protéinées", "Végétarien"],
+    },
     hook: { en: ["Craving", "something fresh?"], fr: ["Envie de", "fraîcheur ?"] },
     description: {
       fr: `Nutrition Shake prépare des repas légers et protéinés : salades au poulet, au shish taouk, grecque et César, assiettes et wraps végétariens, eau et boissons froides, ${KITCHENS_FR}.`,
@@ -436,7 +580,14 @@ export const BRANDS: Brand[] = [
     menu: [
       {
         title: { fr: "Salades protéinées", en: "Protein salads" },
-        items: ["Q0RJH1DDQEEVY", "9WJ119FVZ9CZG", "3X7W15NDS9YK4", "QHACT24KE119P", "WRYSANG402512", "KHQHQGJ4A8RH8"],
+        items: [
+          "Q0RJH1DDQEEVY",
+          "9WJ119FVZ9CZG",
+          "3X7W15NDS9YK4",
+          "QHACT24KE119P",
+          "WRYSANG402512",
+          "KHQHQGJ4A8RH8",
+        ],
       },
       {
         title: { fr: "Assiettes, wraps et eau", en: "Plates, wraps and water" },
@@ -446,12 +597,27 @@ export const BRANDS: Brand[] = [
     heroItems: ["Q0RJH1DDQEEVY", "D74FME072WNFE", "3X7W15NDS9YK4"],
     kitchens: both(
       [
-        { platform: "ubereats", uuid: "58f2a0dd-a9da-5a27-a130-d858a52e18f9", slug: "nutri-shake-ndg", live: true },
+        {
+          platform: "ubereats",
+          uuid: "58f2a0dd-a9da-5a27-a130-d858a52e18f9",
+          slug: "nutri-shake-ndg",
+          live: true,
+        },
         { platform: "doordash", store: "27510307", live: true },
       ],
       [
-        { platform: "ubereats", uuid: "8c0a69ee-1667-5aa7-a8e6-7fdb707095da", slug: "nutri-shake-hochelaga", live: true },
-        { platform: "doordash", store: "33596565", live: false, note: "temporarily deactivated (POS outage)" },
+        {
+          platform: "ubereats",
+          uuid: "8c0a69ee-1667-5aa7-a8e6-7fdb707095da",
+          slug: "nutri-shake-hochelaga",
+          live: true,
+        },
+        {
+          platform: "doordash",
+          store: "33596565",
+          live: false,
+          note: "temporarily deactivated (POS outage)",
+        },
       ],
       { stLeonard: "17679975320192778617" },
     ),
@@ -486,21 +652,44 @@ export const BRANDS: Brand[] = [
     menu: [
       {
         title: { fr: "Glacé et sucré", en: "Icy and sweet" },
-        items: ["XBC44J0XGW846", "4RZHQEWZ5EZ8W", "FM3GRQBRXJT5M", "BMVW3SX774K7G", "E2D6NW8BY4ZNR"],
+        items: [
+          "XBC44J0XGW846",
+          "4RZHQEWZ5EZ8W",
+          "FM3GRQBRXJT5M",
+          "BMVW3SX774K7G",
+          "E2D6NW8BY4ZNR",
+        ],
       },
       {
         title: { fr: "Cheesecakes et gâteaux", en: "Cheesecakes and cakes" },
-        items: ["9BH4C37D32D98", "6JV0JDXBMS79A", "CN917JJCM514Y", "XKXMJ1EQ0XT9T", "9VT6C1M23DNAR", "Z68DXWMMA7B6W"],
+        items: [
+          "9BH4C37D32D98",
+          "6JV0JDXBMS79A",
+          "CN917JJCM514Y",
+          "XKXMJ1EQ0XT9T",
+          "9VT6C1M23DNAR",
+          "Z68DXWMMA7B6W",
+        ],
       },
     ],
     heroItems: ["4RZHQEWZ5EZ8W", "XBC44J0XGW846", "9BH4C37D32D98"],
     kitchens: both(
       [
-        { platform: "ubereats", uuid: "3ca49ac1-fb4c-562d-b066-0389875f24eb", slug: "bin-molle-%26-bin-dure-ndg", live: true },
+        {
+          platform: "ubereats",
+          uuid: "3ca49ac1-fb4c-562d-b066-0389875f24eb",
+          slug: "bin-molle-%26-bin-dure-ndg",
+          live: true,
+        },
         { platform: "doordash", store: "28108457", live: false, note: "inactive" },
       ],
       [
-        { platform: "ubereats", uuid: "7656b055-48d1-5f46-a6a7-2a0d23668c0b", slug: "bin-molle-%26-bin-dure-hochelaga", live: true },
+        {
+          platform: "ubereats",
+          uuid: "7656b055-48d1-5f46-a6a7-2a0d23668c0b",
+          slug: "bin-molle-%26-bin-dure-hochelaga",
+          live: true,
+        },
         { platform: "doordash", store: "33598151", live: false, note: "inactive" },
       ],
     ),
@@ -535,7 +724,14 @@ export const BRANDS: Brand[] = [
     menu: [
       {
         title: { fr: "Crêpes, gaufres et gâteaux", en: "Crêpes, waffles and cakes" },
-        items: ["FM3GRQBRXJT5M", "4RZHQEWZ5EZ8W", "PKW78B88KZHPY", "E7T25Y1XPHN3A", "9PZ89C9Y5VJA0", "9BH4C37D32D98"],
+        items: [
+          "FM3GRQBRXJT5M",
+          "4RZHQEWZ5EZ8W",
+          "PKW78B88KZHPY",
+          "E7T25Y1XPHN3A",
+          "9PZ89C9Y5VJA0",
+          "9BH4C37D32D98",
+        ],
       },
       {
         title: { fr: "Pour boire", en: "Drinks" },
@@ -546,7 +742,13 @@ export const BRANDS: Brand[] = [
     kitchens: both(
       [
         { platform: "doordash", store: "27986646", live: false, note: "inactive (POS outage)" },
-        { platform: "ubereats", uuid: "f9c5fa6b-8353-53f9-ac13-68596b3a21ae", slug: "ocrepe-montreal", live: false, note: "hidden" },
+        {
+          platform: "ubereats",
+          uuid: "f9c5fa6b-8353-53f9-ac13-68596b3a21ae",
+          slug: "ocrepe-montreal",
+          live: false,
+          note: "hidden",
+        },
       ],
       [{ platform: "doordash", store: "33596721", live: false, note: "inactive" }],
     ),
@@ -562,7 +764,10 @@ export const BRANDS: Brand[] = [
     primary: "#7a3e1d",
     accent: "#f0bf72",
     accent2: "#ffd9b3",
-    cuisine: { en: ["Pastry", "Cakes", "Cheesecakes"], fr: ["Pâtisserie", "Gâteaux", "Cheesecakes"] },
+    cuisine: {
+      en: ["Pastry", "Cakes", "Cheesecakes"],
+      fr: ["Pâtisserie", "Gâteaux", "Cheesecakes"],
+    },
     hook: { en: ["Craving", "cake?"], fr: ["Envie d’un", "gâteau ?"] },
     description: {
       fr: `La Viennoise (Gâteaux Montréal), c’est la pâtisserie du quartier : gâteaux Ferrero Rocher, red velvet, carotte, citron, Skor et cheesecakes, à la pointe ou entiers, préparés ${KITCHENS_FR}.`,
@@ -581,19 +786,48 @@ export const BRANDS: Brand[] = [
     menu: [
       {
         title: { fr: "Gâteaux", en: "Cakes" },
-        items: ["E7T25Y1XPHN3A", "Z68DXWMMA7B6W", "T12CC1Z7W38ZM", "QBQDDD7V8TG68", "9VT6C1M23DNAR", "PKW78B88KZHPY", "XG8BV51VSMRG4", "9PZ89C9Y5VJA0"],
+        items: [
+          "E7T25Y1XPHN3A",
+          "Z68DXWMMA7B6W",
+          "T12CC1Z7W38ZM",
+          "QBQDDD7V8TG68",
+          "9VT6C1M23DNAR",
+          "PKW78B88KZHPY",
+          "XG8BV51VSMRG4",
+          "9PZ89C9Y5VJA0",
+        ],
       },
-      { title: { fr: "Cheesecakes", en: "Cheesecakes" }, items: ["6JV0JDXBMS79A", "CN917JJCM514Y"] },
+      {
+        title: { fr: "Cheesecakes", en: "Cheesecakes" },
+        items: ["6JV0JDXBMS79A", "CN917JJCM514Y"],
+      },
     ],
     heroItems: ["E7T25Y1XPHN3A", "Z68DXWMMA7B6W", "6JV0JDXBMS79A"],
     kitchens: both(
       [
-        { platform: "ubereats", uuid: "c20d55f1-661a-56d6-b1db-bd792423b777", slug: "gateaux-montreal-ndg", live: true, note: "Uber store named Gâteaux Montreal (NDG)" },
+        {
+          platform: "ubereats",
+          uuid: "c20d55f1-661a-56d6-b1db-bd792423b777",
+          slug: "gateaux-montreal-ndg",
+          live: true,
+          note: "Uber store named Gâteaux Montreal (NDG)",
+        },
         { platform: "doordash", store: "28114454", live: false, note: "Gâteau Montréal, inactive" },
       ],
       [
-        { platform: "ubereats", uuid: "d4e00c50-971f-5eb4-afa2-d48231f98a48", slug: "gateaux-montreal-hochelaga", live: true, note: "Uber store named Gâteaux Montreal (Hochelaga), paused" },
-        { platform: "doordash", store: "33521453", live: false, note: "Gâteau Montréal, operations suspended" },
+        {
+          platform: "ubereats",
+          uuid: "d4e00c50-971f-5eb4-afa2-d48231f98a48",
+          slug: "gateaux-montreal-hochelaga",
+          live: true,
+          note: "Uber store named Gâteaux Montreal (Hochelaga), paused",
+        },
+        {
+          platform: "doordash",
+          store: "33521453",
+          live: false,
+          note: "Gâteau Montréal, operations suspended",
+        },
       ],
     ),
     phone: null,
@@ -607,7 +841,10 @@ export const BRANDS: Brand[] = [
     primary: "#b0251c",
     accent: "#ffd23f",
     accent2: "#8fe39a",
-    cuisine: { en: ["Mexican", "Tacos", "Burritos", "Nachos"], fr: ["Mexicain", "Tacos", "Burritos", "Nachos"] },
+    cuisine: {
+      en: ["Mexican", "Tacos", "Burritos", "Nachos"],
+      fr: ["Mexicain", "Tacos", "Burritos", "Nachos"],
+    },
     hook: { en: ["Craving", "tacos?"], fr: ["Envie de", "tacos ?"] },
     description: {
       fr: `Taco Mexican prépare tacos, burritos, quesadillas et nachos au poulet, au steak, au bœuf ou aux haricots noirs, ${KITCHENS_FR}.`,
@@ -626,18 +863,41 @@ export const BRANDS: Brand[] = [
     menu: [
       {
         title: { fr: "Tacos et burritos", en: "Tacos and burritos" },
-        items: ["JDE3K8K9ETDB2", "CC2JG7EYN9QTG", "9VT50FXQ4RFA6", "TJFWSWFXW2XDP", "D7D8QVXBP0HSJ", "Q8T19M23HZB8P"],
+        items: [
+          "JDE3K8K9ETDB2",
+          "CC2JG7EYN9QTG",
+          "9VT50FXQ4RFA6",
+          "TJFWSWFXW2XDP",
+          "D7D8QVXBP0HSJ",
+          "Q8T19M23HZB8P",
+        ],
       },
       {
-        title: { fr: "Quesadillas, nachos et trio familial", en: "Quesadillas, nachos and family trio" },
-        items: ["G9ZZ2BG8P5J7P", "7EF6BC6506X2A", "DAZQFAT9RX7DY", "43W3XWAZ78VKA", "HY7370H42A8PJ", "MT73HS8BAH52C"],
+        title: {
+          fr: "Quesadillas, nachos et trio familial",
+          en: "Quesadillas, nachos and family trio",
+        },
+        items: [
+          "G9ZZ2BG8P5J7P",
+          "7EF6BC6506X2A",
+          "DAZQFAT9RX7DY",
+          "43W3XWAZ78VKA",
+          "HY7370H42A8PJ",
+          "MT73HS8BAH52C",
+        ],
       },
     ],
     heroItems: ["JDE3K8K9ETDB2", "43W3XWAZ78VKA", "TJFWSWFXW2XDP"],
     kitchens: both(
       [
         { platform: "doordash", store: "30831008", live: false, note: "deactivated (integration)" },
-        { platform: "ubereats", uuid: "d2288211-7239-5e8e-97f1-df156c9ff71a", slug: "taco-mexican-montreal", live: false, note: "hidden" },
+        {
+          platform: "ubereats",
+          uuid: "d2288211-7239-5e8e-97f1-df156c9ff71a",
+          slug: "taco-mexican-montreal",
+          live: false,
+          note: "hidden",
+        },
       ],
       [{ platform: "doordash", store: "33597179", live: false, note: "inactive (POS outage)" }],
     ),
@@ -671,18 +931,38 @@ export const BRANDS: Brand[] = [
     menu: [
       {
         title: { fr: "Pizzas", en: "Pizzas" },
-        items: ["FYJ5QXV8R7VT2", "CZKGWVHP85VFT", "9Y4WYNJW8FG3P", "PV7K48EG1460E", "4CPFQG1YBKJZC", "KEZWKV1KF0YBW"],
+        items: [
+          "FYJ5QXV8R7VT2",
+          "CZKGWVHP85VFT",
+          "9Y4WYNJW8FG3P",
+          "PV7K48EG1460E",
+          "4CPFQG1YBKJZC",
+          "KEZWKV1KF0YBW",
+        ],
       },
       {
         title: { fr: "Pour partager", en: "To share" },
-        items: ["YDFQHHE9JCVEJ", "EMNACV94ZBWBM", "WYEF3AJ5BY34P", "YC4VER80RB8HW", "R7VQ76BQP03Q6", "BEJCK56NNWTQW"],
+        items: [
+          "YDFQHHE9JCVEJ",
+          "EMNACV94ZBWBM",
+          "WYEF3AJ5BY34P",
+          "YC4VER80RB8HW",
+          "R7VQ76BQP03Q6",
+          "BEJCK56NNWTQW",
+        ],
       },
     ],
     heroItems: ["FYJ5QXV8R7VT2", "YDFQHHE9JCVEJ", "R7VQ76BQP03Q6"],
     kitchens: both(
       [
         { platform: "doordash", store: "28519423", live: false, note: "inactive (POS outage)" },
-        { platform: "ubereats", uuid: "5d836bb5-7e95-5c65-a28f-d0066818349e", slug: "pizza-inntime-montreal", live: false, note: "hidden" },
+        {
+          platform: "ubereats",
+          uuid: "5d836bb5-7e95-5c65-a28f-d0066818349e",
+          slug: "pizza-inntime-montreal",
+          live: false,
+          note: "hidden",
+        },
       ],
       [],
     ),
@@ -716,7 +996,14 @@ export const BRANDS: Brand[] = [
     menu: [
       {
         title: { fr: "Combos pizza et poulet", en: "Pizza and chicken combos" },
-        items: ["5DJ702E4C6GGE", "26YJMPP5AB5D0", "K594K709BHENC", "WSB1KXAEQKEBT", "9RRZNJ8HDF1QT", "T7RZ6YCXJ1R2A"],
+        items: [
+          "5DJ702E4C6GGE",
+          "26YJMPP5AB5D0",
+          "K594K709BHENC",
+          "WSB1KXAEQKEBT",
+          "9RRZNJ8HDF1QT",
+          "T7RZ6YCXJ1R2A",
+        ],
       },
       {
         title: { fr: "Pizza, sous-marin et pain magique", en: "Pizza, sub and magic bread" },
@@ -727,7 +1014,14 @@ export const BRANDS: Brand[] = [
     kitchens: [
       {
         kitchen: "ndg",
-        orderLinks: [{ platform: "ubereats", uuid: "baa21fb9-e843-4667-895e-1fe7d3dbb0ce", slug: "pizza-algerie-montreal", live: true }],
+        orderLinks: [
+          {
+            platform: "ubereats",
+            uuid: "baa21fb9-e843-4667-895e-1fe7d3dbb0ce",
+            slug: "pizza-algerie-montreal",
+            live: true,
+          },
+        ],
       },
     ],
     phone: null,
@@ -742,7 +1036,10 @@ export const BRANDS: Brand[] = [
     primary: "#a3260f",
     accent: "#ffc145",
     accent2: "#ff7b54",
-    cuisine: { en: ["Fried chicken", "Wings", "Chicken burgers"], fr: ["Poulet frit", "Ailes", "Burgers poulet"] },
+    cuisine: {
+      en: ["Fried chicken", "Wings", "Chicken burgers"],
+      fr: ["Poulet frit", "Ailes", "Burgers poulet"],
+    },
     hook: { en: ["Craving", "fried chicken?"], fr: ["Envie de", "poulet frit ?"] },
     description: {
       fr: "Po Poulet, c’est le poulet frit croustillant à Saint-Léonard : poulet frit en 3, 4, 9 ou 15 morceaux avec frites, salade de chou et sauce, ailes et croquettes, burgers au poulet et salade poulet, au 5839 rue Jean-Talon Est, à Montréal.",
@@ -759,14 +1056,39 @@ export const BRANDS: Brand[] = [
       ],
     },
     menu: [
-      { title: { fr: "Poulet frit", en: "Fried chicken" }, items: ["1Z3Q6Z3XD36J8", "5632F0AR37HG4", "JE8906EWHC53T", "J7ANNVEQHJDKE", "9M2JQR3HE1VD4"] },
-      { title: { fr: "Burgers et salades", en: "Burgers and salads" }, items: ["HT19ENNG0E2QA", "ZMJFXFG7DZZJ4", "1FWV6D7D22ZA8", "Q0RJH1DDQEEVY", "YR956YC5NHQQG"] },
+      {
+        title: { fr: "Poulet frit", en: "Fried chicken" },
+        items: [
+          "1Z3Q6Z3XD36J8",
+          "5632F0AR37HG4",
+          "JE8906EWHC53T",
+          "J7ANNVEQHJDKE",
+          "9M2JQR3HE1VD4",
+        ],
+      },
+      {
+        title: { fr: "Burgers et salades", en: "Burgers and salads" },
+        items: [
+          "HT19ENNG0E2QA",
+          "ZMJFXFG7DZZJ4",
+          "1FWV6D7D22ZA8",
+          "Q0RJH1DDQEEVY",
+          "YR956YC5NHQQG",
+        ],
+      },
     ],
     heroItems: ["1Z3Q6Z3XD36J8", "HT19ENNG0E2QA", "J7ANNVEQHJDKE"],
     kitchens: [
       {
         kitchen: "st-leonard",
-        orderLinks: [{ platform: "doordash", store: "34494017", live: false, note: "Po Poulet Hochelaga, inactive, to become Po Poulet (Jean-Talon)" }],
+        orderLinks: [
+          {
+            platform: "doordash",
+            store: "34494017",
+            live: false,
+            note: "Po Poulet Hochelaga, inactive, to become Po Poulet (Jean-Talon)",
+          },
+        ],
       },
     ],
     phone: null,
@@ -798,16 +1120,51 @@ export const BRANDS: Brand[] = [
       ],
     },
     menu: [
-      { title: { fr: "Ailes et croquettes", en: "Wings and nuggets" }, items: ["PQTJ2AABECNZG", "9M2JQR3HE1VD4", "EF46DMNY50B54", "GSD85QSS9EY66", "9YX4SG4B5KGPC"] },
-      { title: { fr: "Trios et à-côtés", en: "Combos and sides" }, items: ["TXR37X7C4MFQ2", "K3GJ1FFGXMXH0", "N27C2RAXVV4Y8", "7BF0CQ2WDEY2R", "YR956YC5NHQQG"] },
+      {
+        title: { fr: "Ailes et croquettes", en: "Wings and nuggets" },
+        items: [
+          "PQTJ2AABECNZG",
+          "9M2JQR3HE1VD4",
+          "EF46DMNY50B54",
+          "GSD85QSS9EY66",
+          "9YX4SG4B5KGPC",
+        ],
+      },
+      {
+        title: { fr: "Trios et à-côtés", en: "Combos and sides" },
+        items: [
+          "TXR37X7C4MFQ2",
+          "K3GJ1FFGXMXH0",
+          "N27C2RAXVV4Y8",
+          "7BF0CQ2WDEY2R",
+          "YR956YC5NHQQG",
+        ],
+      },
     ],
     heroItems: ["9M2JQR3HE1VD4", "TXR37X7C4MFQ2", "GSD85QSS9EY66"],
     kitchens: both(
       [
-        { platform: "doordash", store: "32501399", live: true, note: "Poulet Express, Active (closed)" },
-        { platform: "doordash", store: "28719392", live: false, note: "Poulet Poulet (NDG), inactive" },
+        {
+          platform: "doordash",
+          store: "32501399",
+          live: true,
+          note: "Poulet Express, Active (closed)",
+        },
+        {
+          platform: "doordash",
+          store: "28719392",
+          live: false,
+          note: "Poulet Poulet (NDG), inactive",
+        },
       ],
-      [{ platform: "doordash", store: "33597093", live: false, note: "Poulet Poulet (Hochelaga) at 5839 Jean-Talon, inactive" }],
+      [
+        {
+          platform: "doordash",
+          store: "33597093",
+          live: false,
+          note: "Poulet Poulet (Hochelaga) at 5839 Jean-Talon, inactive",
+        },
+      ],
     ),
     phone: null,
     email: null,
@@ -821,7 +1178,10 @@ export const BRANDS: Brand[] = [
     primary: "#6b4226",
     accent: "#f2c48d",
     accent2: "#e8a87c",
-    cuisine: { en: ["Latin American", "Empanadas", "Nachos"], fr: ["Latino-américain", "Empanadas", "Nachos"] },
+    cuisine: {
+      en: ["Latin American", "Empanadas", "Nachos"],
+      fr: ["Latino-américain", "Empanadas", "Nachos"],
+    },
     hook: { en: ["Craving", "empanadas?"], fr: ["Envie", "d’empanadas ?"] },
     description: {
       fr: `Café Bolon propose des bouchées d’inspiration latino-américaine : empanadas, quesadillas, nachos et burritos au bœuf, au steak ou aux haricots noirs, poutine et sous-marin tacos, et des crêpes et gaufres pour le dessert, ${KITCHENS_FR}.`,
@@ -840,20 +1200,46 @@ export const BRANDS: Brand[] = [
     menu: [
       {
         title: { fr: "Bouchées latino", en: "Latin bites" },
-        items: ["GRY1026TH1T6M", "NRZZ3XN458F8E", "PSV66A91RNA7E", "XN2YG06BHX63W", "TQ3WPBPYVFH20", "CSH40D9HQ784J"],
+        items: [
+          "GRY1026TH1T6M",
+          "NRZZ3XN458F8E",
+          "PSV66A91RNA7E",
+          "XN2YG06BHX63W",
+          "TQ3WPBPYVFH20",
+          "CSH40D9HQ784J",
+        ],
       },
       {
         title: { fr: "Repas tacos et desserts", en: "Taco meals and desserts" },
-        items: ["XTQBFGSREN6WP", "9CJ0N85E1WPNY", "BGMKG4QVXZXV2", "FM3GRQBRXJT5M", "4RZHQEWZ5EZ8W"],
+        items: [
+          "XTQBFGSREN6WP",
+          "9CJ0N85E1WPNY",
+          "BGMKG4QVXZXV2",
+          "FM3GRQBRXJT5M",
+          "4RZHQEWZ5EZ8W",
+        ],
       },
     ],
     heroItems: ["GRY1026TH1T6M", "NRZZ3XN458F8E", "XTQBFGSREN6WP"],
     kitchens: both(
       [
-        { platform: "ubereats", uuid: "8d911a03-247c-53a2-92da-593808f33592", slug: "bolon-cafe-ndg", live: true },
+        {
+          platform: "ubereats",
+          uuid: "8d911a03-247c-53a2-92da-593808f33592",
+          slug: "bolon-cafe-ndg",
+          live: true,
+        },
         { platform: "doordash", store: "30831269", live: false, note: "deactivated" },
       ],
-      [{ platform: "ubereats", uuid: "8179598e-a40f-509e-8b03-59ce49d57d77", slug: "bolon-cafe-hochelaga", live: false, note: "not visible" }],
+      [
+        {
+          platform: "ubereats",
+          uuid: "8179598e-a40f-509e-8b03-59ce49d57d77",
+          slug: "bolon-cafe-hochelaga",
+          live: false,
+          note: "not visible",
+        },
+      ],
       { ndg: "13512885180808196559", stLeonard: "9510640660342127576" },
     ),
     phone: null,
@@ -885,10 +1271,21 @@ export const BRANDS: Brand[] = [
       ],
     },
     menu: [
-      { title: { fr: "Bouchées", en: "Snacks" }, items: ["RGHG7YHPHPY1A", "0WJWVRF0E30HY", "GRY1026TH1T6M"] },
+      {
+        title: { fr: "Bouchées", en: "Snacks" },
+        items: ["RGHG7YHPHPY1A", "0WJWVRF0E30HY", "GRY1026TH1T6M"],
+      },
       {
         title: { fr: "Grillades et à-côtés", en: "Grill and sides" },
-        items: ["H5QAG8XDM7KC0", "D74FME072WNFE", "93A61ZY15KTWY", "DMC178ED7GTPC", "YR956YC5NHQQG", "N27C2RAXVV4Y8", "Z98BT09DS5GRT"],
+        items: [
+          "H5QAG8XDM7KC0",
+          "D74FME072WNFE",
+          "93A61ZY15KTWY",
+          "DMC178ED7GTPC",
+          "YR956YC5NHQQG",
+          "N27C2RAXVV4Y8",
+          "Z98BT09DS5GRT",
+        ],
       },
     ],
     heroItems: ["H5QAG8XDM7KC0", "RGHG7YHPHPY1A", "0WJWVRF0E30HY"],
@@ -912,11 +1309,7 @@ export function getBrand(id: BrandId): Brand {
  * `ooeuf-ca.localhost`). Anything else is PPP.
  */
 export function resolveBrandId(rawHost: string | null | undefined): BrandId {
-  const host = (rawHost ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/:\d+$/, "")
-    .replace(/\.$/, "");
+  const host = (rawHost ?? "").trim().toLowerCase().replace(/:\d+$/, "").replace(/\.$/, "");
   if (!host) return DEFAULT_BRAND_ID;
 
   const bare = host.replace(/^(www|preview)\./, "");
@@ -936,7 +1329,12 @@ export function resolveBrandId(rawHost: string | null | undefined): BrandId {
 /** True on preview hosts (never indexed by search engines). */
 export function isPreviewHost(rawHost: string | null | undefined): boolean {
   const host = (rawHost ?? "").toLowerCase().replace(/:\d+$/, "");
-  return /\.(sslip|nip)\.io$/.test(host) || host.startsWith("preview.") || host.endsWith(".localhost") || host === "localhost";
+  return (
+    /\.(sslip|nip)\.io$/.test(host) ||
+    host.startsWith("preview.") ||
+    host.endsWith(".localhost") ||
+    host === "localhost"
+  );
 }
 
 export function brandOrigin(brand: Brand): string {
@@ -970,17 +1368,34 @@ export function uuidToBase64Url(uuid: string): string {
   const hex = uuid.replace(/-/g, "");
   if (!/^[0-9a-f]{32}$/i.test(hex)) throw new Error(`bad uuid ${uuid}`);
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-  const bytes = hex.match(/../g)!.map((h) => parseInt(h, 16));
+  const bytes = (hex.match(/../g) ?? []).map((h) => parseInt(h, 16));
+  const at = (i: number) => alphabet.charAt(i);
   let out = "";
   for (let i = 0; i < bytes.length; i += 3) {
-    const [a, b = 0, c = 0] = bytes.slice(i, i + 3);
+    const [a = 0, b = 0, c = 0] = bytes.slice(i, i + 3);
     const n = (a << 16) | (b << 8) | c;
     const left = bytes.length - i;
-    out += alphabet[(n >> 18) & 63] + alphabet[(n >> 12) & 63];
-    if (left > 1) out += alphabet[(n >> 6) & 63];
-    if (left > 2) out += alphabet[n & 63];
+    out += at((n >> 18) & 63) + at((n >> 12) & 63);
+    if (left > 1) out += at((n >> 6) & 63);
+    if (left > 2) out += at(n & 63);
   }
   return out;
+}
+
+/**
+ * Kitchens listed on the "all restaurants" page of a site. Po Poulet's domain lists only Saint-Léonard (Po Poulet
+ * NDG is never shown or linked, owner's order).
+ */
+export function listKitchens(site: Brand): KitchenId[] {
+  return site.id === "popoulet" ? ["st-leonard"] : ["ndg", "st-leonard"];
+}
+
+/** The kitchen a site shows first: its own brand's first kitchen, if listed. */
+export function defaultKitchen(site: Brand, wanted?: KitchenId): KitchenId {
+  const options = listKitchens(site);
+  if (wanted && options.includes(wanted)) return wanted;
+  const own = site.kitchens.map((k) => k.kitchen).find((k) => options.includes(k));
+  return own ?? options[0] ?? "ndg";
 }
 
 /** Live links of one kitchen. */
@@ -995,7 +1410,7 @@ export function brandDishIds(brand: Brand): string[] {
 
 /** "16:30" → "16 h 30" (fr) / "4:30 PM" (en). */
 export function formatTime(hhmm: string, lang: "en" | "fr" | "es"): string {
-  const [h, m] = hhmm.split(":").map(Number);
+  const [h = 0, m = 0] = hhmm.split(":").map(Number);
   if (lang === "fr") return m ? `${h} h ${String(m).padStart(2, "0")}` : `${h} h`;
   const suffix = h < 12 ? "AM" : "PM";
   const h12 = h % 12 === 0 ? 12 : h % 12;

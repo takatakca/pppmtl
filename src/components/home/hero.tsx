@@ -9,9 +9,6 @@ import { orderSearch } from "@/lib/order-links";
 import { track } from "@/lib/analytics";
 import { pppBusiness } from "@/config/business";
 import { usePointerDepth } from "@/components/motion/reveal";
-import { itemForClover, useBrand } from "@/context/brand";
-import { KITCHENS } from "@/config/brands";
-import type { MenuItem } from "@/data/menu";
 
 const cravings = [
   { en: "Poutine", fr: "Poutine" },
@@ -26,17 +23,8 @@ export function Hero() {
   const { lang, mode, setMode, openSearch, openLocationSheet, locationId, t } = usePPP();
   const location = useSelectedLocation();
   const { containerRef, layer } = usePointerDepth(14);
-  const brand = useBrand();
-  const isPPP = brand.id === "ppp";
-  // PPP: its most ordered items and its deal. A franchise brand: its own dishes, no PPP deal.
-  const showcase = isPPP
-    ? menuRepository.getPopularItems(locationId, 3)
-    : brand.heroItems.map(itemForClover).filter((i): i is MenuItem => i !== null);
-  const topDeal = isPPP ? getDiscountedItems(locationId, 1)[0] : undefined;
-  const brandLang = lang === "fr" ? "fr" : "en";
-  const quickSearches = isPPP
-    ? cravings
-    : brand.cuisine.en.map((en, i) => ({ en, fr: brand.cuisine.fr[i] ?? en }));
+  const showcase = menuRepository.getPopularItems(locationId, 3);
+  const topDeal = getDiscountedItems(locationId, 1)[0];
   const itemCount = menuRepository.getItems(locationId).length;
   const [starA, starB, starC] = showcase;
 
@@ -65,12 +53,8 @@ export function Hero() {
         <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-8">
           <div className="min-w-0">
             <p className="rise-in flex flex-wrap items-center gap-x-3 gap-y-1 font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
-              <span>
-                {isPPP
-                  ? `${pppBusiness.neighbourhood} · 6280 Somerled`
-                  : brand.kitchens.map((k) => KITCHENS[k.kitchen].area).join(" · ")}
-              </span>
-              {isPPP && pppBusiness.googleProfile.rating != null && (
+              <span>{pppBusiness.neighbourhood} · 6280 Somerled</span>
+              {pppBusiness.googleProfile.rating != null && (
                 <span className="inline-flex items-center gap-1 text-muted-foreground">
                   <Star className="h-3 w-3 fill-current text-accent" />
                   {pppBusiness.googleProfile.rating.toFixed(1)}
@@ -78,40 +62,21 @@ export function Hero() {
               )}
             </p>
             <h1 className="mt-1.5 font-display text-[2.9rem] uppercase leading-[0.8] sm:text-8xl lg:text-[7rem]">
-              {isPPP ? (
-                <>
-                  <span className="line-rise block" style={{ animationDelay: "60ms" }}>
-                    {t("Craving", "Envie de")}
-                  </span>
-                  <span className="line-rise block" style={{ animationDelay: "170ms" }}>
-                    <span className="text-flame">{t("PPP?", "PPP?")}</span>
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="line-rise block" style={{ animationDelay: "60ms" }}>
-                    {brand.name}
-                  </span>
-                  <span
-                    className="line-rise mt-2 block text-[0.62em] leading-[0.9]"
-                    style={{ animationDelay: "170ms" }}
-                  >
-                    {brand.hook[brandLang][0]}{" "}
-                    <span className="text-flame">{brand.hook[brandLang][1]}</span>
-                  </span>
-                </>
-              )}
+              <span className="line-rise block" style={{ animationDelay: "60ms" }}>
+                {t("Craving", "Envie de")}
+              </span>
+              <span className="line-rise block" style={{ animationDelay: "170ms" }}>
+                <span className="text-flame">{t("PPP?", "PPP?")}</span>
+              </span>
             </h1>
             <p
               className="line-rise mt-1.5 max-w-xl text-xs text-muted-foreground sm:text-sm"
               style={{ animationDelay: "280ms" }}
             >
-              {isPPP
-                ? t(
-                    `Chicken · pizza · poutine, from our NDG kitchen — ${itemCount} items, pickup or delivery.`,
-                    `Poulet · pizza · poutine, de notre cuisine NDG — ${itemCount} articles, cueillette ou livraison.`,
-                  )
-                : brand.description[brandLang]}
+              {t(
+                `Chicken · pizza · poutine, from our NDG kitchen — ${itemCount} items, pickup or delivery.`,
+                `Poulet · pizza · poutine, de notre cuisine NDG — ${itemCount} articles, cueillette ou livraison.`,
+              )}
             </p>
 
             {/* Mobile campaign strip — real product, real price, no wasted height */}
@@ -198,7 +163,7 @@ export function Hero() {
               </button>
 
               <div className="no-scrollbar mt-2 flex gap-1.5 overflow-x-auto">
-                {quickSearches.map((c) => (
+                {cravings.map((c) => (
                   <button
                     key={c.en}
                     onClick={() => {

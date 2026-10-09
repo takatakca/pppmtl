@@ -43,20 +43,38 @@ export function BrandFooter() {
               </address>
             );
           })}
-          <nav aria-label={t("Site", "Site")} className="flex flex-wrap gap-x-5 gap-y-2 sm:col-span-2">
-            <a href="/#nos-plats" className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp">
+          <nav
+            aria-label={t("Site", "Site")}
+            className="flex flex-wrap gap-x-5 gap-y-2 sm:col-span-2"
+          >
+            <a
+              href="/#nos-plats"
+              className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp"
+            >
               {t("Our dishes", "Nos plats")}
             </a>
-            <Link to="/menu" className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp">
+            <Link
+              to="/menu"
+              className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp"
+            >
               {t("Full menu", "Menu complet")}
             </Link>
-            <Link to="/order" className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp">
+            <Link
+              to="/order"
+              className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp"
+            >
               {t("Order online", "Commander en ligne")}
             </Link>
-            <Link to="/gift-cards" className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp">
+            <Link
+              to="/gift-cards"
+              className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp"
+            >
               {t("Gift cards", "Cartes-cadeaux")}
             </Link>
-            <a href="/#commander" className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp">
+            <a
+              href="/#commander"
+              className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp"
+            >
               {t("Addresses", "Adresses")}
             </a>
           </nav>

@@ -10,7 +10,8 @@ const GLYPHS: Record<BrandIcon, (accent: string, primary: string) => string> = {
     `<path d="M7 5.5c3-3.2 9.4-2.2 11.2 1.8 1.8 3.4.7 7.3-2.4 9.3-3.2 2.6-9 2.6-11-.4-2.4-3-1.6-7.8 2.2-10.7z" fill="#fff"/><circle cx="12" cy="11.2" r="3.5" fill="${a}"/>`,
   burger: (a) =>
     `<path d="M4 11a8 6.2 0 0 1 16 0z" fill="#fff"/><rect x="3.4" y="12.4" width="17.2" height="2.8" rx="1.4" fill="${a}"/><path d="M4 16.6h16v.9a2.6 2.6 0 0 1-2.6 2.6H6.6A2.6 2.6 0 0 1 4 17.5z" fill="#fff"/>`,
-  crepe: (a) => `<path d="M3 18.5 12 4l9 14.5z" fill="#fff"/><path d="M6.3 16.4c3.4-2.2 8-2.2 11.4 0" stroke="${a}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`,
+  crepe: (a) =>
+    `<path d="M3 18.5 12 4l9 14.5z" fill="#fff"/><path d="M6.3 16.4c3.4-2.2 8-2.2 11.4 0" stroke="${a}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`,
   pita: (a) =>
     `<path d="M3 14.5a9 9 0 0 1 18 0z" fill="#fff"/><path d="M6 14c.8-2.2 2-2.6 3-.6s2-2.2 3-.2 2-2.2 3-.2 2-1.6 3 .9" stroke="${a}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`,
   skewer: (a) =>
@@ -23,7 +24,8 @@ const GLYPHS: Record<BrandIcon, (accent: string, primary: string) => string> = {
     `<path d="M2.5 18a9.5 9.5 0 0 1 19 0z" fill="#fff"/><path d="M5.2 12.4c1-1.6 2-1.6 3 0s2 1.6 3 0 2-1.6 3 0 2 1.6 3 0" stroke="${a}" stroke-width="1.9" fill="none" stroke-linecap="round"/>`,
   pizza: (a, p) =>
     `<path d="M12 21 3.6 5.8a17 17 0 0 1 16.8 0z" fill="#fff"/><path d="M3.6 5.8a17 17 0 0 1 16.8 0l-1 1.9a15 15 0 0 0-14.8 0z" fill="${a}"/><circle cx="10" cy="10.5" r="1.5" fill="${p}"/><circle cx="14" cy="12" r="1.3" fill="${p}"/><circle cx="12" cy="15.5" r="1.2" fill="${p}"/>`,
-  cone: (a) => `<path d="M8 11.4h8L12 21z" fill="${a}"/><circle cx="12" cy="8.6" r="4.6" fill="#fff"/>`,
+  cone: (a) =>
+    `<path d="M8 11.4h8L12 21z" fill="${a}"/><circle cx="12" cy="8.6" r="4.6" fill="#fff"/>`,
   drumstick: (a) =>
     `<path d="M15 3.4a5.8 5.8 0 0 1 3.1 9.6c-1.6 1.6-3.6 1.6-5.2.8l-2.1 2.1a2 2 0 1 1-2.5 2.5 2 2 0 1 1-2.5-2.5 2 2 0 1 1 2.5-2.5l2.1-2.1c-.8-1.6-.8-3.6.8-5.2A5.8 5.8 0 0 1 15 3.4z" fill="#fff"/><circle cx="15.2" cy="8.8" r="1.5" fill="${a}"/>`,
   cup: (a) =>
