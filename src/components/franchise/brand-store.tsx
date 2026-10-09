@@ -132,7 +132,8 @@ function OrderButtons({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {(hasNdg || primary.external) && (
+      {/* Clover online ordering first: pickup at the NDG kitchen only. */}
+      {hasNdg && (
         <a
           href={primary.external ? primary.url : "/order"}
           {...(primary.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}

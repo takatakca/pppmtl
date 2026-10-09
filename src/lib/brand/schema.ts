@@ -74,7 +74,8 @@ export function brandJsonLd(brand: Brand) {
       acceptsReservations: false,
       ...(googleCid ? { hasMap: googleMapsUrl(googleCid) } : {}),
       sameAs: [...(googleCid ? [googleMapsUrl(googleCid)] : []), ...links],
-      potentialAction: [order.url, ...links].map((target) => ({
+      // Clover online ordering is pickup at NDG only.
+      potentialAction: [...(id === "ndg" ? [order.url] : []), ...links].map((target) => ({
         "@type": "OrderAction",
         target: { "@type": "EntryPoint", urlTemplate: target },
         deliveryMethod: ["http://purl.org/goodrelations/v1#DeliveryModePickUp"],

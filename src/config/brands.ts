@@ -114,12 +114,14 @@ export interface Brand {
 export const GROUP_PHONE = { display: "(450) 999-4999", e164: "+14509994999" } as const;
 
 /**
- * Clover Online Ordering page of the On2GO.ca merchant (the owner's main "Commander" button on every brand site,
- * before the delivery apps). null until the exact public address is confirmed: the button then opens the site's own
- * order page, which also pays on Clover (Hosted Checkout).
+ * Clover Online Ordering page of the On2GO.ca merchant: the first "Commander" button of every brand that cooks at
+ * NDG (pickup at Somerled). Saint-Léonard has no Clover ordering, so it is never shown for that kitchen alone.
+ * Google agent, 2026-10-09 (private/google/ORDER_LINKS.md). The build variable VITE_CLOVER_ONLINE_ORDERING_URL
+ * can replace it.
  */
 export const CLOVER_ONLINE_ORDERING_URL: string | null =
-  (import.meta.env?.["VITE_CLOVER_ONLINE_ORDERING_URL"] as string | undefined)?.trim() || null;
+  (import.meta.env?.["VITE_CLOVER_ONLINE_ORDERING_URL"] as string | undefined)?.trim() ||
+  "https://www.clover.com/online-ordering/6280";
 
 /** Hours from Uber Eats Manager (2026-10-07): NDG stores 4:30 PM–3:15 AM, Jean-Talon stores 9 AM–11 PM, daily. */
 export const KITCHENS: Record<KitchenId, Kitchen> = {
@@ -692,6 +694,7 @@ export const BRANDS: Brand[] = [
         },
         { platform: "doordash", store: "33598151", live: false, note: "inactive" },
       ],
+      { ndg: "5723855720782944465" },
     ),
     phone: null,
     email: null,
@@ -758,8 +761,9 @@ export const BRANDS: Brand[] = [
   {
     id: "viennoise",
     domain: "viennoise.ca",
-    name: "La Viennoise",
-    alternateNames: ["Gâteaux Montréal", "Gâteau Montréal"],
+    // viennoise.ca carries Gâteau Montréal (owner: "gateaumtl = viennoise"), the name on its Google profile.
+    name: "Gâteau Montréal",
+    alternateNames: ["La Viennoise", "Gâteaux Montréal"],
     icon: "cake",
     primary: "#7a3e1d",
     accent: "#f0bf72",
@@ -770,8 +774,8 @@ export const BRANDS: Brand[] = [
     },
     hook: { en: ["Craving", "cake?"], fr: ["Envie d’un", "gâteau ?"] },
     description: {
-      fr: `La Viennoise (Gâteaux Montréal), c’est la pâtisserie du quartier : gâteaux Ferrero Rocher, red velvet, carotte, citron, Skor et cheesecakes, à la pointe ou entiers, préparés ${KITCHENS_FR}.`,
-      en: `La Viennoise (Gâteaux Montréal) is the neighbourhood pastry shop: Ferrero Rocher, red velvet, carrot, lemon and Skor cakes and cheesecakes, by the slice or whole, made ${KITCHENS_EN}.`,
+      fr: `Gâteau Montréal (La Viennoise), c’est la pâtisserie du quartier : gâteaux Ferrero Rocher, red velvet, carotte, citron, Skor et cheesecakes, à la pointe ou entiers, préparés ${KITCHENS_FR}.`,
+      en: `Gâteau Montréal (La Viennoise) is the neighbourhood pastry shop: Ferrero Rocher, red velvet, carrot, lemon and Skor cakes and cheesecakes, by the slice or whole, made ${KITCHENS_EN}.`,
     },
     about: {
       fr: [

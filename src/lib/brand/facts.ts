@@ -49,7 +49,10 @@ export function brandsInKitchen(kitchen: KitchenId): Brand[] {
   );
 }
 
-/** Where "Commander" goes first: Clover Online Ordering when its page is known, else the site's own order page. */
+/**
+ * Where "Commander" goes first: Clover Online Ordering (pickup at the NDG kitchen) when its page is known, else the
+ * site's own order page (also paid on Clover). Only for brands that cook at NDG.
+ */
 export function primaryOrderUrl(origin: string): { url: string; external: boolean } {
   return CLOVER_ONLINE_ORDERING_URL
     ? { url: CLOVER_ONLINE_ORDERING_URL, external: true }
@@ -102,8 +105,10 @@ export function llmsTxt(brand: Brand): string {
     );
   }
   lines.push("", "## Commander");
-  const primary = primaryOrderUrl(origin);
-  lines.push(`- Commande en ligne directe (paiement Clover) : ${primary.url}`);
+  if (brand.kitchens.some((k) => k.kitchen === "ndg")) {
+    const primary = primaryOrderUrl(origin);
+    lines.push(`- Commande en ligne directe (Clover, cueillette à NDG) : ${primary.url}`);
+  }
   for (const { kitchen: id } of brand.kitchens) {
     for (const link of liveLinks(brand, id)) {
       lines.push(

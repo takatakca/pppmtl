@@ -131,6 +131,16 @@ describe("links and facts", () => {
     expect(ld).toContain("google.com/maps?cid=8027317480379740171");
   });
 
+  it("puts Clover ordering first for NDG brands and never for Saint-Léonard-only Po Poulet", () => {
+    const pipita = BRANDS.find((b) => b.id === "pipita")!;
+    const popoulet = BRANDS.find((b) => b.id === "popoulet")!;
+    const llms = llmsTxt(pipita);
+    expect(llms).toContain("https://www.clover.com/online-ordering/6280");
+    expect(llms.indexOf("clover.com")).toBeLessThan(llms.indexOf("ubereats.com"));
+    expect(llmsTxt(popoulet)).not.toContain("clover.com");
+    expect(JSON.stringify(brandJsonLd(popoulet))).not.toContain("clover.com");
+  });
+
   it("lists every franchise brand in PPP's llms.txt", () => {
     const hub = hubLlmsTxt();
     for (const b of franchise) expect(hub).toContain(`https://${b.domain}/`);
