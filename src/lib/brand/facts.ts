@@ -79,21 +79,45 @@ export function extraPrice(item: ExtraItem, lang: "fr" | "en"): string {
     .join(" · ");
 }
 
-/** "NDG et Saint-Léonard" / "NDG and Saint-Léonard". */
+/** "NDG, Saint-Léonard et Hochelaga" / "NDG, Saint-Léonard and Hochelaga". */
 export function kitchenNames(brand: Brand, lang: "fr" | "en"): string {
   const names = brand.kitchens.map((k) =>
     lang === "fr" ? KITCHENS[k.kitchen].labelFr : KITCHENS[k.kitchen].labelEn,
   );
-  return names.join(lang === "fr" ? " et " : " and ");
+  return listJoin(names, lang);
 }
 
-/** "ouvert tard (jusqu’à 3 h 15 à NDG)": the latest closing time, never "24 h". */
+/** "a, b et c" / "a, b and c". */
+function listJoin(items: string[], lang: "fr" | "en"): string {
+  const rest = [...items];
+  const last = rest.pop();
+  if (!rest.length) return last ?? "";
+  return `${rest.join(", ")}${lang === "fr" ? " et " : " and "}${last}`;
+}
+
+/** NDG's hours when approved and past midnight: the only case where "ouvert tard" is true. */
+function lateAtNdg(brand: Brand): string | null {
+  const h = KITCHENS.ndg.hours;
+  if (!h || !brand.kitchens.some((k) => k.kitchen === "ndg")) return null;
+  return h.closes < h.opens ? h.closes : null;
+}
+
+/**
+ * "ouvert tard (jusqu’à 3 h 15 à NDG)" / "ouvert tous les jours jusqu’à 23 h à Saint-Léonard": only approved hours
+ * (a kitchen with `hours: null` is never described), never "24 h".
+ */
 export function lateText(brand: Brand, lang: "fr" | "en"): string {
-  const ndg = brand.kitchens.some((k) => k.kitchen === "ndg");
-  const k = KITCHENS[ndg ? "ndg" : "st-leonard"];
+  const late = lateAtNdg(brand);
+  if (late) {
+    const at = formatTime(late, lang);
+    return lang === "fr" ? `ouvert tard (jusqu’à ${at} à NDG)` : `open late (until ${at} in NDG)`;
+  }
+  const k = brand.kitchens.map((b) => KITCHENS[b.kitchen]).find((x) => x.hours);
+  if (!k?.hours) return lang === "fr" ? "heures : appelez-nous" : "hours: please call us";
   const at = formatTime(k.hours.closes, lang);
-  if (lang === "fr") return ndg ? `ouvert tard (jusqu’à ${at} à NDG)` : `ouvert jusqu’à ${at}`;
-  return ndg ? `open late (until ${at} in NDG)` : `open until ${at}`;
+  return lang === "fr"
+    ? `ouvert tous les jours jusqu’à ${at} à ${k.labelFr}`
+    : `open every day until ${at} in ${k.labelEn}`;
 }
 
 function cap(s: string): string {
@@ -126,17 +150,29 @@ export function h1Line(brand: Brand, lang: "fr" | "en"): string {
 export function brandSeo(brand: Brand): { title: string; description: string } {
   const place = mainPlace(brand);
   const ndg = place === "NDG";
-  const late = ndg ? "ouvert tard" : "ouvert jusqu’à 23 h";
-  let title = `${brand.name} : ${brand.titleHead} à ${place}, ${late} | Commander`;
-  if (title.length > 60) title = `${brand.name} : ${brand.titleHead} à ${place}, ${late}`;
-  if (title.length > 60) title = `${brand.name} : ${brand.titleHead} à ${place}`;
+  const lateAt = lateAtNdg(brand);
+  const sl = KITCHENS["st-leonard"].hours;
+  // Only approved hours appear in titles: NDG hours are null until the owner confirms them.
+  const late = lateAt
+    ? "ouvert tard"
+    : !ndg && sl
+      ? `ouvert jusqu’à ${formatTime(sl.closes, "fr")}`
+      : null;
+  const titles = [
+    late && `${brand.name} : ${brand.titleHead} à ${place}, ${late} | Commander`,
+    late && `${brand.name} : ${brand.titleHead} à ${place}, ${late}`,
+    `${brand.name} : ${brand.titleHead} à ${place} | Commander`,
+    `${brand.name} : ${brand.titleHead} à ${place}`,
+  ].filter((t): t is string => Boolean(t));
+  const title = titles.find((t) => t.length <= 60) ?? titles[titles.length - 1]!;
 
-  const where = ndg
-    ? "à NDG, jusqu’à 3 h"
-    : "tous les jours jusqu’à 23 h, à Saint-Léonard (Montréal)";
-  const lead = ndg
-    ? `${cap(brand.titleHead)} ouvert tard ${where}`
-    : `${cap(brand.titleHead)} ouvert ${where}`;
+  const lead = lateAt
+    ? `${cap(brand.titleHead)} ouvert tard à NDG, jusqu’à ${formatTime(lateAt, "fr")}`
+    : ndg
+      ? `${cap(brand.titleHead)} à NDG (Montréal)`
+      : sl
+        ? `${cap(brand.titleHead)} ouvert tous les jours jusqu’à ${formatTime(sl.closes, "fr")}, à Saint-Léonard (Montréal)`
+        : `${cap(brand.titleHead)} à Saint-Léonard (Montréal)`;
   const order = ndg
     ? `Commandez en ligne, cueillette${hasDelivery(brand) ? " ou livraison" : ""}.`
     : hasDelivery(brand)
@@ -173,6 +209,8 @@ export function brandKeywords(brand: Brand): string[] {
 export const AREA_SERVED: Record<KitchenId, string[]> = {
   ndg: ["Notre-Dame-de-Grâce", "Côte-des-Neiges", "Westmount", "Côte-Saint-Luc"],
   "st-leonard": ["Saint-Léonard", "Anjou", "Montréal-Nord", "Saint-Michel"],
+  // Proposed in the project fact sheet (§8b); the owner still confirms the delivery radius.
+  hochelaga: ["Hochelaga-Maisonneuve", "Centre-Sud", "Rosemont", "Mercier-Ouest"],
 };
 
 /** One factual paragraph: real restaurant, addresses, hours, phone, dishes. */
@@ -186,18 +224,24 @@ export function factualAbout(brand: Brand, lang: "fr" | "en"): string {
     .slice(0, 4)
     .map((i) => (lang === "fr" ? i.nameFr : i.nameEn).toLowerCase());
   if (lang === "fr") {
-    const where = kitchens.map((k) => `au ${k.street} (${k.area}, ${k.postalCode})`).join(" et ");
+    const where = listJoin(
+      kitchens.map((k) => `au ${k.street} (${k.area}, ${k.postalCode})`),
+      "fr",
+    );
     return (
       `${brand.name} est un restaurant fast food de Montréal avec sa cuisine sur place, ${where}. ` +
-      `Ouvert tous les jours, ${lateText(brand, "fr")}. Téléphone : ${phone}. ${hasDelivery(brand) ? "Livraison et cueillette." : "Pour emporter."}` +
+      `${cap(lateText(brand, "fr"))}. Téléphone : ${phone}. ${hasDelivery(brand) ? "Livraison et cueillette." : "Pour emporter."}` +
       (dishes.length ? ` Au menu : ${dishes.join(", ")}.` : "") +
       (extras.length ? ` Aussi : ${extras.join(", ")}.` : "")
     );
   }
-  const where = kitchens.map((k) => `${k.street} (${k.area}, ${k.postalCode})`).join(" and ");
+  const where = listJoin(
+    kitchens.map((k) => `${k.street} (${k.area}, ${k.postalCode})`),
+    "en",
+  );
   return (
     `${brand.name} is a fast-food restaurant in Montréal with its own kitchen at ${where}. ` +
-    `Open every day, ${lateText(brand, "en")}. Phone: ${phone}. ${hasDelivery(brand) ? "Delivery and pickup." : "Takeout."}` +
+    `${cap(lateText(brand, "en"))}. Phone: ${phone}. ${hasDelivery(brand) ? "Delivery and pickup." : "Takeout."}` +
     (dishes.length ? ` On the menu: ${dishes.join(", ")}.` : "") +
     (extras.length ? ` Also: ${extras.join(", ")}.` : "")
   );

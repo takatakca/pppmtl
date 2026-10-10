@@ -17,6 +17,7 @@ import {
   defaultKitchen,
   listKitchens,
   brandPhone,
+  hoursRange,
   hoursText,
   formatTime,
   type Brand,
@@ -249,10 +250,9 @@ export function BrandStorePage({ brand, origin }: { brand: Brand; origin: string
                 <Clock className="h-3.5 w-3.5 text-accent" />
                 <span className="text-muted-foreground">
                   {l === "fr" ? k.labelFr : k.labelEn} ·{" "}
-                  {t(
-                    `daily ${formatTime(k.hours.opens, "en")}–${formatTime(k.hours.closes, "en")}`,
-                    `tous les jours ${formatTime(k.hours.opens, "fr")} – ${formatTime(k.hours.closes, "fr")}`,
-                  )}
+                  {k.hours
+                    ? t(`daily ${hoursRange(k, "en")}`, `tous les jours ${hoursRange(k, "fr")}`)
+                    : t("call for hours", "appelez pour les heures")}
                 </span>
               </span>
             ))}
@@ -647,10 +647,9 @@ export function KitchenView({ kitchen, options }: { kitchen: KitchenId; options:
                         ? t("Full menu", "Menu complet")
                         : t(`${dishes} dishes`, `${dishes} plats`)}
                       {" · "}
-                      {t(
-                        `${formatTime(k.hours.opens, "en")}–${formatTime(k.hours.closes, "en")}`,
-                        `${formatTime(k.hours.opens, "fr")} – ${formatTime(k.hours.closes, "fr")}`,
-                      )}
+                      {k.hours
+                        ? t(hoursRange(k, "en") ?? "", hoursRange(k, "fr") ?? "")
+                        : t("Call for hours", "Appelez pour les heures")}
                     </p>
                   </div>
                 </article>

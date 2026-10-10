@@ -86,14 +86,19 @@ export function brandJsonLd(brand: Brand) {
         postalCode: k.postalCode,
         addressCountry: "CA",
       },
-      openingHoursSpecification: [
-        {
-          "@type": "OpeningHoursSpecification",
-          dayOfWeek: DAYS,
-          opens: k.hours.opens,
-          closes: k.hours.closes,
-        },
-      ],
+      // Only approved hours (null = not confirmed by the owner: no hours rather than wrong ones).
+      ...(k.hours
+        ? {
+            openingHoursSpecification: [
+              {
+                "@type": "OpeningHoursSpecification",
+                dayOfWeek: DAYS,
+                opens: k.hours.opens,
+                closes: k.hours.closes,
+              },
+            ],
+          }
+        : {}),
       hasMenu: { "@id": `${origin}/#menu` },
       acceptsReservations: false,
       ...(googleCid ? { hasMap: googleMapsUrl(googleCid) } : {}),

@@ -49,7 +49,7 @@ describe("brand registry", () => {
     const text = JSON.stringify(BRANDS);
     expect(text).not.toContain("27982486");
     const popoulet = BRANDS.find((b) => b.id === "popoulet")!;
-    expect(popoulet.kitchens.map((k) => k.kitchen)).toEqual(["st-leonard"]);
+    expect(popoulet.kitchens.map((k) => k.kitchen)).toEqual(["st-leonard", "hochelaga"]);
     expect(llmsTxt(popoulet)).not.toContain("Somerled");
     expect(JSON.stringify(brandJsonLd(popoulet))).not.toContain("Somerled");
   });
@@ -66,12 +66,13 @@ describe("brand registry", () => {
     for (const b of franchise) expect(b.primary, b.id).toMatch(/^#[0-9a-f]{6}$/i);
   });
 
-  it("puts every brand in at least one of the two kitchens", () => {
+  it("puts every brand in its kitchens, and every brand at Hochelaga (owner, 2026-10-10)", () => {
     expect(brandsInKitchen("ndg").length).toBeGreaterThan(10);
     expect(brandsInKitchen("st-leonard").length).toBeGreaterThan(10);
+    expect(brandsInKitchen("hochelaga").length).toBe(BRANDS.length);
     expect(brandsInKitchen("ndg").some((b) => b.id === "popoulet")).toBe(false);
     const popoulet = BRANDS.find((b) => b.id === "popoulet")!;
-    expect(listKitchens(popoulet)).toEqual(["st-leonard"]);
+    expect(listKitchens(popoulet)).toEqual(["st-leonard", "hochelaga"]);
     expect(defaultKitchen(popoulet, "ndg")).toBe("st-leonard");
     expect(defaultKitchen(BRANDS.find((b) => b.id === "ppp")!)).toBe("ndg");
   });
@@ -98,13 +99,27 @@ describe("fast food, late hours, dishes not in Clover yet", () => {
       expect(seo.title.length, b.id).toBeLessThanOrEqual(60);
       expect(seo.title, b.id).toContain(b.name);
       expect(seo.description.length, b.id).toBeLessThanOrEqual(155);
-      expect(seo.description, b.id).toMatch(/ouvert/i);
+      // NDG hours are not approved yet: no "ouvert tard" or "3 h" claim until they are.
+      if (!KITCHENS.ndg.hours) expect(seo.description, b.id).not.toMatch(/tard|(?<!\d)3 h/i);
       expect(h1Line(b, "fr"), b.id).toContain("fast food");
       expect(/livraison/i.test(seo.description), b.id).toBe(hasDelivery(b));
       expect(b.keywords.length, b.id).toBeGreaterThan(5);
     }
     const popoulet = BRANDS.find((x) => x.id === "popoulet")!;
     expect(brandSeo(popoulet).description).not.toMatch(/à 3 h|tard/);
+    expect(brandSeo(popoulet).description).toMatch(/ouvert tous les jours jusqu’à 23 h/);
+  });
+
+  it("publishes only owner-approved hours (Jean-Talon 10:00–23:00; NDG and Hochelaga not yet)", () => {
+    expect(KITCHENS["st-leonard"].hours).toEqual({ opens: "10:00", closes: "23:00" });
+    for (const b of BRANDS) {
+      const ld = JSON.stringify(brandJsonLd(b));
+      const llms = llmsTxt(b);
+      for (const late of ["03:15", "16:30", "09:00", "3 h 15", "16 h 30"]) {
+        expect(ld, b.id).not.toContain(late);
+        expect(llms, b.id).not.toContain(late);
+      }
+    }
   });
 
   it("shows OOEUF's breakfast and Nutrition Shake's drinks with real prices, in llms.txt and schema.org", () => {
