@@ -264,7 +264,7 @@ export const restaurantLocations: RestaurantLocation[] = [
     slug: "saint-leonard",
     displayName: "PPP Pizzeria — Saint-Léonard",
     neighborhood: "Saint-Léonard",
-    address: "5837 Rue Jean-Talon E",
+    address: "5839 Rue Jean-Talon E",
     city: "Saint-Léonard",
     province: "QC",
     postalCode: "H1S 1M4",
@@ -276,7 +276,7 @@ export const restaurantLocations: RestaurantLocation[] = [
     google: {
       listingUrl: null,
       reviewsUrl: null,
-      ...mapsFor("5837 Rue Jean-Talon E, Saint-Léonard, QC H1S 1M4"),
+      ...mapsFor("5839 Rue Jean-Talon E, Saint-Léonard, QC H1S 1M4"),
       rating: null,
       reviewCount: null,
       lastSyncedAt: null,
