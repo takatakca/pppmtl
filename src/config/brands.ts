@@ -153,8 +153,8 @@ export const CLOVER_ONLINE_ORDERING_URL: string | null =
 
 /**
  * Kitchen facts: canonical copy in the project fact sheet (restaurants/fact-sheet.md).
- * Owner, 2026-10-10: Jean-Talon 10:00–23:00 every day (walk-in food court, dine-in, terrace); Hochelaga serves every
- * brand. NDG and Hochelaga hours are not approved yet (Uber Eats Manager says NDG 4:30 PM–3:15 AM), so they stay null.
+ * Owner, 2026-10-10/11: NDG 16:00–03:00 and Jean-Talon 10:00–23:00 every day (walk-in food courts); Hochelaga serves
+ * every brand, its hours are not approved yet, so they stay null.
  */
 export const KITCHENS: Record<KitchenId, Kitchen> = {
   ndg: {
@@ -166,7 +166,7 @@ export const KITCHENS: Record<KitchenId, Kitchen> = {
     city: "Montréal",
     region: "QC",
     postalCode: "H3X 2B6",
-    hours: null,
+    hours: { opens: "16:00", closes: "03:00" },
   },
   "st-leonard": {
     id: "st-leonard",
