@@ -76,9 +76,17 @@ function buildItems(request: CheckoutRequest): { items: OrderItem[]; dropped: nu
       dropped += 1;
       return;
     }
+    // Never round a malformed quantity up into a paid order or exceed Clover's 50-unit limit.
+    if (!Number.isSafeInteger(line.quantity) || line.quantity < 1 || line.quantity > 50) {
+      dropped += 1;
+      return;
+    }
     const groups = item.modifierGroups ?? [];
     const selections = line.selections ?? {};
-    if (!checkSelections(groups, selections).ok) dropped += 1;
+    if (!checkSelections(groups, selections).ok) {
+      dropped += 1;
+      return;
+    }
     const modifiers = chosenOptions(groups, selections).flatMap(({ group, choices }) =>
       choices.map((choice) => ({
         groupId: group.id,
@@ -94,7 +102,7 @@ function buildItems(request: CheckoutRequest): { items: OrderItem[]; dropped: nu
       productId: item.id,
       providerProductId: item.cloverItemId ?? null,
       name: item.nameEn,
-      quantity: Math.max(1, Math.floor(line.quantity)),
+      quantity: line.quantity,
       unitPrice: toCents(item.price),
       modifiers,
       notes: (line.notes ?? "").slice(0, 240),
