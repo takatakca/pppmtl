@@ -8,8 +8,8 @@ const COOKIE = "ppp_admin_session";
 const LIFETIME_SECONDS = 8 * 60 * 60;
 
 function secrets(): { access: string; signing: string } | null {
-  const access = process.env.PPP_ADMIN_ACCESS_TOKEN?.trim() ?? "";
-  const signing = process.env.PPP_ADMIN_SESSION_SECRET?.trim() ?? "";
+  const access = process.env["PPP_ADMIN_ACCESS_TOKEN"]?.trim() ?? "";
+  const signing = process.env["PPP_ADMIN_SESSION_SECRET"]?.trim() ?? "";
   if (access.length < 32 || signing.length < 32 || access === signing) return null;
   return { access, signing };
 }
@@ -58,7 +58,7 @@ export function openAdminSession(credential: string): boolean {
   const payload = `${until}.${randomBytes(16).toString("hex")}`;
   setCookie(COOKIE, `${payload}.${signature(payload, config.signing)}`, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env["NODE_ENV"] === "production",
     sameSite: "strict",
     path: "/",
     maxAge: LIFETIME_SECONDS,
