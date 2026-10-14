@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AlertTriangle, CheckCircle2, MinusCircle, XCircle } from "lucide-react";
 import {
   getIntegrationSnapshot,
@@ -229,7 +229,8 @@ function IntegrationsAdmin() {
 
       {error && (
         <p className="mt-2 flex items-center gap-2 border border-border bg-card p-4 text-sm text-muted-foreground">
-          <AlertTriangle className="h-4 w-4" /> Status could not be loaded.
+          <AlertTriangle className="h-4 w-4" /> Access denied or unavailable.{" "}
+          <Link to="/admin/sign-in" className="underline">Sign in to operations</Link>
         </p>
       )}
 
