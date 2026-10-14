@@ -23,3 +23,18 @@ Line format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 ## Brand rule
 
 Everything visual or written for TAKATAK follows `BRAND.md` (logo, colours, tagline, services). Electric blue on deep navy; never the old gold "TK" logo; green is for status only.
+
+## Canonical project handoff (all agents)
+
+In addition to the short `WORKLOG.md` rules above, read the following before modifying this repository:
+
+1. `docs/AGENT_HANDOFF.md` — verified branch head, last completed work, live deployment status, next exact action.
+2. `docs/PROJECT_STATUS.md` — what exists versus what has been confirmed functional.
+3. `docs/TASK_QUEUE.md` — ordered incomplete work and GitHub issue links.
+4. `docs/DEPLOYMENT.md` — deployment safety, secrets names and external verification.
+5. `docs/DECISIONS.md` — owner-approved technical and brand decisions.
+
+Never edit `src/routeTree.gen.ts` by hand. Do not disclose production credentials.
+Before declaring a feature deployed, confirm the running version and its server-side functionality.
+Before ending each session, update `docs/AGENT_HANDOFF.md`, then `WORKLOG.md` with
+the actual pushed SHA and any unverified tests or deploy steps. Preserve other agents' changes.
