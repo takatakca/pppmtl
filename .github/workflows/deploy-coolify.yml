@@ -2,10 +2,11 @@ name: Deploy PPPMTL to Coolify
 
 # Coolify's native GitHub App already deploys on push when enabled.
 # Only enable this fallback when using Coolify's deploy webhook, NOT both.
+# This workflow runs only after the main-branch CI typecheck/lint/test/build job succeeds.
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  workflow_run:
+    workflows: ["PPPMTL CI"]
+    types: [completed]
 
 permissions:
   contents: read
@@ -16,7 +17,7 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ vars.PPPMTL_DEPLOY_VIA_ACTIONS == 'true' }}
+    if: ${{ vars.PPPMTL_DEPLOY_VIA_ACTIONS == 'true' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.event == 'push' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
