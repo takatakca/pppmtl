@@ -1,0 +1,40 @@
+name: PPPMTL CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pppmtl-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Typecheck, lint, tests and server build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NITRO_PRESET: node-server
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install pinned dependencies
+        run: bun install --frozen-lockfile
+      - name: Validate TypeScript
+        run: bun run typecheck
+      - name: Lint
+        run: bun run lint
+      - name: Test security, order, brand and integration behavior
+        run: bun run test
+      - name: Build Nitro Node server
+        run: bun run build
