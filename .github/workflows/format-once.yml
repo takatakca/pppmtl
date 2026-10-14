@@ -1,0 +1,60 @@
+name: PPPMTL One-Time Formatter
+
+# Explicitly initiated by the commit that introduces this file ([format]).
+# Runs once, commits only selected source formatting changes and never force-pushes.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: contains(github.event.head_commit.message, '[format]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Normalize project security and order changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          bunx prettier --write \
+            src/lib/orders/__tests__/order-engine.test.ts \
+            src/lib/orders/order-service.ts \
+            src/lib/orders/orders.functions.ts \
+            src/lib/orders/validation.ts \
+            src/lib/security/admin.server.ts \
+            src/lib/security/admin.functions.ts \
+            src/lib/security/order-access.server.ts \
+            src/lib/security/__tests__/access.test.ts \
+            src/routes/admin.sign-in.tsx \
+            src/routes/admin.orders.tsx \
+            src/routes/admin.integrations.tsx
+          if git diff --quiet; then
+            echo "Files were already formatted."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            src/lib/orders/__tests__/order-engine.test.ts \
+            src/lib/orders/order-service.ts \
+            src/lib/orders/orders.functions.ts \
+            src/lib/orders/validation.ts \
+            src/lib/security/admin.server.ts \
+            src/lib/security/admin.functions.ts \
+            src/lib/security/order-access.server.ts \
+            src/lib/security/__tests__/access.test.ts \
+            src/routes/admin.sign-in.tsx \
+            src/routes/admin.orders.tsx \
+            src/routes/admin.integrations.tsx
+          git commit -m "style(pppmtl): normalize security and order files with Prettier"
+          git push origin HEAD:main
