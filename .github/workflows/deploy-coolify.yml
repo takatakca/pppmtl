@@ -21,6 +21,23 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Confirm CI verified the current main commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERIFIED_SHA: ${{ github.event.workflow_run.head_sha }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          MAIN_SHA="$(curl --fail --silent --show-error \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${REPO}/branches/main" \
+            | python3 -c 'import sys,json; print(json.load(sys.stdin)["commit"]["sha"])')"
+          if [ "${VERIFIED_SHA}" != "${MAIN_SHA}" ]; then
+            echo "::error::The successful CI result was for an outdated commit; refusing deployment."
+            exit 1
+          fi
       - name: Check deployment credentials
         env:
           DEPLOY_WEBHOOK: ${{ secrets.PPPMTL_COOLIFY_DEPLOY_WEBHOOK }}
