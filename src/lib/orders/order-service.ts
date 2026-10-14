@@ -164,7 +164,10 @@ export function validateOrder(request: CheckoutRequest): ValidationReport {
 }
 
 /** 2 — CREATE. An internal order exists before any provider is contacted. */
-export function createOrder(request: CheckoutRequest, checkoutScope = ""): OrderResult<InternalOrder> {
+export function createOrder(
+  request: CheckoutRequest,
+  checkoutScope = "",
+): OrderResult<InternalOrder> {
   const { items } = buildItems(request);
   const draft = toDraft(request, items);
 

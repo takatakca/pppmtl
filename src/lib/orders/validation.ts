@@ -40,7 +40,9 @@ export function validateOrderDraft(
   if (context.locationOpen === false) push(codes, "location_closed");
 
   if (draft.items.length === 0) push(codes, "empty_cart");
-  if (draft.items.some((i) => !Number.isSafeInteger(i.quantity) || i.quantity < 1 || i.quantity > 50)) {
+  if (
+    draft.items.some((i) => !Number.isSafeInteger(i.quantity) || i.quantity < 1 || i.quantity > 50)
+  ) {
     push(codes, "menu_changed");
   }
 

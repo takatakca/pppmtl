@@ -72,7 +72,10 @@ describe("validation", () => {
   it("refuses zero, fractional, non-finite and excessive quantities", () => {
     for (const quantity of [0, -1, 1.5, NaN, Infinity, 51]) {
       const report = validateOrderDraft(draft({ items: [item({ quantity })] }), mapped);
-      expect(report.errors.map((e) => e.code), String(quantity)).toContain("menu_changed");
+      expect(
+        report.errors.map((e) => e.code),
+        String(quantity),
+      ).toContain("menu_changed");
     }
     expect(validateOrderDraft(draft({ items: [item({ quantity: 50 })] }), mapped).valid).toBe(true);
   });

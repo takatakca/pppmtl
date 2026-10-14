@@ -50,10 +50,16 @@ function OrdersAdmin() {
           <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
             PPP internal
           </p>
-          <button type="button" className="text-xs underline" onClick={async () => {
-            await signOutAdmin();
-            window.location.assign("/admin/sign-in");
-          }}>Sign out</button>
+          <button
+            type="button"
+            className="text-xs underline"
+            onClick={async () => {
+              await signOutAdmin();
+              window.location.assign("/admin/sign-in");
+            }}
+          >
+            Sign out
+          </button>
         </div>
         <h1 className="mt-1 font-display text-4xl uppercase leading-none">Orders monitor</h1>
         <p className="mt-2 max-w-xl text-sm text-muted-foreground">
@@ -71,7 +77,9 @@ function OrdersAdmin() {
       {error && (
         <p className="mt-2 flex items-center gap-2 border border-border bg-card p-4 text-sm text-muted-foreground">
           <AlertTriangle className="h-4 w-4" /> Access denied or unavailable.{" "}
-          <Link to="/admin/sign-in" className="underline">Sign in to operations</Link>
+          <Link to="/admin/sign-in" className="underline">
+            Sign in to operations
+          </Link>
         </p>
       )}
 

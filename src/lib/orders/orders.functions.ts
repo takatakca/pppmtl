@@ -106,7 +106,8 @@ export const checkOrder = createServerFn({ method: "POST" })
 export const placeOrder = createServerFn({ method: "POST" })
   .inputValidator((input: PlaceOrderInput) => input)
   .handler(async ({ data }): Promise<PlaceOrderResponse> => {
-    const { checkoutBrowserNonce, grantOrderAccess, orderAccessConfigured } = await import("@/lib/security/order-access.server");
+    const { checkoutBrowserNonce, grantOrderAccess, orderAccessConfigured } =
+      await import("@/lib/security/order-access.server");
     const { orderError } = await import("./errors");
     // Without a stable signing key the customer could pay but never read a protected receipt.
     if (!orderAccessConfigured()) {

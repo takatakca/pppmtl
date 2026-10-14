@@ -10,7 +10,10 @@ const CHECKOUT_COOKIE = "ppp_checkout_nonce";
 const LIFETIME_SECONDS = 14 * 24 * 60 * 60;
 const MAX_ORDER_IDS = 10;
 
-interface Grant { ids: string[]; exp: number }
+interface Grant {
+  ids: string[];
+  exp: number;
+}
 
 function secret(): string | null {
   const key = process.env["PPP_ORDER_ACCESS_SECRET"] ?? "";
@@ -33,7 +36,11 @@ function equalHex(a: string, b: string): boolean {
 }
 
 /** Pure, deterministic verifier for cross-user and tampering tests. */
-export function verifyOrderGrant(cookie: string | undefined, key: string, now = Date.now()): string[] {
+export function verifyOrderGrant(
+  cookie: string | undefined,
+  key: string,
+  now = Date.now(),
+): string[] {
   if (!cookie || key.length < 32) return [];
   const dot = cookie.lastIndexOf(".");
   if (dot <= 0) return [];
@@ -43,9 +50,16 @@ export function verifyOrderGrant(cookie: string | undefined, key: string, now = 
   try {
     const grant = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as Grant;
     const seconds = Math.floor(now / 1000);
-    if (!grant || !Number.isSafeInteger(grant.exp) || grant.exp <= seconds || grant.exp > seconds + LIFETIME_SECONDS ||
-        !Array.isArray(grant.ids) || grant.ids.length > MAX_ORDER_IDS ||
-        grant.ids.some((id) => typeof id !== "string" || !/^ord_[a-z0-9_-]{5,80}$/i.test(id))) return [];
+    if (
+      !grant ||
+      !Number.isSafeInteger(grant.exp) ||
+      grant.exp <= seconds ||
+      grant.exp > seconds + LIFETIME_SECONDS ||
+      !Array.isArray(grant.ids) ||
+      grant.ids.length > MAX_ORDER_IDS ||
+      grant.ids.some((id) => typeof id !== "string" || !/^ord_[a-z0-9_-]{5,80}$/i.test(id))
+    )
+      return [];
     return grant.ids;
   } catch {
     return [];

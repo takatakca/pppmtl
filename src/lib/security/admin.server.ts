@@ -34,12 +34,21 @@ function signature(payload: string, signing: string): string {
 }
 
 /** Pure verifier for regression tests; no request-scoped globals required. */
-export function verifyAdminSession(cookie: string | undefined, signing: string, now = Date.now()): boolean {
+export function verifyAdminSession(
+  cookie: string | undefined,
+  signing: string,
+  now = Date.now(),
+): boolean {
   if (!cookie || !signing) return false;
   const parts = cookie.split(".");
   if (parts.length !== 3) return false;
   const [until, nonce, mac] = parts;
-  if (!/^\d{10}$/.test(until ?? "") || !/^[a-f0-9]{32}$/.test(nonce ?? "") || !/^[a-f0-9]{64}$/.test(mac ?? "")) return false;
+  if (
+    !/^\d{10}$/.test(until ?? "") ||
+    !/^[a-f0-9]{32}$/.test(nonce ?? "") ||
+    !/^[a-f0-9]{64}$/.test(mac ?? "")
+  )
+    return false;
   const expiry = Number(until);
   const nowSeconds = Math.floor(now / 1000);
   if (expiry <= nowSeconds || expiry > nowSeconds + LIFETIME_SECONDS) return false;
