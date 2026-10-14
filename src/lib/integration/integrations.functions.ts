@@ -71,6 +71,8 @@ export interface IntegrationSnapshot {
 
 export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
   async (): Promise<IntegrationSnapshot> => {
+    const { requireAdmin } = await import("@/lib/security/admin.server");
+    requireAdmin();
     const { credentialPresence } = await import("./core/credentials.server");
     const { providerHealth } = await import("./core/registry");
     const { recentIntegrationEvents } = await import("./core/logging");
@@ -156,6 +158,8 @@ export const testProviderConnection = createServerFn({ method: "POST" })
   .inputValidator((input: { locationId: string }) => input)
   .handler(
     async ({ data }): Promise<{ ok: boolean; message: string; report: ProviderHealthReport }> => {
+      const { requireAdmin } = await import("@/lib/security/admin.server");
+      requireAdmin();
       const { testUrbanPiperConnection } = await import("./providers/urbanpiper/health.server");
       return testUrbanPiperConnection(data.locationId);
     },
@@ -165,6 +169,8 @@ export const testProviderConnection = createServerFn({ method: "POST" })
 export const getProviderHealth = createServerFn({ method: "POST" })
   .inputValidator((input: { locationId: string }) => input)
   .handler(async ({ data }): Promise<ProviderHealthReport> => {
+    const { requireAdmin } = await import("@/lib/security/admin.server");
+    requireAdmin();
     const { urbanPiperHealth } = await import("./providers/urbanpiper/health.server");
     return urbanPiperHealth(data.locationId);
   });
@@ -182,6 +188,8 @@ export interface MenuSyncRunResult {
 export const runMenuSyncNow = createServerFn({ method: "POST" })
   .inputValidator((input: { locationId: string }) => input)
   .handler(async ({ data }): Promise<MenuSyncRunResult> => {
+    const { requireAdmin } = await import("@/lib/security/admin.server");
+    requireAdmin();
     const { urbanPiperConfigured } = await import("./providers/urbanpiper/config.server");
     if (!urbanPiperConfigured(data.locationId)) {
       return {
@@ -229,6 +237,8 @@ export interface OrderTestPreview {
 export const previewTestOrder = createServerFn({ method: "POST" })
   .inputValidator((input: { locationId: string }) => input)
   .handler(async ({ data }): Promise<OrderTestPreview> => {
+    const { requireAdmin } = await import("@/lib/security/admin.server");
+    requireAdmin();
     const { runOrderTest } = await import("./providers/urbanpiper/test-order");
     const result = await runOrderTest({
       locationId: data.locationId,
