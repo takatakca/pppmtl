@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Printer, RefreshCw } from "lucide-react";
 import { OrderTimeline } from "@/components/order/order-timeline";
@@ -29,17 +29,21 @@ function OrderReceiptPage() {
   const { lang, t, tr, reorderToCart, clearCart } = usePPP();
   const [order, setOrder] = useState<OrderView | null>(null);
   const [error, setError] = useState(false);
-  /** Back from Clover's payment page (`?paid=1`). */
+  /** A redirect from Clover is not proof of payment: only the signed webhook can mark an order PAID. */
   const [paidReturn, setPaidReturn] = useState(false);
+  const clearedPaidCart = useRef(false);
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("paid") === "1") {
-      setPaidReturn(true);
+    setPaidReturn(new URLSearchParams(window.location.search).get("paid") === "1");
+  }, []);
+
+  // Preserve the customer's cart until the server reports a confirmed payment.
+  useEffect(() => {
+    if (order?.paymentStatus === "PAID" && !clearedPaidCart.current) {
+      clearedPaidCart.current = true;
       clearCart();
     }
-    // Only on arrival.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [order?.paymentStatus, clearCart]);
 
   useEffect(() => {
     let alive = true;
@@ -81,31 +85,31 @@ function OrderReceiptPage() {
     );
   };
 
-  // Paid on Clover, but this server does not hold the order (another instance or a restart): Clover has it.
+  // A missing in-memory order plus ?paid=1 is NOT evidence of payment.
   if (error && paidReturn) {
     return (
       <main className="mx-auto max-w-3xl px-4 pt-24 pb-24 sm:px-6 lg:pt-32">
         <div className="border border-primary bg-card p-8 text-center">
           <p className="font-display text-3xl uppercase leading-none">
             {t(
-              "Payment received — thank you!",
-              "Paiement reçu — merci!",
-              "Pago recibido — ¡gracias!",
+              "Payment verification pending",
+              "Vérification du paiement en attente",
+              "Verificación del pago pendiente",
             )}
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
             {t(
-              "Your order is in the restaurant's Clover register. Clover emails your receipt. Pick it up at the counter.",
-              "Votre commande est dans la caisse Clover du restaurant. Clover vous envoie le reçu par courriel. Récupérez-la au comptoir.",
-              "Tu pedido está en la caja Clover del restaurante. Clover te envía el recibo por correo. Recógelo en el mostrador.",
+              "We couldn't verify this payment here. Keep your Clover receipt, if you received one, and contact the restaurant to confirm your order before pickup. Your cart has been saved.",
+              "Nous ne pouvons pas confirmer ce paiement ici. Gardez votre reçu Clover, si vous en avez reçu un, et contactez le restaurant pour confirmer votre commande avant de venir. Votre panier est conservé.",
+              "No pudimos verificar el pago aquí. Guarda tu recibo de Clover, si lo recibiste, y contacta al restaurante para confirmar el pedido antes de recogerlo. Tu carrito se conserva.",
             )}
           </p>
           <Link
-            to="/"
+            to="/support/order"
             className="mt-5 inline-flex items-center gap-2 border border-border px-5 py-3 font-display text-sm uppercase leading-none focus-ppp hover:border-primary"
           >
             <ArrowLeft className="h-4 w-4" />
-            {t("Back to the menu", "Retour au menu", "Volver al menú")}
+            {t("Order support", "Soutien aux commandes", "Ayuda con pedidos")}
           </Link>
         </div>
       </main>
