@@ -2,10 +2,11 @@
  * This is NOT TAKATAK identity; anonymous cross-device history requires verified TAKATAK Auth.
  * Signed HttpOnly cookies contain only random internal order IDs, never names/phones/card data.
  */
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { getCookie, setCookie } from "@tanstack/react-start/server";
 
 const COOKIE = "ppp_order_access";
+const CHECKOUT_COOKIE = "ppp_checkout_nonce";
 const LIFETIME_SECONDS = 14 * 24 * 60 * 60;
 const MAX_ORDER_IDS = 10;
 
@@ -77,4 +78,23 @@ export function grantOrderAccess(orderId: string): void {
     path: "/",
     maxAge: LIFETIME_SECONDS,
   });
+}
+
+/**
+ * Bind in-memory cart deduplication to this browser. Two different guests can
+ * place the same items using the same contact number without sharing an order.
+ * Cookie value is random, HttpOnly, and never accepted from the checkout payload.
+ */
+export function checkoutBrowserNonce(): string {
+  const existing = getCookie(CHECKOUT_COOKIE);
+  if (existing && /^[a-f0-9]{64}$/.test(existing)) return existing;
+  const nonce = randomBytes(32).toString("hex");
+  setCookie(CHECKOUT_COOKIE, nonce, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: LIFETIME_SECONDS,
+  });
+  return nonce;
 }
