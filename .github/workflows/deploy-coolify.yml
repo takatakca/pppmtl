@@ -1,0 +1,69 @@
+name: Deploy PPPMTL to Coolify
+
+# Coolify's native GitHub App already deploys on push when enabled.
+# Only enable this fallback when using Coolify's deploy webhook, NOT both.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pppmtl-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ vars.PPPMTL_DEPLOY_VIA_ACTIONS == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check deployment credentials
+        env:
+          DEPLOY_WEBHOOK: ${{ secrets.PPPMTL_COOLIFY_DEPLOY_WEBHOOK }}
+          API_TOKEN: ${{ secrets.PPPMTL_COOLIFY_API_TOKEN }}
+        shell: bash
+        run: |
+          if [ -z "$DEPLOY_WEBHOOK" ] || [ -z "$API_TOKEN" ]; then
+            echo "::error::Missing PPPMTL_COOLIFY_DEPLOY_WEBHOOK or PPPMTL_COOLIFY_API_TOKEN repository secret."
+            exit 1
+          fi
+          # Never send a bearer token to an HTTP endpoint or to an unexpected URL.
+          case "$DEPLOY_WEBHOOK" in
+            https://*/api/v1/deploy\?uuid=*) ;;
+            *)
+              echo "::error::The deploy webhook must be an HTTPS Coolify resource URL with ?uuid=."
+              exit 1
+              ;;
+          esac
+      - name: Request a Coolify deployment for main
+        env:
+          DEPLOY_WEBHOOK: ${{ secrets.PPPMTL_COOLIFY_DEPLOY_WEBHOOK }}
+          API_TOKEN: ${{ secrets.PPPMTL_COOLIFY_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The webhook is intentionally not echoed, since it contains the target UUID.
+          curl --fail-with-body --silent --show-error \
+            --retry 2 --retry-delay 3 --connect-timeout 10 --max-time 60 \
+            --request POST \
+            --header "Authorization: Bearer ${API_TOKEN}" \
+            --header "Accept: application/json" \
+            --output "$RUNNER_TEMP/pppmtl-coolify-response.json" \
+            "$DEPLOY_WEBHOOK"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path(os.environ["RUNNER_TEMP"]) / "pppmtl-coolify-response.json"
+          response = json.loads(path.read_text())
+          deployments = response.get("deployments") if isinstance(response, dict) else None
+          if not isinstance(deployments, list) or not deployments:
+              raise SystemExit("Coolify did not confirm that a deployment was queued.")
+          for deployment in deployments:
+              print("Coolify accepted deployment request:", deployment.get("deployment_uuid", "queued"))
+          print("Queued is NOT a successful production release; inspect Coolify Deployment Logs.")
+          PY
