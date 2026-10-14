@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+- 2026-10-14 | ChatGPT GPT-6 (server operations) | main → commits e54ab4e / 745ed9f | done; untested | Added credential-free GET /healthz liveness route and documented Coolify check | verify health endpoint after Nitro build/deployment
+- 2026-10-14 | ChatGPT GPT-6 (launch blockers) | GitHub issues #5 and #6 | tracked, not done | Production blockers: admin/order-access authorization and durable Clover order/webhook idempotency | implement both issues before live payments, with later security and integration tests
 - 2026-10-14 | ChatGPT GPT-6 (checkout safety) | main → commits f344722 / 0654d0e / 9621cbc / ac8433e | done; tests intentionally deferred | Clover redirect no longer falsely confirms a payment or clears the cart; malformed quantities and invalid modifiers rejected; regression cases added | later run typecheck/lint/test/build and Clover payment/refund checks
 - 2026-10-14 | ChatGPT GPT-6 (delivery handoff) | main → commits 110f900 / a7c9ffa | code pushed; live deployment unverified | Added opt-in GitHub Actions Coolify deploy webhook, rewrote README for real TanStack server deployment and blockers | configure native Coolify GitHub auto-deploy OR fallback repo secrets + variable; verify DNS, live instance, backend auth, Clover keys and persistent orders
 - 2026-10-14 | ChatGPT GPT-6 (kitchen facts) | fix/kitchen-facts-hochelaga → PR #4 | done; merged as c93d17b | Reused and merged existing approved NDG/Jean-Talon hours and Hochelaga all-brand kitchen information | owner must approve Hochelaga hours; sync external channels
