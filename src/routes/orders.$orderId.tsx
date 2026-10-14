@@ -37,13 +37,13 @@ function OrderReceiptPage() {
     setPaidReturn(new URLSearchParams(window.location.search).get("paid") === "1");
   }, []);
 
-  // Preserve the customer's cart until the server reports a confirmed payment.
+  // Preserve the cart unless this is a fresh Clover return AND the server confirms payment.\n  // Opening an old paid receipt must not erase a new shopping cart.
   useEffect(() => {
-    if (order?.paymentStatus === "PAID" && !clearedPaidCart.current) {
+    if (paidReturn && order?.paymentStatus === "PAID" && !clearedPaidCart.current) {
       clearedPaidCart.current = true;
       clearCart();
     }
-  }, [order?.paymentStatus, clearCart]);
+  }, [paidReturn, order?.paymentStatus, clearCart]);
 
   useEffect(() => {
     let alive = true;
