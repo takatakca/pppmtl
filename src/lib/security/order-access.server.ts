@@ -13,7 +13,7 @@ const MAX_ORDER_IDS = 10;
 interface Grant { ids: string[]; exp: number }
 
 function secret(): string | null {
-  const key = process.env.PPP_ORDER_ACCESS_SECRET ?? "";
+  const key = process.env["PPP_ORDER_ACCESS_SECRET"] ?? "";
   return key.length >= 32 ? key : null;
 }
 
@@ -73,7 +73,7 @@ export function grantOrderAccess(orderId: string): void {
   const payload = Buffer.from(JSON.stringify(grant)).toString("base64url");
   setCookie(COOKIE, `${payload}.${mac(payload, key)}`, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env["NODE_ENV"] === "production",
     sameSite: "lax",
     path: "/",
     maxAge: LIFETIME_SECONDS,
@@ -91,7 +91,7 @@ export function checkoutBrowserNonce(): string {
   const nonce = randomBytes(32).toString("hex");
   setCookie(CHECKOUT_COOKIE, nonce, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env["NODE_ENV"] === "production",
     sameSite: "lax",
     path: "/",
     maxAge: LIFETIME_SECONDS,
