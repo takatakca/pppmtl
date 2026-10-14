@@ -30,11 +30,13 @@ jobs:
           bun-version: latest
       - name: Install pinned dependencies
         run: bun install --frozen-lockfile
+      # Vite's TanStack router plugin generates the typed route tree during build.
+      # Generate the routes before tsc checks new file-based routes.
+      - name: Build Nitro Node server and generate route types
+        run: bun run build
       - name: Validate TypeScript
         run: bun run typecheck
       - name: Lint
         run: bun run lint
       - name: Test security, order, brand and integration behavior
         run: bun run test
-      - name: Build Nitro Node server
-        run: bun run build
