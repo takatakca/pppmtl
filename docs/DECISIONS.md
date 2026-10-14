@@ -1,0 +1,21 @@
+# PPPMTL — engineering decisions
+
+Updated: 2026-10-14. Supersede only with documented owner approval and clear migration plan.
+
+| Decision | Rationale | Consequence |
+|---|---|---|
+| Continue the existing `takatakca/pppmtl` source on `main` | Existing React/TanStack product, photos, real Clover catalog and franchise routing must be preserved | No rewrite or force-push |
+| One multi-brand codebase | All franchise hosts share menu, cart and backend capabilities | Each host has its own appearance and canonical SEO |
+| Clover Hosted Checkout for pickup | Card details never enter PPP application; provider is payment authority | No direct client Clover secret; verified webhook required |
+| No acceptance of `?paid=1` as proof | Return URL is untrusted browser input | UI only confirms payment when server sees a verified event |
+| Server-revalidated quantities and modifiers | Prevent malformed carts and unauthorized price manipulation | Reject invalid items; never silently round quantities |
+| Temporary admin access via signed server-only session | TAKATAK Auth customer/admin backend is not connected | Explicit strong `PPP_ADMIN_* ` secrets; all admin RPCs deny access when absent; replace with TAKATAK roles |
+| Signed HttpOnly guest receipt list | Until verified TAKATAK identity exists, caller-supplied phone/customer IDs cannot grant access | Only the checkout browser reads a limited list of its orders; 14-day expiry; secure signature |
+| Checkout nonce for browser-specific idempotency | Matching phone/cart data across two guests is not equivalent to same order | Random server-issued browser scope supplements deterministic order key |
+| Durable order state required before payment launch | In-memory orders and replay dedup cannot support restarts/multi-worker guarantees | Keep issue #6 open until transactional DB/outbox is integrated |
+| Node/Nitro backend, not static copy | Checkout/webhook require confidential server execution | Deploy through verified Coolify/native Node host |
+| CI before deployment | Core security and payment code may not go online after failing build/tests | Deploy fallback triggers only on successful main CI; native Coolify triggers require equivalent guard |
+| Hochelaga hours unapproved | Owner has not confirmed hours | Keep null and exclude from SEO/structured hours; do not invent values |
+| TAKATAK remains identity/data authority | Cross-brand customer resolution and company isolation belong to central TAKATAK services | Do not create a competing PPP master CRM |
+
+See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.md`.
