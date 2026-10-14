@@ -63,7 +63,8 @@ function OrdersAdmin() {
 
       {error && (
         <p className="mt-2 flex items-center gap-2 border border-border bg-card p-4 text-sm text-muted-foreground">
-          <AlertTriangle className="h-4 w-4" /> Orders could not be loaded.
+          <AlertTriangle className="h-4 w-4" /> Access denied or unavailable.{" "}
+          <Link to="/admin/sign-in" className="underline">Sign in to operations</Link>
         </p>
       )}
 
