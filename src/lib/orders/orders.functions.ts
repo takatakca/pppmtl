@@ -106,11 +106,19 @@ export const checkOrder = createServerFn({ method: "POST" })
 export const placeOrder = createServerFn({ method: "POST" })
   .inputValidator((input: PlaceOrderInput) => input)
   .handler(async ({ data }): Promise<PlaceOrderResponse> => {
+    const { grantOrderAccess, orderAccessConfigured } = await import("@/lib/security/order-access.server");
+    const { orderError } = await import("./errors");
+    // Without a stable signing key the customer could pay but never read a protected receipt.
+    if (!orderAccessConfigured()) {
+      return { ok: false, order: null, error: orderError("provider_unavailable") };
+    }
     const { createOrder, submitOrder } = await import("./order-service");
 
     const created = createOrder(data);
     if (!created.ok) return { ok: false, order: null, error: created.error };
 
+    // The cookie is issued before redirecting off-domain to Clover, even if the provider errors.
+    grantOrderAccess(created.data.id);
     const submitted = await submitOrder(created.data.id);
     if (!submitted.ok) {
       return { ok: false, order: toView(created.data), error: submitted.error };
@@ -121,6 +129,11 @@ export const placeOrder = createServerFn({ method: "POST" })
 export const cancelMyOrder = createServerFn({ method: "POST" })
   .inputValidator((input: { orderId: string; reason: string }) => input)
   .handler(async ({ data }): Promise<PlaceOrderResponse> => {
+    const { canReadOrder } = await import("@/lib/security/order-access.server");
+    const { orderError } = await import("./errors");
+    if (!canReadOrder(data.orderId)) {
+      return { ok: false, order: null, error: orderError("order_not_found") };
+    }
     const { cancelOrder } = await import("./order-service");
     const result = await cancelOrder(data.orderId, data.reason);
     return result.ok
@@ -131,14 +144,19 @@ export const cancelMyOrder = createServerFn({ method: "POST" })
 /** Order history. Returns an empty list honestly until ordering is live. */
 export const listMyOrders = createServerFn({ method: "POST" })
   .inputValidator((input: { customerId: string | null; phone: string | null }) => input)
-  .handler(async ({ data }): Promise<{ orders: OrderView[] }> => {
-    const { listCustomerOrders } = await import("./order-service");
-    return { orders: listCustomerOrders(data.customerId, data.phone).map(toView) };
+  .handler(async (): Promise<{ orders: OrderView[] }> => {
+    // Client-supplied phone/customer IDs cannot authorize a customer history lookup.
+    const { readableOrderIds } = await import("@/lib/security/order-access.server");
+    const { getOrderById: findOrder } = await import("./order-service");
+    const orders = readableOrderIds().map(findOrder).filter((o): o is InternalOrder => o !== null);
+    return { orders: orders.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(toView) };
   });
 
 export const getOrderById = createServerFn({ method: "POST" })
   .inputValidator((input: { orderId: string }) => input)
   .handler(async ({ data }): Promise<{ order: OrderView | null }> => {
+    const { canReadOrder } = await import("@/lib/security/order-access.server");
+    if (!canReadOrder(data.orderId)) return { order: null };
     const { getOrderById: findOrder } = await import("./order-service");
     const order = findOrder(data.orderId);
     return { order: order ? toView(order) : null };
@@ -161,6 +179,8 @@ export interface AdminOrderRow {
 
 export const getAdminOrders = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ generatedAt: string; orders: AdminOrderRow[] }> => {
+    const { requireAdmin } = await import("@/lib/security/admin.server");
+    requireAdmin();
     const { listRecentOrders } = await import("./order-service");
     return {
       generatedAt: new Date().toISOString(),
