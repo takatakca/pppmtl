@@ -144,11 +144,15 @@ export const cancelMyOrder = createServerFn({ method: "POST" })
 /** Order history. Returns an empty list honestly until ordering is live. */
 export const listMyOrders = createServerFn({ method: "POST" })
   .inputValidator((input: { customerId: string | null; phone: string | null }) => input)
-  .handler(async (): Promise<{ orders: OrderView[] }> => {
-    // Client-supplied phone/customer IDs cannot authorize a customer history lookup.
+  .handler(async ({ data }): Promise<{ orders: OrderView[] }> => {
+    // A phone is only an additional filter. It NEVER authorizes an order by itself.
     const { readableOrderIds } = await import("@/lib/security/order-access.server");
     const { getOrderById: findOrder } = await import("./order-service");
-    const orders = readableOrderIds().map(findOrder).filter((o): o is InternalOrder => o !== null);
+    const phone = data.phone?.replace(/\D/g, "") ?? "";
+    const orders = readableOrderIds()
+      .map(findOrder)
+      .filter((o): o is InternalOrder => o !== null)
+      .filter((o) => !phone || (o.customer.phone ?? "").replace(/\D/g, "") === phone);
     return { orders: orders.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(toView) };
   });
 
