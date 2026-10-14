@@ -40,7 +40,7 @@ describe("temporary administrator authorization", () => {
     expect(verifyAdminSession(valid, signing, now)).toBe(true);
     expect(verifyAdminSession(signedAdmin(t - 1), signing, now)).toBe(false);
     expect(verifyAdminSession(signedAdmin(t + 9 * 3600), signing, now)).toBe(false);
-    expect(verifyAdminSession(valid.slice(0, -1) + "f", signing, now)).toBe(false);
+    expect(verifyAdminSession(valid.slice(0, -1) + (valid.endsWith("f") ? "e" : "f"), signing, now)).toBe(false);
     expect(verifyAdminSession(valid, "different-strong-key", now)).toBe(false);
     expect(verifyAdminSession(undefined, signing, now)).toBe(false);
   });
@@ -58,7 +58,7 @@ describe("signed browser-scoped order receipts", () => {
   it("rejects tampering, other signing keys and forged order ids", () => {
     const t = Math.floor(now / 1000);
     const cookie = signedOrders(["ord_checkout123"], t + 3600);
-    expect(verifyOrderGrant(cookie.replace("checkout123", "attacker"), customerSecret, now)).toEqual([]);
+    expect(verifyOrderGrant(cookie.slice(0, -1) + (cookie.endsWith("f") ? "e" : "f"), customerSecret, now)).toEqual([]);
     expect(verifyOrderGrant(cookie, "some-other-secret-which-is-long-enough", now)).toEqual([]);
     expect(verifyOrderGrant(signedOrders(["ord_checkout123", "bad-value"], t + 3600), customerSecret, now)).toEqual([]);
     expect(verifyOrderGrant(undefined, customerSecret, now)).toEqual([]);
