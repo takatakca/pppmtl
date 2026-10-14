@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { signOutAdmin } from "@/lib/security/admin.functions";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AlertTriangle, CheckCircle2, MinusCircle, XCircle } from "lucide-react";
 import {
@@ -217,9 +218,15 @@ function IntegrationsAdmin() {
   return (
     <main className="min-h-dvh bg-background px-4 py-10 sm:px-8">
       <header className="border border-border bg-card p-6">
-        <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
-          PPP internal
-        </p>
+        <div className="flex items-center justify-between gap-4">
+          <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
+            PPP internal
+          </p>
+          <button type="button" className="text-xs underline" onClick={async () => {
+            await signOutAdmin();
+            window.location.assign("/admin/sign-in");
+          }}>Sign out</button>
+        </div>
         <h1 className="mt-1 font-display text-4xl uppercase leading-none">Integrations status</h1>
         <p className="mt-2 max-w-xl text-sm text-muted-foreground">
           Provider engines, store mapping and recent events. A capability shows as active only when
