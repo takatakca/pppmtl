@@ -163,7 +163,7 @@ export function validateOrder(request: CheckoutRequest): ValidationReport {
 }
 
 /** 2 — CREATE. An internal order exists before any provider is contacted. */
-export function createOrder(request: CheckoutRequest): OrderResult<InternalOrder> {
+export function createOrder(request: CheckoutRequest, checkoutScope = ""): OrderResult<InternalOrder> {
   const { items } = buildItems(request);
   const draft = toDraft(request, items);
 
@@ -173,7 +173,11 @@ export function createOrder(request: CheckoutRequest): OrderResult<InternalOrder
     return { ok: false, error: first ?? orderError("menu_changed") };
   }
 
-  const idempotencyKey = deriveIdempotencyKey(draft);
+  // The scope is generated server-side from an HttpOnly browser cookie for live checkout.
+  // Without it, two guests placing identical orders could be assigned the same receipt.
+  const idempotencyKey = checkoutScope
+    ? `${deriveIdempotencyKey(draft)}:${checkoutScope}`
+    : deriveIdempotencyKey(draft);
   const existingId = claimOrderKey(idempotencyKey, `ord_${Date.now().toString(36)}`);
   const existing = existingId.fresh ? null : readOrder(existingId.orderId);
   if (existing) return { ok: true, data: existing };
