@@ -12,6 +12,7 @@
  * order FAILED with a human reason instead of inventing an order number.
  */
 
+import { randomUUID } from "node:crypto";
 import { restaurantLocations } from "@/config/locations";
 import { mappingForLocation } from "@/config/integration-locations";
 import { menuRepository } from "@/lib/menu-repository";
@@ -178,7 +179,8 @@ export function createOrder(request: CheckoutRequest, checkoutScope = ""): Order
   const idempotencyKey = checkoutScope
     ? `${deriveIdempotencyKey(draft)}:${checkoutScope}`
     : deriveIdempotencyKey(draft);
-  const existingId = claimOrderKey(idempotencyKey, `ord_${Date.now().toString(36)}`);
+  // Opaque unpredictable ids: a timestamp must never double as a receipt authorization secret.
+  const existingId = claimOrderKey(idempotencyKey, `ord_${randomUUID().replace(/-/g, "")}`);
   const existing = existingId.fresh ? null : readOrder(existingId.orderId);
   if (existing) return { ok: true, data: existing };
 
