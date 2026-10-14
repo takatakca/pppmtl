@@ -32,8 +32,9 @@ Scripts: `npm run build`, `npm run typecheck`, `npm run lint`, `npm run test`. T
 2. Build with `NITRO_PRESET=node-server` and `npm run build` after installing dependencies. Start with `node .output/server/index.mjs`; internal port `3000`. Configure the proper Node/Nitro host binding in Coolify.
 3. Configure the application's server secrets from [the Clover checklist](docs/integrations/clover.md#4-where-to-host-important): `CLOVER_MERCHANT_ID`, `CLOVER_ECOMM_PRIVATE_KEY`, `CLOVER_WEBHOOK_SECRET`, and optionally `CLOVER_API_TOKEN`. Set `PUBLIC_SITE_URL=https://pppmtl.com`. Never put credentials in `VITE_*` variables or Git.
 4. Assign `pppmtl.com` (and `www` if used) to the Coolify app, configure HTTPS and its DNS record, and preserve the domain's email DNS records.
-5. **Preferred automatic delivery:** use Coolify's native GitHub connection with automatic deployment on commits to `main`. This does not require the fallback workflow below.
-6. **Alternative only:** `.github/workflows/deploy-coolify.yml` can queue a Coolify deployment on every push to `main` when GitHub repository variable `PPPMTL_DEPLOY_VIA_ACTIONS=true` and both repository secrets `PPPMTL_COOLIFY_DEPLOY_WEBHOOK` (HTTPS `/api/v1/deploy?uuid=...`) and `PPPMTL_COOLIFY_API_TOKEN` are configured. Do **not** enable it at the same time as Coolify's native push deployment.
+5. Configure Coolify's **HTTP health check** on `GET /healthz`. This checks that the Nitro web process is serving requests; it is not a Clover payment or database health check.
+6. **Preferred automatic delivery:** use Coolify's native GitHub connection with automatic deployment on commits to `main`. This does not require the fallback workflow below.
+7. **Alternative only:** `.github/workflows/deploy-coolify.yml` can queue a Coolify deployment on every push to `main` when GitHub repository variable `PPPMTL_DEPLOY_VIA_ACTIONS=true` and both repository secrets `PPPMTL_COOLIFY_DEPLOY_WEBHOOK` (HTTPS `/api/v1/deploy?uuid=...`) and `PPPMTL_COOLIFY_API_TOKEN` are configured. Do **not** enable it at the same time as Coolify's native push deployment.
 
 Coolify accepting a webhook does **not** confirm a healthy release. After deployment, check Coolify Deployment Logs, the domain, the checkout/server APIs, and the signed webhook before taking real customer payments.
 
