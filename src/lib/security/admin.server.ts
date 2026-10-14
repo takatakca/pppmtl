@@ -26,7 +26,7 @@ export function adminConfigured(): boolean {
 
 export function validateAdminCredential(candidate: string): boolean {
   const config = secrets();
-  return Boolean(config && equals(candidate, config.access));
+  return Boolean(config && typeof candidate === "string" && equals(candidate, config.access));
 }
 
 function signature(payload: string, signing: string): string {
@@ -53,7 +53,7 @@ export function adminSessionActive(): boolean {
 
 export function openAdminSession(credential: string): boolean {
   const config = secrets();
-  if (!config || !equals(credential, config.access)) return false;
+  if (!config || typeof credential !== "string" || !equals(credential, config.access)) return false;
   const until = Math.floor(Date.now() / 1000) + LIFETIME_SECONDS;
   const payload = `${until}.${randomBytes(16).toString("hex")}`;
   setCookie(COOKIE, `${payload}.${signature(payload, config.signing)}`, {
