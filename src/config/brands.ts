@@ -34,7 +34,7 @@ export type BrandId =
   | "bolon"
   | "placeafrique";
 
-export type KitchenId = "ndg" | "st-leonard";
+export type KitchenId = "ndg" | "st-leonard" | "hochelaga";
 
 export type BrandIcon =
   | "egg"
@@ -65,8 +65,11 @@ export interface Kitchen {
   city: string;
   region: string;
   postalCode: string;
-  /** Every day, 24-hour "HH:MM". `closes` before `opens` = after midnight. */
-  hours: { opens: string; closes: string };
+  /**
+   * Every day, 24-hour "HH:MM". `closes` before `opens` = after midnight. null = not approved by the owner yet:
+   * never shown, never in schema.org or llms.txt (customers are told to call).
+   */
+  hours: { opens: string; closes: string } | null;
 }
 
 export interface BrandText {
@@ -148,7 +151,11 @@ export const CLOVER_ONLINE_ORDERING_URL: string | null =
   (import.meta.env?.["VITE_CLOVER_ONLINE_ORDERING_URL"] as string | undefined)?.trim() ||
   "https://www.clover.com/online-ordering/6280";
 
-/** Hours from Uber Eats Manager (2026-10-07): NDG stores 4:30 PM–3:15 AM, Jean-Talon stores 9 AM–11 PM, daily. */
+/**
+ * Kitchen facts: canonical copy in the project fact sheet (restaurants/fact-sheet.md).
+ * Owner, 2026-10-10/11: NDG 16:00–03:00 and Jean-Talon 10:00–23:00 every day (walk-in food courts); Hochelaga serves
+ * every brand, its hours are not approved yet, so they stay null.
+ */
 export const KITCHENS: Record<KitchenId, Kitchen> = {
   ndg: {
     id: "ndg",
@@ -159,7 +166,7 @@ export const KITCHENS: Record<KitchenId, Kitchen> = {
     city: "Montréal",
     region: "QC",
     postalCode: "H3X 2B6",
-    hours: { opens: "16:30", closes: "03:15" },
+    hours: { opens: "16:00", closes: "03:00" },
   },
   "st-leonard": {
     id: "st-leonard",
@@ -170,7 +177,18 @@ export const KITCHENS: Record<KitchenId, Kitchen> = {
     city: "Montréal",
     region: "QC",
     postalCode: "H1S 1M4",
-    hours: { opens: "09:00", closes: "23:00" },
+    hours: { opens: "10:00", closes: "23:00" },
+  },
+  hochelaga: {
+    id: "hochelaga",
+    labelEn: "Hochelaga",
+    labelFr: "Hochelaga",
+    area: "Hochelaga-Maisonneuve",
+    street: "3583 Rue Sainte-Catherine E",
+    city: "Montréal",
+    region: "QC",
+    postalCode: "H1W 2E6",
+    hours: null,
   },
 };
 
@@ -185,11 +203,14 @@ const both = (
     orderLinks: stLeonard,
     ...(google.stLeonard ? { googleCid: google.stLeonard } : {}),
   },
+  // Owner, 2026-10-10: every brand is also served at Hochelaga. No store links recorded there yet.
+  { kitchen: "hochelaga", orderLinks: [] },
 ];
 
 const KITCHENS_FR =
-  "dans nos cuisines de Notre-Dame-de-Grâce (NDG) et de Saint-Léonard, à Montréal";
-const KITCHENS_EN = "in our kitchens in Notre-Dame-de-Grâce (NDG) and Saint-Léonard, Montréal";
+  "dans nos cuisines de Notre-Dame-de-Grâce (NDG), de Saint-Léonard et d’Hochelaga, à Montréal";
+const KITCHENS_EN =
+  "in our kitchens in Notre-Dame-de-Grâce (NDG), Saint-Léonard and Hochelaga, Montréal";
 
 export const BRANDS: Brand[] = [
   {
@@ -242,6 +263,7 @@ export const BRANDS: Brand[] = [
           },
         ],
       },
+      { kitchen: "hochelaga", orderLinks: [] },
     ],
     phone: null,
     email: null,
@@ -1473,6 +1495,7 @@ export const BRANDS: Brand[] = [
           },
         ],
       },
+      { kitchen: "hochelaga", orderLinks: [] },
     ],
     phone: null,
     email: null,
@@ -1554,6 +1577,7 @@ export const BRANDS: Brand[] = [
           },
         ],
       },
+      { kitchen: "hochelaga", orderLinks: [] },
     ],
     phone: null,
     email: null,
@@ -1909,7 +1933,7 @@ export function uuidToBase64Url(uuid: string): string {
  * NDG is never shown or linked, owner's order).
  */
 export function listKitchens(site: Brand): KitchenId[] {
-  return site.id === "popoulet" ? ["st-leonard"] : ["ndg", "st-leonard"];
+  return site.id === "popoulet" ? ["st-leonard", "hochelaga"] : ["ndg", "st-leonard", "hochelaga"];
 }
 
 /** The kitchen a site shows first: its own brand's first kitchen, if listed. */
@@ -1939,7 +1963,17 @@ export function formatTime(hhmm: string, lang: "en" | "fr" | "es"): string {
   return `${h12}:${String(m).padStart(2, "0")} ${suffix}`;
 }
 
+/** "10:00–23:00" style range, or null when the kitchen's hours are not approved yet. */
+export function hoursRange(kitchen: Kitchen, lang: "en" | "fr" | "es"): string | null {
+  if (!kitchen.hours) return null;
+  const { opens, closes } = kitchen.hours;
+  return lang === "fr"
+    ? `${formatTime(opens, "fr")} – ${formatTime(closes, "fr")}`
+    : `${formatTime(opens, "en")}–${formatTime(closes, "en")}`;
+}
+
 export function hoursText(kitchen: Kitchen, lang: "en" | "fr" | "es"): string {
+  if (!kitchen.hours) return lang === "fr" ? "Heures : appelez-nous" : "Hours: please call us";
   const { opens, closes } = kitchen.hours;
   return lang === "fr"
     ? `Tous les jours, de ${formatTime(opens, "fr")} à ${formatTime(closes, "fr")}`

@@ -49,7 +49,7 @@ describe("brand registry", () => {
     const text = JSON.stringify(BRANDS);
     expect(text).not.toContain("27982486");
     const popoulet = BRANDS.find((b) => b.id === "popoulet")!;
-    expect(popoulet.kitchens.map((k) => k.kitchen)).toEqual(["st-leonard"]);
+    expect(popoulet.kitchens.map((k) => k.kitchen)).toEqual(["st-leonard", "hochelaga"]);
     expect(llmsTxt(popoulet)).not.toContain("Somerled");
     expect(JSON.stringify(brandJsonLd(popoulet))).not.toContain("Somerled");
   });
@@ -66,12 +66,13 @@ describe("brand registry", () => {
     for (const b of franchise) expect(b.primary, b.id).toMatch(/^#[0-9a-f]{6}$/i);
   });
 
-  it("puts every brand in at least one of the two kitchens", () => {
+  it("puts every brand in its kitchens, and every brand at Hochelaga (owner, 2026-10-10)", () => {
     expect(brandsInKitchen("ndg").length).toBeGreaterThan(10);
     expect(brandsInKitchen("st-leonard").length).toBeGreaterThan(10);
+    expect(brandsInKitchen("hochelaga").length).toBe(BRANDS.length);
     expect(brandsInKitchen("ndg").some((b) => b.id === "popoulet")).toBe(false);
     const popoulet = BRANDS.find((b) => b.id === "popoulet")!;
-    expect(listKitchens(popoulet)).toEqual(["st-leonard"]);
+    expect(listKitchens(popoulet)).toEqual(["st-leonard", "hochelaga"]);
     expect(defaultKitchen(popoulet, "ndg")).toBe("st-leonard");
     expect(defaultKitchen(BRANDS.find((b) => b.id === "ppp")!)).toBe("ndg");
   });
@@ -105,6 +106,21 @@ describe("fast food, late hours, dishes not in Clover yet", () => {
     }
     const popoulet = BRANDS.find((x) => x.id === "popoulet")!;
     expect(brandSeo(popoulet).description).not.toMatch(/à 3 h|tard/);
+    expect(brandSeo(popoulet).description).toMatch(/ouvert tous les jours jusqu’à 23 h/);
+  });
+
+  it("publishes only owner-approved hours (NDG 16:00–03:00, Jean-Talon 10:00–23:00; Hochelaga not yet)", () => {
+    expect(KITCHENS.ndg.hours).toEqual({ opens: "16:00", closes: "03:00" });
+    expect(KITCHENS["st-leonard"].hours).toEqual({ opens: "10:00", closes: "23:00" });
+    expect(KITCHENS.hochelaga.hours).toBeNull();
+    for (const b of BRANDS) {
+      const ld = JSON.stringify(brandJsonLd(b));
+      const llms = llmsTxt(b);
+      for (const late of ["03:15", "16:30", "09:00", "3 h 15", "16 h 30"]) {
+        expect(ld, b.id).not.toContain(late);
+        expect(llms, b.id).not.toContain(late);
+      }
+    }
   });
 
   it("shows OOEUF's breakfast and Nutrition Shake's drinks with real prices, in llms.txt and schema.org", () => {

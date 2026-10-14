@@ -9,15 +9,15 @@ import { kitchenListJsonLd } from "@/lib/brand/schema";
 import { canonicalUrl } from "@/config/site";
 import { currentOrigin } from "@/lib/brand/current";
 
-/** Every restaurant of a kitchen in one list (?cuisine=ndg | st-leonard). */
+/** Every restaurant of a kitchen in one list (?cuisine=ndg | st-leonard | hochelaga). */
 export const Route = createFileRoute("/marques/")({
   validateSearch: (search: Record<string, unknown>): { cuisine?: KitchenId | undefined } => ({
     cuisine:
-      search["cuisine"] === "st-leonard"
-        ? "st-leonard"
-        : search["cuisine"] === "ndg"
-          ? "ndg"
-          : undefined,
+      search["cuisine"] === "st-leonard" ||
+      search["cuisine"] === "ndg" ||
+      search["cuisine"] === "hochelaga"
+        ? search["cuisine"]
+        : undefined,
   }),
   head: ({ match }) => {
     const kitchen: KitchenId = defaultKitchen(currentBrand(), match.search.cuisine);
