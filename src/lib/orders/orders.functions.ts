@@ -106,7 +106,7 @@ export const checkOrder = createServerFn({ method: "POST" })
 export const placeOrder = createServerFn({ method: "POST" })
   .inputValidator((input: PlaceOrderInput) => input)
   .handler(async ({ data }): Promise<PlaceOrderResponse> => {
-    const { grantOrderAccess, orderAccessConfigured } = await import("@/lib/security/order-access.server");
+    const { checkoutBrowserNonce, grantOrderAccess, orderAccessConfigured } = await import("@/lib/security/order-access.server");
     const { orderError } = await import("./errors");
     // Without a stable signing key the customer could pay but never read a protected receipt.
     if (!orderAccessConfigured()) {
@@ -114,7 +114,7 @@ export const placeOrder = createServerFn({ method: "POST" })
     }
     const { createOrder, submitOrder } = await import("./order-service");
 
-    const created = createOrder(data);
+    const created = createOrder(data, checkoutBrowserNonce());
     if (!created.ok) return { ok: false, order: null, error: created.error };
 
     // The cookie is issued before redirecting off-domain to Clover, even if the provider errors.
