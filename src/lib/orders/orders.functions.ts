@@ -115,7 +115,12 @@ export const placeOrder = createServerFn({ method: "POST" })
     }
     const { createOrder, submitOrder } = await import("./order-service");
 
-    const created = createOrder(data, checkoutBrowserNonce());
+    const { unverifiedCheckoutCustomer } = await import("@/lib/security/guest-identity");
+    const guestRequest: PlaceOrderInput = {
+      ...data,
+      customer: unverifiedCheckoutCustomer(data.customer),
+    };
+    const created = createOrder(guestRequest, checkoutBrowserNonce());
     if (!created.ok) return { ok: false, order: null, error: created.error };
 
     // The cookie is issued before redirecting off-domain to Clover, even if the provider errors.
