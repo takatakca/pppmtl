@@ -535,4 +535,63 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
     expect(forged.status).toBeGreaterThanOrEqual(400);
     expect(printed).toBe(0);
   });
+
+  it("rejects signed payments for another merchant and non-payment events", async () => {
+    vi.stubEnv("CLOVER_API_TOKEN", "rest_test");
+    const { handleCloverHostedCheckoutWebhook } =
+      await import("@/lib/integration/providers/clover/webhook");
+    const send = async (merchantId: string, type: string) => {
+      const raw = JSON.stringify({
+        status: "APPROVED",
+        type,
+        id: "PAY_FOREIGN",
+        merchantId,
+        data: "SESSION_FOREIGN",
+      });
+      const t = Math.floor(Date.now() / 1000);
+      const signature = `t=${t},v1=${createHmac("sha256", "whsec_test").update(`${t}.${raw}`).digest("hex")}`;
+      return handleCloverHostedCheckoutWebhook(
+        new Request("https://pppmtl.com/api/public/webhooks/clover", {
+          method: "POST",
+          body: raw,
+          headers: { "clover-signature": signature },
+        }),
+      );
+    };
+
+    expect((await send("FOREIGN_MERCHANT", "PAYMENT")).status).toBe(401);
+    expect((await send("MTEST", "REFUND")).status).toBe(400);
+    expect(calls.filter((call) => call.url.includes("/payments/"))).toHaveLength(0);
+    expect(printed).toBe(0);
+  });
+
+  it("returns retryable 503 and releases claims on temporary Clover REST failures", async () => {
+    vi.stubEnv("CLOVER_API_TOKEN", "rest_test");
+    const { handleCloverHostedCheckoutWebhook } =
+      await import("@/lib/integration/providers/clover/webhook");
+    const raw = JSON.stringify({
+      status: "APPROVED",
+      type: "PAYMENT",
+      id: "MISSING_PAYMENT",
+      merchantId: "MTEST",
+      data: "MISSING_SESSION",
+    });
+    const t = Math.floor(Date.now() / 1000);
+    const signature = `t=${t},v1=${createHmac("sha256", "whsec_test").update(`${t}.${raw}`).digest("hex")}`;
+    const send = () =>
+      handleCloverHostedCheckoutWebhook(
+        new Request("https://pppmtl.com/api/public/webhooks/clover", {
+          method: "POST",
+          body: raw,
+          headers: { "clover-signature": signature },
+        }),
+      );
+
+    const first = await send();
+    expect(first.status).toBe(503);
+    expect(first.headers.get("retry-after")).toBe("30");
+    const second = await send();
+    expect(second.status).toBe(503);
+    expect(printed).toBe(0);
+  });
 });
