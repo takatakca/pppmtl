@@ -1,6 +1,6 @@
 # PPPMTL — prioritized task queue
 
-Updated: 2026-10-14 · GitHub is the source of truth.
+Updated: 2026-10-15 · GitHub is the source of truth.
 
 ## P0 — mandatory before enabling production payments
 
@@ -29,3 +29,10 @@ Updated: 2026-10-14 · GitHub is the source of truth.
 - Claim a single task in `WORKLOG.md`; do not redo open agent work; make narrow commits to `main` only when permitted.
 - Never mark an integration as live because a file or secret *name* exists. Obtain API/response evidence.
 - Keep `AGENT_HANDOFF.md` and this queue aligned after every complete development session.
+
+## Update 2026-10-15
+
+- **Safety applied:** source now fails closed on real Clover production checkout until the order repository becomes durable (not just a configuration flag), and refuses malformed Clover quantities.
+- **Identity boundary applied:** guest checkouts ignore caller-supplied TAKATAK/customer IDs; a dedicated TAKATAK-scoped auth assertion/service is still needed. Review [IDENTITY_INTEGRATION.md](IDENTITY_INTEGRATION.md) and do not borrow 1LV credentials.
+- **#7 CI infrastructure blocker:** recent Actions runs have `runner_id=0`, no job steps, logs returning 404 BlobNotFound. Inspect repo/org Actions billing, quotas, disabled runners and policies; restore an actual runner, then run the full CI suite. GitHub's public service-status page cannot verify this account's runner availability.
+- **Migration remains unapplied:** `db/migrations/0001_ppp_orders.sql` defines tenant-scoped order, webhook and outbox tables. It is not a working database or replacement for #6 without a verified PostgreSQL instance, application driver, transaction logic, backups and restart/replay tests.
