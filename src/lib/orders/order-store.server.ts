@@ -10,6 +10,13 @@
 import type { InternalOrder, OrderStatus } from "./types";
 import { canTransition } from "./types";
 
+/**
+ * This repository is still an in-process ring. Production Clover Hosted Checkout
+ * must remain disabled until this is replaced with transactional durable storage.
+ * Never switch this flag alone: implement restart-safe writes/webhooks and test first.
+ */
+export const ordersPersistAcrossRestarts = false;
+
 const MAX_ORDERS = 500;
 const orders = new Map<string, InternalOrder>();
 
