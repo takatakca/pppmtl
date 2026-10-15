@@ -30,7 +30,7 @@ The application is a **server-rendered TanStack Start / Nitro Node application**
 
 - In GitHub repository Variables: `PPPMTL_DEPLOY_VIA_ACTIONS=true`.
 - In Actions secrets: `PPPMTL_COOLIFY_DEPLOY_WEBHOOK` (trusted HTTPS Coolify `/api/v1/deploy?uuid=...` endpoint) and `PPPMTL_COOLIFY_API_TOKEN` (least-privilege deploy-only bearer token).
-- It queues a deploy **after** `PPPMTL CI` succeeds on a `main` push; a queued deployment is **not** proof of success.
+- It requests a deploy **after** `PPPMTL CI` succeeds on a `main` push; then polls Coolify `GET /api/v1/deployments/{uuid}` for `finished`, checks its `commit` equals the verified CI SHA and verifies the HTTPS application health endpoint. Configure optional repository variable `PPPMTL_HEALTHCHECK_URL` (default `https://pppmtl.com/healthz`). A queued request alone is **not** proof of success.
 - Keep native Coolify git-push deploy disabled if this fallback is enabled.
 
 ## Production release verification (not yet executed)
@@ -51,3 +51,11 @@ Revert a faulty commit using a new non-destructive commit, or redeploy a known-g
 - Never enable **live Clover Hosted Checkout** based solely on configured merchant keys. `src/lib/integration/providers/clover/config.server.ts` now rejects live production checkout while `src/lib/orders/order-store.server.ts` declares non-durable in-process storage. Finish transactional PostgreSQL order persistence and signed-event replay/outbox before lifting this guard. Sandbox testing is not authorization to accept real payments.
 - CI and one-time formatter runs dated October 15 failed with `runner_id: 0`, empty job steps and job log downloads returning 404 BlobNotFound. Outcome is tracked in [issue #7](https://github.com/takatakca/pppmtl/issues/7). Check repository billing/Actions quotas and runner provisioning. No green commit verification or live deployment is established by those failed runs.
 - Official Coolify API documentation supports `POST /api/v1/deploy?uuid=...` with a bearer token, returning a deployment UUID when a request is queued. Its response is **not** successful deployment verification. Validate against the exact installed Coolify instance before activation.
+
+## Deployment verifier (added 2026-10-15)
+
+The opt-in Coolify workflow uses the official POST `/api/v1/deploy` response's `deployment_uuid`, then calls authenticated GET `/api/v1/deployments/{uuid}` for up to 36 attempts. It refuses cancelled/failed or stale-SHA deployments, requires `status=finished`, and finally checks the configured HTTPS `/healthz` response identifies PPPMTL. It fails closed on API errors/verification timeout and never prints the bearer token. This feature is **committed but not tested against a real resource**, and does not replace merchant/payment testing or application-level transaction monitoring.
+
+Real Clover payment remains disabled with the in-memory order store in **all** Node environments; do not infer that a development-mode node process permits safe live payments. See [DB_ROLLOUT.md](DB_ROLLOUT.md) for the RLS and outbox migration gate.
+
+As of the latest check, the public PPPMTL homepage returned HTTP 403 via external retrieval, while `/healthz` could not be fetched. Neither proves that the intended application is running; real deployment SHA/health are **not verified**.
