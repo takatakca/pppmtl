@@ -1,5 +1,54 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+
+## CURRENT HANDOFF — 2026-10-15, session continued after 15:04 Montréal
+
+**Repository:** `takatakca/pppmtl` · **Release branch:** `main` (write permissions confirmed).  
+**Last confirmed pushed commit BEFORE this handoff update:** `4942f45fcd817fe357111044ab09d94a4477938d` (WORKLOG). This file update creates another commit: always read the actual `main` SHA before writing further. No force push.  
+**Open issues:** [#5 TAKATAK Auth and tenant permissions](https://github.com/takatakca/pppmtl/issues/5), [#6 PostgreSQL durable order/webhook/outbox](https://github.com/takatakca/pppmtl/issues/6), [#7 GitHub Actions runnerless jobs](https://github.com/takatakca/pppmtl/issues/7). No open PRs were found at resume.
+
+### Last task completed (source commits pushed; production remains blocked)
+
+- **Clover webhook correctness:** `src/lib/integration/providers/clover/webhook.ts` validates signed `PAYMENT` type, provider payment ID, checkout session ID and exact expected merchant before applying payment; rejects wrong merchant. Reversible REST lookup/title failures and unexpected exceptions release in-process replay claims, log a redacted error and return HTTP 503 plus Retry-After. Print failure is surfaced for manual review, not a claim that fulfilment succeeded.
+- **Replay helper:** `src/lib/integration/core/webhook-security.ts` gained `releaseWebhookDelivery`. Reminder: still in-process memory, not durable and not exactly-once; #6 is critical.
+- **Tests added:** `src/lib/integration/__tests__/clover.test.ts` has wrong-merchant, wrong-event, temporary REST error and thrown-exception retry cases. Also `clover-readiness.test.ts` verifies the live payment safety guard under multiple `NODE_ENV` values.
+- **Clover payment gating:** `src/lib/integration/providers/clover/config.server.ts` blocks `CLOVER_ENV=production` when `ordersPersistAcrossRestarts=false`, regardless of Node environment.
+- **PostgreSQL tenant safety:** `db/migrations/0001_ppp_orders.sql` now uses composite `(tenant_id, order_id)` foreign keys and `FORCE ROW LEVEL SECURITY` for all PPP tables; `db/tests/tenant-isolation.sql` tests no cross-tenant reads/writes/outbox references in a rollback-only transaction.
+- **CI:** `.github/workflows/ci.yml` gained a PostgreSQL 16 service job that applies the migration on an ephemeral instance and runs the isolation test as a restricted role. **No PostgreSQL job has actually executed: GitHub runners are not being provisioned.**
+- **CD:** `.github/workflows/deploy-coolify.yml` now uses the official `GET /api/v1/deployments/{uuid}` after the POST, waits for `finished`, requires deployment commit equals the passing CI SHA, and verifies optional `PPPMTL_HEALTHCHECK_URL` (default HTTPS `https://pppmtl.com/healthz`). Deploy job remains opt-in/disabled and untested against a real resource.
+- **Documentation:** `docs/DB_ROLLOUT.md` created; `docs/PROJECT_STATUS.md`, `docs/TASK_QUEUE.md`, `docs/DEPLOYMENT.md`, `docs/DECISIONS.md` and `WORKLOG.md` updated.
+
+### Next exact action — unfinished task
+
+**1. CI infrastructure first:** investigate [issue #7](https://github.com/takatakca/pppmtl/issues/7) with GitHub repository/organization Actions policies, billing quota and runner provisioning. Attempt #2 of run `38776419726` was re-triggered through the authenticated GitHub plugin but again failed without running steps. Newest verified CI run `38792461370` failed, as did both jobs of `38792224759`; the GitHub Actions job response had `runner_id=0`, an empty runner name and `steps=[]`. Previous job logs failed with 404 BlobNotFound. **Do not assume these are compile/test failures.** Once a runner becomes available, rerun current-main CI and correct any real Nitro, TypeScript, ESLint, Vitest or PostgreSQL test diagnostics.
+
+**2. Durable payments:** implement a real authorized PostgreSQL connection, verified tenant-bound transactions, persistent order creation, provider IDs, webhook deduplication, recovery worker, print-once outbox, backup/restore and integration tests. SQL exists but has never been applied to production or staging. Do NOT flip `ordersPersistAcrossRestarts` without actually replacing the store. See `docs/DB_ROLLOUT.md`.
+
+**3. Identity:** integrate the TAKATAK master authority via PPP-specific scoped verification and role/tenant entitlements. Do not reuse the existing 1LV credential. Existing temporary admin cookie and signed guest receipts are not full TAKATAK SSO (issue #5).
+
+**4. Hosting:** identify/authorize PPPMTL's actual Coolify/Contabo application (or another verified target), set server secrets without exposing them, attach correct domain and HTTPS, keep DNS email records intact; enable one deployment mechanism only after green CI, and confirm resulting revision/health. Only after durable payment checks may actual merchant checkout be enabled.
+
+### Verification performed and deployment evidence
+
+- Read `AGENTS.md`, prior handoff, tasks/status, GitHub HEAD/PRs/issues, source, checkout/security/webhook modules, workflows and recent GitHub Actions jobs.
+- Pushed normal GitHub commits on `main`, read back updated webhook code, migration and CI workflows. All source modifications are recorded in WORKLOG; no local git clone was possible because this environment cannot resolve private GitHub via container DNS.
+- Retried one old failed CI job through the GitHub API; still failed before starting its runner. No new build, ESLint, TypeScript, Vitest or SQL probe success can be attested.
+- Verified Coolify's documented POST `/api/v1/deploy` and GET `/api/v1/deployments/{uuid}` API contracts, but **did not** call a real authenticated Coolify instance.
+- External check: `https://pppmtl.com` returned HTTP 403 via the public fetch tool and `https://pppmtl.com/healthz` could not be retrieved. Neither is evidence of a working release.
+- **Real deployment status: NOT VERIFIED / NO SUCCESS CLAIMED.** Optional Coolify workflow runs are skipped. No live payment, checkout, webhook printer or DB transaction was performed.
+- Access required: Actions runners, authorized database/migration/app role, PPP-specific TAKATAK assertion service, live merchant credentials, identified Coolify instance and scoped API token. Never record credential values in docs or GitHub history.
+
+### Files changed in this continuation
+
+`src/lib/integration/providers/clover/webhook.ts`, `src/lib/integration/core/webhook-security.ts`, `src/lib/integration/providers/clover/config.server.ts`, `src/lib/integration/__tests__/clover.test.ts`, `src/lib/integration/__tests__/clover-readiness.test.ts`, `db/migrations/0001_ppp_orders.sql`, `db/tests/tenant-isolation.sql`, `.github/workflows/deploy-coolify.yml`, `.github/workflows/ci.yml`, `docs/DB_ROLLOUT.md`, `docs/PROJECT_STATUS.md`, `docs/TASK_QUEUE.md`, `docs/DEPLOYMENT.md`, `docs/DECISIONS.md`, `WORKLOG.md`, and this handoff.
+
+### Agent continuity
+
+Read this section and then the prior handoff. Do not redo merged PR #4 or previously shipped safety improvements. Maintain TAKATAK's central identity authority and strict tenant boundaries. An external orchestrator can restart future sessions only after it has been explicitly installed and authorized; a prompt cannot self-restart an interrupted agent. No orchestrator was connected or configured here.
+
+---
+
+
 ## CURRENT HANDOFF — 2026-10-15, Montréal
 
 **Repository:** `takatakca/pppmtl` (private) · **branch:** `main` · permission: GitHub write/admin.  
