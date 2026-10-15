@@ -16,9 +16,11 @@ describe("Clover payment safety gate", () => {
 
   it("never starts real production charges with an in-memory order store", () => {
     credentials();
-    vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("CLOVER_ENV", "production");
-    expect(cloverCheckoutConfigured(locationId)).toBe(false);
+    for (const nodeEnv of ["production", "development", "test"]) {
+      vi.stubEnv("NODE_ENV", nodeEnv);
+      expect(cloverCheckoutConfigured(locationId)).toBe(false);
+    }
     expect(cloverReadiness(locationId)).toMatchObject({
       durableOrderStore: false,
       checkoutReady: false,
