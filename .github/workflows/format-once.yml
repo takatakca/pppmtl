@@ -37,7 +37,11 @@ jobs:
             src/lib/security/__tests__/access.test.ts \
             src/routes/admin.sign-in.tsx \
             src/routes/admin.orders.tsx \
-            src/routes/admin.integrations.tsx
+            src/routes/admin.integrations.tsx \
+            src/lib/integration/providers/clover/checkout.ts \
+            src/lib/integration/providers/clover/config.server.ts \
+            src/lib/integration/__tests__/clover-readiness.test.ts \
+            src/lib/orders/order-store.server.ts
           if git diff --quiet; then
             echo "Files were already formatted."
             exit 0
@@ -55,6 +59,10 @@ jobs:
             src/lib/security/__tests__/access.test.ts \
             src/routes/admin.sign-in.tsx \
             src/routes/admin.orders.tsx \
-            src/routes/admin.integrations.tsx
+            src/routes/admin.integrations.tsx \
+            src/lib/integration/providers/clover/checkout.ts \
+            src/lib/integration/providers/clover/config.server.ts \
+            src/lib/integration/__tests__/clover-readiness.test.ts \
+            src/lib/orders/order-store.server.ts
           git commit -m "style(pppmtl): normalize security and order files with Prettier"
           git push origin HEAD:main
