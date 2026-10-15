@@ -60,11 +60,7 @@ export function cloverServesLocation(locationId: string): boolean {
 export function cloverCheckoutConfigured(locationId: string): boolean {
   // A redirect to real payment cannot be made safe by a signed return URL alone.
   // The current in-memory order store loses payment reconciliation on process restart.
-  if (
-    process.env["NODE_ENV"] === "production" &&
-    cloverEnvironment() === "production" &&
-    !ordersPersistAcrossRestarts
-  ) {
+  if (cloverEnvironment() === "production" && !ordersPersistAcrossRestarts) {
     return false;
   }
   return (
