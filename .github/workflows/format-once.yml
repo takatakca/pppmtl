@@ -1,17 +1,15 @@
 name: PPPMTL One-Time Formatter
 
-# Explicitly initiated by the commit that introduces this file ([format]).
-# Runs once, commits only selected source formatting changes and never force-pushes.
+# Manual repair only: GitHub-hosted runners on 2026-10-15 did not start.
+# Do not run concurrently with an agent pushing source changes.
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   format:
-    if: contains(github.event.head_commit.message, '[format]')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
