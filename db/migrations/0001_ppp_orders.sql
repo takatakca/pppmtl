@@ -25,6 +25,9 @@ CREATE TABLE IF NOT EXISTS ppp.orders (
   updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT ppp_orders_tenant_idempotency UNIQUE (tenant_id, idempotency_key)
 );
+-- Composite unique key permits tenant-safe foreign keys for event and outbox records.
+CREATE UNIQUE INDEX IF NOT EXISTS ppp_orders_tenant_id_idx
+  ON ppp.orders (tenant_id, id);
 CREATE UNIQUE INDEX IF NOT EXISTS ppp_orders_provider_session_idx
   ON ppp.orders (tenant_id, provider, provider_order_id)
   WHERE provider_order_id IS NOT NULL;
@@ -47,7 +50,9 @@ CREATE TABLE IF NOT EXISTS ppp.inbound_webhooks (
   payload_digest text NOT NULL CHECK (payload_digest ~ '^[a-f0-9]{64}$'),
   event_type text NOT NULL,
   provider_payment_id text,
-  order_id text REFERENCES ppp.orders(id),
+  order_id text,
+  CONSTRAINT ppp_inbound_webhook_order_same_tenant
+    FOREIGN KEY (tenant_id, order_id) REFERENCES ppp.orders(tenant_id, id),
   processing_state text NOT NULL DEFAULT 'PENDING'
     CHECK (processing_state IN ('PENDING', 'PROCESSED', 'RETRY', 'FAILED')),
   attempts integer NOT NULL DEFAULT 0 CHECK (attempts >= 0),
@@ -66,7 +71,9 @@ CREATE INDEX IF NOT EXISTS ppp_webhook_retry_idx
 CREATE TABLE IF NOT EXISTS ppp.fulfillment_outbox (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   tenant_id text NOT NULL,
-  order_id text NOT NULL REFERENCES ppp.orders(id),
+  order_id text NOT NULL,
+  CONSTRAINT ppp_fulfillment_order_same_tenant
+    FOREIGN KEY (tenant_id, order_id) REFERENCES ppp.orders(tenant_id, id),
   effect text NOT NULL CHECK (effect IN ('CLOVER_TITLE', 'CLOVER_PRINT', 'CUSTOMER_NOTIFICATION')),
   dedup_key text NOT NULL,
   payload jsonb NOT NULL DEFAULT '{}'::jsonb,
@@ -90,6 +97,12 @@ CREATE INDEX IF NOT EXISTS ppp_fulfillment_due_idx
 ALTER TABLE ppp.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ppp.inbound_webhooks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ppp.fulfillment_outbox ENABLE ROW LEVEL SECURITY;
+
+-- Table owners normally bypass RLS. FORCE also restricts table owners;
+-- application database roles must NOT have SUPERUSER or BYPASSRLS grants.
+ALTER TABLE ppp.orders FORCE ROW LEVEL SECURITY;
+ALTER TABLE ppp.inbound_webhooks FORCE ROW LEVEL SECURITY;
+ALTER TABLE ppp.fulfillment_outbox FORCE ROW LEVEL SECURITY;
 
 CREATE POLICY ppp_orders_tenant_policy ON ppp.orders
   USING (tenant_id = nullif(current_setting('ppp.tenant_id', true), ''))
