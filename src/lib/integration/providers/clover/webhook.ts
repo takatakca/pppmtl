@@ -116,11 +116,27 @@ export async function handleCloverHostedCheckoutWebhook(request: Request): Promi
   if (!claimWebhookDelivery(key)) return Response.json({ received: true, duplicate: true });
 
   const approved = event.status === "APPROVED";
-  const { applyCloverPayment } = await import("@/lib/orders/order-service");
-  const order = event.checkoutSessionId
-    ? applyCloverPayment(event.checkoutSessionId, event.paymentId, approved)
-    : null;
-  const confirmation = approved ? await confirmInClover(event.paymentId, order) : null;
+  let order: InternalOrder | null;
+  let confirmation: CloverConfirmation | null;
+  try {
+    const { applyCloverPayment } = await import("@/lib/orders/order-service");
+    order = applyCloverPayment(event.checkoutSessionId, event.paymentId, approved);
+    confirmation = approved ? await confirmInClover(event.paymentId, order) : null;
+  } catch {
+    // A transient exception after claiming a delivery is not a completed
+    // payment event. Return 503 so the signed event remains retryable.
+    releaseWebhookDelivery(key);
+    logIntegrationEvent({
+      provider: "clover",
+      eventType: "payment.reconciliation_exception",
+      status: "error",
+      payloadReference: event.paymentId,
+    });
+    return new Response("Payment reconciliation temporarily unavailable", {
+      status: 503,
+      headers: { "Retry-After": "30" },
+    });
+  }
 
   // An unavailable Clover REST lookup or failed title must not be acknowledged
   // as completed: the original delivery can safely be retried without printing.
