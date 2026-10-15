@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+- 2026-10-15 | ChatGPT GPT-6 (CI and payment safety) | main → active | active | Resume after formatter commit 2de37b9; verify CI and harden Clover production payment readiness + integer quantity | push changes, read complete CI logs, update handoff
+
 - 2026-10-14 | ChatGPT GPT-6 (security issue #5) | main → commits f918e6f / 2527145 / daaf965 / 7249cc3 / 0aeaac0 / 9894028 / df87722 / acf927d / 39be6b3 | partial; core security gates pushed | Added temporary signed admin session/login/logout; all admin server RPCs require it; signed HttpOnly same-browser order receipts, nonce-scoped checkout idempotency, random order IDs; regression tests included | replace bootstrap with TAKATAK Auth roles, review checkout cookie implementation on a live server and maintain #5 open
 - 2026-10-14 | ChatGPT GPT-6 (CI and continuity) | main → commits f9a5333 / 87e6b65 / 6216d7b | code pushed; CI rerun after fixes | Added CI build/typecheck/lint/tests; required successful main CI before opt-in Coolify workflow; corrected TypeScript process.env index access and generated-route timing | inspect the latest GitHub CI run; repair any remaining failures, then verify actual deployment and secrets
 - 2026-10-14 | ChatGPT GPT-6 (five-file handoff) | main → docs/PROJECT_STATUS.md, TASK_QUEUE.md, DEPLOYMENT.md, DECISIONS.md | docs pushed | Recorded ownership, deployment, actual blockers #5 and #6, and prioritized queue; updated AGENTS.md and README.md | update AGENT_HANDOFF.md with branch SHA and CI evidence before session ends
