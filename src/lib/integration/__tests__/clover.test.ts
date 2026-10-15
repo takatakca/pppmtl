@@ -596,4 +596,34 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
     expect(second.status).toBe(503);
     expect(printed).toBe(0);
   });
+
+  it("releases the delivery after unexpected reconciliation exceptions", async () => {
+    vi.stubEnv("CLOVER_API_TOKEN", "rest_test");
+    vi.stubEnv("PUBLIC_SITE_URL", "not a valid URL");
+    const { handleCloverHostedCheckoutWebhook } =
+      await import("@/lib/integration/providers/clover/webhook");
+    const raw = JSON.stringify({
+      status: "APPROVED",
+      type: "PAYMENT",
+      id: "PAY1",
+      merchantId: "MTEST",
+      data: "SESSION_RETRY",
+    });
+    const timestamp = Math.floor(Date.now() / 1000);
+    const digest = createHmac("sha256", "whsec_test")
+      .update(`${timestamp}.${raw}`)
+      .digest("hex");
+    const send = () =>
+      handleCloverHostedCheckoutWebhook(
+        new Request("https://pppmtl.com/api/public/webhooks/clover", {
+          method: "POST",
+          body: raw,
+          headers: { "clover-signature": `t=${timestamp},v1=${digest}` },
+        }),
+      );
+
+    expect((await send()).status).toBe(503);
+    expect((await send()).status).toBe(503);
+    expect(printed).toBe(0);
+  });
 });
