@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+- 2026-10-15 | ChatGPT GPT-6 (webhook correctness and CI recovery) | main | active | Reran failed CI run 38776419726; investigating Clover webhook replay/failure boundaries and migration correctness | code + validate + update five docs and handoff
+
 - 2026-10-15 | ChatGPT GPT-6 (CI and payment safety) | main → code commits 9212d9d / 6117cb9 / 4222b47 / fa97c39 / 1403975 / 8c50af3 | partial; code pushed, production payments safely disabled; CI blocked at runner provisioning | Added integer-only Clover pricing, required signed webhook secret, disabled real Clover checkout until durable order store; stripped forged master/customer identity IDs and added regression tests. Formatter bot prior commit 2de37b9 succeeded; 2026-10-15 CI/formatter jobs show runner_id=0, no steps, logs 404. Created issue #7 and documented integration boundary in docs/IDENTITY_INTEGRATION.md | inspect Actions billing/runner quota and restore runner; run full build/typecheck/lint/tests; implement #6 transactional orders and #5 TAKATAK-scoped SSO before release
 
 - 2026-10-14 | ChatGPT GPT-6 (security issue #5) | main → commits f918e6f / 2527145 / daaf965 / 7249cc3 / 0aeaac0 / 9894028 / df87722 / acf927d / 39be6b3 | partial; core security gates pushed | Added temporary signed admin session/login/logout; all admin server RPCs require it; signed HttpOnly same-browser order receipts, nonce-scoped checkout idempotency, random order IDs; regression tests included | replace bootstrap with TAKATAK Auth roles, review checkout cookie implementation on a live server and maintain #5 open
