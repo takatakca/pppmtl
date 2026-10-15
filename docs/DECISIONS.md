@@ -29,3 +29,13 @@ See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.m
 | Discard all browser-supplied customer/master identity references on guest checkout | Forged identifiers are not verified TAKATAK sessions | Verified cross-device accounts will require a separate TAKATAK scoped-session integration |
 | Do not reuse `TAKATAK_1LV_API_KEY` for PPPMTL | Central TAKATAK Master API currently scopes it to 1LV | Require a distinct audienced PPPMTL assertion/API contract |
 | Treat runnerless CI failures as unverified | Runner `0` / missing job steps cannot prove source correctness or failure | Keep deployment gated, track #7, run build/typecheck/lint/tests on a working runner |
+
+## Continuation decisions — 2026-10-15
+
+| Decision | Rationale | Consequence |
+|---|---|---|
+| Validate webhook merchant identity and `PAYMENT` type after HMAC verification | A validly signed event for another merchant or event kind is not permission to update a PPP order | Reject before payment mutation; preserve processing for genuine events |
+| Release transient in-memory delivery claims and return HTTP 503 | A provider REST/title exception must not permanently mark an event as completed | Replay is possible on retry; still replace with durable dedup/outbox before production |
+| Disable **every** live Clover checkout until order persistence is durable | `NODE_ENV` can be incorrectly configured on a real server | `CLOVER_ENV=production` with in-memory order store always fails closed |
+| Match all outbox/webhook order references to their tenant and force RLS | Prevent cross-tenant effects, including through the table-owner PostgreSQL role | Composite foreign keys, forced RLS and limited-role PostgreSQL CI test |
+| Verify Coolify finished status, exact commit and public HTTPS health | A queued deployment response does not prove running revision | CI-gated opt-in workflow polls official API; no verified deployment yet |
