@@ -1,6 +1,6 @@
 # PPPMTL — engineering decisions
 
-Updated: 2026-10-14. Supersede only with documented owner approval and clear migration plan.
+Updated: 2026-10-15. Supersede only with documented owner approval and clear migration plan.
 
 | Decision | Rationale | Consequence |
 |---|---|---|
@@ -19,3 +19,13 @@ Updated: 2026-10-14. Supersede only with documented owner approval and clear mig
 | TAKATAK remains identity/data authority | Cross-brand customer resolution and company isolation belong to central TAKATAK services | Do not create a competing PPP master CRM |
 
 See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.md`.
+
+## Decisions added 2026-10-15
+
+| Decision | Why | Operational consequence |
+|---|---|---|
+| Fail closed on live Clover charges while using an in-memory order ring | Process restart or concurrent workers can lose the paid order and deduplication history | Production checkout readiness is false until a durable repository is implemented and verified; sandbox tests permitted with signed webhooks |
+| Reject any fractional/non-finite Clover item quantity | Never round customer-supplied amounts into a payment | Exact positive safe integers only, at most 50 units |
+| Discard all browser-supplied customer/master identity references on guest checkout | Forged identifiers are not verified TAKATAK sessions | Verified cross-device accounts will require a separate TAKATAK scoped-session integration |
+| Do not reuse `TAKATAK_1LV_API_KEY` for PPPMTL | Central TAKATAK Master API currently scopes it to 1LV | Require a distinct audienced PPPMTL assertion/API contract |
+| Treat runnerless CI failures as unverified | Runner `0` / missing job steps cannot prove source correctness or failure | Keep deployment gated, track #7, run build/typecheck/lint/tests on a working runner |
