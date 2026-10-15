@@ -14,7 +14,10 @@
 import type { WebhookAdapter, WebhookEvent } from "@/lib/integration/core/adapter";
 import type { IntegrationResult } from "@/lib/integration/core/contracts";
 import { logIntegrationEvent } from "@/lib/integration/core/logging";
-import { claimWebhookDelivery } from "@/lib/integration/core/webhook-security";
+import {
+  claimWebhookDelivery,
+  releaseWebhookDelivery,
+} from "@/lib/integration/core/webhook-security";
 import type { InternalOrder } from "@/lib/orders/types";
 import {
   isWebsiteTitled,
@@ -23,7 +26,12 @@ import {
   websiteOrderNote,
   websiteOrderTitle,
 } from "./checkout";
-import { cloverWebhookSecret, printWebOrders, siteBaseUrl } from "./config.server";
+import {
+  cloverMerchantId,
+  cloverWebhookSecret,
+  printWebOrders,
+  siteBaseUrl,
+} from "./config.server";
 import { orderForPayment, printCloverOrder, titleCloverOrder } from "./api.server";
 
 export interface CloverConfirmation {
@@ -83,8 +91,33 @@ export async function handleCloverHostedCheckoutWebhook(request: Request): Promi
   }
 
   const event = parseHostedCheckoutEvent(rawBody);
-  if (!event) return new Response("Invalid payload", { status: 400 });
-  const key = `clover:${event.paymentId ?? event.checkoutSessionId ?? "?"}:${event.status}`;
+  if (
+    !event ||
+    event.type !== "PAYMENT" ||
+    !event.paymentId ||
+    !event.checkoutSessionId
+  ) {
+    return new Response("Invalid payment event", { status: 400 });
+  }
+
+  // The HMAC proves the sender knows the configured secret; verify that the
+  // payment is also for this merchant before mutating any local order.
+  const merchantId = cloverMerchantId();
+  if (!merchantId) return new Response("Merchant not configured", { status: 503 });
+  if (event.merchantId !== merchantId) {
+    logIntegrationEvent({
+      provider: "clover",
+      eventType: "webhook.merchant_mismatch",
+      status: "rejected",
+      payloadReference: "merchant",
+    });
+    return new Response("Rejected merchant", { status: 401 });
+  }
+  if (event.status !== "APPROVED" && event.status !== "DECLINED") {
+    return Response.json({ received: true, ignored: true });
+  }
+
+  const key = `clover:${event.paymentId}:${event.checkoutSessionId}:${event.status}`;
   if (!claimWebhookDelivery(key)) return Response.json({ received: true, duplicate: true });
 
   const approved = event.status === "APPROVED";
@@ -92,8 +125,27 @@ export async function handleCloverHostedCheckoutWebhook(request: Request): Promi
   const order = event.checkoutSessionId
     ? applyCloverPayment(event.checkoutSessionId, event.paymentId, approved)
     : null;
-  const confirmation =
-    approved && event.paymentId ? await confirmInClover(event.paymentId, order) : null;
+  const confirmation = approved ? await confirmInClover(event.paymentId, order) : null;
+
+  // An unavailable Clover REST lookup or failed title must not be acknowledged
+  // as completed: the original delivery can safely be retried without printing.
+  if (
+    confirmation?.reason === "order_not_readable" ||
+    confirmation?.reason === "title_failed"
+  ) {
+    releaseWebhookDelivery(key);
+    logIntegrationEvent({
+      provider: "clover",
+      eventType: "payment.reconciliation_pending",
+      status: "error",
+      payloadReference: event.paymentId,
+      detail: confirmation.reason,
+    });
+    return new Response("Payment reconciliation temporarily unavailable", {
+      status: 503,
+      headers: { "Retry-After": "30" },
+    });
+  }
 
   logIntegrationEvent({
     provider: "clover",
@@ -114,6 +166,7 @@ export async function handleCloverHostedCheckoutWebhook(request: Request): Promi
     applied: Boolean(order),
     titled: confirmation?.titled ?? false,
     printed: confirmation?.printed ?? false,
+    manualReviewRequired: confirmation?.reason === "print_failed",
   });
 }
 
