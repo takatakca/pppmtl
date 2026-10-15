@@ -549,7 +549,8 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
         data: "SESSION_FOREIGN",
       });
       const t = Math.floor(Date.now() / 1000);
-      const signature = `t=${t},v1=${createHmac("sha256", "whsec_test").update(`${t}.${raw}`).digest("hex")}`;
+      const digest = createHmac("sha256", "whsec_test").update(`${t}.${raw}`).digest("hex");
+      const signature = `t=${t},v1=${digest}`;
       return handleCloverHostedCheckoutWebhook(
         new Request("https://pppmtl.com/api/public/webhooks/clover", {
           method: "POST",
@@ -577,7 +578,8 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
       data: "MISSING_SESSION",
     });
     const t = Math.floor(Date.now() / 1000);
-    const signature = `t=${t},v1=${createHmac("sha256", "whsec_test").update(`${t}.${raw}`).digest("hex")}`;
+    const digest = createHmac("sha256", "whsec_test").update(`${t}.${raw}`).digest("hex");
+    const signature = `t=${t},v1=${digest}`;
     const send = () =>
       handleCloverHostedCheckoutWebhook(
         new Request("https://pppmtl.com/api/public/webhooks/clover", {
