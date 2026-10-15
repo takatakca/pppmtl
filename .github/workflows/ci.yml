@@ -40,3 +40,44 @@ jobs:
         run: bun run lint
       - name: Test security, order, brand and integration behavior
         run: bun run test
+
+  database-isolation:
+    name: PostgreSQL schema and tenant isolation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ppp-ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install PostgreSQL client if needed
+        run: command -v psql >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client)
+      - name: Apply clean PostgreSQL schema
+        env:
+          PGPASSWORD: ppp-ci-only-password
+        run: psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -f db/migrations/0001_ppp_orders.sql
+      - name: Create limited test application role
+        env:
+          PGPASSWORD: ppp-ci-only-password
+        shell: bash
+        run: |
+          psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE ROLE ppp_ci_role LOGIN PASSWORD 'ppp-ci-tenant-test-password';
+          GRANT USAGE ON SCHEMA ppp TO ppp_ci_role;
+          GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA ppp TO ppp_ci_role;
+          GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA ppp TO ppp_ci_role;
+          SQL
+      - name: Prove cross-tenant reads and writes are blocked
+        env:
+          PGPASSWORD: ppp-ci-tenant-test-password
+        run: psql -h 127.0.0.1 -U ppp_ci_role -d postgres -v ON_ERROR_STOP=1 -f db/tests/tenant-isolation.sql
