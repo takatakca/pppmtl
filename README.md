@@ -6,7 +6,7 @@ The source repository for **[pppmtl.com](https://pppmtl.com)** and the related f
 
 - **Frontend and server:** TanStack Start, React 19, Vite, Tailwind CSS, Nitro.
 - **One shared menu/cart:** PPP and franchise brands use one catalog and Clover item mapping. The hostname determines the storefront; see [franchise documentation](docs/brands.md).
-- **Checkout:** server-side Clover Hosted Checkout for supported **pickup** orders. Prices and availability are verified by the server. Card details must never pass through PPPMTL code.
+- **Checkout:** server-side Clover Hosted Checkout for supported **pickup** orders in properly configured sandbox environments. Prices and availability are verified by the server. Card details must never pass through PPPMTL code. **Real production checkout is fail-closed while the order repository is in memory** (see issue #6).
 - **Webhook:** `POST /api/public/webhooks/clover` verifies Clover's signature. Only a verified payment event may mark an order paid.
 - **Integrations:** Clover, with UrbanPiper and other marketplaces separately tracked. See [Clover integration](docs/integrations/clover.md) and [UrbanPiper notes](docs/integrations/urbanpiper.md).
 - **Ownership:** TAKATAK is the customer identity/data authority where shared customer services are subsequently connected; tenant data must remain isolated.
@@ -47,4 +47,4 @@ Coolify accepting a webhook does **not** confirm a healthy release. After deploy
 - **Brand data:** Hochelaga is present but its business hours are **not approved** and must remain unpublished. Align operating hours and location facts with the owner and external delivery channels.
 - **QA:** run `npm run typecheck`, `npm run lint`, `npm run test`, and `npm run build` before production launch (deferred at the owner's request).
 
-See [AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md), [TASK_QUEUE.md](docs/TASK_QUEUE.md), and [WORKLOG.md](WORKLOG.md) for recent commits and the next handoff. No secret, DNS, deployment or live-payment verification is implied by a successful Git push.
+See [AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md), [IDENTITY_INTEGRATION.md](docs/IDENTITY_INTEGRATION.md), [TASK_QUEUE.md](docs/TASK_QUEUE.md), and [WORKLOG.md](WORKLOG.md). GitHub Actions issue [#7](https://github.com/takatakca/pppmtl/issues/7) tracks runnerless CI failures on October 15, 2026. for recent commits and the next handoff. No secret, DNS, deployment or live-payment verification is implied by a successful Git push.
