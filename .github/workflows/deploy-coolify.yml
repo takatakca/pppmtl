@@ -85,3 +85,81 @@ jobs:
               print("Coolify accepted deployment request:", deployment.get("deployment_uuid", "queued"))
           print("Queued is NOT a successful production release; inspect Coolify Deployment Logs.")
           PY
+
+      - name: Verify actual Coolify deployment, revision and public health
+        env:
+          DEPLOY_WEBHOOK: ${{ secrets.PPPMTL_COOLIFY_DEPLOY_WEBHOOK }}
+          API_TOKEN: ${{ secrets.PPPMTL_COOLIFY_API_TOKEN }}
+          VERIFIED_SHA: ${{ github.event.workflow_run.head_sha }}
+          HEALTH_URL: ${{ vars.PPPMTL_HEALTHCHECK_URL || 'https://pppmtl.com/healthz' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import time
+          from pathlib import Path
+          from urllib.error import HTTPError
+          from urllib.parse import quote, urlsplit
+          from urllib.request import HTTPRedirectHandler, Request, build_opener
+
+          class NoRedirect(HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  return None
+
+          opener = build_opener(NoRedirect())
+          url = urlsplit(os.environ["DEPLOY_WEBHOOK"])
+          if url.scheme != "https" or not url.netloc or url.path != "/api/v1/deploy":
+              raise SystemExit("Invalid Coolify deployment origin.")
+          origin = f"{url.scheme}://{url.netloc}"
+          expected_sha = os.environ["VERIFIED_SHA"]
+          records = json.loads(
+              (Path(os.environ["RUNNER_TEMP"]) / "pppmtl-coolify-response.json").read_text()
+          )["deployments"]
+          if not records:
+              raise SystemExit("No deployment UUID returned by Coolify.")
+
+          for record in records:
+              deployment_uuid = record.get("deployment_uuid", "")
+              if not re.fullmatch(r"[A-Za-z0-9_-]{8,128}", deployment_uuid):
+                  raise SystemExit("Invalid deployment UUID returned by Coolify.")
+              endpoint = f"{origin}/api/v1/deployments/{quote(deployment_uuid)}"
+              for attempt in range(36):
+                  request = Request(endpoint, headers={
+                      "Authorization": f"Bearer {os.environ['API_TOKEN']}",
+                      "Accept": "application/json",
+                  })
+                  try:
+                      with opener.open(request, timeout=15) as response:
+                          details = json.load(response)
+                  except HTTPError as exc:
+                      if exc.code != 404:
+                          raise
+                      details = {"status": "queued"}
+
+                  status = details.get("status", "unknown")
+                  if status == "finished":
+                      deployed_sha = details.get("commit")
+                      if deployed_sha != expected_sha:
+                          raise SystemExit("Coolify finished a different revision than the verified CI SHA.")
+                      print(f"Coolify finished and verified commit {deployed_sha}.")
+                      break
+                  if status in ("failed", "cancelled-by-user"):
+                      raise SystemExit(f"Coolify deployment failed with status: {status}")
+                  time.sleep(8)
+              else:
+                  raise SystemExit("Deployment did not finish within verification window.")
+
+          health_url = os.environ["HEALTH_URL"]
+          if urlsplit(health_url).scheme != "https":
+              raise SystemExit("The public health-check URL must use HTTPS.")
+          with opener.open(Request(health_url, headers={"Accept": "application/json"}), timeout=15) as res:
+              if urlsplit(res.geturl()).scheme != "https":
+                  raise SystemExit("Health check changed to an insecure URL.")
+              health = json.load(res)
+          if health.get("status") != "ok" or health.get("service") != "pppmtl":
+              raise SystemExit("Public health response does not identify a healthy PPPMTL application.")
+          print("Coolify deployment and PPPMTL HTTPS health verified.")
+          PY
