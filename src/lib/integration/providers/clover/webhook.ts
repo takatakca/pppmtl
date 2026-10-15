@@ -91,12 +91,7 @@ export async function handleCloverHostedCheckoutWebhook(request: Request): Promi
   }
 
   const event = parseHostedCheckoutEvent(rawBody);
-  if (
-    !event ||
-    event.type !== "PAYMENT" ||
-    !event.paymentId ||
-    !event.checkoutSessionId
-  ) {
+  if (!event || event.type !== "PAYMENT" || !event.paymentId || !event.checkoutSessionId) {
     return new Response("Invalid payment event", { status: 400 });
   }
 
@@ -129,10 +124,7 @@ export async function handleCloverHostedCheckoutWebhook(request: Request): Promi
 
   // An unavailable Clover REST lookup or failed title must not be acknowledged
   // as completed: the original delivery can safely be retried without printing.
-  if (
-    confirmation?.reason === "order_not_readable" ||
-    confirmation?.reason === "title_failed"
-  ) {
+  if (confirmation?.reason === "order_not_readable" || confirmation?.reason === "title_failed") {
     releaseWebhookDelivery(key);
     logIntegrationEvent({
       provider: "clover",
