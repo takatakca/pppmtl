@@ -66,10 +66,10 @@ export function priceCloverCart(
     if (!item)
       return { ok: false, code: "menu_changed", detail: `no Clover item for ${line.siteItemId}` };
     if (!item.available) return { ok: false, code: "item_unavailable", detail: item.name };
-    const quantity = Math.floor(line.quantity);
-    if (!(quantity >= 1 && quantity <= MAX_QTY)) {
+    if (!Number.isSafeInteger(line.quantity) || line.quantity < 1 || line.quantity > MAX_QTY) {
       return { ok: false, code: "menu_changed", detail: `quantity ${line.quantity}` };
     }
+    const quantity = line.quantity;
     const siteGroups = siteGroupsFor(inventory, item.id);
     const check = checkSelections(siteGroups, line.selections ?? {});
     if (!check.ok) {
