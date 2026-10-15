@@ -45,3 +45,9 @@ The application is a **server-rendered TanStack Start / Nitro Node application**
 ## Rollback
 
 Revert a faulty commit using a new non-destructive commit, or redeploy a known-good immutable commit via authorized Coolify controls. Avoid force-push and preserve other agents' history.
+
+## 2026-10-15 payment and pipeline status
+
+- Never enable **live Clover Hosted Checkout** based solely on configured merchant keys. `src/lib/integration/providers/clover/config.server.ts` now rejects live production checkout while `src/lib/orders/order-store.server.ts` declares non-durable in-process storage. Finish transactional PostgreSQL order persistence and signed-event replay/outbox before lifting this guard. Sandbox testing is not authorization to accept real payments.
+- CI and one-time formatter runs dated October 15 failed with `runner_id: 0`, empty job steps and job log downloads returning 404 BlobNotFound. Outcome is tracked in [issue #7](https://github.com/takatakca/pppmtl/issues/7). Check repository billing/Actions quotas and runner provisioning. No green commit verification or live deployment is established by those failed runs.
+- Official Coolify API documentation supports `POST /api/v1/deploy?uuid=...` with a bearer token, returning a deployment UUID when a request is queued. Its response is **not** successful deployment verification. Validate against the exact installed Coolify instance before activation.
