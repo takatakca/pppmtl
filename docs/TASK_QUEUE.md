@@ -36,3 +36,10 @@ Updated: 2026-10-15 · GitHub is the source of truth.
 - **Identity boundary applied:** guest checkouts ignore caller-supplied TAKATAK/customer IDs; a dedicated TAKATAK-scoped auth assertion/service is still needed. Review [IDENTITY_INTEGRATION.md](IDENTITY_INTEGRATION.md) and do not borrow 1LV credentials.
 - **#7 CI infrastructure blocker:** recent Actions runs have `runner_id=0`, no job steps, logs returning 404 BlobNotFound. Inspect repo/org Actions billing, quotas, disabled runners and policies; restore an actual runner, then run the full CI suite. GitHub's public service-status page cannot verify this account's runner availability.
 - **Migration remains unapplied:** `db/migrations/0001_ppp_orders.sql` defines tenant-scoped order, webhook and outbox tables. It is not a working database or replacement for #6 without a verified PostgreSQL instance, application driver, transaction logic, backups and restart/replay tests.
+
+## Current next actions (continuation 2026-10-15)
+
+1. **#7:** restore GitHub-hosted runner provisioning; run `PPPMTL CI` and fix real diagnostics (Nitro build, TypeScript, lint, Vitest **and** PostgreSQL RLS smoke job). Latest observed run `38792224759` had two failed unstarted jobs with `runner_id=0` and no steps; job logs are not evidence of an executed test.
+2. **#6:** implement `db/migrations/0001_ppp_orders.sql` against an approved database, wire the actual driver/transactions/outbox and verify restart, concurrent, signed webhook replay and print-once behavior. Schema and `db/tests/tenant-isolation.sql` are committed but not run; see `docs/DB_ROLLOUT.md`.
+3. **#5:** integrate central TAKATAK verified identity and restaurant-scoped entitlements; temporary signed admin cookie and browser guest receipt do not replace SSO.
+4. Confirm the real Coolify PPPMTL resource, API access, domain routing and secrets. Optional post-CI pipeline now verifies completion/status/SHA/HTTPS health but is **disabled** until its authorized trigger and credentials are configured. Do not switch on paid Clover until #5/#6 are actually verified.
