@@ -69,6 +69,14 @@ export function claimWebhookDelivery(key: string, now = Date.now()): boolean {
   return true;
 }
 
+/** Release a failed transient delivery so Clover can retry after a 503.
+ * This process-local helper is NOT durable idempotency; issue #6 requires
+ * transactional webhook claims before production charges are enabled.
+ */
+export function releaseWebhookDelivery(key: string): void {
+  seen.delete(key);
+}
+
 export function resetWebhookReplayForTests(): void {
   seen.clear();
 }
