@@ -41,6 +41,14 @@ See [TASK_QUEUE.md](TASK_QUEUE.md), [AGENT_HANDOFF.md](AGENT_HANDOFF.md), [DEPLO
 ## 2026-10-15 safety changes
 
 - Formatter bot successfully committed the previous Prettier cleanup as `2de37b9`. Subsequent GitHub Actions jobs on October 15 have failed before publishing runner steps/logs; follow [#7](https://github.com/takatakca/pppmtl/issues/7). **No full green CI is confirmed** for newer commits.
-- Real Clover Hosted Checkout is **disabled when `NODE_ENV=production`, `CLOVER_ENV=production` and the order store remains in memory**. Clover sandbox/test routes remain available only with webhook verification credentials. This blocks charging customers until #6 is actually implemented.
+- Real Clover Hosted Checkout is **disabled for production Clover payments in every Node environment while the order store remains in memory**. Clover sandbox/test routes remain available only with webhook verification credentials. This blocks charging customers until #6 is actually implemented.
 - Clover price validation now rejects fractional, NaN, infinite, zero and >50 quantities. Guest checkout discards unverified browser-claimed TAKATAK/customer identity IDs.
 - Reviewed `takatakca/takatak-v1` auth source; its current internal identity endpoints use an unrelated 1LV-specific integration credential. Do **not** reuse it for PPPMTL. See [IDENTITY_INTEGRATION.md](IDENTITY_INTEGRATION.md).
+
+## 2026-10-15 continuation — webhook, DB and delivery safety
+
+- Clover Hosted Checkout now rejects signed events whose merchant ID does not match this site's merchant or whose type is not PAYMENT. On recoverable Clover REST lookup/title failures or unexpected processing exceptions, the process-local claim is released and HTTP 503/Retry-After is returned. A print failure is flagged for operator review rather than declared successful fulfilment. These are safety improvements, **not durable exactly-once guarantees** (#6 remains open).
+- A production Clover payment cannot be enabled with the current in-memory store by changing `NODE_ENV`. `CLOVER_ENV=production` remains blocked until durable storage exists.
+- PostgreSQL schema now uses same-tenant composite foreign keys for outbox/events, forces RLS for table owners and has a rollback-only isolation probe at `db/tests/tenant-isolation.sql`. Neither the schema migration nor the probe has been executed against a real PostgreSQL instance.
+- CI has an additional ephemeral PostgreSQL 16 job. Latest verified GitHub CI run `38792224759` failed on two jobs with `runner_id=0` and `steps=[]`; no executable build/test result is available. Track issue #7.
+- Optional Coolify workflow now polls the deployment's official API until `finished`, compares its actual commit with the green CI SHA and checks HTTPS `/healthz`. Deployment configuration remains disabled/unverified.
