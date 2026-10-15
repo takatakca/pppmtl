@@ -1,6 +1,6 @@
 # PPPMTL — project status
 
-Updated: 2026-10-14 · branch: `main` · [repository](https://github.com/takatakca/pppmtl)
+Updated: 2026-10-15 · branch: `main` · [repository](https://github.com/takatakca/pppmtl)
 
 ## Product identity and current implementation
 
@@ -37,3 +37,10 @@ Updated: 2026-10-14 · branch: `main` · [repository](https://github.com/takatak
 - [#6 Durable order and Clover webhook pipeline](https://github.com/takatakca/pppmtl/issues/6)
 
 See [TASK_QUEUE.md](TASK_QUEUE.md), [AGENT_HANDOFF.md](AGENT_HANDOFF.md), [DEPLOYMENT.md](DEPLOYMENT.md), and [DECISIONS.md](DECISIONS.md).
+
+## 2026-10-15 safety changes
+
+- Formatter bot successfully committed the previous Prettier cleanup as `2de37b9`. Subsequent GitHub Actions jobs on October 15 have failed before publishing runner steps/logs; follow [#7](https://github.com/takatakca/pppmtl/issues/7). **No full green CI is confirmed** for newer commits.
+- Real Clover Hosted Checkout is **disabled when `NODE_ENV=production`, `CLOVER_ENV=production` and the order store remains in memory**. Clover sandbox/test routes remain available only with webhook verification credentials. This blocks charging customers until #6 is actually implemented.
+- Clover price validation now rejects fractional, NaN, infinite, zero and >50 quantities. Guest checkout discards unverified browser-claimed TAKATAK/customer identity IDs.
+- Reviewed `takatakca/takatak-v1` auth source; its current internal identity endpoints use an unrelated 1LV-specific integration credential. Do **not** reuse it for PPPMTL. See [IDENTITY_INTEGRATION.md](IDENTITY_INTEGRATION.md).
