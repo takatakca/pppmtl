@@ -33,3 +33,20 @@ The test checks:
 ## Rollout gate
 
 Do not change `ordersPersistAcrossRestarts = false` in `src/lib/orders/order-store.server.ts` simply to enable checkout. Replace the in-memory adapter first, and prove storage/webhook/outbox durability on a real database. The `cloverCheckoutConfigured` function blocks real Clover charges even if `NODE_ENV` is set incorrectly, until actual durability exists.
+
+## Atomic checkout and webhook SQL foundation — 2026-10-15 late session
+
+A second migration is committed at `db/migrations/0002_ppp_atomic_payments.sql`, with rollback-only fixture checks in `db/tests/atomic-payments.sql`. **Neither migration has been executed against a real database by this agent.**
+
+- `ppp.create_order_once(...)` inserts or reads an existing order under the verified transaction-local `ppp.tenant_id`, constrained by `(tenant_id,idempotency_key)`.
+- `ppp.record_verified_clover_payment(...)` is **only for events already verified by a trusted server** (Clover HMAC, merchant, payment type, session correlation); it atomically deduplicates delivery keys, rejects mismatched payload hashes and conflicting payment IDs, marks the existing Clover order paid, and schedules a unique `CLOVER_TITLE` outbox record. **It does not verify the signature inside PostgreSQL or print a ticket.**
+- No `CLOVER_PRINT` effect is queued before Clover confirms the title. Build the outbox worker, delivery claim/lease, title completion, print after title, retries, terminal manual review and audit before enabling real payments.
+- Both routines execute as `SECURITY INVOKER`, require tenant context and revoke PUBLIC EXECUTE. Grant EXECUTE to a dedicated approved least-privilege application role only.
+- The CI PostgreSQL 16 job now applies **0001 then 0002**, explicitly grants functions to its disposable runtime role, runs both isolation and atomic-payment probes, and rolls back test fixtures.
+
+Migration order when an authorized DB exists:
+```sh
+psql -v ON_ERROR_STOP=1 -f db/migrations/0001_ppp_orders.sql
+psql -v ON_ERROR_STOP=1 -f db/migrations/0002_ppp_atomic_payments.sql
+```
+Do not re-run `0001` blindly on a database with an existing schema: use the approved migration history and staging rehearsal. The SQL routines are not wired to the TypeScript in-memory store; issue #6 stays open.
