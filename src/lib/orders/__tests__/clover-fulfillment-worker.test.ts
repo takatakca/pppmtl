@@ -1,11 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { InternalOrder } from "../types";
-import type { ClaimedFulfillmentWork, PppSqlClient, PppSqlPool } from "../postgres-transactions.server";
+import type {
+  ClaimedFulfillmentWork,
+  PppSqlClient,
+  PppSqlPool,
+} from "../postgres-transactions.server";
 import { processPppCloverFulfillmentBatch } from "../clover-fulfillment-worker.server";
-import { orderForPayment, printCloverOrder, titleCloverOrder } from
-  "@/lib/integration/providers/clover/api.server";
-import { printWebOrders, siteBaseUrl } from
-  "@/lib/integration/providers/clover/config.server";
+import {
+  orderForPayment,
+  printCloverOrder,
+  titleCloverOrder,
+} from "@/lib/integration/providers/clover/api.server";
+import { printWebOrders, siteBaseUrl } from "@/lib/integration/providers/clover/config.server";
 
 vi.mock("@/lib/integration/providers/clover/api.server", () => ({
   orderForPayment: vi.fn(),
@@ -107,7 +113,11 @@ describe("Clover fulfillment batch (mocked DB and provider)", () => {
     const db = dbFixture();
     const summary = await processPppCloverFulfillmentBatch(db.pool, work.tenant_id);
     expect(summary).toEqual({
-      claimed: 1, done: 1, retry: 0, manualReview: 0, quarantinedPrints: 0,
+      claimed: 1,
+      done: 1,
+      retry: 0,
+      manualReview: 0,
+      quarantinedPrints: 0,
     });
     expect(titleCloverOrder).not.toHaveBeenCalled();
     expect(printCloverOrder).not.toHaveBeenCalled();
