@@ -1,6 +1,51 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
 
+## CURRENT HANDOFF — 2026-10-16 (America/Toronto)
+
+**Repository:** `takatakca/pppmtl` (private), branch `main`, push/admin confirmed. **Main HEAD verified before this handoff update:** `99a20285128487132da2dc61914c95599639b646` (`docs/DB_ROLLOUT.md`); this handoff update and subsequent WORKLOG update create later commits. **Always fetch the real GitHub HEAD**. No open PRs at resume; issues #5 (TAKATAK Auth), #6 (durable checkout/outbox) and #7 (GitHub Actions runner provisioning) remain open.
+
+### Last completed task
+
+**Critical source repair:** `db/migrations/0002_ppp_atomic_payments.sql` was actually malformed. The previous agent's final string substitution truncated the `coalesce(p_payload_digest, '') !~ '^[a-f0-9]{64}$' OR` expression and repeated the remainder of the PL/pgSQL function after `COMMIT;`. Restored the complete validation and removed the second tail (commit `3eba0bbb1de512e3c56e89f26bcd0323941f10cc`).
+
+**Preflight:** created `scripts/check-sql-migrations.mjs`, `scripts/__tests__/check-sql-migrations.test.mjs`, wired the Node structural test to the PostgreSQL job in `.github/workflows/ci.yml`. The checks detect duplicate/missing transaction bounds, unmatched dollar quotes and missing Clover 0002 digest/status guards. Node 22 was used to run a local reproduction of the five checker tests; **all five passed**. Independently inspected current GitHub migration file text: each of 0001 and 0002 has exactly one BEGIN/COMMIT, and 0002 has two function bodies/four dollar delimiters. **This is not a PostgreSQL syntax/execution test**.
+
+**Server code:** added `src/lib/orders/postgres-transactions.server.ts` and `src/lib/orders/__tests__/postgres-transactions.test.ts` with an injected pool/client boundary, `BEGIN` → bound tenant-local `set_config` → COMMIT/ROLLBACK and guaranteed release, SQL-backed guest-order idempotency, Clover checkout session write before redirection and previously verified signed-event persistence. Guest storage rejects any browser-claimed customer identity and refuses `isGuest=false` without master verification; checkout destination requires Clover HTTPS hostname. **No database driver/pool has been provisioned or integrated into `order-service.ts` yet. Mock Vitest tests were authored but have not executed.**
+
+**Docs:** updated `docs/PROJECT_STATUS.md`, `docs/TASK_QUEUE.md`, `docs/DB_ROLLOUT.md`, `docs/DEPLOYMENT.md`, `docs/DECISIONS.md`; `WORKLOG.md` claimed active task and must be marked partial at completion.
+
+### Current and next work
+
+1. **#7 — CI infrastructure:** run 38848538433 from the previous session had both jobs fail with no assigned runner and `steps=[]`. Newly pushed commits launched fresh CI attempts, including `38883685755` (pending when checked); distinguish queued work from failed runnerless jobs. Inspect Actions account/repository billing, hosted runner availability and policy. Once a runner actually executes jobs, run the exact current-main quality/test/build + PostgreSQL 0001/0002 SQL smoke suite, fix *actual* failures. Do not keep rerunning identical runnerless attempts.
+2. **#6 — Production durability:** provision an approved PostgreSQL service + restricted role (no new billable Supabase project), apply both reviewed migrations and run the signed-payment/RLS tests. Connect the injected adapter to the existing synchronous order API by a carefully reviewed async/storage transition; ensure a checkout is durably committed before returning its payment URL. Add verified location→tenant scope, durable signed-webhook inbox, parallel/lease recovery, Clover title+print worker with ambiguous print/manual-review handling, reconciled refund/cancellation and backup/restart proof. **Keep `ordersPersistAcrossRestarts=false`.**
+3. **#5 — Verified central identity:** integrate a PPPMTL-specific TAKATAK authorization assertion and server-side tenant/product entitlements; never reuse 1LV keys. Keep guest ID null until verified. Replace temporary admin login with TAKATAK roles before launching.
+4. **Deployment:** identify the actual Coolify/Contabo/other PPPMTL application, HTTPS domain and scoped secrets; use CI-gated deployment only after successful checks; verify exact release SHA and `/healthz`, not just a queued deployment. At this handoff, public site fetch returned HTTP 403 and `/healthz` could not be read. These do not prove a release.
+
+### Files changed in this session
+
+`db/migrations/0002_ppp_atomic_payments.sql`, `scripts/check-sql-migrations.mjs`, `scripts/__tests__/check-sql-migrations.test.mjs`, `.github/workflows/ci.yml`, `src/lib/orders/postgres-transactions.server.ts`, `src/lib/orders/__tests__/postgres-transactions.test.ts`, `docs/PROJECT_STATUS.md`, `docs/TASK_QUEUE.md`, `docs/DEPLOYMENT.md`, `docs/DECISIONS.md`, `docs/DB_ROLLOUT.md`, `WORKLOG.md`, this handoff.
+
+### Verification performed
+
+- Read from authenticated GitHub: `main` branch SHA, repository access, AGENTS.md, prior handoff, issue/PR lists, CI workflows and runs, relevant SQL and order source. Pushed normal SHA-guarded file commits on authorized `main`; re-read the repaired migration, structural checker and the adapter. No force-push.
+- Ran `node --test` on an equivalent local temporary copy of the five migration-preflight tests: **5 pass / 0 fail**. This verifies the checker logic only; the repository's exact files and complete Vitest/build were not executed locally.
+- Inspected both migration files' actual GitHub contents with structural assertions; no double commit/trailing SQL issue remained.
+- GitHub Actions runs up to `38883685755` were checked; prior attempted CI executions had `runner_id=0`/no steps. A new CI was pending at last check. No successful end-to-end CI, database migration, payment/refund or printer recovery was observed.
+- Public `https://pppmtl.com/healthz` inaccessible; `https://pppmtl.com` returned 403 from web fetch. No functioning production SHA can be attested.
+
+### Deployment status and outstanding accesses
+
+**NOT DEPLOYED / VERIFIED IN THIS SESSION.** CI-triggered Coolify workflow has been skipped or awaits upstream status; the PPPMTL Coolify app and live database are not identified through connected tools. Production Clover Hosted Checkout is still fail-closed because orders remain in-memory. Need working GitHub-hosted runner allocation, an approved PostgreSQL target and migration credentials, PPP-specific verified TAKATAK assertion issuer/tenant mapping, merchant-side credentials, actual Coolify service and deploy API access. Never commit secrets. The connection to an external session orchestrator was not present; a prompt alone cannot restart stopped agent sessions.
+
+### Next exact executable operation
+
+Fetch `main` and latest CI jobs. If runnerless persists, implement/review the PostgreSQL-backed order/webhook/outbox path and scoped TAKATAK server assertions in source without enabling live payments. Execute full Postgres SQL/TypeScript checks as soon as an actual runner/DB exists; then complete deployment/rollback verification. Keep AGENTS/WORKLOG and these five docs in sync.
+
+---
+
+
+
 ## CURRENT HANDOFF — 2026-10-15 late evening (America/Toronto)
 
 **Repository:** `takatakca/pppmtl` · **branch:** `main`, direct pushes permitted and performed without force-push.  
