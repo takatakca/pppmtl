@@ -15,6 +15,10 @@ import type { WebhookAdapter, WebhookEvent } from "@/lib/integration/core/adapte
 import type { IntegrationResult } from "@/lib/integration/core/contracts";
 import { logIntegrationEvent } from "@/lib/integration/core/logging";
 import {
+  readBoundedWebhookBody,
+  WebhookBodyTooLargeError,
+} from "@/lib/integration/core/webhook-body.server";
+import {
   claimWebhookDelivery,
   releaseWebhookDelivery,
 } from "@/lib/integration/core/webhook-security";
@@ -73,7 +77,14 @@ export async function confirmInClover(
 }
 
 export async function handleCloverHostedCheckoutWebhook(request: Request): Promise<Response> {
-  const rawBody = await request.text();
+  let rawBody: string;
+  try {
+    rawBody = await readBoundedWebhookBody(request);
+  } catch (error) {
+    return new Response("Invalid webhook body", {
+      status: error instanceof WebhookBodyTooLargeError ? 413 : 400,
+    });
+  }
   const check = verifyCloverSignature(
     rawBody,
     request.headers.get("clover-signature"),
