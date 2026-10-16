@@ -49,8 +49,21 @@ BEGIN
   IF v_order.id IS NULL THEN
     RAISE EXCEPTION 'Unable to resolve order idempotency claim';
   END IF;
-  -- A legitimate retry keeps the initial immutable order, even if a new
-  -- request changed its body. The server must not charge a mutated cart.
+  -- An idempotency key must never silently reassign a different cart to the
+  -- previous customer's checkout. Lifecycle fields (status, paymentUrl, etc.)
+  -- legitimately change, so compare only immutable order intent attributes.
+  IF v_order.location_id IS DISTINCT FROM p_location_id
+     OR v_order.provider IS DISTINCT FROM p_provider
+     OR v_order.customer_ref IS DISTINCT FROM p_customer_ref
+     OR v_order.order_document->'items' IS DISTINCT FROM p_document->'items'
+     OR v_order.order_document->'customer' IS DISTINCT FROM p_document->'customer'
+     OR v_order.order_document->'orderType' IS DISTINCT FROM p_document->'orderType'
+     OR v_order.order_document->'deliveryAddress' IS DISTINCT FROM p_document->'deliveryAddress'
+     OR v_order.order_document->'notes' IS DISTINCT FROM p_document->'notes'
+  THEN
+    RAISE EXCEPTION 'Idempotency key was reused for a different order';
+  END IF;
+  -- Identical retries return the original stored order, not a new charge.
   RETURN v_order;
 END;
 $$;
