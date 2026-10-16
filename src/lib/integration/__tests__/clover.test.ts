@@ -381,6 +381,9 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
     calls.length = 0;
     printed = 0;
     title = "";
+    // Live checkout must never be enabled with the non-durable in-memory store.
+    // These mocked Clover network tests exercise only the sandbox contract.
+    vi.stubEnv("CLOVER_ENV", "sandbox");
     vi.stubEnv("CLOVER_MERCHANT_ID", "MTEST");
     vi.stubEnv("CLOVER_ECOMM_PRIVATE_KEY", "priv_test");
     vi.stubEnv("CLOVER_WEBHOOK_SECRET", "whsec_test");
