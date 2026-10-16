@@ -39,3 +39,13 @@ See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.m
 | Disable **every** live Clover checkout until order persistence is durable | `NODE_ENV` can be incorrectly configured on a real server | `CLOVER_ENV=production` with in-memory order store always fails closed |
 | Match all outbox/webhook order references to their tenant and force RLS | Prevent cross-tenant effects, including through the table-owner PostgreSQL role | Composite foreign keys, forced RLS and limited-role PostgreSQL CI test |
 | Verify Coolify finished status, exact commit and public HTTPS health | A queued deployment response does not prove running revision | CI-gated opt-in workflow polls official API; no verified deployment yet |
+
+## Late-session safety design (2026-10-15)
+
+| Decision | Why | Status |
+|---|---|---|
+| Explicitly set Clover sandbox mode in mocked checkout tests | Live mode intentionally rejects in-memory orders; tests must never depend on production defaults | Test source committed; full CI still unavailable |
+| Reject production payment/quote if live inventory is unavailable | Avoid charging cards from stale site snapshot prices or 86'd items | Source guard committed; live credential verification outstanding |
+| Add tenant-local SQL `create_order_once` and `record_verified_clover_payment` | Database constraints must own idempotent order creation and webhook receipt before returning a paid result | SQL migration and tests committed, not deployed; still needs driver and worker |
+| Schedule only the title outbox effect initially | Clover order must be titled before print can safely be scheduled | Atomic title queue coded in SQL; worker/print completion not yet implemented |
+| Reject public webhook bodies larger than 128 KiB before HMAC | Avoid unbounded memory allocation from unauthenticated requests | Streaming cap and tests committed, server still unverified |
