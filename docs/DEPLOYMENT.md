@@ -59,3 +59,10 @@ The opt-in Coolify workflow uses the official POST `/api/v1/deploy` response's `
 Real Clover payment remains disabled with the in-memory order store in **all** Node environments; do not infer that a development-mode node process permits safe live payments. See [DB_ROLLOUT.md](DB_ROLLOUT.md) for the RLS and outbox migration gate.
 
 As of the latest check, the public PPPMTL homepage returned HTTP 403 via external retrieval, while `/healthz` could not be fetched. Neither proves that the intended application is running; real deployment SHA/health are **not verified**.
+
+## 2026-10-15 late-session payment preflight
+
+- The new database migration `0002_ppp_atomic_payments.sql` must be reviewed/applied **after** `0001_ppp_orders.sql` against the approved PostgreSQL target. Both are currently source-only. Their TypeScript driver and recovery worker are not connected; they do not make live checkout safe.
+- The production Clover `CLOVER_API_TOKEN` or `CLOVER_API_KEY` is required to fetch current price/availability and reconcile payment in the restaurant; public payment redirects must not fall back to a committed inventory snapshot.
+- Signed Clover webhook handlers reject public bodies larger than 128 KiB before HMAC processing. Confirm Clover sends supported event sizes in staging.
+- Never flip `ordersPersistAcrossRestarts` merely because migrations exist. Transactional runtime storage, outbox processing, signed webhook replay recovery and verified TAKATAK tenant scope are launch prerequisites.
