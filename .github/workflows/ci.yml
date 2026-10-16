@@ -60,6 +60,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Check for broken or duplicated SQL migration files
+        run: |
+          node scripts/check-sql-migrations.mjs
+          node --test scripts/__tests__/check-sql-migrations.test.mjs
       - name: Install PostgreSQL client if needed
         run: command -v psql >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client)
       - name: Apply PostgreSQL schema and atomic payment operations
