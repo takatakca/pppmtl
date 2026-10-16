@@ -58,3 +58,12 @@ See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.m
 | Always bind tenant scope through parameterized transaction-local `set_config` | Never interpolate user input into `SET LOCAL` and never share tenant state across pooled connections | New injected PostgreSQL adapter uses one `BEGIN` → tenant scope → SQL → COMMIT/ROLLBACK per connection |
 | Keep guest checkout separate from unverified master identity claims | Central TAKATAK alone can assert a customer's ID and tenant memberships | Guest persistence rejects claimed `customerId`/`takatakCustomerId` and `isGuest=false`; customer SSO remains #5 |
 | Require durable checkout-session linkage before redirect | Signed payment events must be correlated to an actual saved tenant order | Added parameterized provider-session SQL write seam; actual runtime integration and verification remain #6 |
+
+## 2026-10-16 — decisions on idempotency and kitchen tickets
+
+| Decision | Reason | Verified status |
+|---|---|---|
+| Reject a duplicate order key if the immutable cart/customer/location intent changes | Reusing a receipt for different goods or another tenant location could misroute payment and kitchen work | SQL and regression source pushed; PostgreSQL execution pending |
+| Do not acknowledge or print live Clover payment webhooks while order state is in-memory | A signed merchant event alone does not identify a durable PPP checkout after a crash | Production handler now returns HTTP 503 with Retry-After; tests source committed |
+| Add expiring fulfillment leases with random fencing tokens | Prevent a delayed or duplicate worker from confirming a task it no longer owns | Migration 0003 + typed adapter source committed, not applied |
+| Retry title only after provider-side reconciliation; quarantine uncertain print outcomes | Printer APIs may have physically printed despite transport timeout; automatic retry risks duplicate tickets | SQL worker foundation/SQL probes committed; monitored worker/manual-review UI still missing |
