@@ -26,6 +26,7 @@ import {
 } from "./checkout";
 import {
   cloverCheckoutConfigured,
+  cloverEnvironment,
   cloverTaxRatesFromEnv,
   DEFAULT_TAX_RATES,
   siteBaseUrl,
@@ -93,7 +94,10 @@ export function websiteOrderNumber(orderId: string): string {
 }
 
 async function quote(draft: UniversalOrderDraft): Promise<IntegrationResult<OrderQuote>> {
-  const { inventory } = await inventoryForCheckout();
+  const { inventory, source } = await inventoryForCheckout();
+  if (cloverEnvironment() === "production" && source !== "live") {
+    return { ok: false, code: "provider_unavailable", message: "Live Clover inventory unavailable" };
+  }
   const priced = priceCloverCart(draftLines(draft), inventory, cloverSlotFor);
   if (!priced.ok) return { ok: false, code: "invalid_request", message: priced.code };
   const taxes = taxesFor(priced.subtotal, await taxRatesForCheckout());
@@ -138,7 +142,12 @@ export const cloverOrderSubmitAdapter: ProviderOrderAdapter = {
     if (!cloverCheckoutConfigured(draft.locationId)) return orderFailure("provider_unavailable");
     if (draft.orderType !== "PICKUP") return orderFailure("unsupported_order_type");
     const orderId = context?.orderId ?? `ord_${Date.now().toString(36)}`;
-    const { inventory } = await inventoryForCheckout();
+    const { inventory, source } = await inventoryForCheckout();
+    // A committed catalog snapshot is only suitable for development/sandbox.
+    // Never charge real cards using prices or availability that Clover did not confirm.
+    if (cloverEnvironment() === "production" && source !== "live") {
+      return orderFailure("provider_unavailable");
+    }
     const priced = priceCloverCart(draftLines(draft), inventory, cloverSlotFor);
     if (!priced.ok) {
       return orderFailure(priced.code === "item_unavailable" ? "item_unavailable" : "menu_changed");
