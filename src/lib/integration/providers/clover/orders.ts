@@ -96,7 +96,7 @@ export function websiteOrderNumber(orderId: string): string {
 async function quote(draft: UniversalOrderDraft): Promise<IntegrationResult<OrderQuote>> {
   const { inventory, source } = await inventoryForCheckout();
   if (cloverEnvironment() === "production" && source !== "live") {
-    return { ok: false, code: "provider_unavailable", message: "Live Clover inventory unavailable" };
+    return { ok: false, code: "provider_error", message: "Live Clover inventory unavailable" };
   }
   const priced = priceCloverCart(draftLines(draft), inventory, cloverSlotFor);
   if (!priced.ok) return { ok: false, code: "invalid_request", message: priced.code };
