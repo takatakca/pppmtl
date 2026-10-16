@@ -66,3 +66,10 @@ As of the latest check, the public PPPMTL homepage returned HTTP 403 via externa
 - The production Clover `CLOVER_API_TOKEN` or `CLOVER_API_KEY` is required to fetch current price/availability and reconcile payment in the restaurant; public payment redirects must not fall back to a committed inventory snapshot.
 - Signed Clover webhook handlers reject public bodies larger than 128 KiB before HMAC processing. Confirm Clover sends supported event sizes in staging.
 - Never flip `ordersPersistAcrossRestarts` merely because migrations exist. Transactional runtime storage, outbox processing, signed webhook replay recovery and verified TAKATAK tenant scope are launch prerequisites.
+
+## 2026-10-16 release gate
+
+- SQL `0002` was malformed in a prior commit and was **repaired**, not applied. The zero-dependency structural preflight is now run by the PostgreSQL CI job before `psql`; only a real PostgreSQL CI/staging execution can validate SQL semantics and RLS.
+- `src/lib/orders/postgres-transactions.server.ts` is an injected PostgreSQL transaction boundary, not an actual configured DB pool. Never assume its presence means persistent orders. It must get its tenant from a verified TAKATAK server-side entitlement, never from browser fields.
+- The runtime order service still uses in-process memory; no production Clover payment authorization, print-out, release revision, DB migration or provider webhook retry has been verified.
+- Keep Coolify post-CI deploy disabled until the Actions runner, signed TAKATAK tenant identity, real PostgreSQL adapter/outbox, payment reconciliation, and authorized target configuration are verified.
