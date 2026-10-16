@@ -7,8 +7,8 @@ CREATE OR REPLACE FUNCTION public.sample() RETURNS integer
 LANGUAGE plpgsql AS $$
 BEGIN
   RETURN 1;
-END
-$$;
+END;
+$;
 COMMIT;
 `;
 
@@ -17,11 +17,11 @@ describe("PPPMTL PostgreSQL migration integrity", () => {
     assert.deepEqual(migrationStructuralErrors(valid), []);
   });
   it("rejects an accidental duplicate after COMMIT", () => {
-    const bad = valid + "OR missing_condition THEN\\nCOMMIT;\\n";
+    const bad = valid + "OR unexpected SQL after commit;";
     assert.notEqual(migrationStructuralErrors(bad).length, 0);
   });
   it("rejects a truncated PL/pgSQL dollar quote", () => {
-    const bad = valid.replace("END\\n$$;", "END;");
+    const bad = valid.replace("$$;", "");
     assert.ok(migrationStructuralErrors(bad).some((error) => error.includes("dollar")));
   });
   it("rejects a missing terminal COMMIT", () => {
