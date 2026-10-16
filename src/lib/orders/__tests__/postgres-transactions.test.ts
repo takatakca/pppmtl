@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   attachCloverCheckoutSession,
+  claimFulfillmentWork,
+  finishFulfillmentWork,
+  quarantineExpiredPrintWork,
   persistGuestOrderOnce,
   persistVerifiedCloverPayment,
   withPppTenantTransaction,
@@ -173,4 +176,65 @@ describe("PPPMTL PostgreSQL transaction boundary", () => {
     ).rejects.toThrow("Invalid verified Clover payment");
     expect(db.statements).toEqual([]);
   });
+  it("claims work with a bounded, tenant-scoped fencing lease", async () => {
+    const db = fakeDb([
+      { id: "5", lease_token: "a4a17b63-4b77-4a31-834e-4d771451b332", effect: "CLOVER_TITLE" },
+    ]);
+    const tasks = await claimFulfillmentWork(db.pool, "ppp_tenant", 3, 120);
+    expect(tasks[0]?.lease_token).toBe("a4a17b63-4b77-4a31-834e-4d771451b332");
+    expect(db.statements[2]?.sql).toContain("ppp.claim_due_fulfillment");
+    expect(db.statements[2]?.params).toEqual([3, 120]);
+    expect(db.isReleased()).toBe(true);
+  });
+
+  it("rejects invalid lease counts without touching the database", async () => {
+    const db = fakeDb();
+    await expect(claimFulfillmentWork(db.pool, "ppp_tenant", 0)).rejects.toThrow(
+      "Invalid fulfillment lease parameters",
+    );
+    await expect(claimFulfillmentWork(db.pool, "ppp_tenant", 10, 5)).rejects.toThrow(
+      "Invalid fulfillment lease parameters",
+    );
+    expect(db.statements).toEqual([]);
+  });
+
+  it("uses the fencing token when confirming a title and enabling its print intent", async () => {
+    const db = fakeDb([{ state: "DONE" }]);
+    const status = await finishFulfillmentWork(db.pool, "ppp_tenant", {
+      id: "5",
+      leaseToken: "a4a17b63-4b77-4a31-834e-4d771451b332",
+      success: true,
+      retryable: false,
+      enablePrint: true,
+    });
+    expect(status).toBe("DONE");
+    expect(db.statements[2]?.sql).toContain("ppp.finish_fulfillment");
+    expect(db.statements[2]?.params[5]).toBe(true);
+  });
+
+  it("cannot enable a print intent for a failed title or with a fabricated lease token", async () => {
+    const db = fakeDb();
+    await expect(finishFulfillmentWork(db.pool, "ppp_tenant", {
+      id: "5",
+      leaseToken: "a4a17b63-4b77-4a31-834e-4d771451b332",
+      success: false,
+      retryable: true,
+      enablePrint: true,
+    })).rejects.toThrow("Cannot queue print");
+    await expect(finishFulfillmentWork(db.pool, "ppp_tenant", {
+      id: "5",
+      leaseToken: "not-a-valid-token",
+      success: true,
+      retryable: false,
+    })).rejects.toThrow("Invalid fulfillment fencing token");
+    expect(db.statements).toEqual([]);
+  });
+
+  it("quarantines uncertain printed tickets for manual review", async () => {
+    const db = fakeDb([{ count: 2 }]);
+    const count = await quarantineExpiredPrintWork(db.pool, "ppp_tenant");
+    expect(count).toBe(2);
+    expect(db.statements[2]?.sql).toContain("ppp.quarantine_expired_prints");
+  });
+
 });
