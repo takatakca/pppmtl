@@ -73,3 +73,11 @@ As of the latest check, the public PPPMTL homepage returned HTTP 403 via externa
 - `src/lib/orders/postgres-transactions.server.ts` is an injected PostgreSQL transaction boundary, not an actual configured DB pool. Never assume its presence means persistent orders. It must get its tenant from a verified TAKATAK server-side entitlement, never from browser fields.
 - The runtime order service still uses in-process memory; no production Clover payment authorization, print-out, release revision, DB migration or provider webhook retry has been verified.
 - Keep Coolify post-CI deploy disabled until the Actions runner, signed TAKATAK tenant identity, real PostgreSQL adapter/outbox, payment reconciliation, and authorized target configuration are verified.
+
+## 2026-10-16 — release gate for queued kitchen actions
+
+The PostgreSQL migration order is now `0001_ppp_orders.sql` → `0002_ppp_atomic_payments.sql` → `0003_ppp_fulfillment_leases.sql`. **None is confirmed applied to a live authorized database.** The CI PostgreSQL test role receives explicitly granted EXECUTE privileges and runs `tenant-isolation.sql`, `atomic-payments.sql` and `fulfillment-leases.sql`; those tests remain unexecuted because runner provisioning is failing.
+
+The new 0003 procedure returns tenant-scoped outbox claims with fencing tokens and controlled leases. Title retries require a provider-side read to confirm whether the title already exists; print retries are deliberately withheld after ambiguous failures (manual review) to avoid duplicate kitchen tickets. A caller must have a verified TAKATAK tenant entitlement, actual scoped PostgreSQL connection, provider API credentials and a monitored worker. The typed TypeScript outbox primitives do not start this process.
+
+Production Clover webhook processing is **fail-closed** (HTTP 503) while `ordersPersistAcrossRestarts=false`. The checkout readiness gate is still false in production. Do not turn it on until both the transactional ledger and the outbox/print recovery operations are deployed and validated end to end. Do not treat `/healthz` or a Coolify queued response as a paid-order readiness check.
