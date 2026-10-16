@@ -62,10 +62,14 @@ jobs:
         uses: actions/checkout@v4
       - name: Install PostgreSQL client if needed
         run: command -v psql >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client)
-      - name: Apply clean PostgreSQL schema
+      - name: Apply PostgreSQL schema and atomic payment operations
         env:
           PGPASSWORD: ppp-ci-only-password
-        run: psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -f db/migrations/0001_ppp_orders.sql
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -f db/migrations/0001_ppp_orders.sql
+          psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -f db/migrations/0002_ppp_atomic_payments.sql
       - name: Create limited test application role
         env:
           PGPASSWORD: ppp-ci-only-password
@@ -76,8 +80,14 @@ jobs:
           GRANT USAGE ON SCHEMA ppp TO ppp_ci_role;
           GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA ppp TO ppp_ci_role;
           GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA ppp TO ppp_ci_role;
+          GRANT EXECUTE ON FUNCTION ppp.create_order_once(text,text,text,text,jsonb,text) TO ppp_ci_role;
+          GRANT EXECUTE ON FUNCTION ppp.record_verified_clover_payment(text,text,text,text,text) TO ppp_ci_role;
           SQL
-      - name: Prove cross-tenant reads and writes are blocked
+      - name: Prove cross-tenant RLS and atomic payment idempotency
         env:
           PGPASSWORD: ppp-ci-tenant-test-password
-        run: psql -h 127.0.0.1 -U ppp_ci_role -d postgres -v ON_ERROR_STOP=1 -f db/tests/tenant-isolation.sql
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -h 127.0.0.1 -U ppp_ci_role -d postgres -v ON_ERROR_STOP=1 -f db/tests/tenant-isolation.sql
+          psql -h 127.0.0.1 -U ppp_ci_role -d postgres -v ON_ERROR_STOP=1 -f db/tests/atomic-payments.sql
