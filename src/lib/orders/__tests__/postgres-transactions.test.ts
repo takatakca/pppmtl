@@ -111,6 +111,17 @@ describe("PPPMTL PostgreSQL transaction boundary", () => {
     expect(db.statements).toEqual([]);
   });
 
+  it("rejects a forged non-guest account until TAKATAK authentication is wired", async () => {
+    const db = fakeDb();
+    await expect(
+      persistGuestOrderOnce(db.pool, "tenant_one", {
+        ...order,
+        customer: { ...order.customer, isGuest: false },
+      }),
+    ).rejects.toThrow("Unverified customer identity");
+    expect(db.statements).toEqual([]);
+  });
+
   it("rejects checkout redirects outside Clover and binds the legitimate session", async () => {
     const db = fakeDb([{ id: order.id, order_document: { ...order, status: "SUBMITTED" } }]);
     await expect(
