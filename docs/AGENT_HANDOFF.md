@@ -1,6 +1,55 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
 
+## CURRENT HANDOFF — 2026-10-15 late evening (America/Toronto)
+
+**Repository:** `takatakca/pppmtl` · **branch:** `main`, direct pushes permitted and performed without force-push.  
+**Latest main SHA confirmed immediately before this handoff update:** `861487b34d26e74fef1a3f65733fef6fff6694de` (`WORKLOG.md`). Updating THIS handoff produces a later SHA; read the actual GitHub branch HEAD at next launch.  
+**Open issues:** [#5 authenticated TAKATAK/tenant permissions](https://github.com/takatakca/pppmtl/issues/5), [#6 durable order/payment/webhook store](https://github.com/takatakca/pppmtl/issues/6), [#7 GitHub Actions runner provisioning](https://github.com/takatakca/pppmtl/issues/7). No PRs open at the start.
+
+### Last completed code tasks (committed, not production verified)
+
+- `src/lib/integration/__tests__/clover.test.ts`: mocked Clover checkout now explicitly uses `CLOVER_ENV=sandbox`. Previously live-mode fail-closed safety prevented mocked checkout tests from executing their intended path.
+- `src/lib/integration/providers/clover/orders.ts`: do not price or create a live Clover checkout using fallback static inventory when the Clover REST feed cannot be read. Sandbox may use the snapshot; production requires the provider-backed catalogue.
+- `src/lib/integration/providers/clover/config.server.ts`: production payment readiness now also requires a REST token in addition to durable storage/merchant/Hosted Checkout/webhook credentials. **The in-memory storage guard still disables live payments.**
+- `db/migrations/0002_ppp_atomic_payments.sql`: security-invoker `ppp.create_order_once` (tenant-scoped order idempotency) and `ppp.record_verified_clover_payment` (server-verified payment event deduplication, conflict checks, paid status update and a unique `CLOVER_TITLE` intent). Requires same-transaction `SET LOCAL ppp.tenant_id`; PUBLIC function EXECUTE revoked. No Clover signature is checked inside SQL; the caller must verify it. **No application DB driver calls these functions yet.**
+- `db/tests/atomic-payments.sql`: rollback-only tests for same-tenant idempotency, duplicate signed webhook receipts, mismatched payload digest, paid order consistency, unique title-only outbox and cross-tenant session invisibility. `.github/workflows/ci.yml` now applies migrations 0001 and 0002 and runs both PostgreSQL tests as a restricted role.
+- `src/lib/integration/core/webhook-body.server.ts` and `src/lib/integration/providers/clover/webhook.ts`: public incoming Clover webhook body limited to 128 KiB **while streaming**, ahead of HMAC/JSON work; return HTTP 413 for oversized, 400 for malformed body. Added `src/lib/integration/__tests__/webhook-body.test.ts` to cover raw bytes, streamed/declared size and handler rejection. Align test formatting with `.prettierrc`.
+- Updated `docs/DB_ROLLOUT.md`, `docs/TASK_QUEUE.md`, `docs/PROJECT_STATUS.md`, `docs/DEPLOYMENT.md`, `docs/DECISIONS.md` and `WORKLOG.md` with explicit source-vs-deployed status and irreversible-payment release gates.
+
+### Currently active / blocked work
+
+**Priority 1 — #7:** Restore actual GitHub Actions runner assignment. Latest inspected run [38848450042](https://github.com/takatakca/pppmtl/actions/runs/38848450042) failed both `Typecheck, lint, tests and server build` and `PostgreSQL schema and tenant isolation` with `runner_id: 0` and **zero executed steps**. This is consistent with previous runnerless failures. Review GitHub repository/org billing, Actions restrictions and runner availability in Settings. No tool surfaced the admin billing/runner settings. Re-run CI on the exact current `main` SHA after the runner issue is resolved. Fix real build, types, lint, Vitest or PostgreSQL diagnostics only once the runner actually executes commands.
+
+**Priority 2 — #6:** Obtain approved PostgreSQL connection/roles and staging migration access; review and run migrations 0001/0002 in order, test rollback/recovery, implement TypeScript transactional adapter and lifecycle that atomically stores checkout sessions before external redirection. Add durable webhook lease/retries, worker for Clover title, and print only after title with provider-side read-before-print and ambiguity/manual review. Tests must prove parallel requests, restarts, duplicate signatures and cross-tenant isolation. Schema/function SQL alone is **not** a working durable order service; keep `ordersPersistAcrossRestarts=false`.
+
+**Priority 3 — #5:** Integrate validated TAKATAK identity and product/tenant entitlements through a dedicated PPPMTL-scoped API/assertion; never reuse another app's `TAKATAK_1LV_API_KEY`. Replace the temporary admin token with role-scoped operations login and authorize cross-device order history only via verified user identity.
+
+**Priority 4 — deploy:** Identify PPPMTL's actual authorized Coolify/Contabo or other deployment target, provision scoped secrets and HTTPS without changing email DNS, then use **one** CI-gated deploy mechanism. Test exact commit SHA, HTTPS health and real credentials in staging. Do not enable live Clover production checkout without durable orders and verified backend/workers.
+
+### Files written this continuation
+
+`WORKLOG.md`, `src/lib/integration/__tests__/clover.test.ts`, `src/lib/integration/__tests__/clover-readiness.test.ts`, `src/lib/integration/providers/clover/orders.ts`, `src/lib/integration/providers/clover/config.server.ts`, `src/lib/integration/core/webhook-body.server.ts`, `src/lib/integration/providers/clover/webhook.ts`, `src/lib/integration/__tests__/webhook-body.test.ts`, `db/migrations/0002_ppp_atomic_payments.sql`, `db/tests/atomic-payments.sql`, `.github/workflows/ci.yml`, all five canonical docs and this file.
+
+### Verification/commands genuinely performed
+
+- Through the authenticated GitHub connector: read `AGENTS.md`, previous handoff, `WORKLOG.md`, queue/status, `main`, latest Actions runs/jobs, issues and PRs; reviewed relevant TypeScript, SQL and workflows; committed source changes on `main`, read-back/verified the latest branch head.
+- GitHub Actions automatically launched after commits; checked run `38848450042`: both jobs failed **without an assigned runner or steps**. No successful new code build, typecheck, lint, Vitest, PostgreSQL migration/probe or outbox integration test can be claimed.
+- Local runtime check: Node 22 exists, but Bun, `psql`, `postgres` server and authenticated private-repository clone/build access are unavailable. No real PostgreSQL or live Clover requests were executed.
+- All source commits were published with ordinary updates. No force-push or secret was disclosed.
+
+### Real deployment status
+
+**NOT VERIFIED / NO SUCCESS CLAIMED.** The Coolify opt-in deploy workflow is skipped because CI has not succeeded and the target is not proven configured. No live application SHA, backend liveness, real card payment, database migration or print-out was observed. Live Clover payment remains fail-closed while the in-memory order store is in use. The newly added SQL functions must NOT be described as activated.
+
+### Resume directly without redoing work
+
+Re-read the first sections here, then `AGENTS.md`, `WORKLOG.md`, queue, deployment docs; fetch actual `main` HEAD and latest jobs. Do **not** rerun an identically runnerless CI repeatedly without a changed condition. Work on the next independently executable issue #6/#5 step while Actions runner provisioning is blocked, and preserve the above safeguards. No external autonomous session orchestrator was connected; automatic self-restart is not available from this chat alone.
+
+---
+
+
+
 ## CURRENT HANDOFF — 2026-10-15, session continued after 15:04 Montréal
 
 **Repository:** `takatakca/pppmtl` · **Release branch:** `main` (write permissions confirmed).  
