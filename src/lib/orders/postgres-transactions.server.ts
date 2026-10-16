@@ -93,7 +93,12 @@ export async function persistGuestOrderOnce(
   verifiedServerTenantId: string,
   order: InternalOrder,
 ): Promise<InternalOrder> {
-  if (order.customerId || order.customer.customerId || order.customer.takatakCustomerId) {
+  if (
+    !order.customer.isGuest ||
+    order.customerId ||
+    order.customer.customerId ||
+    order.customer.takatakCustomerId
+  ) {
     throw new Error("Unverified customer identity cannot be persisted");
   }
   return withPppTenantTransaction(pool, verifiedServerTenantId, async (client) => {
