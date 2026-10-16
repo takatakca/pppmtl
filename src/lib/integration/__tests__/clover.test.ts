@@ -539,6 +539,36 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
     expect(printed).toBe(0);
   });
 
+  it("does not reconcile or print real Clover payments without a durable store", async () => {
+    vi.stubEnv("CLOVER_ENV", "production");
+    vi.stubEnv("CLOVER_API_TOKEN", "rest_test");
+    const { handleCloverHostedCheckoutWebhook } =
+      await import("@/lib/integration/providers/clover/webhook");
+    const raw = JSON.stringify({
+      status: "APPROVED",
+      type: "PAYMENT",
+      id: "LIVE_UNTRACKED_PAYMENT",
+      merchantId: "MTEST",
+      data: "LIVE_UNTRACKED_SESSION",
+    });
+    const timestamp = Math.floor(Date.now() / 1000);
+    const digest = createHmac("sha256", "whsec_test").update(`${timestamp}.${raw}`).digest("hex");
+    const send = () =>
+      handleCloverHostedCheckoutWebhook(
+        new Request("https://pppmtl.com/api/public/webhooks/clover", {
+          method: "POST",
+          body: raw,
+          headers: { "clover-signature": `t=${timestamp},v1=${digest}` },
+        }),
+      );
+    const first = await send();
+    expect(first.status).toBe(503);
+    expect(first.headers.get("retry-after")).toBe("60");
+    expect((await send()).status).toBe(503);
+    expect(calls.filter((call) => call.url.includes("/payments/"))).toHaveLength(0);
+    expect(printed).toBe(0);
+  });
+
   it("rejects signed payments for another merchant and non-payment events", async () => {
     vi.stubEnv("CLOVER_API_TOKEN", "rest_test");
     const { handleCloverHostedCheckoutWebhook } =
