@@ -22,6 +22,7 @@ import {
   claimWebhookDelivery,
   releaseWebhookDelivery,
 } from "@/lib/integration/core/webhook-security";
+import { ordersPersistAcrossRestarts } from "@/lib/orders/order-store.server";
 import type { InternalOrder } from "@/lib/orders/types";
 import {
   isWebsiteTitled,
@@ -31,6 +32,7 @@ import {
   websiteOrderTitle,
 } from "./checkout";
 import {
+  cloverEnvironment,
   cloverMerchantId,
   cloverWebhookSecret,
   printWebOrders,
@@ -121,6 +123,23 @@ export async function handleCloverHostedCheckoutWebhook(request: Request): Promi
   }
   if (event.status !== "APPROVED" && event.status !== "DECLINED") {
     return Response.json({ received: true, ignored: true });
+  }
+
+  // The non-durable in-process order ring cannot prove this is our checkout
+  // after a restart, nor can it safely record payment/print replay state.
+  // NEVER title or print live merchant payments without a durable session.
+  // Respond retryably instead of accidentally acknowledging untracked money.
+  if (cloverEnvironment() === "production" && !ordersPersistAcrossRestarts) {
+    logIntegrationEvent({
+      provider: "clover",
+      eventType: "payment.durable_store_required",
+      status: "error",
+      payloadReference: event.paymentId,
+    });
+    return new Response("Durable payment reconciliation unavailable", {
+      status: 503,
+      headers: { "Retry-After": "60" },
+    });
   }
 
   const key = `clover:${event.paymentId}:${event.checkoutSessionId}:${event.status}`;
