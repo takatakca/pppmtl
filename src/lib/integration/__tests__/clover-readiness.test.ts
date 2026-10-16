@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cloverCheckoutConfigured, cloverReadiness } from "../providers/clover/config.server";
 import { priceCloverCart } from "../providers/clover/checkout";
+import { cloverOrderAdapter } from "../providers/clover/orders";
 import { cloverSlotFor, cloverSnapshot } from "@/data/clover/overlay";
 
 afterEach(() => vi.unstubAllEnvs());
@@ -34,6 +35,29 @@ describe("Clover payment safety gate", () => {
     expect(cloverCheckoutConfigured(locationId)).toBe(true);
     vi.stubEnv("CLOVER_WEBHOOK_SECRET", "");
     expect(cloverCheckoutConfigured(locationId)).toBe(false);
+  });
+
+  it("never quotes a production card checkout using an unverified snapshot", async () => {
+    credentials();
+    vi.stubEnv("CLOVER_ENV", "production");
+    vi.stubEnv("CLOVER_API_TOKEN", "");
+    vi.stubEnv("CLOVER_API_KEY", "");
+    const result = await cloverOrderAdapter.quoteOrder({
+      locationId,
+      orderType: "PICKUP",
+      lines: [],
+      customer: {
+        takatakCustomerId: null,
+        externalCustomerId: null,
+        preferredName: null,
+        email: null,
+        phone: null,
+        phoneVerified: false,
+      },
+      deliveryAddress: null,
+      notes: "",
+    });
+    expect(result).toMatchObject({ ok: false, code: "provider_error" });
   });
 
   it("rejects fractional, non-finite and oversized quantities at the Clover price boundary", () => {
