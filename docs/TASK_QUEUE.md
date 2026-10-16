@@ -58,3 +58,12 @@ Updated: 2026-10-15 · GitHub is the source of truth.
 - **Next executable #6:** provision an *approved* database and application role, run both migrations/probes in staging, wire the verified-tenant PostgreSQL pool into all order APIs without a second identity authority, implement lease/retry and operator-safe title/print outbox, and prove restart/concurrency behavior.
 - **Next external #7:** inspect GitHub Actions billing, settings and runner registration; newest Actions jobs have continued to fail with no assigned runner/steps. Then rerun full CI and fix genuine diagnostics.
 - **#5:** connect PPP-scoped TAKATAK assertions/entitlements before granting cross-device order retrieval or persistent authenticated customer IDs. Guest-only storage must reject browser-claimed master identities.
+
+## 2026-10-16 — title/print worker increment
+
+- Done in source: mismatched-cart idempotency-key reuse is rejected; signed live Clover webhooks refuse payment or print side effects without a durable order ledger.
+- Added unapplied `db/migrations/0003_ppp_fulfillment_leases.sql`, regression `db/tests/fulfillment-leases.sql` and the CI SQL step. Leases use UUID fencing tokens; title calls may be retried after a provider read, while an uncertain printed ticket must enter FAILED/manual review, never automatic reprint.
+- Added `claimFulfillmentWork`, `finishFulfillmentWork`, `quarantineExpiredPrintWork` PostgreSQL adapter methods and mocked tests. They require a verified TAKATAK tenant and do not start a worker.
+- **Next #6:** identify/authorize actual PostgreSQL service; run 0001/0002/0003 as the limited app role; implement the runtime Postgres pool, durable order transitions, verified webhook inbox, real outbound Clover title/print worker, outage alerting, manual-review queue and concurrent restart tests. Never enable live checkout based only on source migrations.
+- **Next #7:** restore GitHub Actions runner allocation (no runner steps reported), then run full Bun/Nitro/typecheck/ESLint/Vitest/PostgreSQL CI and repair actual diagnostics.
+- **Next #5:** integrate scoped TAKATAK identity and product/tenant verification for all guest, operator and customer permissions.
