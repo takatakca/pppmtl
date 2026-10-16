@@ -67,3 +67,7 @@ Updated: 2026-10-15 · GitHub is the source of truth.
 - **Next #6:** identify/authorize actual PostgreSQL service; run 0001/0002/0003 as the limited app role; implement the runtime Postgres pool, durable order transitions, verified webhook inbox, real outbound Clover title/print worker, outage alerting, manual-review queue and concurrent restart tests. Never enable live checkout based only on source migrations.
 - **Next #7:** restore GitHub Actions runner allocation (no runner steps reported), then run full Bun/Nitro/typecheck/ESLint/Vitest/PostgreSQL CI and repair actual diagnostics.
 - **Next #5:** integrate scoped TAKATAK identity and product/tenant verification for all guest, operator and customer permissions.
+
+### 2026-10-16 — next integration after worker source
+
+The opt-in `processPppCloverFulfillmentBatch` worker and mocked tests have been committed. Migration 0003 excludes unrelated CUSTOMER_NOTIFICATION tasks from Clover claims. Next: wire a real PostgreSQL pool and trusted TAKATAK-verified tenant mapping; schedule bounded worker runs with alerts and operator reconciliation UI; resolve crash/retry tests under real PostgreSQL; validate that the signed webhook always persists the session/payment event before worker processing; verify merchant print behavior. Keep the server gate shut before these checks.
