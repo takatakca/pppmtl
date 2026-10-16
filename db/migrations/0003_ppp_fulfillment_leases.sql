@@ -41,8 +41,8 @@ BEGIN
              AND work.locked_until < now())
        )
      ORDER BY work.next_attempt_at, work.id
-     FOR UPDATE SKIP LOCKED
      LIMIT p_limit
+     FOR UPDATE SKIP LOCKED
   )
   UPDATE ppp.fulfillment_outbox AS outbox
      SET state = 'RUNNING',
