@@ -66,7 +66,7 @@ jobs:
           node --test scripts/__tests__/check-sql-migrations.test.mjs
       - name: Install PostgreSQL client if needed
         run: command -v psql >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client)
-      - name: Apply PostgreSQL schema and atomic payment operations
+      - name: Apply PostgreSQL schema, payments and worker leases
         env:
           PGPASSWORD: ppp-ci-only-password
         shell: bash
@@ -74,6 +74,7 @@ jobs:
           set -euo pipefail
           psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -f db/migrations/0001_ppp_orders.sql
           psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -f db/migrations/0002_ppp_atomic_payments.sql
+          psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -f db/migrations/0003_ppp_fulfillment_leases.sql
       - name: Create limited test application role
         env:
           PGPASSWORD: ppp-ci-only-password
@@ -86,8 +87,11 @@ jobs:
           GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA ppp TO ppp_ci_role;
           GRANT EXECUTE ON FUNCTION ppp.create_order_once(text,text,text,text,jsonb,text) TO ppp_ci_role;
           GRANT EXECUTE ON FUNCTION ppp.record_verified_clover_payment(text,text,text,text,text) TO ppp_ci_role;
+          GRANT EXECUTE ON FUNCTION ppp.claim_due_fulfillment(integer,integer) TO ppp_ci_role;
+          GRANT EXECUTE ON FUNCTION ppp.finish_fulfillment(bigint,uuid,boolean,boolean,text,boolean) TO ppp_ci_role;
+          GRANT EXECUTE ON FUNCTION ppp.quarantine_expired_prints() TO ppp_ci_role;
           SQL
-      - name: Prove cross-tenant RLS and atomic payment idempotency
+      - name: Prove tenant isolation, atomic payments and fenced worker leasing
         env:
           PGPASSWORD: ppp-ci-tenant-test-password
         shell: bash
@@ -95,3 +99,4 @@ jobs:
           set -euo pipefail
           psql -h 127.0.0.1 -U ppp_ci_role -d postgres -v ON_ERROR_STOP=1 -f db/tests/tenant-isolation.sql
           psql -h 127.0.0.1 -U ppp_ci_role -d postgres -v ON_ERROR_STOP=1 -f db/tests/atomic-payments.sql
+          psql -h 127.0.0.1 -U ppp_ci_role -d postgres -v ON_ERROR_STOP=1 -f db/tests/fulfillment-leases.sql
