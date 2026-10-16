@@ -50,3 +50,17 @@ psql -v ON_ERROR_STOP=1 -f db/migrations/0001_ppp_orders.sql
 psql -v ON_ERROR_STOP=1 -f db/migrations/0002_ppp_atomic_payments.sql
 ```
 Do not re-run `0001` blindly on a database with an existing schema: use the approved migration history and staging rehearsal. The SQL routines are not wired to the TypeScript in-memory store; issue #6 stays open.
+
+## 2026-10-16 correction: migration 0002 and runtime adapter
+
+A review of GitHub source found `0002_ppp_atomic_payments.sql` was invalid: its HMAC payload digest validator was truncated and a second tail of the function appeared **after COMMIT**. This was repaired on `main` (commit `3eba0bbb1`). Never use the earlier malformed blob.
+
+`scripts/check-sql-migrations.mjs` now performs a dependency-free, structural check of each numbered migration (exactly one top-level BEGIN/COMMIT, terminal COMMIT, balanced function dollar delimiters, complete 0002 input constraints). `scripts/__tests__/check-sql-migrations.test.mjs` tests corrupt fixtures. The GitHub Actions PostgreSQL job runs both checks before applying SQL. A reproduced local Node test set passed 5/5, and the current SQL files were checked directly via GitHub for those same structural invariants; **SQL execution remains unverified** due to GitHub-hosted runner issues.
+
+An injected storage seam is now in `src/lib/orders/postgres-transactions.server.ts` with mock tests in `src/lib/orders/__tests__/postgres-transactions.test.ts`. Its `withPppTenantTransaction` uses a fresh pool client and:
+1. `BEGIN`;
+2. parameter-bound `SELECT set_config('ppp.tenant_id',$1,true)`;
+3. a tenant-scoped application operation;
+4. `COMMIT` or `ROLLBACK`, then `release`.
+
+`persistGuestOrderOnce` refuses unverified customer identities; `attachCloverCheckoutSession` requires an HTTPS Clover destination and an associated unpaid order; `persistVerifiedCloverPayment` delegates to the 0002 SQL procedure **only after verification at the server**. The code intentionally does not provision credentials, a database, TAKATAK assertions or outbox workers. Do **not** set `ordersPersistAcrossRestarts=true` or enable Clover production because this file exists. Complete the SQL driver/pool wiring, signed-event validation, worker leases/retry policy and restart tests before the next release.
