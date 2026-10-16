@@ -49,3 +49,12 @@ See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.m
 | Add tenant-local SQL `create_order_once` and `record_verified_clover_payment` | Database constraints must own idempotent order creation and webhook receipt before returning a paid result | SQL migration and tests committed, not deployed; still needs driver and worker |
 | Schedule only the title outbox effect initially | Clover order must be titled before print can safely be scheduled | Atomic title queue coded in SQL; worker/print completion not yet implemented |
 | Reject public webhook bodies larger than 128 KiB before HMAC | Avoid unbounded memory allocation from unauthenticated requests | Streaming cap and tests committed, server still unverified |
+
+## 2026-10-16 — transaction and migration safeguards
+
+| Decision | Rationale | Consequence |
+|---|---|---|
+| Reject malformed SQL migration files before PostgreSQL startup | Migration 0002 previously contained a truncated condition and duplicate SQL after COMMIT | Commit `scripts/check-sql-migrations.mjs` and five regression fixtures; still require real PostgreSQL integration tests |
+| Always bind tenant scope through parameterized transaction-local `set_config` | Never interpolate user input into `SET LOCAL` and never share tenant state across pooled connections | New injected PostgreSQL adapter uses one `BEGIN` → tenant scope → SQL → COMMIT/ROLLBACK per connection |
+| Keep guest checkout separate from unverified master identity claims | Central TAKATAK alone can assert a customer's ID and tenant memberships | Guest persistence rejects claimed `customerId`/`takatakCustomerId` and `isGuest=false`; customer SSO remains #5 |
+| Require durable checkout-session linkage before redirect | Signed payment events must be correlated to an actual saved tenant order | Added parameterized provider-session SQL write seam; actual runtime integration and verification remain #6 |
