@@ -50,3 +50,11 @@ Updated: 2026-10-15 · GitHub is the source of truth.
 - Clover production pricing cannot fall back to the committed snapshot if the live REST inventory is unavailable. Real payment readiness requires a REST token and a durable order repository.
 - Webhook HTTP request bodies now have a verified-on-stream 128 KiB upper bound with regression coverage. Tests have not run on a real GitHub-hosted runner.
 - GitHub issue #7 remains first infrastructure blocker. Preserve the release gate until a full green quality and PostgreSQL CI run exists for the actual main SHA.
+
+## 2026-10-16 continuation — concrete remaining tasks
+
+- **Integrity repaired:** fixed broken `0002_ppp_atomic_payments.sql` from the previous session; an automated Node preflight now refuses an unbalanced/truncated/duplicated migration. The preflight is structural only; PostgreSQL must still parse and execute 0001+0002.
+- **Durable adapter started:** `src/lib/orders/postgres-transactions.server.ts` encapsulates `BEGIN`, parameter-bound `set_config('ppp.tenant_id', ..., true)`, COMMIT/ROLLBACK/release, SQL-order idempotency, Clover checkout-session binding and verified-payment persistence. Its unit tests are committed, not run via Vitest. It is not a live storage replacement.
+- **Next executable #6:** provision an *approved* database and application role, run both migrations/probes in staging, wire the verified-tenant PostgreSQL pool into all order APIs without a second identity authority, implement lease/retry and operator-safe title/print outbox, and prove restart/concurrency behavior.
+- **Next external #7:** inspect GitHub Actions billing, settings and runner registration; newest Actions jobs have continued to fail with no assigned runner/steps. Then rerun full CI and fix genuine diagnostics.
+- **#5:** connect PPP-scoped TAKATAK assertions/entitlements before granting cross-device order retrieval or persistent authenticated customer IDs. Guest-only storage must reject browser-claimed master identities.
