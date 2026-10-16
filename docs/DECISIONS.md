@@ -67,3 +67,11 @@ See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.m
 | Do not acknowledge or print live Clover payment webhooks while order state is in-memory | A signed merchant event alone does not identify a durable PPP checkout after a crash | Production handler now returns HTTP 503 with Retry-After; tests source committed |
 | Add expiring fulfillment leases with random fencing tokens | Prevent a delayed or duplicate worker from confirming a task it no longer owns | Migration 0003 + typed adapter source committed, not applied |
 | Retry title only after provider-side reconciliation; quarantine uncertain print outcomes | Printer APIs may have physically printed despite transport timeout; automatic retry risks duplicate tickets | SQL worker foundation/SQL probes committed; monitored worker/manual-review UI still missing |
+
+### 2026-10-16 — safe worker execution
+
+| Decision | Reason | Status |
+|---|---|---|
+| Keep Clover kitchen worker as opt-in trusted server batch until identity/DB provisioning | An unauthenticated timer or endpoint could process other tenants' paid orders | Worker code and mock tests pushed; **no cron/endpoint deployed** |
+| Require order/session/payment correlation before provider-side title or print | A valid merchant payment is not proof the session belongs to this PPP checkout | `readPaidOrder` checks tenant-bound persisted paid order, checkout session, outbox payment reference; mock coverage committed |
+| Never assume a provider print timeout means no physical ticket | Prevent duplicate kitchen tickets | Worker consults provider printed status, and ambiguity goes to FAILED/manual review; actual provider integration not live-tested |
