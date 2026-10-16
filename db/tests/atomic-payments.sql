@@ -26,6 +26,40 @@ BEGIN
 END
 $$;
 
+
+-- Replaying a key must not silently reassign another cart or restaurant
+-- to an earlier checkout, even if the provider session has already started.
+DO $
+DECLARE
+  blocked boolean := false;
+BEGIN
+  BEGIN
+    PERFORM * FROM ppp.create_order_once(
+      'ord_ci_mutated_cart_0001', 'loc-ndg-somerled', 'clover',
+      'key_ci_atomic_1',
+      '{"customer":{"isGuest":true},"items":[{"productId":"unexpected-pizza"}]}'::jsonb,
+      NULL
+    );
+  EXCEPTION WHEN raise_exception THEN blocked := true;
+  END;
+  IF NOT blocked THEN
+    RAISE EXCEPTION 'An idempotency key accepted a different shopping cart';
+  END IF;
+
+  blocked := false;
+  BEGIN
+    PERFORM * FROM ppp.create_order_once(
+      'ord_ci_other_location_0001', 'loc-other-restaurant', 'clover',
+      'key_ci_atomic_1', '{"customer":{"isGuest":true}}'::jsonb, NULL
+    );
+  EXCEPTION WHEN raise_exception THEN blocked := true;
+  END;
+  IF NOT blocked THEN
+    RAISE EXCEPTION 'An idempotency key crossed restaurant location';
+  END IF;
+END
+$;
+
 UPDATE ppp.orders SET provider_order_id = 'SESSION_ATOMIC_1'
   WHERE tenant_id = 'ppp_ci_atomic_a' AND id = 'ord_ci_atomic_one';
 
