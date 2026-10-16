@@ -20,9 +20,7 @@ describe("public webhook body limits", () => {
       method: "POST",
       body: "x".repeat(MAX_WEBHOOK_BYTES + 1),
     });
-    await expect(readBoundedWebhookBody(request)).rejects.toBeInstanceOf(
-      WebhookBodyTooLargeError,
-    );
+    await expect(readBoundedWebhookBody(request)).rejects.toBeInstanceOf(WebhookBodyTooLargeError);
   });
 
   it("rejects an oversized declared Content-Length immediately", async () => {
@@ -31,9 +29,7 @@ describe("public webhook body limits", () => {
       headers: { "content-length": String(MAX_WEBHOOK_BYTES + 1) },
       body: "short",
     });
-    await expect(readBoundedWebhookBody(request)).rejects.toBeInstanceOf(
-      WebhookBodyTooLargeError,
-    );
+    await expect(readBoundedWebhookBody(request)).rejects.toBeInstanceOf(WebhookBodyTooLargeError);
   });
 
   it("rejects giant unsigned Clover webhook requests with HTTP 413", async () => {
