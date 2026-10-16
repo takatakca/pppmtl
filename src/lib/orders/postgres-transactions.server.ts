@@ -218,8 +218,14 @@ export async function claimFulfillmentWork(
   limit = 10,
   leaseSeconds = 90,
 ): Promise<ClaimedFulfillmentWork[]> {
-  if (!Number.isSafeInteger(limit) || limit < 1 || limit > 50 ||
-      !Number.isSafeInteger(leaseSeconds) || leaseSeconds < 30 || leaseSeconds > 600) {
+  if (
+    !Number.isSafeInteger(limit) ||
+    limit < 1 ||
+    limit > 50 ||
+    !Number.isSafeInteger(leaseSeconds) ||
+    leaseSeconds < 30 ||
+    leaseSeconds > 600
+  ) {
     throw new Error("Invalid fulfillment lease parameters");
   }
   return withPppTenantTransaction(pool, verifiedServerTenantId, async (client) => {
