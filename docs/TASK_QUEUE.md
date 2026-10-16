@@ -43,3 +43,10 @@ Updated: 2026-10-15 · GitHub is the source of truth.
 2. **#6:** implement `db/migrations/0001_ppp_orders.sql` against an approved database, wire the actual driver/transactions/outbox and verify restart, concurrent, signed webhook replay and print-once behavior. Schema and `db/tests/tenant-isolation.sql` are committed but not run; see `docs/DB_ROLLOUT.md`.
 3. **#5:** integrate central TAKATAK verified identity and restaurant-scoped entitlements; temporary signed admin cookie and browser guest receipt do not replace SSO.
 4. Confirm the real Coolify PPPMTL resource, API access, domain routing and secrets. Optional post-CI pipeline now verifies completion/status/SHA/HTTPS health but is **disabled** until its authorized trigger and credentials are configured. Do not switch on paid Clover until #5/#6 are actually verified.
+
+## Late-session additions (2026-10-15)
+
+- The atomic PostgreSQL operations migration and corresponding rollback-only tests were committed; CI is configured to execute both SQL migrations and tenant/isolation/atomic tests once GitHub runners are available. **Implement the TypeScript/PostgreSQL transactional connection, outbox worker, lease/retry and verified tenant integration next.** See `docs/DB_ROLLOUT.md`.
+- Clover production pricing cannot fall back to the committed snapshot if the live REST inventory is unavailable. Real payment readiness requires a REST token and a durable order repository.
+- Webhook HTTP request bodies now have a verified-on-stream 128 KiB upper bound with regression coverage. Tests have not run on a real GitHub-hosted runner.
+- GitHub issue #7 remains first infrastructure blocker. Preserve the release gate until a full green quality and PostgreSQL CI run exists for the actual main SHA.
