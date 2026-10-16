@@ -59,3 +59,10 @@ See [TASK_QUEUE.md](TASK_QUEUE.md), [AGENT_HANDOFF.md](AGENT_HANDOFF.md), [DEPLO
 - `db/migrations/0002_ppp_atomic_payments.sql` adds secure tenant-scoped, idempotent order-creation and verified-webhook/payment-to-title-outbox SQL operations; `db/tests/atomic-payments.sql` tests them. **Neither is applied or proven by a working PostgreSQL runner yet.** The backend still uses the in-memory order store.
 - Public Clover webhook bodies are now capped at 128 KiB before signature verification; streaming/body-length regression tests committed.
 - The production-payment lockout remains active; this is a security improvement, **not** a successful payment, fully durable implementation or live deployment.
+
+## 2026-10-16 — SQL repair and transactional adapter progress
+
+- Discovered that `db/migrations/0002_ppp_atomic_payments.sql` had an **invalid, truncated payment-digest expression and duplicated trailing SQL after its first COMMIT**. Repaired the migration in commit `3eba0bbb1`. Earlier claims that 0002 was ready to apply are superseded; the corrected SQL still requires a real PostgreSQL staging run.
+- Added a dependency-free structural migration preflight (`scripts/check-sql-migrations.mjs`), five negative/positive `node:test` fixtures, and an extra PostgreSQL CI step. A local reproduction of the preflight tests passed 5/5; inspected both migrations' actual GitHub contents and saw one BEGIN/COMMIT pair and balanced function delimiters. **No live PostgreSQL syntax/execution proof.**
+- Added `src/lib/orders/postgres-transactions.server.ts`: parameterized transaction-local tenant context, rollback/release safety, atomic create-order SQL function call, durable Clover checkout-session association, and recorded-payment SQL function call. Added mocked database transaction/identity/redirect tests. **These functions are not yet wired into the existing synchronous in-memory order path or any real database pool**; `ordersPersistAcrossRestarts=false` and Clover live payment guard remain unchanged.
+- GitHub Actions job provisioning issue #7 remains open; neither the app build nor the PostgreSQL test suite is confirmed green on this source.
