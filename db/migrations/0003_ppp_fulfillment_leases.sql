@@ -35,6 +35,7 @@ BEGIN
     SELECT work.id
       FROM ppp.fulfillment_outbox AS work
      WHERE work.tenant_id = v_tenant
+       AND work.effect IN ('CLOVER_TITLE', 'CLOVER_PRINT')
        AND (
          (work.state IN ('PENDING', 'RETRY') AND work.next_attempt_at <= now())
          OR (work.effect = 'CLOVER_TITLE' AND work.state = 'RUNNING'
