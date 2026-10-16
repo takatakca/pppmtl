@@ -552,7 +552,9 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
       data: "LIVE_UNTRACKED_SESSION",
     });
     const timestamp = Math.floor(Date.now() / 1000);
-    const digest = createHmac("sha256", "whsec_test").update(`${timestamp}.${raw}`).digest("hex");
+    const digest = createHmac("sha256", "whsec_test")
+      .update(`${timestamp}.${raw}`)
+      .digest("hex");
     const send = () =>
       handleCloverHostedCheckoutWebhook(
         new Request("https://pppmtl.com/api/public/webhooks/clover", {
