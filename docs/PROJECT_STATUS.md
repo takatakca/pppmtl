@@ -52,3 +52,10 @@ See [TASK_QUEUE.md](TASK_QUEUE.md), [AGENT_HANDOFF.md](AGENT_HANDOFF.md), [DEPLO
 - PostgreSQL schema now uses same-tenant composite foreign keys for outbox/events, forces RLS for table owners and has a rollback-only isolation probe at `db/tests/tenant-isolation.sql`. Neither the schema migration nor the probe has been executed against a real PostgreSQL instance.
 - CI has an additional ephemeral PostgreSQL 16 job. Latest verified GitHub CI run `38792224759` failed on two jobs with `runner_id=0` and `steps=[]`; no executable build/test result is available. Track issue #7.
 - Optional Coolify workflow now polls the deployment's official API until `finished`, compares its actual commit with the green CI SHA and checks HTTPS `/healthz`. Deployment configuration remains disabled/unverified.
+
+## Late-session hardening (2026-10-15)
+
+- Clover integration mocks explicitly use `CLOVER_ENV=sandbox`; production quotations and payments now fail closed when live Clover inventory cannot be fetched. Production readiness also requires a Clover REST token and durable order storage (still absent).
+- `db/migrations/0002_ppp_atomic_payments.sql` adds secure tenant-scoped, idempotent order-creation and verified-webhook/payment-to-title-outbox SQL operations; `db/tests/atomic-payments.sql` tests them. **Neither is applied or proven by a working PostgreSQL runner yet.** The backend still uses the in-memory order store.
+- Public Clover webhook bodies are now capped at 128 KiB before signature verification; streaming/body-length regression tests committed.
+- The production-payment lockout remains active; this is a security improvement, **not** a successful payment, fully durable implementation or live deployment.
