@@ -290,7 +290,10 @@ export const restaurantLocations: RestaurantLocation[] = [
       lastSyncedAt: null,
     },
     social: emptySocial,
-    ordering: emptyOrdering,
+    ordering: {
+      ...emptyOrdering,
+      doorDash: "https://www.doordash.com/en-CA/store/33598081/",
+    },
     discovery: { birdeye: null, restoEnLigne: null },
     legacy: {},
     support: {
