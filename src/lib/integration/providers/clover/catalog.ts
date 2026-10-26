@@ -221,6 +221,8 @@ export function displayName(name: string): string {
 export function displayGroupName(name: string): string {
   let s = name.replace(/\s+/g, " ").trim();
   s = s.replace(/\(\s*\+?\s*\d+[.,]\d{2}\s*\$\s*\)/g, " "); // "(+4.16 $)"
+  s = s.replace(/\(\s*[^()]*\d[^()]*\)/g, " "); // internal codes carry a digit: "(Ac-6)", "(TRIO-1)", "(PITA 1)", "(2)"
+  s = s.replace(/\(\s*[^()]*\+[^()]*\)/g, " "); // staff combos: "(ASSIETTE+PITA)"
   s = s.replace(/#\s*\d+/g, " "); // "#1"
   s = s.replace(/^\([^)]*\)\s*/, ""); // "(Mex) …", "(ASSIETTES) …"
   const inner = /\(([^()]*(?:\([^()]*\))?[^()]*)\)\s*$/.exec(s);
@@ -233,6 +235,9 @@ export function displayGroupName(name: string): string {
   // ALL-CAPS names read as a sentence ("BOISSON EXTRA" -> "Boisson extra").
   if (s === s.toUpperCase()) s = s.charAt(0) + s.slice(1).toLowerCase();
   s = s.replace(/\binclus\b/gi, "incluse").replace(/\s*\/\s*/g, " / ");
+  // A few Clover names are plain English; the customer reads the French label.
+  if (/^pizza choice$/i.test(s)) s = "Choix de pizza";
+  if (/^medium poutine choice$/i.test(s)) s = "Choix de poutine moyenne";
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
@@ -261,6 +266,7 @@ const GROUP_EN: Array<[RegExp, string]> = [
   [/^extra coulis|^extras coulis/i, "Extra sauce drizzle"],
   [/^grandeur|^format/i, "Size"],
   [/^choix de pizza/i, "Choose your pizza"],
+  [/^choix de poutine moyenne/i, "Choose your medium poutine"],
   [/^choix de salade/i, "Choose your salad"],
   [/^choix du g[âa]teau/i, "Choose your cake"],
   [/^choix\b/i, "Your choice"],

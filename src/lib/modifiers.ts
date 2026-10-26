@@ -151,13 +151,13 @@ export function selectionSummary(
   );
 }
 
-/** Rule shown next to a group title. */
+/** Section badge on the item sheet: how many to choose, or that the group is optional. */
 export function groupRule(group: ModifierGroup, fr: boolean): string {
   const min = groupMin(group);
   const max = groupMax(group);
   if (min >= 1) {
-    if (min === max) return fr ? `Requis · choisissez ${min}` : `Required · choose ${min}`;
-    return fr ? `Requis · ${min} à ${max}` : `Required · ${min} to ${max}`;
+    if (min === max) return fr ? `Choisissez-en ${min}` : `Choose ${min}`;
+    return fr ? `Choisissez-en ${min} à ${max}` : `Choose ${min} to ${max}`;
   }
   if (max > 1 && max < group.choices.length)
     return fr ? `Optionnel · jusqu'à ${max}` : `Optional · up to ${max}`;

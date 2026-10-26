@@ -166,14 +166,20 @@ describe("Clover inventory rules", () => {
     expect(displayGroupName("Extra Fromage Pizza #1 (+4.16 $)")).toBe("Extra Fromage Pizza");
     expect(displayGroupName("(Mex) Extra Sauces")).toBe("Extra Sauces");
     expect(displayGroupName("Choix (PITA/WRAP)")).toBe("Choix pita / wrap");
+    // Internal codes never reach the customer, wherever they sit in the name.
+    expect(displayGroupName("(Ac-6) Boisson")).toBe("Boisson");
+    expect(displayGroupName("(TRIO-1) SAUCES BURGER #1")).toBe("Sauces burger");
+    expect(displayGroupName("Choix (PITA 1)")).toBe("Choix");
+    expect(displayGroupName("Pizza Choice #2")).toBe("Choix de pizza");
   });
 });
 
 describe("options (modifiers) nested in each item", () => {
-  it("puts the pita's real Clover groups in the item, required first, suggestions last", () => {
+  it("puts the pita's real Clover groups in the item, required first, suggestions excluded", () => {
     const groups = pita().modifierGroups!;
     expect(groups.slice(0, 3).every((g) => g.required)).toBe(true);
-    expect(groups.at(-1)!.labelFr).toMatch(/sugg/i);
+    // Cross-sell lives in the sheet's "Complétez votre commande" rail, never as an option group.
+    expect(groups.some((g) => /sugg/i.test(g.labelFr))).toBe(false);
     const trio = group(/^Trio/);
     expect(trio).toMatchObject({ required: false, min: 0, max: 1 });
     expect(trio.choices.find((c) => c.id === "frites-pepsi")?.priceDelta).toBe(5.42);
