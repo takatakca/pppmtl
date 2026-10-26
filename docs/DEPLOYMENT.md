@@ -11,6 +11,16 @@ The application is a **server-rendered TanStack Start / Nitro Node application**
 - `GET /healthz` is a server liveness endpoint; it is not proof that a payment or database integration is healthy.
 - There is no verified PPPMTL production host, real-domain version, or active Coolify app connection established in this handoff.
 
+## Back-end prerequisites
+
+Before enabling the customer repository (`backendEnabled`) and before any **live** Clover payment, the back-end wiring below must be in place. Variable names are documented in [`.env.example`](../.env.example); all values stay server-side only.
+
+- **Identity — Supabase Auth, canonical TAKATAK project.** Set `SUPABASE_URL` and `SUPABASE_ANON_KEY` for the canonical « TAKATAK User Official Dashboard V1 » Supabase project (contract: [IDENTITY_INTEGRATION.md](IDENTITY_INTEGRATION.md)). PPPMTL never creates its own master customer table: customer identity belongs to TAKATAK (`takatakca/takatak-v1`), and PPP holds restaurant-tenant orders only. The Supabase **service_role** key is never used in PPP and must never be exposed to the browser.
+- **Durable order storage — PostgreSQL.** Set `DATABASE_URL` to the PostgreSQL 15+ target and apply the migrations `db/migrations/0001` + `0002`, in order, before the runtime can persist orders across restarts and process the signed-event replay/outbox.
+- **Clover.** Set `CLOVER_MERCHANT_ID`, `CLOVER_ECOMM_PRIVATE_KEY`, `CLOVER_WEBHOOK_SECRET`, the production `CLOVER_ENV`, `PUBLIC_SITE_URL=https://pppmtl.com`, and the permitted `CLOVER_TAX_RATES` / `CLOVER_PRINT_WEB_ORDERS` settings. `CLOVER_API_TOKEN` stays optional (current price/availability fetch and payment reconciliation; otherwise the Food Hub OAuth app covers order titling/printing).
+- **Order access + temporary admin bootstrap.** Set `PPP_ORDER_ACCESS_SECRET`, `PPP_ADMIN_ACCESS_TOKEN` and `PPP_ADMIN_SESSION_SECRET`. The admin token is a temporary bootstrap credential only and is retired once authorized TAKATAK administrator roles are live.
+- **Release gates.** Issues [#5](https://github.com/takatakca/pppmtl/issues/5) (server-function security) and [#6](https://github.com/takatakca/pppmtl/issues/6) (durable orders + webhook idempotency) gate production payments: do not enable the customer repository or live Clover checkout until both are closed and verified.
+
 ## Coolify configuration (after identifying the actual target)
 
 1. Connect the **private** repository `takatakca/pppmtl` on `main`, Node.js 22.
