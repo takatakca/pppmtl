@@ -3,7 +3,7 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
-- 2026-10-26 | claude (Taktak) | fix/heures-saint-leonard-11h-2026-10-26 → PR | active | Owner decision 2026-10-26: Saint-Léonard (5839 rue Jean-Talon E) opens at 11:00 — brands.ts KITCHENS st-leonard 10:00 → 11:00, locations.ts loc-saint-leonard openingHours null → 11:00–23:00 every day, brand tests updated | open the PR, then owner merges
+- 2026-10-26 | claude (Taktak) | fix/heures-saint-leonard-11h-2026-10-26 → PR #10 | done (owner merges) | Owner decision 2026-10-26: Saint-Léonard (5839 rue Jean-Talon E) opens at 11:00 — brands.ts KITCHENS st-leonard 10:00 → 11:00, locations.ts loc-saint-leonard openingHours null → 11:00–23:00 every day, brand tests updated | owner merges PR #10
 
 - 2026-10-16 | GPT-6 (checkout consistency and webhook safety) | main | active | Audit durable order idempotency and prevent untracked production Clover webhook effects; CI runnerless | patch, add tests, handoff
 
