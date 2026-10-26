@@ -109,9 +109,9 @@ describe("fast food, late hours, dishes not in Clover yet", () => {
     expect(brandSeo(popoulet).description).toMatch(/ouvert tous les jours jusqu’à 23 h/);
   });
 
-  it("publishes only owner-approved hours (NDG 16:00–03:00, Jean-Talon 10:00–23:00; Hochelaga not yet)", () => {
+  it("publishes only owner-approved hours (NDG 16:00–03:00, Jean-Talon 11:00–23:00; Hochelaga not yet)", () => {
     expect(KITCHENS.ndg.hours).toEqual({ opens: "16:00", closes: "03:00" });
-    expect(KITCHENS["st-leonard"].hours).toEqual({ opens: "10:00", closes: "23:00" });
+    expect(KITCHENS["st-leonard"].hours).toEqual({ opens: "11:00", closes: "23:00" });
     expect(KITCHENS.hochelaga.hours).toBeNull();
     for (const b of BRANDS) {
       const ld = JSON.stringify(brandJsonLd(b));

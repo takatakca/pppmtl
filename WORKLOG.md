@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+- 2026-10-26 | claude (Taktak) | fix/heures-saint-leonard-11h-2026-10-26 → PR #10 | done (owner merges) | Owner decision 2026-10-26: Saint-Léonard (5839 rue Jean-Talon E) opens at 11:00 — brands.ts KITCHENS st-leonard 10:00 → 11:00, locations.ts loc-saint-leonard openingHours null → 11:00–23:00 every day, brand tests updated | owner merges PR #10
+
 - 2026-10-16 | GPT-6 (checkout consistency and webhook safety) | main | active | Audit durable order idempotency and prevent untracked production Clover webhook effects; CI runnerless | patch, add tests, handoff
 
 - 2026-10-16 | GPT-6 SQL repair and Postgres adapter | main → 3eba0bb / 76083f1 / 94ece51 / 7189406 / 2d1b035 / 0fb7fcf / 2686590 / 1400a54 / dea699e / handoff fdcf4fb | partial; source pushed, live blocked | Repaired syntactically broken duplicated migration 0002; added migration checker, 5 Node tests (local reproduction passed), preflight to DB CI, tenant-transaction PostgreSQL adapter (injected pool, no credentials), guest ID guard, durable session and verified-event SQL integration seam, mocked transaction tests; five docs and handoff updated. CI remains unverified due earlier runnerless jobs. | Restore GitHub Actions runners #7, run real Postgres/TS/Vitest checks, wire durable service and safe outbox #6, scoped TAKATAK SSO #5, deploy only after a verified target and successful CI
