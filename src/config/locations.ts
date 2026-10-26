@@ -271,7 +271,15 @@ export const restaurantLocations: RestaurantLocation[] = [
     phone: { display: pppBusiness.phone.display, e164: pppBusiness.phone.e164 },
     lifecycleStatus: "open",
     statusNote: null,
-    openingHours: null,
+    openingHours: {
+      monday: [{ opens: "11:00", closes: "23:00" }],
+      tuesday: [{ opens: "11:00", closes: "23:00" }],
+      wednesday: [{ opens: "11:00", closes: "23:00" }],
+      thursday: [{ opens: "11:00", closes: "23:00" }],
+      friday: [{ opens: "11:00", closes: "23:00" }],
+      saturday: [{ opens: "11:00", closes: "23:00" }],
+      sunday: [{ opens: "11:00", closes: "23:00" }],
+    },
     specialHours: null,
     google: {
       listingUrl: null,
