@@ -5,19 +5,22 @@ import { MenuImage } from "@/components/menu/menu-item-image";
 import { localizedName } from "@/lib/search";
 
 /**
- * The single rail product card. Fixed width so a category always reads as one
- * row, and the food image pops out of its frame on hover / focus.
+ * The single product card. In a rail it keeps a fixed width so a category reads
+ * as one row; in a grid (`fluid`) it fills its cell. The food image pops out of
+ * its frame on hover / focus.
  */
 export function ProductCard({
   item,
   onOpen,
   badge,
   index = 0,
+  fluid = false,
 }: {
   item: MenuItem;
   onOpen: (item: MenuItem) => void;
   badge?: string;
   index?: number;
+  fluid?: boolean;
 }) {
   const { lang, t, isFavourite, addFavourite, removeFavourite } = usePPP();
   const name = localizedName(item, lang);
@@ -29,7 +32,7 @@ export function ProductCard({
 
   return (
     <li
-      className="rise-in group relative w-[13.5rem] shrink-0 sm:w-[15rem]"
+      className={`rise-in group relative ${fluid ? "w-full" : "w-[13.5rem] shrink-0 sm:w-[15rem]"}`}
       style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
     >
       <button

@@ -9,6 +9,7 @@ import {
   checkSelections,
   chosenIds,
   defaultSelections,
+  groupMax,
   groupRule,
   optionsTotal,
   toggleChoice,
@@ -35,11 +36,14 @@ export function ItemSheet({
   const [qty, setQty] = useState(1);
   const [notes, setNotes] = useState("");
   const [selections, setSelections] = useState<LineSelections>({});
+  /** Set when the customer confirms with a required group incomplete: those groups get highlighted. */
+  const [attempted, setAttempted] = useState(false);
   const favourited = isFavourite(item?.id ?? "");
 
   useEffect(() => {
     setQty(1);
     setNotes("");
+    setAttempted(false);
     setSelections(defaultSelections(item?.modifierGroups ?? []));
   }, [item?.id, item?.modifierGroups]);
 
@@ -123,40 +127,65 @@ export function ItemSheet({
           )}
 
           {groups.length > 0 && (
-            <div className="mt-6 space-y-5">
-              {groups.map((group) => (
-                <fieldset key={group.id}>
-                  <legend className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
-                    {lang === "fr" ? group.labelFr : group.labelEn}
-                    <span className="ml-2 text-primary">{groupRule(group, lang === "fr")}</span>
-                  </legend>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {group.choices.map((choice) => {
-                      const active = chosenIds(selections, group.id).includes(choice.id);
-                      return (
-                        <button
-                          key={choice.id}
-                          type="button"
-                          aria-pressed={active}
-                          onClick={() => setSelections((s) => toggleChoice(s, group, choice.id))}
-                          className={`border px-3 py-2 text-[0.7rem] font-bold uppercase tracking-widest transition-colors focus-ppp ${
-                            active
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-border text-muted-foreground hover:text-foreground"
-                          }`}
-                        >
-                          {lang === "fr" ? choice.labelFr : choice.labelEn}
-                          {choice.priceDelta !== null && choice.priceDelta > 0 && (
-                            <span className="ml-1.5 normal-case tracking-normal opacity-80">
-                              +${choice.priceDelta.toFixed(2)}
+            <div className="mt-6 space-y-6">
+              {groups.map((group) => {
+                const single = groupMax(group) === 1;
+                const highlight = attempted && missing.some((g) => g.id === group.id);
+                return (
+                  <fieldset
+                    key={group.id}
+                    data-sheet-group={group.id}
+                    className={highlight ? "border border-primary bg-primary/5 p-3" : undefined}
+                  >
+                    <legend className="font-display text-lg uppercase leading-none">
+                      {lang === "fr" ? group.labelFr : group.labelEn}
+                      <span className="ml-2 align-middle font-sans text-[0.65rem] font-bold uppercase tracking-[0.2em] text-primary">
+                        {groupRule(group, lang === "fr")}
+                      </span>
+                    </legend>
+                    <div className="mt-2 divide-y divide-border border border-border">
+                      {group.choices.map((choice) => {
+                        const active = chosenIds(selections, group.id).includes(choice.id);
+                        return (
+                          <button
+                            key={choice.id}
+                            type="button"
+                            aria-pressed={active}
+                            onClick={() =>
+                              setSelections((s) => toggleChoice(s, group, choice.id))
+                            }
+                            className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors focus-ppp ${
+                              active ? "bg-primary/10" : "hover:bg-muted/50"
+                            }`}
+                          >
+                            <span
+                              aria-hidden
+                              className={`flex h-5 w-5 shrink-0 items-center justify-center border ${
+                                single ? "rounded-full" : ""
+                              } ${active ? "border-primary" : "border-muted-foreground/50"}`}
+                            >
+                              {active && (
+                                <span
+                                  className={`bg-primary ${single ? "h-2.5 w-2.5 rounded-full" : "h-3 w-3"}`}
+                                />
+                              )}
                             </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </fieldset>
-              ))}
+                            <span className="min-w-0 flex-1 text-sm font-medium">
+                              {lang === "fr" ? choice.labelFr : choice.labelEn}
+                            </span>
+                            <span className="shrink-0 text-sm text-muted-foreground">
+                              {choice.priceDelta !== null &&
+                                (choice.priceDelta > 0
+                                  ? `+$${choice.priceDelta.toFixed(2)}`
+                                  : t("Included", "Inclus"))}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
+                );
+              })}
               {unpricedOptions && (
                 <p className="text-xs text-muted-foreground">
                   {t(
@@ -277,12 +306,19 @@ export function ItemSheet({
             </div>
             <button
               onClick={() => {
-                if (missing.length > 0) return;
+                if (missing.length > 0) {
+                  // Not a dead end: highlight the incomplete groups and scroll to the first one.
+                  setAttempted(true);
+                  document
+                    .querySelector(`[data-sheet-group="${missing[0]!.id}"]`)
+                    ?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  return;
+                }
                 addToCart(item.id, qty, notes.trim(), selections);
                 onClose();
               }}
-              disabled={missing.length > 0}
-              className="flex-1 bg-primary px-5 py-3.5 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp disabled:cursor-not-allowed disabled:opacity-50"
+              aria-disabled={missing.length > 0}
+              className="flex-1 bg-primary px-5 py-3.5 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
               style={missing.length > 0 ? undefined : { boxShadow: "var(--shadow-glow)" }}
             >
               {missing.length > 0

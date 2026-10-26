@@ -3,14 +3,13 @@ import { Link } from "@tanstack/react-router";
 import { usePPP } from "@/context/ppp-store";
 import { menuRepository } from "@/lib/menu-repository";
 import { localizedName } from "@/lib/search";
-import { MenuRail } from "@/components/menu/menu-rail";
 import { ProductCard } from "@/components/menu/product-card";
 import { ItemSheet } from "@/components/order/item-sheet";
 import type { MenuItem } from "@/data/menu";
 
 /**
  * Homepage catalog browser: category chips on one line, the selected category
- * rendered as a single swipeable product row. Nothing wraps into a grid.
+ * rendered as a grid of product cards — the same grammar as the menu page.
  */
 export function CategoryExplorer() {
   const { lang, locationId, t } = usePPP();
@@ -60,14 +59,21 @@ export function CategoryExplorer() {
         </div>
       </div>
 
-      <MenuRail
-        title={localizedName(current, lang)}
-        count={t(`${items.length} products`, `${items.length} produits`)}
-      >
-        {items.map((item, i) => (
-          <ProductCard key={item.id} item={item} index={i} onOpen={setActive} />
-        ))}
-      </MenuRail>
+      <div className="mx-auto max-w-[110rem] px-3 sm:px-6">
+        <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+          <h3 className="truncate font-display text-xl uppercase leading-none sm:text-3xl">
+            {localizedName(current, lang)}
+          </h3>
+          <span className="hidden text-[0.6rem] font-bold uppercase tracking-[0.25em] text-muted-foreground sm:inline">
+            {t(`${items.length} products`, `${items.length} produits`)}
+          </span>
+        </div>
+        <ul className="mt-2 grid grid-cols-2 gap-2 pb-2 pt-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {items.map((item, i) => (
+            <ProductCard key={item.id} item={item} index={i} onOpen={setActive} fluid />
+          ))}
+        </ul>
+      </div>
 
       <ItemSheet item={active} onClose={() => setActive(null)} onSelectItem={setActive} />
     </section>

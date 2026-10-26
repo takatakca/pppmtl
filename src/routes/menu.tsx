@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Flame, Search, BadgePercent } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Flame, Search } from "lucide-react";
 import { PPPHeader } from "@/components/layout/ppp-header";
 import { PPPFooter } from "@/components/layout/ppp-footer";
 import { MobileOrderBar } from "@/components/layout/mobile-order-bar";
@@ -13,7 +13,6 @@ import { MenuRail } from "@/components/menu/menu-rail";
 import { ProductCard } from "@/components/menu/product-card";
 import { usePPP } from "@/context/ppp-store";
 import { menuRepository } from "@/lib/menu-repository";
-import { getDiscountedItems } from "@/lib/promotions";
 import { localizedName } from "@/lib/search";
 import type { MenuItem } from "@/data/menu";
 import { canonicalUrl } from "@/config/site";
@@ -25,12 +24,12 @@ export const Route = createFileRoute("/menu")({
       {
         name: "description",
         content:
-          "Browse every PPP Pizzeria NDG category in one swipe: fried chicken, trios, pizza, subs, poutine, pita plates, mexicain, desserts and drinks.",
+          "Browse every PPP Pizzeria NDG category in one clean grid: fried chicken, trios, pizza, subs, poutine, pita plates, mexicain, desserts and drinks.",
       },
       { property: "og:title", content: "Full Menu — PPP Pizzeria NDG" },
       {
         property: "og:description",
-        content: "One row per category. Every product, every option, ready to order.",
+        content: "One grid per category. Every product, every option, ready to order.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -44,7 +43,6 @@ function MenuPage() {
   const { lang, locationId, t, openSearch } = usePPP();
   const categories = menuRepository.getCategories(locationId);
   const popular = menuRepository.getPopularItems(locationId, 14);
-  const deals = useMemo(() => getDiscountedItems(locationId), [locationId]);
   const [active, setActive] = useState<MenuItem | null>(null);
   const [activeCat, setActiveCat] = useState("most-ordered");
   const navRef = useRef<HTMLDivElement>(null);
@@ -108,7 +106,6 @@ function MenuPage() {
           >
             {[
               { id: "most-ordered", label: t("Most ordered", "Plus commandés") },
-              ...(deals.length > 0 ? [{ id: "real-deals", label: t("Deals", "Rabais") }] : []),
               ...categories.map((c) => ({ id: c.id, label: localizedName(c, lang) })),
             ].map((c) => (
               <a
@@ -150,38 +147,25 @@ function MenuPage() {
             ))}
           </MenuRail>
 
-          {deals.length > 0 && (
-            <MenuRail
-              id="real-deals"
-              kicker={
-                <>
-                  <BadgePercent className="h-3.5 w-3.5" />
-                  {t("Real catalog discounts", "Vrais rabais du catalogue")}
-                </>
-              }
-              title={t("Real deals", "Vrais rabais")}
-              count={t(`${deals.length} on sale`, `${deals.length} en rabais`)}
-            >
-              {deals.map(({ item }, i) => (
-                <ProductCard key={item.id} item={item} index={i} onOpen={setActive} />
-              ))}
-            </MenuRail>
-          )}
-
           {categories.map((c) => {
             const items = menuRepository.getItemsInCategory(c.id, locationId);
             if (items.length === 0) return null;
             return (
-              <MenuRail
-                key={c.id}
-                id={c.id}
-                title={localizedName(c, lang)}
-                count={t(`${items.length} products`, `${items.length} produits`)}
-              >
-                {items.map((item, i) => (
-                  <ProductCard key={item.id} item={item} index={i} onOpen={setActive} />
-                ))}
-              </MenuRail>
+              <section key={c.id} id={c.id} className="scroll-mt-28 py-3 sm:py-4">
+                <div className="mx-auto grid max-w-[110rem] grid-cols-[minmax(0,1fr)_auto] items-end gap-3 px-3 sm:px-6">
+                  <h2 className="mt-0.5 truncate font-display text-xl uppercase leading-none sm:text-3xl lg:text-4xl">
+                    {localizedName(c, lang)}
+                  </h2>
+                  <span className="hidden text-[0.6rem] font-bold uppercase tracking-[0.25em] text-muted-foreground sm:inline">
+                    {t(`${items.length} products`, `${items.length} produits`)}
+                  </span>
+                </div>
+                <ul className="mx-auto mt-2 grid max-w-[110rem] grid-cols-2 gap-2 px-3 pb-2 pt-1 sm:grid-cols-3 sm:px-6 lg:grid-cols-4 xl:grid-cols-5">
+                  {items.map((item, i) => (
+                    <ProductCard key={item.id} item={item} index={i} onOpen={setActive} fluid />
+                  ))}
+                </ul>
+              </section>
             );
           })}
         </div>
