@@ -3,7 +3,7 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
-- 2026-10-26 | claude (Coolify migration) | fix/hydration-418-2026-10-26 → main | active | Fix React #418 hydration error (favourite button nested inside the product-card button) and record the live Coolify host (VPS2, native GitHub auto-deploy), PPP secrets set in Coolify, DMARC p=none added | verify the webhook auto-deploy and live SHA, then update handoff
+- 2026-10-26 | claude (Coolify migration) | fix/hydration-418-2026-10-26 → main 48c00a4 | done | Fixed React #418 (favourite button nested in the product-card button), live via Coolify webhook deploy pqqwxhcy2jctxxhcblwafvia. pppmtl.com now on Coolify vps2 with native auto-deploy; PPP secrets set (admin login verified); DMARC p=none added | owner: Clover keys + issue #6 before live payments; stop MochaHost pppmtl_node after a few stable days
 
 - 2026-10-26 | claude (Taktak) | fix/heures-saint-leonard-11h-2026-10-26 → PR #10 | done (owner merges) | Owner decision 2026-10-26: Saint-Léonard (5839 rue Jean-Talon E) opens at 11:00 — brands.ts KITCHENS st-leonard 10:00 → 11:00, locations.ts loc-saint-leonard openingHours null → 11:00–23:00 every day, brand tests updated | owner merges PR #10
 

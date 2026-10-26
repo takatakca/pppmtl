@@ -9,7 +9,8 @@ The application is a **server-rendered TanStack Start / Nitro Node application**
 - `.github/workflows/deploy-coolify.yml` is **opt-in only** and runs only when the main-branch CI workflow concludes successfully. The GitHub Actions variable `PPPMTL_DEPLOY_VIA_ACTIONS` must equal `true`.
 - When disabled or missing secrets, no Coolify deployment is requested by this workflow. Native Coolify GitHub auto-deploy is an alternative; never configure both at the same time.
 - `GET /healthz` is a server liveness endpoint; it is not proof that a payment or database integration is healthy.
-- There is no verified PPPMTL production host, real-domain version, or active Coolify app connection established in this handoff.
+- **Production host (verified 2026-10-26):** Coolify application `pppmtl` (uuid `r13hz1mmbi4eeoc6ssxbvxnv`) on Contabo server vps2 (209.145.49.63), domains `https://pppmtl.com` and `https://www.pppmtl.com`, branch `main`, native Coolify GitHub auto-deploy enabled. A push to `main` triggered webhook deployment of `48c00a4` within seconds. The Actions workflow above must stay disabled.
+- DNS stays in the MochaHost zone. Only the apex A record (and `www`, a CNAME to it) points to Coolify; mail records remain on MochaHost. A monitor-only DMARC record (`p=none`, reports to admin@pppmtl.com) was added on 2026-10-26 at the owner's request.
 
 ## Back-end prerequisites
 

@@ -1,7 +1,24 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
 
-## CURRENT HANDOFF — 2026-10-16 (America/Toronto)
+## CURRENT HANDOFF — 2026-10-26 (UTC)
+
+**Production now runs on Coolify, verified.** `https://pppmtl.com` and `https://www.pppmtl.com` are served by Coolify application `pppmtl` (uuid `r13hz1mmbi4eeoc6ssxbvxnv`, project PPPMTL) on server **vps2** (Contabo, 209.145.49.63), branch `main`, native **Coolify GitHub-App auto-deploy ON**. The MochaHost Passenger copy (`~/pppmtl_node`) is no longer receiving traffic and is kept only as a rollback.
+
+- **Release verified:** `48c00a4` (hydration fix) was deployed by a GitHub **webhook** 3 s after the push (Coolify deployment `pqqwxhcy2jctxxhcblwafvia`, status `finished`, container healthy on `/healthz`). Every later push to `main` deploys the same way.
+- **Build:** Nixpacks, Node 22, `npm install -g bun && bun install --frozen-lockfile`, `bun run build`, start `node .output/server/index.mjs`, port 3000. Env: `NITRO_PRESET=node-server`, `PUBLIC_SITE_URL=https://pppmtl.com`, `NIXPACKS_NODE_VERSION=22`.
+- **Secrets set in Coolify on 2026-10-26** (random, 48 characters, values only in Coolify): `PPP_ORDER_ACCESS_SECRET`, `PPP_ADMIN_ACCESS_TOKEN`, `PPP_ADMIN_SESSION_SECRET`. Verified live: a wrong token is refused, the real token opens `/admin/orders`.
+- **Not set (owner action):** Clover credentials, `DATABASE_URL`. Live card payment stays disabled by design (`ordersPersistAcrossRestarts = false`, issue #6). Customers who press "Pay with Clover" see "This restaurant is not taking online orders yet" with a call button (verified live).
+- **DNS (MochaHost zone):** apex A → 209.145.49.63 (TTL 300), `www` CNAME → apex, `ftp` A → 209.42.24.127. Mail stays on MochaHost: MX, mail, webmail, SPF and DKIM are unchanged. **Added** `_dmarc` TXT `v=DMARC1; p=none; rua=mailto:admin@pppmtl.com; fo=1` (monitor only). TLS: Let's Encrypt via Traefik, auto-renewed.
+- **Fixed in `48c00a4`:** React #418 on home, menu and offers. The favourite button sat inside the product-card button (invalid HTML). Typecheck, ESLint, Prettier, 134 Vitest tests and the Nitro build pass locally. The live site shows no hydration error on 20 pages.
+- **Known, unrelated:** `bun run test` reports `scripts/__tests__/check-sql-migrations.test.mjs` as a failed suite ("No test suite found"): it is a `node --test` file that Vitest also collects, and 1 of its 5 node tests fails. Not touched here.
+- **Do not also enable** `.github/workflows/deploy-coolify.yml` (`PPPMTL_DEPLOY_VIA_ACTIONS`): native auto-deploy is the active mechanism.
+
+**Next exact action:** owner supplies the Clover credentials and approves the durable PostgreSQL order store (issue #6) before any live payment. A PostgreSQL database can be created on Coolify vps2. After a few stable days, stop the MochaHost `pppmtl_node` app to free a MochaHost process.
+
+---
+
+## PREVIOUS HANDOFF — 2026-10-16 (America/Toronto)
 
 **Repository:** `takatakca/pppmtl` (private), branch `main`, push/admin confirmed. **Main HEAD verified before this handoff update:** `99a20285128487132da2dc61914c95599639b646` (`docs/DB_ROLLOUT.md`); this handoff update and subsequent WORKLOG update create later commits. **Always fetch the real GitHub HEAD**. No open PRs at resume; issues #5 (TAKATAK Auth), #6 (durable checkout/outbox) and #7 (GitHub Actions runner provisioning) remain open.
 
