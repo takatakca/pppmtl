@@ -64,13 +64,15 @@ The site is TanStack Start: the checkout and the webhook are **server functions*
 need a server. **A static copy on shared hosting (the current MochaHost files) cannot take orders**: there is no
 server to keep the keys and receive Clover's webhook.
 
-Run it on one of:
-- **Lovable hosting** (the project is connected to Lovable; its build already targets Cloudflare Workers). Set the
-  variables below in the project's secrets, then publish.
+Run it on:
 - **Coolify on the owner's VPS** (fits the migration plan, same server as Food Hub): Node 22, `npm ci && npm run
-  build`, start `node .output/server/index.mjs`, one instance, HTTPS on `pppmtl.com`.
+  build`, start `node .output/server/index.mjs`, one instance, HTTPS on `pppmtl.com`. Set the variables below in
+  the app's environment in Coolify.
 
-Note: orders are kept in memory (the site has no database yet). On Workers, or after a restart, the order page may
+(Lovable hosting is NOT an option: the owner refused Lovable categorically on 2026-10-26. GitHub → Coolify is the
+only route.)
+
+Note: orders are kept in memory (the site has no database yet). After a restart, the order page may
 not find an order; the customer still sees "payment received" and Clover keeps the order. Nothing is lost on the
 Clover side.
 
