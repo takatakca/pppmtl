@@ -29,13 +29,13 @@ export function ProductCard({
 
   return (
     <li
-      className="rise-in w-[13.5rem] shrink-0 sm:w-[15rem]"
+      className="rise-in group relative w-[13.5rem] shrink-0 sm:w-[15rem]"
       style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
     >
       <button
         type="button"
         onClick={() => onOpen(item)}
-        className="press-tap group flex h-full w-full flex-col border border-border bg-card text-left transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-1.5 hover:border-primary hover:shadow-[0_18px_40px_-18px_hsl(0_0%_0%/0.9)] focus-ppp"
+        className="press-tap flex h-full w-full flex-col border border-border bg-card text-left transition-[transform,box-shadow,border-color] duration-300 ease-out group-hover:-translate-y-1.5 group-hover:border-primary group-hover:shadow-[0_18px_40px_-18px_hsl(0_0%_0%/0.9)] focus-ppp"
       >
         <span className="relative block overflow-hidden">
           <span
@@ -48,26 +48,6 @@ export function ProductCard({
             variant="hero"
             className="h-32 w-full transition-transform duration-500 ease-out group-hover:-translate-y-1.5 group-hover:scale-[1.10] sm:h-36"
           />
-          <button
-            type="button"
-            aria-label={
-              favourited
-                ? t("Remove from favourites", "Retirer des favoris")
-                : t("Add to favourites", "Ajouter aux favoris")
-            }
-            onClick={(e) => {
-              e.stopPropagation();
-              if (favourited) removeFavourite(item.id);
-              else addFavourite(item.id);
-            }}
-            className="absolute right-2 top-2 z-20 flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-black/60 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110 focus-ppp active:scale-95"
-          >
-            <Heart
-              className={`h-3.5 w-3.5 transition-all duration-200 ${
-                favourited ? "fill-primary text-primary" : "fill-transparent text-white"
-              }`}
-            />
-          </button>
           {(discount ?? badge) && (
             <span className="absolute left-0 top-0 flex flex-col items-start gap-0.5">
               {discount && (
@@ -103,6 +83,27 @@ export function ProductCard({
             {t("Add", "Ajouter")}
           </span>
         </span>
+      </button>
+      {/* A sibling of the card button, not a child: a button inside a button is invalid HTML
+          and makes the server-rendered page fail hydration. It rises with the card on hover. */}
+      <button
+        type="button"
+        aria-label={
+          favourited
+            ? t("Remove from favourites", "Retirer des favoris")
+            : t("Add to favourites", "Ajouter aux favoris")
+        }
+        onClick={() => {
+          if (favourited) removeFavourite(item.id);
+          else addFavourite(item.id);
+        }}
+        className="absolute right-[calc(0.5rem+1px)] top-[calc(0.5rem+1px)] z-20 flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-black/60 text-white backdrop-blur-sm transition-all duration-300 ease-out group-hover:-translate-y-1.5 hover:scale-110 focus-ppp active:scale-95"
+      >
+        <Heart
+          className={`h-3.5 w-3.5 transition-all duration-200 ${
+            favourited ? "fill-primary text-primary" : "fill-transparent text-white"
+          }`}
+        />
       </button>
     </li>
   );
