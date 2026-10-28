@@ -42,3 +42,11 @@ Read `AGENTS.md`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`, `
 
 - Changes here touched the order validation and tests, **not** the approved finished yellow Canva product artwork (#18), brand/price catalog, provider secrets, Coolify deployment configuration, RLS code or checkout enablement.
 - GitHub canonical agent log is updated at start and end; append this evidence to existing PPP Pizzeria Google Drive project note and existing TAKATAK live journal, rather than creating a duplicate Drive document.
+
+
+## Follow-up security hardening — temporary administrator sign-in
+
+- `src/lib/security/admin.server.ts` now exports `isReasonableAdminCredential(value)`: rejects null/non-string/empty/over-1024-character input **before any sensitive token comparison or large Buffer allocation**. `validateAdminCredential` and `openAdminSession` use the same guard. Commits `77555eb8de65fc9110e475bc483cbe7b6ca8561d` and formatting `28fbf214957781837ab3e2ba6a0fe44634faeb41`.
+- `src/lib/security/admin.functions.ts` verifies the runtime POST input before reading `data.credential`, instead of assuming TanStack's TypeScript-typed `inputValidator` validated JSON. Commit `8ce7481c6cb43539fd06ed0071a193bb06a732cd`.
+- `src/lib/security/__tests__/access.test.ts`: valid/invalid and excessive credential tests without exposing any real secrets. Commit `2ea9781597f9116144db0bcb237608f00f47b50e`.
+- This is **defense-in-depth for the existing temporary admin token**, not a replacement for TAKATAK tenant-scoped admin identity, edge rate limiting or auditing (#5). Production environment keys were not inspected, generated or committed.
