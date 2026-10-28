@@ -5,6 +5,7 @@ import { usePPP } from "@/context/ppp-store";
 import { MenuImage } from "@/components/menu/menu-item-image";
 import type { LineSelections } from "@/lib/cart";
 import { menuRepository } from "@/lib/menu-repository";
+import { useDialogKeyboard } from "@/lib/use-dialog-keyboard";
 import {
   checkSelections,
   chosenIds,
@@ -40,6 +41,8 @@ export function ItemSheet({
   const [attempted, setAttempted] = useState(false);
   const optionScroller = useRef<HTMLDivElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogKeyboard(Boolean(item), onClose, dialogRef, closeButton);
   const favourited = isFavourite(item?.id ?? "");
 
   useEffect(() => {
@@ -51,21 +54,6 @@ export function ItemSheet({
     // product choice, not retain the previous sheet's extras scroll position.
     optionScroller.current?.scrollTo({ top: 0, behavior: "auto" });
   }, [item?.id, item?.modifierGroups]);
-
-  useEffect(() => {
-    if (!item) return undefined;
-    const previousOverflow = document.body.style.overflow;
-    const previousFocus = document.activeElement;
-    document.body.style.overflow = "hidden";
-    closeButton.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previousOverflow;
-      if (previousFocus instanceof HTMLElement) previousFocus.focus();
-    };
-  }, [item, onClose]);
 
   const groups = useMemo(() => item?.modifierGroups ?? [], [item]);
   const missing = checkSelections(groups, selections).missing;
@@ -83,6 +71,8 @@ export function ItemSheet({
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center bg-background/85 backdrop-blur-sm sm:items-center">
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={name}
