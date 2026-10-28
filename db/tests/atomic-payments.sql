@@ -29,7 +29,7 @@ $$;
 
 -- Replaying a key must not silently reassign another cart or restaurant
 -- to an earlier checkout, even if the provider session has already started.
-DO $
+DO $$
 DECLARE
   blocked boolean := false;
 BEGIN
@@ -58,7 +58,7 @@ BEGIN
     RAISE EXCEPTION 'An idempotency key crossed restaurant location';
   END IF;
 END
-$;
+$$;
 
 UPDATE ppp.orders SET provider_order_id = 'SESSION_ATOMIC_1'
   WHERE tenant_id = 'ppp_ci_atomic_a' AND id = 'ord_ci_atomic_one';
