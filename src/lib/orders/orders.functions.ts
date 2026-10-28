@@ -7,6 +7,11 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
+import {
+  isGuestOrderCancelInput,
+  isGuestOrderListInput,
+  isGuestOrderReadInput,
+} from "./guest-request-input";
 import type { OrderError } from "./errors";
 import type { InternalOrder, OrderStatus, OrderType } from "./types";
 
@@ -143,7 +148,7 @@ export const cancelMyOrder = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<PlaceOrderResponse> => {
     const { canReadOrder } = await import("@/lib/security/order-access.server");
     const { orderError } = await import("./errors");
-    if (!canReadOrder(data.orderId)) {
+    if (!isGuestOrderCancelInput(data) || !canReadOrder(data.orderId)) {
       return { ok: false, order: null, error: orderError("order_not_found") };
     }
     const { cancelOrder } = await import("./order-service");
@@ -157,6 +162,9 @@ export const cancelMyOrder = createServerFn({ method: "POST" })
 export const listMyOrders = createServerFn({ method: "POST" })
   .inputValidator((input: { customerId: string | null; phone: string | null }) => input)
   .handler(async ({ data }): Promise<{ orders: OrderView[] }> => {
+    // Never allow malformed JSON or a non-string phone to throw on .replace().
+    // A valid phone is just a filter, never an authorization to read a receipt.
+    if (!isGuestOrderListInput(data)) return { orders: [] };
     // A phone is only an additional filter. It NEVER authorizes an order by itself.
     const { readableOrderIds } = await import("@/lib/security/order-access.server");
     const { getOrderById: findOrder } = await import("./order-service");
@@ -171,6 +179,7 @@ export const listMyOrders = createServerFn({ method: "POST" })
 export const getOrderById = createServerFn({ method: "POST" })
   .inputValidator((input: { orderId: string }) => input)
   .handler(async ({ data }): Promise<{ order: OrderView | null }> => {
+    if (!isGuestOrderReadInput(data)) return { order: null };
     const { canReadOrder } = await import("@/lib/security/order-access.server");
     if (!canReadOrder(data.orderId)) return { order: null };
     const { getOrderById: findOrder } = await import("./order-service");
