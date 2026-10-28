@@ -34,9 +34,10 @@ export function isGuestOrderReadInput(input: unknown): input is GuestOrderIdInpu
 
 export function isGuestOrderCancelInput(input: unknown): input is GuestCancelInput {
   return (
-    isGuestOrderReadInput(input) &&
-    typeof input.reason === "string" &&
-    input.reason.length <= 240
+    isRecord(input) &&
+    isGuestOrderId(input["orderId"]) &&
+    typeof input["reason"] === "string" &&
+    input["reason"].length <= 240
   );
 }
 
