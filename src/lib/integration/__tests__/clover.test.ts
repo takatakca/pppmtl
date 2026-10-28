@@ -181,11 +181,7 @@ describe("saved cart recovery is visible and does not alter valid Clover choices
       pita().locationIds[0]!,
     );
     expect(result).toMatchObject({ removed: 3, updated: 0, lines: [] });
-    const elsewhere = reconcileSavedCart(
-      [savedLine(pitaCombo(), 0)],
-      findItem,
-      "invalid-store",
-    );
+    const elsewhere = reconcileSavedCart([savedLine(pitaCombo(), 0)], findItem, "invalid-store");
     expect(elsewhere).toMatchObject({ removed: 1, updated: 0, lines: [] });
   });
 
