@@ -9,7 +9,9 @@ export const adminAuthStatus = createServerFn({ method: "GET" }).handler(async (
 export const signInAdmin = createServerFn({ method: "POST" })
   .inputValidator((input: { credential: string }) => input)
   .handler(async ({ data }) => {
-    const { openAdminSession } = await import("./admin.server");
+    const { isReasonableAdminCredential, openAdminSession } = await import("./admin.server");
+    // Generic inputValidator types do not validate untrusted runtime JSON.
+    if (!data || !isReasonableAdminCredential(data.credential)) return { ok: false };
     return { ok: openAdminSession(data.credential) };
   });
 
