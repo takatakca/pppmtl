@@ -6,7 +6,7 @@ import { statusForEvent, statusForProviderStatus, normalizeEventName } from "../
 import { orderToUniversalDraft, draftToUniversalDraft } from "../order-mapping";
 import { classifyProviderFailure, orderError } from "../errors";
 import { mapDraftToUrbanPiperOrder } from "@/lib/integration/providers/urbanpiper/mapping";
-import { createOrder, getOrderById, listCustomerOrders } from "../order-service";
+import { createOrder, getOrderById, listCustomerOrders, validateOrder } from "../order-service";
 import { resetOrderStoreForTests, saveOrder } from "../order-store.server";
 import type { InternalOrder } from "../types";
 
@@ -120,6 +120,38 @@ describe("validation", () => {
     const codes = report.errors.map((e) => e.code);
     expect(codes).toContain("missing_name");
     expect(codes).toContain("missing_phone");
+  });
+});
+
+describe("malformed browser checkout payloads", () => {
+  it("rejects invalid runtime JSON without throwing or creating an order", () => {
+    const validShape = {
+      locationId: "ndg",
+      orderType: "PICKUP",
+      lines: [],
+      customer: { name: "Guest", phone: "5145550101" },
+      deliveryAddress: null,
+      notes: "",
+    };
+    const malformed: unknown[] = [
+      null,
+      [],
+      { ...validShape, lines: null },
+      { ...validShape, lines: new Array(101).fill(null) },
+      { ...validShape, customer: null },
+      { ...validShape, customer: { name: 123, phone: "5145550101" } },
+      { ...validShape, deliveryAddress: 7 },
+      { ...validShape, notes: 7 },
+      { ...validShape, lines: [null] },
+      { ...validShape, lines: [{ itemId: "pizza", quantity: 1, notes: 4, selections: {} }] },
+    ];
+    for (const candidate of malformed) {
+      const request = candidate as Parameters<typeof validateOrder>[0];
+      expect(() => validateOrder(request)).not.toThrow();
+      expect(validateOrder(request).errors[0]?.code).toBe("menu_changed");
+      expect(() => createOrder(request)).not.toThrow();
+      expect(createOrder(request).ok).toBe(false);
+    }
   });
 });
 
