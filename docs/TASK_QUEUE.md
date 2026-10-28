@@ -99,3 +99,9 @@ The opt-in `processPppCloverFulfillmentBatch` worker and mocked tests have been 
 
 - **Completed in source:** `db58af73` validates untrusted checkout JSON at runtime before creating orders or sanitizing guest identity. New malformed-body tests passed in **CI 40645275982 (success)** together with build, lint and PostgreSQL tenant/atomic-payment probes. It supplements the browser cart guards; do not redo it.
 - **Still blocking release:** current Coolify container SHA/health not verified here, no real Android/iOS modal/cart QA or live Clover inventory assertion, production tenant/DB/merchant/outbox gates #5/#6/#13 unresolved. Do not activate payments.
+
+## 2026-10-28 — UX/QA progress after saved-cart and modal repairs
+
+- **Source complete (CI GREEN 40646740316 at `297c0f9`):** customer notice for restored cart removals/updated items, safe cart reconciliation/pricing tests, and keyboard focus trap for cart/customizer with Escape and focus restoration. Read [dated technical audit](agent-notes/2026-10-28-cart-reliability-audit.md).
+- **P1 remain:** verify mobile/desktop keyboard, screen reader, swipe/scroll and recovery-notice behavior on actual public build; inspect native Coolify running SHA + `/healthz` instead of assuming CI is a deployment; confirm live Clover inventory choices and prices.
+- **P0 remains #5/#6/#13:** durable production DB, scoped TAKATAK authorization, signed Clover webhook and outbox/print/replay safety, controlled real payment/refund. Leave checkout fail-closed pending actual integration evidence.
