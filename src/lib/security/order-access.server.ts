@@ -41,7 +41,9 @@ export function verifyOrderGrant(
   key: string,
   now = Date.now(),
 ): string[] {
-  if (!cookie || key.length < 32) return [];
+  // No signed grant with at most ten bounded order IDs can approach 4 KiB.
+  // Reject attacker-controlled oversized cookies before HMAC/JSON processing.
+  if (!cookie || cookie.length > 4096 || key.length < 32) return [];
   const dot = cookie.lastIndexOf(".");
   if (dot <= 0) return [];
   const payload = cookie.slice(0, dot);
