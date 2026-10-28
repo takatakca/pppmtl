@@ -31,7 +31,7 @@ import {
   toggleChoice,
   type LineSelections,
 } from "@/lib/modifiers";
-import { canAddCartLine, unitPriceFor } from "@/lib/cart";
+import { canAddCartLine, reconcileSavedCart, unitPriceFor } from "@/lib/cart";
 import { resetWebhookReplayForTests } from "@/lib/integration/core/webhook-security";
 import { resetOrderStoreForTests } from "@/lib/orders/order-store.server";
 import { resetIdempotencyForTests } from "@/lib/orders/idempotency";
@@ -135,6 +135,68 @@ describe("client cart and server options agree on real Clover requirements", () 
     expect(checkSelections(groups, invalid).unknown).toContain(first);
     expect(checkSelections(groups, [] as unknown as LineSelections).ok).toBe(false);
     expect(checkSelections(groups, null as unknown as LineSelections).ok).toBe(false);
+  });
+});
+
+describe("saved cart recovery is visible and does not alter valid Clover choices", () => {
+  const findItem = (id: string) => menuItems.find((item) => item.id === id) ?? null;
+  const savedLine = (selections: LineSelections, unitPrice: number | null) => ({
+    lineId: "saved-pita",
+    itemId: PITA,
+    quantity: 1,
+    instructions: "No onions",
+    selections,
+    unitPrice,
+  });
+
+  it("keeps the exact choices and price for a valid existing order", () => {
+    const selections = pitaCombo();
+    const price = unitPriceFor(pita(), selections);
+    const result = reconcileSavedCart(
+      [savedLine(selections, price)],
+      findItem,
+      pita().locationIds[0]!,
+    );
+    expect(result).toMatchObject({ removed: 0, updated: 0 });
+    expect(result.lines[0]?.selections).toEqual(selections);
+    expect(result.lines[0]?.unitPrice).toBe(price);
+  });
+
+  it("notices outdated price and obsolete optional group while preserving required choices", () => {
+    const selections = { ...pitaCombo(), oldSauce: "no-longer-offered" };
+    const result = reconcileSavedCart([savedLine(selections, 0)], findItem, null);
+    expect(result).toMatchObject({ removed: 0, updated: 1 });
+    expect(result.lines[0]?.selections).toEqual(pitaCombo());
+    expect(result.lines[0]?.unitPrice).toBe(unitPriceFor(pita(), pitaCombo()));
+  });
+
+  it("drops missing required choices, unknown items, invalid quantities and wrong locations", () => {
+    const result = reconcileSavedCart(
+      [
+        savedLine({}, 0),
+        { ...savedLine(pitaCombo(), 0), itemId: "not-in-menu" },
+        { ...savedLine(pitaCombo(), 0), quantity: 99 },
+      ],
+      findItem,
+      pita().locationIds[0]!,
+    );
+    expect(result).toMatchObject({ removed: 3, updated: 0, lines: [] });
+    const elsewhere = reconcileSavedCart(
+      [savedLine(pitaCombo(), 0)],
+      findItem,
+      "invalid-store",
+    );
+    expect(elsewhere).toMatchObject({ removed: 1, updated: 0, lines: [] });
+  });
+
+  it("drops invalid serialized choices rather than incorrectly granting free options", () => {
+    const corrupt = savedLine(pitaCombo(), 0);
+    const result = reconcileSavedCart(
+      [{ ...corrupt, selections: { invalid: 42 } }, null],
+      findItem,
+      null,
+    );
+    expect(result).toMatchObject({ removed: 2, updated: 0, lines: [] });
   });
 });
 
