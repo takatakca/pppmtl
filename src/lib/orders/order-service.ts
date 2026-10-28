@@ -64,6 +64,41 @@ const toCents = (dollars: number | null): number | null =>
   dollars === null ? null : Math.round(dollars * 100);
 
 /**
+ * TanStack's generic inputValidator type does not validate runtime JSON.
+ * Fail closed before touching fields that are otherwise assumed to be arrays,
+ * strings or nested customer objects. Monetary authority stays on the server.
+ */
+function hasCheckoutPayloadShape(value: unknown): value is CheckoutRequest {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const input = value as Partial<CheckoutRequest>;
+  const nullableString = (field: unknown) => field == null || typeof field === "string";
+  if (
+    typeof input.locationId !== "string" ||
+    input.locationId.length > 128 ||
+    !Array.isArray(input.lines) ||
+    input.lines.length > 100 ||
+    !input.customer ||
+    typeof input.customer !== "object" ||
+    Array.isArray(input.customer) ||
+    !nullableString(input.customer.name) ||
+    !nullableString(input.customer.phone) ||
+    !nullableString(input.deliveryAddress) ||
+    !nullableString(input.notes)
+  ) {
+    return false;
+  }
+  return input.lines.every(
+    (line) =>
+      !!line &&
+      typeof line === "object" &&
+      typeof line.itemId === "string" &&
+      typeof line.quantity === "number" &&
+      nullableString(line.notes),
+  );
+}
+
+
+/**
  * Rebuild priced items from the verified catalog. Unknown ids are dropped; a line whose options break the
  * item's rules (a required choice missing, too many, an option it does not offer) counts as dropped too.
  */
@@ -145,6 +180,9 @@ function toDraft(request: CheckoutRequest, items: OrderItem[]): OrderDraft {
 
 /** 1 — VALIDATE. Pure inputs in, human errors out. */
 export function validateOrder(request: CheckoutRequest): ValidationReport {
+  if (!hasCheckoutPayloadShape(request)) {
+    return { valid: false, errors: [orderError("menu_changed")] };
+  }
   const { items, dropped } = buildItems(request);
   const draft = toDraft(request, items);
   const location = restaurantLocations.find((l) => l.id === request.locationId);
@@ -168,14 +206,15 @@ export function createOrder(
   request: CheckoutRequest,
   checkoutScope = "",
 ): OrderResult<InternalOrder> {
-  const { items } = buildItems(request);
-  const draft = toDraft(request, items);
-
+  // Validate the runtime shape before dereferencing user-provided JSON.
   const report = validateOrder(request);
   if (!report.valid) {
     const first = report.errors[0];
     return { ok: false, error: first ?? orderError("menu_changed") };
   }
+
+  const { items } = buildItems(request);
+  const draft = toDraft(request, items);
 
   // The scope is generated server-side from an HttpOnly browser cookie for live checkout.
   // Without it, two guests placing identical orders could be assigned the same receipt.
