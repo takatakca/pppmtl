@@ -70,7 +70,13 @@ describe("temporary administrator authorization", () => {
 describe("signed browser-scoped order receipts", () => {
   it("rejects oversized receipt cookies before HMAC or payload parsing", () => {
     expect(verifyOrderGrant("a".repeat(4097), customerSecret, now)).toEqual([]);
-    expect(verifyOrderGrant(signedOrders(["ord_checkout123"], Math.floor(now / 1000) + 60), customerSecret, now)).toEqual(["ord_checkout123"]);
+    expect(
+      verifyOrderGrant(
+        signedOrders(["ord_checkout123"], Math.floor(now / 1000) + 60),
+        customerSecret,
+        now,
+      ),
+    ).toEqual(["ord_checkout123"]);
   });
 
   it("returns only authorized order ids, not names or phone-based matches", () => {
