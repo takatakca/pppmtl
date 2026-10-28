@@ -163,8 +163,7 @@ describe("pre-launch checkout catalog isolation and bounded input", () => {
   const availableProduct = () => {
     const product = menuItems.find(
       (candidate) =>
-        candidate.isAvailable &&
-        !candidate.modifierGroups?.some((group) => groupMin(group) > 0),
+        candidate.isAvailable && !candidate.modifierGroups?.some((group) => groupMin(group) > 0),
     );
     if (!product) throw new Error("Expected an available no-required-options menu item");
     return product;
@@ -202,7 +201,9 @@ describe("pre-launch checkout catalog isolation and bounded input", () => {
 
   it("rejects an otherwise valid product submitted to a different restaurant", () => {
     const product = availableProduct();
-    const other = restaurantLocations.find((location) => !product.locationIds.includes(location.id));
+    const other = restaurantLocations.find(
+      (location) => !product.locationIds.includes(location.id),
+    );
     if (!other) throw new Error("Expected another real PPP location");
     const request = { ...requestFor(product), locationId: other.id };
     expect(validateOrder(request).errors.map((e) => e.code)).toContain("item_unavailable");
@@ -215,9 +216,7 @@ describe("pre-launch checkout catalog isolation and bounded input", () => {
       orderType: "DELIVERY" as const,
       deliveryAddress: "123 Test Street, Montreal",
     };
-    expect(validateOrder(request).errors.map((e) => e.code)).toContain(
-      "unsupported_order_type",
-    );
+    expect(validateOrder(request).errors.map((e) => e.code)).toContain("unsupported_order_type");
     expect(createOrder(request).ok).toBe(false);
   });
 
