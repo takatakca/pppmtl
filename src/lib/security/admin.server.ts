@@ -20,13 +20,18 @@ function equals(a: string, b: string): boolean {
   return aBytes.length === bBytes.length && timingSafeEqual(aBytes, bBytes);
 }
 
+/** Refuse malformed/oversized login bodies before comparing secrets or allocating large buffers. */
+export function isReasonableAdminCredential(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0 && value.length <= 1024;
+}
+
 export function adminConfigured(): boolean {
   return Boolean(secrets());
 }
 
 export function validateAdminCredential(candidate: string): boolean {
   const config = secrets();
-  return Boolean(config && typeof candidate === "string" && equals(candidate, config.access));
+  return Boolean(config && isReasonableAdminCredential(candidate) && equals(candidate, config.access));
 }
 
 function signature(payload: string, signing: string): string {
@@ -62,7 +67,9 @@ export function adminSessionActive(): boolean {
 
 export function openAdminSession(credential: string): boolean {
   const config = secrets();
-  if (!config || typeof credential !== "string" || !equals(credential, config.access)) return false;
+  if (!config || !isReasonableAdminCredential(credential) || !equals(credential, config.access)) {
+    return false;
+  }
   const until = Math.floor(Date.now() / 1000) + LIFETIME_SECONDS;
   const payload = `${until}.${randomBytes(16).toString("hex")}`;
   setCookie(COOKIE, `${payload}.${signature(payload, config.signing)}`, {
