@@ -19,8 +19,8 @@ export function groupMax(group: ModifierGroup): number {
 }
 
 export function chosenIds(selections: LineSelections, groupId: string): string[] {
-  const raw = selections[groupId];
-  return raw ? raw.split(",").filter(Boolean) : [];
+  const raw = selections?.[groupId];
+  return typeof raw === "string" ? raw.split(",").filter(Boolean) : [];
 }
 
 function withGroup(selections: LineSelections, groupId: string, ids: string[]): LineSelections {
@@ -83,8 +83,19 @@ export function checkSelections(
   const missing: ModifierGroup[] = [];
   const tooMany: ModifierGroup[] = [];
   const unknown: string[] = [];
+  // JSON supplied by a browser is not runtime type-checked by TypeScript.
+  // A malformed optional modifier must be rejected, never cause a 500 or
+  // silently become a free/empty selection.
+  if (!selections || typeof selections !== "object" || Array.isArray(selections)) {
+    return { ok: false, missing, tooMany, unknown: ["selections"] };
+  }
   const byId = new Map(groups.map((g) => [g.id, g]));
   for (const groupId of Object.keys(selections)) {
+    const raw = selections[groupId];
+    if (typeof raw !== "string" || raw.length > 2048) {
+      unknown.push(groupId);
+      continue;
+    }
     const group = byId.get(groupId);
     if (!group) {
       unknown.push(groupId);
