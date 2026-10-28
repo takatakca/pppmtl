@@ -47,29 +47,66 @@ function MenuPage() {
   const [activeCat, setActiveCat] = useState("most-ordered");
   const navRef = useRef<HTMLDivElement>(null);
 
-  // Scrollspy: the chip nav always reflects the rail currently on screen.
+  // Keep one active chip in sync with the actual page, not with each
+  // IntersectionObserver entry (which can arrive out of scroll order).
+  // A passive scroll listener batched in rAF avoids fighting category clicks.
   useEffect(() => {
     const sections = Array.from(
       document.querySelectorAll<HTMLElement>("[data-rail-root] section[id]"),
     );
-    if (sections.length === 0) return undefined;
-    const io = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
-        if (visible) setActiveCat(visible.target.id);
-      },
-      { rootMargin: "-140px 0px -60% 0px", threshold: 0 },
-    );
-    sections.forEach((s) => io.observe(s));
-    return () => io.disconnect();
-  }, [categories.length]);
+    if (!sections.length) return undefined;
 
+    let frame = 0;
+    const sync = () => {
+      frame = 0;
+      const offset = (window.innerWidth >= 1024 ? 96 : 56) +
+        (navRef.current?.offsetHeight ?? 44) + 16;
+      let current = sections[0]!.id;
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top <= offset) current = section.id;
+        else break;
+      }
+      setActiveCat((previous) => (previous === current ? previous : current));
+    };
+    const schedule = () => {
+      if (!frame) frame = window.requestAnimationFrame(sync);
+    };
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    schedule();
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [categories.length, locationId]);
+
+  // Centre the selected chip inside its OWN horizontal scroller.
+  // scrollIntoView was also moving the document vertically, producing the
+  // reported unexpected swipe/jump when choosing a distant category.
   useEffect(() => {
-    const chip = navRef.current?.querySelector<HTMLElement>(`[data-chip="${activeCat}"]`);
-    chip?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+    const nav = navRef.current;
+    const chip = Array.from(nav?.querySelectorAll<HTMLElement>("[data-chip]") ?? [])
+      .find((element) => element.dataset["chip"] === activeCat);
+    if (!nav || !chip) return;
+    const dx = chip.getBoundingClientRect().left - nav.getBoundingClientRect().left +
+      chip.clientWidth / 2 - nav.clientWidth / 2;
+    nav.scrollTo({ left: nav.scrollLeft + dx, behavior: "auto" });
   }, [activeCat]);
+
+  const jumpToCategory = (categoryId: string) => {
+    const section = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-rail-root] section[id]"),
+    ).find((element) => element.id === categoryId);
+    if (!section) return;
+    const offset = (window.innerWidth >= 1024 ? 96 : 56) +
+      (navRef.current?.offsetHeight ?? 44) + 16;
+    setActiveCat(categoryId);
+    window.scrollTo({
+      top: Math.max(0, window.scrollY + section.getBoundingClientRect().top - offset),
+      behavior: "auto",
+    });
+  };
 
   const total = menuRepository.getItems(locationId).length;
 
@@ -99,8 +136,11 @@ function MenuPage() {
             </div>
           </div>
 
-          {/* Sticky one-line category nav */}
-          <div
+        </section>
+
+        {/* Sticky navigation must be OUTSIDE the introductory section:
+            otherwise position:sticky stops when that parent ends. */}
+        <div
             ref={navRef}
             className="no-scrollbar sticky top-14 z-40 flex gap-1.5 overflow-x-auto border-t border-border bg-background/95 px-3 py-2 backdrop-blur-xl sm:px-6 lg:top-24"
           >
@@ -111,6 +151,10 @@ function MenuPage() {
               <a
                 key={c.id}
                 href={`#${c.id}`}
+                onClick={(event) => {
+                  event.preventDefault();
+                  jumpToCategory(c.id);
+                }}
                 data-chip={c.id}
                 className={`shrink-0 whitespace-nowrap border px-3 py-1.5 font-display text-xs uppercase leading-none transition-colors focus-ppp ${
                   activeCat === c.id
@@ -121,8 +165,7 @@ function MenuPage() {
                 {c.label}
               </a>
             ))}
-          </div>
-        </section>
+        </div>
 
         <div data-rail-root>
           <MenuRail
