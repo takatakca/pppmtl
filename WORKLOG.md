@@ -3,6 +3,8 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
+- 2026-10-28 | GPT-6 (menu UX and modifier sequencing) | main | active | Owner reports category swipe/lag and nonsensical modifier order; audit current deployed menu and Clover-backed catalog, preserve current design and images, fix targeted UX and tests | review latest code, commit, verify, update GitHub handoff first and then Google Drive
+
 - 2026-10-28 | GPT-6 (mobile menu + Clover option UX audit) | main | active | Reprise depuis GitHub SHA 79919b8; examiner bug de scroll/swipe catégorie desserts, ordre des groupes Clover obligatoires / sauces / légumes / boisson / trio / combo / extras; garder production paiement verrouillé; vérification Coolify et Drive après les commits | audit fichiers et site, corriger avec tests, documenter chaque étape et synchroniser Google Drive
 
 - 2026-10-26 | claude (Coolify migration) | fix/hydration-418-2026-10-26 → main 48c00a4 | done | Fixed React #418 (favourite button nested in the product-card button), live via Coolify webhook deploy pqqwxhcy2jctxxhcblwafvia. pppmtl.com now on Coolify vps2 with native auto-deploy; PPP secrets set (admin login verified); DMARC p=none added | owner: Clover keys + issue #6 before live payments; stop MochaHost pppmtl_node after a few stable days
