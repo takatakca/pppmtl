@@ -3,7 +3,7 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
-- 2026-10-28 | GPT-6 (menu UX and modifier sequencing) | main | active | Owner reports category swipe/lag and nonsensical modifier order; audit current deployed menu and Clover-backed catalog, preserve current design and images, fix targeted UX and tests | review latest code, commit, verify, update GitHub handoff first and then Google Drive
+- 2026-10-28 | GPT-6 (menu/Clover audit + CI and Drive handoff) | main → 4dae445 / 004e9c9 / e1d64aa / 9702122 / 1f211c1 / cdb2d30 | partial; source+Drive notes saved; mobile/live release unverified | Read current agents/handoff and latest code; avoided colliding with parallel agent UX fixes (b927e59, a9389f8, c880977, b88ec0f, 747cb83); repaired malformed SQL Node fixture, removed duplicate Vitest collection, inspected real GitHub CI lint/DB failures, documented previous and current work in five canonical docs and dated agent note; mirrored detailed report into PPP Pizzeria Drive (doc 1M9aEd9S-IN-oH_ZcMB5i5cCFgd5Q2CFCXzACnQxP83k), link in handoff | Verify latest CI and Coolify exact release SHA, real mobile category navigation and Clover modifier membership; do not activate payments until DB/SSO/worker verified
 
 - 2026-10-28 | GPT-6 (mobile menu + Clover option UX audit) | main | active | Reprise depuis GitHub SHA 79919b8; examiner bug de scroll/swipe catégorie desserts, ordre des groupes Clover obligatoires / sauces / légumes / boisson / trio / combo / extras; garder production paiement verrouillé; vérification Coolify et Drive après les commits | audit fichiers et site, corriger avec tests, documenter chaque étape et synchroniser Google Drive
 
