@@ -1,6 +1,7 @@
 import type { MenuItem, OrderMode } from "@/data/menu";
 import {
   checkSelections,
+  keepKnownSelections,
   optionsTotal,
   selectionSummary,
   type LineSelections,
@@ -51,6 +52,78 @@ export function canAddCartLine(
     quantity <= 50 &&
     checkSelections(item.modifierGroups ?? [], selections).ok
   );
+}
+
+export interface ReconciledCart {
+  lines: CartLine[];
+  /** Whole saved lines no longer safe to order (unknown item, store, quantity or required choice). */
+  removed: number;
+  /** Retained lines with a changed published price or pruned obsolete optional choices. */
+  updated: number;
+}
+
+/**
+ * On session restore, treat localStorage as untrusted historical data.
+ * Preserve a valid saved order, but never invent a missing required choice,
+ * silently keep a removed extra or reuse an outdated item price.
+ */
+export function reconcileSavedCart(
+  saved: unknown,
+  findItem: (itemId: string) => MenuItem | null,
+  locationId: string | null,
+): ReconciledCart {
+  const result: ReconciledCart = { lines: [], removed: 0, updated: 0 };
+  if (!Array.isArray(saved)) return result;
+  const seenLineIds = new Set<string>();
+
+  for (const candidate of saved) {
+    if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) {
+      result.removed++;
+      continue;
+    }
+    const line = candidate as Partial<CartLine>;
+    const item = typeof line.itemId === "string" ? findItem(line.itemId) : null;
+    const input = line.selections;
+    if (
+      !item ||
+      typeof line.instructions !== "string" ||
+      !input ||
+      typeof input !== "object" ||
+      Array.isArray(input) ||
+      Object.values(input).some((choice) => typeof choice !== "string")
+    ) {
+      result.removed++;
+      continue;
+    }
+    const selections = keepKnownSelections(item.modifierGroups ?? [], input);
+    if (!canAddCartLine(item, line.quantity as number, selections, locationId)) {
+      result.removed++;
+      continue;
+    }
+    const unitPrice = unitPriceFor(item, selections);
+    const lineId =
+      typeof line.lineId === "string" &&
+      line.lineId.length > 0 &&
+      !seenLineIds.has(line.lineId)
+        ? line.lineId
+        : `${item.id}:restored:${result.lines.length}`;
+    const changed =
+      line.unitPrice !== unitPrice ||
+      lineId !== line.lineId ||
+      Object.keys(input).length !== Object.keys(selections).length ||
+      Object.entries(input).some(([id, value]) => selections[id] !== value);
+    if (changed) result.updated++;
+    seenLineIds.add(lineId);
+    result.lines.push({
+      lineId,
+      itemId: item.id,
+      quantity: line.quantity as number,
+      instructions: line.instructions,
+      selections,
+      unitPrice,
+    });
+  }
+  return result;
 }
 
 /** One unit of the item with these options, in dollars (null without a published price). */
