@@ -11,7 +11,15 @@ const orderId = "ord_checkout123";
 describe("public guest order JSON boundary", () => {
   it("accepts only well-formed receipt IDs, without treating their format as authorization", () => {
     expect(isGuestOrderId(orderId)).toBe(true);
-    for (const input of [null, 27, "", "ord_", "checkout123", "ord_../other", "ord_" + "x".repeat(81)]) {
+    for (const input of [
+      null,
+      27,
+      "",
+      "ord_",
+      "checkout123",
+      "ord_../other",
+      "ord_" + "x".repeat(81),
+    ]) {
       expect(isGuestOrderId(input), String(input)).toBe(false);
     }
   });
