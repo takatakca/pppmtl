@@ -24,7 +24,9 @@ export function useDialogKeyboard(
         dialog?.querySelectorAll<HTMLElement>(
           'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
         ) ?? [],
-      ).filter((el) => !el.closest("[hidden], [inert]") && el.getAttribute("aria-hidden") !== "true");
+      ).filter(
+        (el) => !el.closest("[hidden], [inert]") && el.getAttribute("aria-hidden") !== "true",
+      );
 
     (initialFocusRef.current ?? focusable()[0] ?? dialog)?.focus();
 
