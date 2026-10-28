@@ -10,7 +10,13 @@ import {
 import { locations, type Lang, type OrderMode } from "@/data/menu";
 import { NDG_LOCATION_ID, locationById, restaurantLocations } from "@/config/locations";
 import { track } from "@/lib/analytics";
-import { newLine, unitPriceFor, type CartLine, type LineSelections } from "@/lib/cart";
+import {
+  canAddCartLine,
+  newLine,
+  unitPriceFor,
+  type CartLine,
+  type LineSelections,
+} from "@/lib/cart";
 import { useBrand } from "@/context/brand";
 import { keepKnownSelections } from "@/lib/modifiers";
 import { menuRepository } from "@/lib/menu-repository";
@@ -156,12 +162,14 @@ export function PPPProvider({ children }: { children: ReactNode }) {
         // A saved cart is priced again from today's menu (Clover prices and options); gone items are dropped.
         if (Array.isArray(stored.cart)) {
           stored.cart = stored.cart.flatMap((line) => {
+            if (!line || typeof line.itemId !== "string") return [];
             const item = menuRepository.getItem(line.itemId);
             if (!item) return [];
             const selections = keepKnownSelections(
               item.modifierGroups ?? [],
               line.selections ?? {},
             );
+            if (!canAddCartLine(item, line.quantity, selections, stored.locationId)) return [];
             return [{ ...line, selections, unitPrice: unitPriceFor(item, selections) }];
           });
         }
@@ -218,7 +226,7 @@ export function PPPProvider({ children }: { children: ReactNode }) {
       clearRecentSearches: () => persist({ ...state, recentSearches: [] }),
       addToCart: (itemId, quantity, instructions, selections) => {
         const item = menuRepository.getItem(itemId);
-        if (!item) return;
+        if (!item || !canAddCartLine(item, quantity, selections ?? {}, state.locationId)) return;
         track("cart_item_added", { itemId, quantity });
         persist({
           ...state,
@@ -226,14 +234,16 @@ export function PPPProvider({ children }: { children: ReactNode }) {
         });
         setCartOpen(true);
       },
-      setLineQuantity: (lineId, quantity) =>
+      setLineQuantity: (lineId, quantity) => {
+        if (!Number.isSafeInteger(quantity) || quantity > 50) return;
         persist({
           ...state,
           cart:
             quantity <= 0
               ? state.cart.filter((l) => l.lineId !== lineId)
               : state.cart.map((l) => (l.lineId === lineId ? { ...l, quantity } : l)),
-        }),
+        });
+      },
       removeLine: (lineId) =>
         persist({ ...state, cart: state.cart.filter((l) => l.lineId !== lineId) }),
       clearCart: () => persist({ ...state, cart: [] }),
@@ -283,16 +293,18 @@ export function PPPProvider({ children }: { children: ReactNode }) {
       },
       reorderToCart: (lines) => {
         const added: string[] = [];
+        const cart = [...state.cart];
         for (const line of lines) {
           const item = menuRepository.getItem(line.itemId);
           if (!item) continue;
-          const selections = keepKnownSelections(item.modifierGroups ?? [], line.selections);
-          state.cart.push(newLine(item, line.quantity, line.notes, selections));
+          const selections = keepKnownSelections(item.modifierGroups ?? [], line.selections ?? {});
+          if (!canAddCartLine(item, line.quantity, selections, state.locationId)) continue;
+          cart.push(newLine(item, line.quantity, line.notes, selections));
           added.push(item.id);
         }
         if (added.length > 0) {
           track("reorder_added", { itemIds: added });
-          persist({ ...state, cart: [...state.cart] });
+          persist({ ...state, cart });
           setCartOpen(true);
         }
       },
