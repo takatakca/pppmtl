@@ -47,6 +47,9 @@ export function ItemSheet({
     setNotes("");
     setAttempted(false);
     setSelections(defaultSelections(item?.modifierGroups ?? []));
+    // Switching from a suggested dish to another must start at the main
+    // product choice, not retain the previous sheet's extras scroll position.
+    optionScroller.current?.scrollTo({ top: 0, behavior: "auto" });
   }, [item?.id, item?.modifierGroups]);
 
   useEffect(() => {
