@@ -52,3 +52,23 @@ After the initial source pass, a further runtime trust-boundary audit found that
 - **No live payment was activated.** App config, merchant tokens, production database and physical mobile-browser verification remain separate release gates. The current publicly running Coolify revision was not accessible through available HTTP/DNS tools.
 - On resumption, read latest main SHA and current GitHub Actions (later docs commits generate new runs). Next action: verify native Coolify deployed SHA/health and run mobile cart-item, category-switching and modal QA. Then verify live Clover group constraints and the deferred durable database/TAKATAK scope work.
 
+
+## Third pass on 2026-10-28 — guest-facing saved-cart recovery and accessible dialogs
+
+**Start:** Agent GPT-6 read latest `main`, CI, issues, open PRs, `AGENTS.md`, `WORKLOG.md` and latest handoff; no open PR. GitHub `main` was `f02b614beaa0a861aaf18ca6f3e9369abfd1d156` with CI `40645720067` success. Claimed follow-up in `WORKLOG.md` before source changes at `e1ab1f65c46b577e1e4613528c3928f43275dcdc`.
+
+**Confirmed source gaps:** Last pass intentionally rejected obsolete saved cart lines but showed guests no explanation. It also lacked true Tab/Shift-Tab focus confinement in the cart and item dialogs. `ItemSheet` used effect dependencies `[item,onClose]`; switching related dishes could restore focus behind the still-open dialog when the callback or item identity changed.
+
+**Committed fixes (all `main`):**
+- `src/lib/cart.ts` `5fe6009`, format `d54e746`: new pure `reconcileSavedCart` takes historical localStorage as untrusted input, keeps valid lines with Clover-preserved identifiers/options, re-prices from the current published menu, counts removed lines and updated selections/prices, rejects malformed items/quantity/choice objects, handles duplicate/missing line ids. Does not fabricate mandatory choices.
+- `src/context/ppp-store.tsx` `565bea3`: actual saved-cart restore uses reconciliation, records counts, saves sanitized browser cart once to avoid repeated warnings on refresh, shows dismissible accessible French/English/Spanish recovery notice with a direct Review my cart button. The notice is informational; it does not activate checkout.
+- `src/lib/integration/__tests__/clover.test.ts` `2ead295`, format `b8287ad`: tests using existing real pita groups for unchanged valid cart, changed price/optional obsolete choice, missing required options, invalid store/quantity/item, and malformed JSON. Existing exact-price/required-group tests preserved.
+- `src/lib/use-dialog-keyboard.ts` `5270f21`, format `297c0f9`: shared modal keyboard handling with stable callback ref. Locks page scrolling while open, focuses close control on opening, keeps Tab/Shift-Tab within dialog, closes on Escape, restores focus after closure without re-running on every product swap.
+- `src/components/order/item-sheet.tsx` `19a87c5`: uses stable hook and dialog ref; product swaps no longer restart focus restoration.
+- `src/components/order/cart-panel.tsx` `4535e28`: same modal keyboard behavior, including return focus to former page control and keyboard trap.
+
+**Actual CI:** [GitHub PPPMTL CI 40646740316](https://github.com/takatakca/pppmtl/actions/runs/40646740316) on exact tested source commit **`297c0f9e2d4a657228638f90d7a0f5c5546acdd3`**: `completed / success`, both CI jobs green. Verified successful Nitro Node build, TypeScript check, Prettier/ESLint, Vitest tests, PostgreSQL 16 migrations and SQL tenant RLS/atomic-payment/worker-leasing tests. Intermediate `40646523247`, `40646636818` source runs failed on Prettier formatting errors which were corrected; cancelled queued runs are not test evidence.
+
+**Unverified and pending:** No real mobile-browser keyboard/touch test, and no independently confirmed current Coolify running SHA or live Clover API inventory/merchant tokens. `https://pppmtl.com/menu` remained inaccessible to the web fetch tool; connected Browser tab listing returned `Browser access requires the originating browser context`. This does not establish public downtime. Need actual Android/iOS Safari/Chrome test of focus containment, restored cart notice, modals and Desserts swipe; verify current Coolify SHA and `/healthz`; then follow durable production database, TAKATAK tenant scope and verified Clover/webhook/worker requirements from #5/#6/#13. **Real payments remain fail-closed**.
+
+**Next incremental improvement:** Replace simplistic recovery plural placeholders with grammatically exact copy if desired, and test actual screen-reader announcement timing and overlays. Do not change approved Canva imagery (#18) or past Clover ID/pricing maps without real merchant evidence.
