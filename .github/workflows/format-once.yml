@@ -1,12 +1,21 @@
 name: PPPMTL One-Time Formatter
 
-# Manual repair only: GitHub-hosted runners on 2026-10-15 did not start.
-# Do not run concurrently with an agent pushing source changes.
+# A targeted, one-shot source formatting repair for 2026-10-28. The push
+# trigger matches ONLY this workflow file, preventing a bot push loop.
+# Future changes elsewhere do not dispatch formatting automatically.
 on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/format-once.yml
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: pppmtl-onetime-format
+  cancel-in-progress: false
 
 jobs:
   format:
@@ -20,51 +29,29 @@ jobs:
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
-      - name: Normalize project security and order changes
+      - name: Format only the files reported by CI Prettier
         shell: bash
         run: |
           set -euo pipefail
-          bunx prettier --write \
-            src/lib/orders/__tests__/order-engine.test.ts \
-            src/lib/orders/order-service.ts \
-            src/lib/orders/orders.functions.ts \
-            src/lib/orders/validation.ts \
-            src/lib/security/admin.server.ts \
-            src/lib/security/admin.functions.ts \
-            src/lib/security/order-access.server.ts \
-            src/lib/security/__tests__/access.test.ts \
-            src/routes/admin.sign-in.tsx \
-            src/routes/admin.orders.tsx \
-            src/routes/admin.integrations.tsx \
-            src/lib/integration/providers/clover/checkout.ts \
-            src/lib/integration/providers/clover/config.server.ts \
-            src/lib/integration/__tests__/clover-readiness.test.ts \
-            src/lib/orders/order-store.server.ts \
-            src/lib/security/guest-identity.ts \
-            src/lib/security/__tests__/guest-identity.test.ts
+          files=(
+            scripts/check-sql-migrations.mjs
+            src/components/order/item-sheet.tsx
+            src/lib/integration/__tests__/clover.test.ts
+            src/lib/integration/providers/clover/site-groups.ts
+            src/lib/orders/__tests__/clover-fulfillment-worker.test.ts
+            src/lib/orders/__tests__/postgres-transactions.test.ts
+            src/lib/orders/clover-fulfillment-worker.server.ts
+            src/lib/orders/postgres-transactions.server.ts
+            src/routes/menu.tsx
+          )
+          bunx prettier --write "${files[@]}"
           if git diff --quiet; then
-            echo "Files were already formatted."
+            echo "Targeted files already formatted."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            src/lib/orders/__tests__/order-engine.test.ts \
-            src/lib/orders/order-service.ts \
-            src/lib/orders/orders.functions.ts \
-            src/lib/orders/validation.ts \
-            src/lib/security/admin.server.ts \
-            src/lib/security/admin.functions.ts \
-            src/lib/security/order-access.server.ts \
-            src/lib/security/__tests__/access.test.ts \
-            src/routes/admin.sign-in.tsx \
-            src/routes/admin.orders.tsx \
-            src/routes/admin.integrations.tsx \
-            src/lib/integration/providers/clover/checkout.ts \
-            src/lib/integration/providers/clover/config.server.ts \
-            src/lib/integration/__tests__/clover-readiness.test.ts \
-            src/lib/orders/order-store.server.ts \
-            src/lib/security/guest-identity.ts \
-            src/lib/security/__tests__/guest-identity.test.ts
-          git commit -m "style(pppmtl): normalize security and order files with Prettier"
+          git add -- "${files[@]}"
+          git commit -m "style(pppmtl): format menu, Clover and order files flagged by CI"
+          # Never force-push or overwrite other agents' commits.
           git push origin HEAD:main
