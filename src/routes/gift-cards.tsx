@@ -10,6 +10,7 @@ import { OrderSheet } from "@/components/layout/order-sheet";
 import { usePPP } from "@/context/ppp-store";
 import { pppBusiness } from "@/config/business";
 import { canonicalUrl } from "@/config/site";
+import { PPPLogo } from "@/components/brand/ppp-logo";
 
 export const Route = createFileRoute("/gift-cards")({
   head: () => ({
@@ -18,12 +19,12 @@ export const Route = createFileRoute("/gift-cards")({
       {
         name: "description",
         content:
-          "Send a PPP Pizzeria NDG gift card by email or pick one up in store at 6280 Av. Somerled. Chicken, pizza and poutine for someone who deserves it.",
+          "Preview PPP Pizzeria NDG gift cards. Online checkout is not yet available; contact the restaurant to confirm current purchase and redemption options.",
       },
       { property: "og:title", content: "PPP Gift Cards | NDG Montréal" },
       {
         property: "og:description",
-        content: "Digital or in-store gift cards from PPP Pizzeria Notre-Dame-de-Grâce.",
+        content: "PPP Pizzeria gift-card preview and restaurant purchase information.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -61,8 +62,8 @@ function GiftCards() {
             </h1>
             <p className="mt-3 max-w-xl text-sm text-muted-foreground">
               {t(
-                "Chicken, pizza, poutine, shawarma — one card, every category on the PPP NDG menu.",
-                "Poulet, pizza, poutine, shawarma — une carte, toutes les catégories du menu PPP NDG.",
+                "Discover PPP Pizzeria gift cards. Online purchase and delivery are not active yet; ask our team about current options.",
+                "Découvrez les cartes-cadeaux PPP Pizzeria. L’achat et l’envoi en ligne ne sont pas encore actifs; renseignez-vous auprès de notre équipe.",
               )}
             </p>
           </div>
@@ -78,11 +79,9 @@ function GiftCards() {
               />
               <div className="relative flex h-full flex-col justify-between p-5 sm:p-8">
                 <div className="flex items-center gap-2">
-                  <span className="bg-primary px-2 py-1 font-display text-xl leading-none text-primary-foreground">
-                    PPP
-                  </span>
+                  <PPPLogo variant="account" className="h-12" />
                   <span className="font-display text-xl uppercase leading-none tracking-wide">
-                    NDG MTL
+                    PPP Pizzeria
                   </span>
                 </div>
                 <div>
@@ -103,18 +102,18 @@ function GiftCards() {
               {[
                 {
                   Icon: Mail,
-                  title: t("Emailed instantly", "Envoyée par courriel"),
-                  body: t("Delivered the moment you send it.", "Livrée dès l'envoi."),
+                  title: t("Digital delivery pending", "Envoi numérique à venir"),
+                  body: t("No card is sent from this preview.", "Aucune carte n'est envoyée depuis cet aperçu."),
                 },
                 {
                   Icon: Store,
-                  title: t("Works in store", "Valide en restaurant"),
-                  body: t("Pickup, delivery or dine-in.", "Cueillette, livraison ou sur place."),
+                  title: t("Ask the restaurant", "Informez-vous au restaurant"),
+                  body: t("Confirm purchase and redemption with our team.", "Confirmez l'achat et l'utilisation avec notre équipe."),
                 },
                 {
                   Icon: Check,
-                  title: t("Never expires", "Sans expiration"),
-                  body: t("Balance stays on the card.", "Le solde reste sur la carte."),
+                  title: t("Check card terms", "Vérifiez les conditions"),
+                  body: t("Ask about validity and remaining balance.", "Renseignez-vous sur la validité et le solde."),
                 },
               ].map((f) => (
                 <li key={f.title} className="border border-border bg-card p-3">
@@ -126,12 +125,18 @@ function GiftCards() {
             </ul>
           </div>
 
-          {/* Purchase form (frontend prototype) */}
+          {/* Non-transactional gift-card preview. No card is issued or charged here. */}
           <div className="min-w-0 border border-border bg-card p-4 sm:p-6">
             <h2 className="font-display text-2xl uppercase leading-none">
-              {t("Send a gift card", "Envoyer une carte-cadeau")}
+              {t("Preview a gift card", "Aperçu d’une carte-cadeau")}
             </h2>
 
+            <p role="status" className="mt-3 border border-border bg-background p-3 text-sm text-muted-foreground">
+              {t(
+                "Preview only. No payment is collected and no gift card is sent. Please contact PPP to confirm available gift cards.",
+                "Aperçu seulement. Aucun paiement n’est perçu et aucune carte n’est envoyée. Communiquez avec PPP pour confirmer les cartes disponibles.",
+              )}
+            </p>
             <p className="mt-4 text-[0.65rem] font-bold uppercase tracking-[0.3em] text-muted-foreground">
               {t("Amount", "Montant")}
             </p>
@@ -206,7 +211,7 @@ function GiftCards() {
               className="mt-5 w-full bg-primary py-3.5 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp disabled:opacity-50"
               style={{ boxShadow: "var(--shadow-glow)" }}
             >
-              {t(`Continue · $${value.toFixed(2)}`, `Continuer · ${value.toFixed(2)} $`)}
+              {t("How to buy · call PPP", "Comment acheter · appeler PPP")}
             </button>
 
             {sent && (
