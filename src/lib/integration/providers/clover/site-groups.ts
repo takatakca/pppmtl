@@ -13,20 +13,30 @@ import { displayGroupName, displayName, groupNameEn, type CloverInventory } from
 const SUGGESTED = /sugg/i;
 
 /**
- * Preparation order inside a requirement tier, read off the cleaned customer label:
- * the dish choice / format first, then what comes included with the dish (fries, salad,
- * toppings, condiments), the included sauce, the included breuvage, and only then the
- * paid extras (meat, cheese, sauce, breuvage) and the trio / combo add-ons.
+ * Display sequence for the restaurant preparation flow, regardless of the
+ * order Clover exposes modifier groups. NEVER mutate ids, prices, min/max or
+ * choice order: these remain authoritative from the live Clover inventory.
+ *
+ * 0 = base dish / required product choice, 1 = sauces, 2 = garnishes and
+ * vegetables, 3 = drinks, 4 = trio upgrades, 5 = combos, 6 = paid extras.
+ * Unknown group names stay at the end in their original Clover order.
  */
-function prepRank(labelFr: string): number {
-  const s = labelFr.toLowerCase();
-  if (/^(choix|format|grandeur|nombre|assiette ou duo)/.test(s)) return 0;
-  if (/^\d/.test(s)) return 1; // included quantities: "2 frites", "6 ailes de poulet"
-  if (/inclus/.test(s) && !/^sauce/.test(s) && !/^boisson/.test(s)) return 1;
-  if (/^sauce/.test(s) && /inclus/.test(s)) return 2;
-  if (/^boisson/.test(s) && /inclus/.test(s)) return 3;
-  if (/extra|ajout|^(trio|combo)\b/.test(s)) return 4;
-  return 5;
+export function preparationRank(labelFr: string): number {
+  const label = labelFr
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+  // 'Extra sauces' and 'Boisson extra' are extras, not included choices.
+  if (/\b(extra|extras|supplement|supplements|ajout|ajouts)\b/.test(label)) return 6;
+  if (/^(en )?trio\b|\boption trio\b/.test(label)) return 4;
+  if (/^(en )?combo\b|\boption combo\b/.test(label)) return 5;
+  if (/sauce|vinaigrette|trempette|coulis/.test(label)) return 1;
+  if (/garniture|legume|salade|condiment|crudite|accompagnement|frite/.test(label)) return 2;
+  if (/boisson|breuvage|liqueur|jus|canette|drink/.test(label)) return 3;
+  if (/^\d+/.test(label)) return 0;
+  if (/^(choix|format|grandeur|taille|nombre|type|cuisson|pain|pate|assiette|portion)/.test(label)) return 0;
+  return 7;
 }
 
 /**
@@ -62,7 +72,7 @@ export function siteGroupsFor(inventory: CloverInventory, cloverItemId: string):
     .map((g, i) => ({ g, i }))
     .sort(
       (a, b) =>
-        tier(a.g) - tier(b.g) || prepRank(a.g.labelFr) - prepRank(b.g.labelFr) || a.i - b.i,
+        tier(a.g) - tier(b.g) || preparationRank(a.g.labelFr) - preparationRank(b.g.labelFr) || a.i - b.i,
     )
     .map(({ g }) => g);
 }
