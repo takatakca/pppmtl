@@ -1,6 +1,10 @@
 import { createHmac } from "node:crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { validateAdminCredential, verifyAdminSession } from "../admin.server";
+import {
+  isReasonableAdminCredential,
+  validateAdminCredential,
+  verifyAdminSession,
+} from "../admin.server";
 import { verifyOrderGrant } from "../order-access.server";
 
 const signing = "signing-secret-at-least-32-characters-for-tests";
@@ -32,6 +36,17 @@ describe("temporary administrator authorization", () => {
     expect(validateAdminCredential("access-token-is-long-enough-for-local-testx")).toBe(false);
     vi.stubEnv("PPP_ADMIN_SESSION_SECRET", "access-token-is-long-enough-for-local-tests");
     expect(validateAdminCredential("access-token-is-long-enough-for-local-tests")).toBe(false);
+  });
+
+  it("rejects malformed and oversized bootstrap credentials before comparison", () => {
+    expect(isReasonableAdminCredential(null)).toBe(false);
+    expect(isReasonableAdminCredential({ credential: "x" })).toBe(false);
+    expect(isReasonableAdminCredential("")).toBe(false);
+    expect(isReasonableAdminCredential("x".repeat(1025))).toBe(false);
+    expect(isReasonableAdminCredential("x".repeat(1024))).toBe(true);
+    vi.stubEnv("PPP_ADMIN_ACCESS_TOKEN", "access-token-is-long-enough-for-local-tests");
+    vi.stubEnv("PPP_ADMIN_SESSION_SECRET", "session-token-is-long-enough-for-local-tests");
+    expect(validateAdminCredential("x".repeat(1025))).toBe(false);
   });
 
   it("accepts valid session and rejects expired, future-dated, tampered or foreign cookies", () => {
