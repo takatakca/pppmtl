@@ -249,9 +249,9 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
             <Gift className="h-8 w-8 shrink-0 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
               {t(
-                "Buy, send and redeem PPP gift cards.",
-                "Achetez, offrez et utilisez des cartes PPP.",
-                "Compra, envía y usa tarjetas de regalo PPP.",
+                "Gift-card purchases are not available online yet. Contact the restaurant for current options.",
+                "L’achat des cartes-cadeaux en ligne n’est pas encore disponible. Communiquez avec le restaurant pour connaître les options.",
+                "La compra de tarjetas de regalo en línea aún no está disponible. Contacta al restaurante para conocer las opciones.",
               )}
             </p>
           </div>
