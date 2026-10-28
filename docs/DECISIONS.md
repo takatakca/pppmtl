@@ -75,3 +75,13 @@ See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.m
 | Keep Clover kitchen worker as opt-in trusted server batch until identity/DB provisioning | An unauthenticated timer or endpoint could process other tenants' paid orders | Worker code and mock tests pushed; **no cron/endpoint deployed** |
 | Require order/session/payment correlation before provider-side title or print | A valid merchant payment is not proof the session belongs to this PPP checkout | `readPaidOrder` checks tenant-bound persisted paid order, checkout session, outbox payment reference; mock coverage committed |
 | Never assume a provider print timeout means no physical ticket | Prevent duplicate kitchen tickets | Worker consults provider printed status, and ambiguity goes to FAILED/manual review; actual provider integration not live-tested |
+
+## 2026-10-28 — owner instructions and multi-agent work
+
+| Decision | Rationale | Effect |
+|---|---|---|
+| Keep one vertical menu page, but fix sticky category navigation and avoid `scrollIntoView` scrolling the document | Owner reported « Desserts » lag/swipe; fixes in `b927e59f8`, `b88ec0f62`, `747cb837c` | Keep simplified PR #12 grid; verify on real mobile devices and latest deployed SHA |
+| Sort **existing** Clover modifier groups by kitchen flow | Owner: base-required product → sauce → vegetables/garnish → drink → trio → combo → extras, when actually present | `a9389f835` and `c88097721`; never edit Clover IDs/min/max/prices or invent options; test real items and provider parity |
+| GitHub notes first, Drive second on each agent session | Prevent duplicate/overwriting work when multiple agents commit simultaneously | Claim WORKLOG active at start; append handoff and canonical docs before stopping, mirror substantive decisions under PPP project in Google Drive |
+| Preserve approved finished yellow Canva product images | Owner decision logged in #18 | Do not replace with plain raw photo or unapproved AI/Canva variants |
+| Treat prepared Clover merchant keys and production activation as distinct | Central Drive journal describes secure credentials but no confirmed deployment of them to Coolify | Never copy secrets to docs; keep real payment blocked until tenant DB + webhook/outbox + end-to-end tests |
