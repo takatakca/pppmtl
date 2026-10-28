@@ -104,3 +104,11 @@ The codebase now contains `processPppCloverFulfillmentBatch(pool, verifiedServer
 - GitHub Actions runner allocation now works; latest inspected initial CI run `40364935041` failed at Prettier and Node test fixture, NOT runner provisioning. Don't skip required build/test gate.
 - Clover credentials may exist in secure merchant administration per TAKATAK central journal but were not confirmed set in Coolify; no `DATABASE_URL` validated. Production card checkout must remain disabled until #5/#6 end-to-end verified.
 - Project documentation mirrored into Drive at https://docs.google.com/document/d/1M9aEd9S-IN-oH_ZcMB5i5cCFgd5Q2CFCXzACnQxP83k/edit, GitHub source note `docs/agent-notes/2026-10-28-menu-clover-audit.md`.
+
+## 2026-10-28 — CI green, live release evidence still outstanding
+
+**Verification for code commit `23043b539acdea63385d56bb3da6d31b2959c96e`:** GitHub Actions `PPPMTL CI` run [40639386985](https://github.com/takatakca/pppmtl/actions/runs/40639386985) concluded `success`. Its Node quality and PostgreSQL schema/atomic-payment/worker-leasing jobs both completed successfully.
+
+The repository still has native Coolify GitHub-App auto-deploy as the historically verified production mechanism, not the opt-in Actions fallback. **No deployment event/actual running revision was read from Coolify on this date.** Public `/menu`/`/healthz` could not be reached with the connected verification tools. Therefore `23043b5` is CI-validated source, **not verified customer-visible production**. Verify exact SHA/health with authorized Coolify access, and test the reported mobile Desserts/menu interactions before treating UX bug as closed.
+
+No Clover production checkout may be enabled solely because the SQL staging CI passes: server durable order adapter, scoped identity, configured merchant secrets, production DB/migrations, retries, order title/print and refund/reconciliation remain subject to #5/#6/#13.
