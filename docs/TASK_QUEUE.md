@@ -105,3 +105,11 @@ The opt-in `processPppCloverFulfillmentBatch` worker and mocked tests have been 
 - **Source complete (CI GREEN 40646740316 at `297c0f9`):** customer notice for restored cart removals/updated items, safe cart reconciliation/pricing tests, and keyboard focus trap for cart/customizer with Escape and focus restoration. Read [dated technical audit](agent-notes/2026-10-28-cart-reliability-audit.md).
 - **P1 remain:** verify mobile/desktop keyboard, screen reader, swipe/scroll and recovery-notice behavior on actual public build; inspect native Coolify running SHA + `/healthz` instead of assuming CI is a deployment; confirm live Clover inventory choices and prices.
 - **P0 remains #5/#6/#13:** durable production DB, scoped TAKATAK authorization, signed Clover webhook and outbox/print/replay safety, controlled real payment/refund. Leave checkout fail-closed pending actual integration evidence.
+
+## 2026-10-28 — Evening go/no-go order
+
+1. **Done in source, tested:** sold-out and cross-restaurant products can no longer escape validation because of an already-filtered menu map; Clover DELIVERY is refused before order creation. Input length guards and regression tests passed full CI `40648225513` at `eff248a211`. Admin malformed-login guard added afterward; verify current full CI.
+2. **First external check required now:** inspect authorized native Coolify application `r13hz1mmbi4eeoc6ssxbvxnv` running SHA/container deployment log and `https://pppmtl.com/healthz`. GitHub Actions deployment fallback is intentionally skipped; do not turn it on beside native Coolify. A cached home page does not confirm the running commit.
+3. **Then:** real Android/iOS and desktop smoke (Desserts swipe, required Clover options, cross-sell, cart saved-state warning, keyboard focus trap, no asset 404, checkout fail-closed).
+4. **Payment release NO-GO until #5/#6/#13:** actual tenant-authorized PostgreSQL, applied migrations and backup/restore, order persistence before redirect, signed merchant-verified webhooks, durable inbox/outbox/worker, printer reconciliation and controlled refund test. No replacement of `ordersPersistAcrossRestarts=false` without wiring and proving all of these.
+5. [Detailed source and production checklist](agent-notes/2026-10-28-release-security-gate.md).

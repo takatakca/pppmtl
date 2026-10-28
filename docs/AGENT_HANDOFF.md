@@ -1,6 +1,21 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
 
+## EVENING RELEASE SECURITY HANDOFF — 2026-10-28
+
+**Start-of-work evidence:** initial `main` `280b916763c2a5e935d5687bae6557722aeb167f`, CI `40647117549` SUCCESS, no open PR; read AGENTS/WORKLOG + latest canonical docs and open issues. New task claimed in `WORKLOG.md` **before code**, commit `b21fb002b82458f3c7b22aeb591e63eda1d6fc49`. Preserve prior menu, official Canva imagery and historical Lovable commits. No force-push.
+
+**New fixes:** `src/lib/orders/order-service.ts` commit `59613ab` fixes critical *filtered availability map* gap: server rejects sold-out and wrong-location item before creation, refuses unsupported Clover delivery early, and bounds untrusted checkout fields. `src/lib/orders/__tests__/order-engine.test.ts` `1044e4c`, formatter `eff248a`; `src/lib/integration/__tests__/clover.test.ts` `00b2011` updates the delivery rejection expectation but retains forged webhook coverage. **Full CI [40648225513](https://github.com/takatakca/pppmtl/actions/runs/40648225513) SUCCESS for code SHA `eff248a211680e96b0879e455bdadc219e963202`** (build, TypeScript, lint, Vitest, PostgreSQL 16 RLS/payments/worker). `src/lib/security/admin.server.ts` `77555eb` and formatter `28fbf21`, `src/lib/security/admin.functions.ts` `8ce7481`, `src/lib/security/__tests__/access.test.ts` `2ea9781` add runtime malformed/oversized temporary admin credential rejection; inspect CI of newest HEAD before claiming this addition green. Source/security documentation: [`docs/agent-notes/2026-10-28-release-security-gate.md`](agent-notes/2026-10-28-release-security-gate.md), created `1942c4f`, appended `60fe399`.
+
+**Deployment status:** HISTORICAL Coolify main native auto-deploy to app `pppmtl` UUID `r13hz1mmbi4eeoc6ssxbvxnv`, last documented live SHA `48c00a4` from 26 Oct. No direct 28 Oct authorized Coolify console, running SHA, or live HTTPS/mobile browser proof. `pppmtl.com` homepage appears in a cached web crawl, but direct `/healthz` and `/menu` fetch and container DNS failed; Browser connector requires original browser session. **Do not claim this code deployed**. GitHub Actions Coolify workflow skipped by design; leave native vs Actions split unchanged.
+
+**Paying customers: NO-GO.** Production order store remains an in-memory ring with `ordersPersistAcrossRestarts=false`. Source contains PgSQL 0001–0003 / injected adapters and worker, tested only on ephemeral CI Postgres, not actual production. Missing connected approved DB + backups + least-privilege role, verified server TAKATAK tenant permissions, signed correlated Clover merchant webhook durable inbox, workers/print/retry/manual-review and controlled payment/refund tests. Keep #5/#6/#13 open and payment fail-closed. No secrets, live customer transactions or production environment settings were changed.
+
+**Next exact action for evening release:** fetch current `main` and Actions job results, inspect actual Coolify deployed SHA and HTTPS health with authorized console; real mobile/desktop smoke category Desserts, cart, choices and fail-closed checkout. Only after these checks mark storefront deploy done; obtain approved DB/Clover/tenant integrations and failure-injection before switching payment. Do not duplicate Google Drive docs; append evidence to existing project and central live journal.
+
+---
+
+
 ## LATEST HANDOFF — 2026-10-28 — Saved-cart transparency and keyboard dialogs (third pass)
 
 **Source of truth:** `takatakca/pppmtl`, `main`. Source CI and chronological notes supersede historical paragraphs below. Started from `f02b614beaa0a861aaf18ca6f3e9369abfd1d156` with successful CI `40645720067`, no open PR; read `AGENTS.md`, `WORKLOG.md`, newest handoff, issues and CI. Claimed task BEFORE source changes in WORKLOG at `e1ab1f65c46b577e1e4613528c3928f43275dcdc`. Preserve prior agents' menu/Clover fixes and official yellow Canva images (#18).

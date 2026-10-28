@@ -117,3 +117,12 @@ See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.m
 | Inform guests when restoring old cart alters or removes saved lines | Silently dropping invalid options/products is safe but confusing | Pure `reconcileSavedCart` preserves valid Clover prices/choices, reports removed/updated counts, and client shows dismissible FR/EN/ES notice and Review cart action; no fabricated required choice. |
 | Keep focus in a product/cart dialog until dismissed | Tab could escape behind a visually modal panel; changing related products could reset focus outside | Shared hook handles Tab/Shift-Tab, Escape, background scroll and previous-focus restoration on close. Source CI `40646740316` green; real device/screen-reader behavior remains to verify. |
 | Do not conflate successful CI with live Coolify deployment or card payments | Source is testable but server secrets and durable order integration are unverified | Payments remain disabled; first verify running Coolify SHA/health and requirements #5/#6/#13 before production launch. |
+
+## 2026-10-28 — New production safety decisions
+
+| Decision | Evidence | Launch consequence |
+|---|---|---|
+| Reject unavailable/out-of-store products **server-side**, not only in browser UI | `menuRepository.getItems(locationId)` filters such products away, so a map built from it did not carry `false` entries; fixed `buildItems` and added regression tests (`eff248a`, CI `40648225513` success). | No order or checkout session from a sold-out or cross-location line; preserve the authentic item/store mapping and published prices. |
+| Reject unsupported Clover DELIVERY before creating an order | Clover Hosted Checkout integration is documented as pickup-only; a prior integration test expected late refusal but now expects safer pre-creation refusal. | Clear error with no erroneous temporary order/guest grant. |
+| Reject abnormally long untrusted checkout/admin sign-in fields before data processing | Typed input validators alone do not validate runtime JSON. | Length/shape gates, test coverage, and no new secrets or rate-limit bypass; full tenant-specific auth and trusted edge rate limiting remain open #5. |
+| Separate storefront release approval from production card payment approval | Source CI proves Node/PostgreSQL test suite; production durable DB/runtime/Clover keys/worker and exact Coolify running image remain unverified. | **Storefront: pending exact SHA + mobile smoke. Paid Clover checkout: NO-GO** until all #5/#6/#13 prerequisites are demonstrated. |
