@@ -103,3 +103,9 @@ See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.m
 | Preserve immutable React cart state and enforce Clover's 50 unit cap | Mutating `state.cart` can break reactive updates and cart limit mismatch creates checkout errors | Reorders copy array; cart quantity control stops at 50, server continues its own independent gate. |
 | Keep item/cart dialogs from causing unwanted mobile background scroll | The owner reported swipe/jump and hidden main item when moving from extras to another product | Lock background overflow when dialog shown, contain sheet scroll, reset next item's scroll to top, maintain Escape and focus restoration; full device/keyboard QA still required. |
 | Treat `40644711329` as CI proof only | Source checks passed but no live Coolify revision or real devices were inspected | Payment remains blocked until verified DB, tenant identity, provider/HMAC and operational recovery; see `docs/agent-notes/2026-10-28-cart-reliability-audit.md`. |
+
+### 2026-10-28 — Untrusted browser checkout JSON
+
+| Decision | Rationale | Consequence |
+|---|---|---|
+| Reject malformed checkout requests **before** guest identity sanitizer or order creation | TypeScript and generic `inputValidator` do not check runtime JSON shape; missing customer/lines could previously raise a 500 | `hasCheckoutPayloadShape` and `validateOrder` reject invalid values/oversized line lists with a safe `menu_changed` error; `placeOrder` validates before sanitizing guest identity; CI [40645275982](https://github.com/takatakca/pppmtl/actions/runs/40645275982) green at `db58af73`. Keep real Clover/DB/identity release gates unchanged. |
