@@ -35,7 +35,8 @@ export function preparationRank(labelFr: string): number {
   if (/garniture|legume|salade|condiment|crudite|accompagnement|frite/.test(label)) return 2;
   if (/boisson|breuvage|liqueur|jus|canette|drink/.test(label)) return 3;
   if (/^\d+/.test(label)) return 0;
-  if (/^(choix|format|grandeur|taille|nombre|type|cuisson|pain|pate|assiette|portion)/.test(label)) return 0;
+  if (/^(choix|format|grandeur|taille|nombre|type|cuisson|pain|pate|assiette|portion)/.test(label))
+    return 0;
   return 7;
 }
 
@@ -72,7 +73,9 @@ export function siteGroupsFor(inventory: CloverInventory, cloverItemId: string):
     .map((g, i) => ({ g, i }))
     .sort(
       (a, b) =>
-        tier(a.g) - tier(b.g) || preparationRank(a.g.labelFr) - preparationRank(b.g.labelFr) || a.i - b.i,
+        tier(a.g) - tier(b.g) ||
+        preparationRank(a.g.labelFr) - preparationRank(b.g.labelFr) ||
+        a.i - b.i,
     )
     .map(({ g }) => g);
 }

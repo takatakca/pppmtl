@@ -89,7 +89,11 @@ function dbFixture(
     },
     release() {},
   };
-  const pool: PppSqlPool = { async connect() { return client; } };
+  const pool: PppSqlPool = {
+    async connect() {
+      return client;
+    },
+  };
   return { pool, queries };
 }
 

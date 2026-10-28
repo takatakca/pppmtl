@@ -59,8 +59,8 @@ function MenuPage() {
     let frame = 0;
     const sync = () => {
       frame = 0;
-      const offset = (window.innerWidth >= 1024 ? 96 : 56) +
-        (navRef.current?.offsetHeight ?? 44) + 16;
+      const offset =
+        (window.innerWidth >= 1024 ? 96 : 56) + (navRef.current?.offsetHeight ?? 44) + 16;
       let current = sections[0]!.id;
       for (const section of sections) {
         if (section.getBoundingClientRect().top <= offset) current = section.id;
@@ -86,11 +86,15 @@ function MenuPage() {
   // reported unexpected swipe/jump when choosing a distant category.
   useEffect(() => {
     const nav = navRef.current;
-    const chip = Array.from(nav?.querySelectorAll<HTMLElement>("[data-chip]") ?? [])
-      .find((element) => element.dataset["chip"] === activeCat);
+    const chip = Array.from(nav?.querySelectorAll<HTMLElement>("[data-chip]") ?? []).find(
+      (element) => element.dataset["chip"] === activeCat,
+    );
     if (!nav || !chip) return;
-    const dx = chip.getBoundingClientRect().left - nav.getBoundingClientRect().left +
-      chip.clientWidth / 2 - nav.clientWidth / 2;
+    const dx =
+      chip.getBoundingClientRect().left -
+      nav.getBoundingClientRect().left +
+      chip.clientWidth / 2 -
+      nav.clientWidth / 2;
     nav.scrollTo({ left: nav.scrollLeft + dx, behavior: "auto" });
   }, [activeCat]);
 
@@ -99,8 +103,8 @@ function MenuPage() {
       document.querySelectorAll<HTMLElement>("[data-rail-root] section[id]"),
     ).find((element) => element.id === categoryId);
     if (!section) return;
-    const offset = (window.innerWidth >= 1024 ? 96 : 56) +
-      (navRef.current?.offsetHeight ?? 44) + 16;
+    const offset =
+      (window.innerWidth >= 1024 ? 96 : 56) + (navRef.current?.offsetHeight ?? 44) + 16;
     setActiveCat(categoryId);
     window.scrollTo({
       top: Math.max(0, window.scrollY + section.getBoundingClientRect().top - offset),
@@ -135,36 +139,35 @@ function MenuPage() {
               </button>
             </div>
           </div>
-
         </section>
 
         {/* Sticky navigation must be OUTSIDE the introductory section:
             otherwise position:sticky stops when that parent ends. */}
         <div
-            ref={navRef}
-            className="no-scrollbar sticky top-14 z-40 flex gap-1.5 overflow-x-auto border-t border-border bg-background/95 px-3 py-2 backdrop-blur-xl sm:px-6 lg:top-24"
-          >
-            {[
-              { id: "most-ordered", label: t("Most ordered", "Plus commandés") },
-              ...categories.map((c) => ({ id: c.id, label: localizedName(c, lang) })),
-            ].map((c) => (
-              <a
-                key={c.id}
-                href={`#${c.id}`}
-                onClick={(event) => {
-                  event.preventDefault();
-                  jumpToCategory(c.id);
-                }}
-                data-chip={c.id}
-                className={`shrink-0 whitespace-nowrap border px-3 py-1.5 font-display text-xs uppercase leading-none transition-colors focus-ppp ${
-                  activeCat === c.id
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {c.label}
-              </a>
-            ))}
+          ref={navRef}
+          className="no-scrollbar sticky top-14 z-40 flex gap-1.5 overflow-x-auto border-t border-border bg-background/95 px-3 py-2 backdrop-blur-xl sm:px-6 lg:top-24"
+        >
+          {[
+            { id: "most-ordered", label: t("Most ordered", "Plus commandés") },
+            ...categories.map((c) => ({ id: c.id, label: localizedName(c, lang) })),
+          ].map((c) => (
+            <a
+              key={c.id}
+              href={`#${c.id}`}
+              onClick={(event) => {
+                event.preventDefault();
+                jumpToCategory(c.id);
+              }}
+              data-chip={c.id}
+              className={`shrink-0 whitespace-nowrap border px-3 py-1.5 font-display text-xs uppercase leading-none transition-colors focus-ppp ${
+                activeCat === c.id
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {c.label}
+            </a>
+          ))}
         </div>
 
         <div data-rail-root>

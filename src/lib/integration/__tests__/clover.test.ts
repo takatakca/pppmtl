@@ -68,26 +68,36 @@ describe("Clover preparation sequence", () => {
       source: "test",
       generatedAt: "2026-10-28T00:00:00Z",
       categories: [{ id: "cat", name: "Menu", sortOrder: 0 }],
-      items: [{
-        id: "burger",
-        name: "Hamburger",
-        price: 1000,
-        description: null,
-        categoryIds: ["cat"],
-        modifierGroupIds: groupSpecs.map(([id]) => id),
-        available: true,
-      }],
+      items: [
+        {
+          id: "burger",
+          name: "Hamburger",
+          price: 1000,
+          description: null,
+          categoryIds: ["cat"],
+          modifierGroupIds: groupSpecs.map(([id]) => id),
+          available: true,
+        },
+      ],
       modifierGroups: groupSpecs.map(([id, name, min]) => ({
         id,
         name,
         min,
         max: 1,
-        modifiers: [{ id: `choice-${id}`, slug: `choice-${id}`, name: "Option", price: 125, available: true }],
+        modifiers: [
+          { id: `choice-${id}`, slug: `choice-${id}`, name: "Option", price: 125, available: true },
+        ],
       })),
     };
     const actual = siteGroupsFor(synthetic, "burger");
     expect(actual.map((g) => g.id)).toEqual([
-      "dish", "sauce", "vegetables", "drink", "trio", "combo", "extras",
+      "dish",
+      "sauce",
+      "vegetables",
+      "drink",
+      "trio",
+      "combo",
+      "extras",
     ]);
     expect(actual[0]).toMatchObject({ required: true, min: 1, max: 1 });
     expect(actual[6]?.choices[0]).toMatchObject({ id: "choice-extras", priceDelta: 1.25 });
@@ -609,9 +619,7 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
       data: "LIVE_UNTRACKED_SESSION",
     });
     const timestamp = Math.floor(Date.now() / 1000);
-    const digest = createHmac("sha256", "whsec_test")
-      .update(`${timestamp}.${raw}`)
-      .digest("hex");
+    const digest = createHmac("sha256", "whsec_test").update(`${timestamp}.${raw}`).digest("hex");
     const send = () =>
       handleCloverHostedCheckoutWebhook(
         new Request("https://pppmtl.com/api/public/webhooks/clover", {

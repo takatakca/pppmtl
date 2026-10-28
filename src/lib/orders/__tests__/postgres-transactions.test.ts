@@ -56,7 +56,11 @@ function fakeDb(rows: unknown[] = []) {
       released = true;
     },
   };
-  const pool: PppSqlPool = { async connect() { return client; } };
+  const pool: PppSqlPool = {
+    async connect() {
+      return client;
+    },
+  };
   return { pool, statements, isReleased: () => released };
 }
 
@@ -214,19 +218,23 @@ describe("PPPMTL PostgreSQL transaction boundary", () => {
 
   it("cannot enable a print intent for a failed title or with a fabricated lease token", async () => {
     const db = fakeDb();
-    await expect(finishFulfillmentWork(db.pool, "ppp_tenant", {
-      id: "5",
-      leaseToken: "a4a17b63-4b77-4a31-834e-4d771451b332",
-      success: false,
-      retryable: true,
-      enablePrint: true,
-    })).rejects.toThrow("Cannot queue print");
-    await expect(finishFulfillmentWork(db.pool, "ppp_tenant", {
-      id: "5",
-      leaseToken: "not-a-valid-token",
-      success: true,
-      retryable: false,
-    })).rejects.toThrow("Invalid fulfillment fencing token");
+    await expect(
+      finishFulfillmentWork(db.pool, "ppp_tenant", {
+        id: "5",
+        leaseToken: "a4a17b63-4b77-4a31-834e-4d771451b332",
+        success: false,
+        retryable: true,
+        enablePrint: true,
+      }),
+    ).rejects.toThrow("Cannot queue print");
+    await expect(
+      finishFulfillmentWork(db.pool, "ppp_tenant", {
+        id: "5",
+        leaseToken: "not-a-valid-token",
+        success: true,
+        retryable: false,
+      }),
+    ).rejects.toThrow("Invalid fulfillment fencing token");
     expect(db.statements).toEqual([]);
   });
 
@@ -236,5 +244,4 @@ describe("PPPMTL PostgreSQL transaction boundary", () => {
     expect(count).toBe(2);
     expect(db.statements[2]?.sql).toContain("ppp.quarantine_expired_prints");
   });
-
 });

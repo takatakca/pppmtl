@@ -26,10 +26,7 @@ import {
   websiteOrderNote,
   websiteOrderTitle,
 } from "@/lib/integration/providers/clover/checkout";
-import {
-  printWebOrders,
-  siteBaseUrl,
-} from "@/lib/integration/providers/clover/config.server";
+import { printWebOrders, siteBaseUrl } from "@/lib/integration/providers/clover/config.server";
 
 interface StoredOrderRow {
   order_document: InternalOrder;

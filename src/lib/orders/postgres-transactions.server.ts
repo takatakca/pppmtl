@@ -123,11 +123,7 @@ export async function attachCloverCheckoutSession(
   paymentUrl: string,
 ): Promise<InternalOrder> {
   const url = new URL(paymentUrl);
-  if (
-    url.protocol !== "https:" ||
-    !/(^|\.)clover\.com$/.test(url.hostname) ||
-    !sessionId.trim()
-  ) {
+  if (url.protocol !== "https:" || !/(^|\.)clover\.com$/.test(url.hostname) || !sessionId.trim()) {
     throw new Error("Refusing an untrusted Clover checkout destination");
   }
   return withPppTenantTransaction(pool, verifiedServerTenantId, async (client) => {
@@ -259,9 +255,11 @@ export async function finishFulfillmentWork(
   verifiedServerTenantId: string,
   outcome: FulfillmentOutcome,
 ): Promise<"DONE" | "RETRY" | "FAILED"> {
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-    outcome.leaseToken,
-  )) {
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      outcome.leaseToken,
+    )
+  ) {
     throw new Error("Invalid fulfillment fencing token");
   }
   if (outcome.enablePrint && !outcome.success) {

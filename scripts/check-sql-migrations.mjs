@@ -37,7 +37,9 @@ export function migrationStructuralErrors(sql, filename = "migration") {
 }
 
 export function checkMigrations(directory) {
-  const names = readdirSync(directory).filter((name) => /^\d+_.+\.sql$/.test(name)).sort();
+  const names = readdirSync(directory)
+    .filter((name) => /^\d+_.+\.sql$/.test(name))
+    .sort();
   if (!names.length) return ["No numbered migrations found"];
   return names.flatMap((name) =>
     migrationStructuralErrors(readFileSync(resolve(directory, name), "utf8"), name),
