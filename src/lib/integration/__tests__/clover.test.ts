@@ -654,8 +654,8 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
     expect(printed).toBe(1);
   });
 
-  it("refuses delivery through Clover (pickup only) and a forged webhook", async () => {
-    const { createOrder, submitOrder } = await import("@/lib/orders/order-service");
+  it("refuses delivery through Clover (pickup only) before creating an order, and a forged webhook", async () => {
+    const { createOrder } = await import("@/lib/orders/order-service");
     const created = createOrder({
       locationId: "loc-ndg-somerled",
       orderType: "DELIVERY",
@@ -671,9 +671,7 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
       deliveryAddress: "1 rue Test",
       notes: "",
     });
-    if (!created.ok) throw new Error("not created");
-    const submitted = await submitOrder(created.data.id);
-    expect(submitted).toMatchObject({ ok: false, error: { code: "unsupported_order_type" } });
+    expect(created).toMatchObject({ ok: false, error: { code: "unsupported_order_type" } });
 
     const { handleCloverHostedCheckoutWebhook } =
       await import("@/lib/integration/providers/clover/webhook");
