@@ -1,5 +1,20 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-10-28 ~19:55 EDT — RELAIS TAK TAK / franchise copy / PR #19 (DRAFT)
+
+**Owner request:** Continue safe PPP franchise-level UX/brand cleanup and delegate native Coolify validation to the server-capable agent **Tak Tak**. The handoff ticket is [issue #20](https://github.com/takatakca/pppmtl/issues/20); the actual fix is [draft PR #19](https://github.com/takatakca/pppmtl/pull/19), branch `fix/franchise-truthful-status-gifts-20261028`, based on verified main `c6aacee9f180c1bc0849cf86b3e708c8f4ed2057`. Main [CI 40786387653](https://github.com/takatakca/pppmtl/actions/runs/40786387653) SUCCESS for this exact SHA (quality + PostgreSQL 16), while Actions Coolify alternative SKIPPED intentionally (native Coolify only). Zero open PRs at start; this draft PR is new and deliberately **not merged**. Existing agent SOCIO changes preserved.
+
+**Demonstrated content defects:** home `story-band.tsx` hard-coded Sainte-Catherine E as open and Saint-Léonard as upcoming, contradicting `src/config/locations.ts` (`temporarily_closed` / `open`). Draft PR now derives story timeline states/labels from that registry via `story-timeline.ts` with three Vitest tests; no store lifecycle facts changed. Gift-card previews falsely promised instantaneous email, unsupported terms ("never expires"), and buying while online processing is not implemented. Draft PR makes its non-transactional status visible before user input, uses existing official PPP logo, changes the homepage gift card link, and aligns FAQ and member copy (no gift-card purchase or email triggered).
+
+**Test evidence and remaining gate:** First PR Actions [40790238039](https://github.com/takatakca/pppmtl/actions/runs/40790238039) had PostgreSQL job SUCCESS, quality job FAILED only at ESLint/Prettier (5 formatting errors); source build and TypeScript succeeded. Formatting was repaired on the same draft branch in `8ec9a433` and `a6d20fcb`. **Check final PR HEAD CI after subsequent handoff/WORKLOG commits**; do not call it green without both job results. No direct local runner or active Coolify browser session was available.
+
+**Server handoff to Tak Tak:** native Coolify PPP app UUID `r13hz1mmbi4eeoc6ssxbvxnv`: read actual live SHA, health, rollback and HTTP smoke proofs; compare exact target to CI. Central TAKATAK Drive journal reports `/healthz 200` around 19:29 EDT, **but liveness is not deployed-SHA proof**, and this session cannot independently validate it. Keep GitHub Actions fallback off. Before any publish, review PR #19, verify operational location statuses and FR/EN/ES mobile, keyboard/accessibility. Official Canva yellow export manifest #18: 158 verified, 13 plain-only, 27 missing out of 198 master records; site currently advertises 175 items and Clover journal reports 179, which requires a source-ID reconciliation rather than assuming a defect or faking missing photos. Never use AI food photos, "PayP" or "Sweet Shack"; the brand is **PPP Pizzeria with its actual gold logo**.
+
+**Absolute payment NO-GO:** `src/lib/orders/order-store.server.ts` still sets `ordersPersistAcrossRestarts=false`; production PostgreSQL, canonical TAKATAK tenant identity, signed merchant-matched Clover webhook and durable outbox/worker are unproven (#5/#6/#13). Do not enable a live payment, modify DNS/server secrets or trigger refunds/orders. No SSH, DNS, Coolify deploy or financial action performed in this review. Preserve all other agents' edits; use ordinary commits only.
+
+---
+
+
 ## 2026-10-28 ~14 h EDT — Guest-order runtime security, CI GREEN and Drive sync
 
 Verified resumption: main at 82a1feb7c4cfe2794d3a9c04a5864f83939e4551, full CI 40660324160 SUCCESS; 13 branches, zero open PR; reviewed AGENTS.md, WORKLOG.md, handoff, status, queue, deployment, decisions, open issues and BOTH Google Docs. The /dev SSR security work 27a0077 was already present; not duplicated. An unrelated concurrent social note in WORKLOG, SHA 7606dc5, was preserved. This task was claimed before coding in WORKLOG commit 410cb21bea2a8fd6d25e1c1985d28c0a4987f0ef.
