@@ -46,7 +46,9 @@ export function verifyAdminSession(
   signing: string,
   now = Date.now(),
 ): boolean {
-  if (!cookie || !signing) return false;
+  // A legitimate session contains only an expiry, 16-byte nonce and SHA-256.
+  // Reject oversized user-supplied cookies before splitting/verifying them.
+  if (!cookie || cookie.length > 256 || !signing) return false;
   const parts = cookie.split(".");
   if (parts.length !== 3) return false;
   const [until, nonce, mac] = parts;
