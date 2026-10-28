@@ -1,6 +1,32 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
 
+## LATEST HANDOFF — 2026-10-28 — menu → cart → server checkout reliability
+
+**What was done / ownership:** This is a NEW follow-up task after the 28 Oct menu/Desserts and Clover option-order UX passes. Agent GPT-6 claimed `WORKLOG.md` first at `925cd83de5996373235776ee4f730cee640019f4` and preserved prior agents' source and notes. Read `AGENTS.md`, `WORKLOG.md`, current branch and the five canonical docs before continuing. No open PR was found at session start.
+
+**Tested source SHA:** `db58af73e7c1c42d3d261772195eb28de918a5c9`. **Verifiable GitHub Actions result:** [PPPMTL CI 40645275982](https://github.com/takatakca/pppmtl/actions/runs/40645275982) = **completed/success** on that SHA. Actual jobs passed: Bun frozen install, Nitro Node build, TypeScript, ESLint, Vitest application tests, structural SQL preflight, PostgreSQL 16 migrations 0001/0002/0003, limited DB role + tenant isolation, atomic Clover payments and worker-leasing SQL fixtures. Earlier follow-up CI [40644711329](https://github.com/takatakca/pppmtl/actions/runs/40644711329) was also green at `3a584d6`.
+
+**Last new source changes (all on `main`):**
+- `src/lib/modifiers.ts` (`30f45af`): malformed option JSON safely rejected, no `.split` crash.
+- `src/lib/cart.ts` (`a3df45e`, format `55dca7c`): `canAddCartLine` checks item availability, location, valid safe integer quantity 1–50, and Clover min/max/actual choice rules.
+- `src/context/ppp-store.tsx` (`e969b6a`): invalid legacy cart lines removed on rehydration, valid lines re-priced; add-to-cart/reorders guarded; immutable reorder (no `state.cart.push`); capped setter.
+- `src/components/order/cart-panel.tsx` (`eebb73e`, `307c3ce`): disable increment after 50, modal Escape key/scroll containment/body lock and `aria-modal`.
+- `src/components/order/item-sheet.tsx` (`c4e8994`, `2de33be`, `3a584d6`): modal background scroll lock, restore focus after close, `aria-modal`, reset sheet scroll to top when switching product, so new required product choices appear first.
+- `src/lib/integration/__tests__/clover.test.ts` (`52ffb81`): real pita selection, location, quantity, malformed/null selection tests. Audited all **175 items and 218 option groups** in committed Clover snapshot; no item/group reference absent and no mandatory group with too few available choices, but this is snapshot-only.
+- `src/lib/orders/order-service.ts` (`15c63bc`, format `db58af7`), `src/lib/orders/orders.functions.ts` (`4c86ae3`), `src/lib/orders/__tests__/order-engine.test.ts` (`add0d48`): reject missing/null/oversized/wrong-type runtime JSON before order creation or guest identity handling. `createOrder` validates before dereferencing untrusted fields; server re-prices separately. No Clover production credential, live DB or payment code was enabled.
+
+**Documentation:** Full factual technical note at [`docs/agent-notes/2026-10-28-cart-reliability-audit.md`](agent-notes/2026-10-28-cart-reliability-audit.md) (initial `cdd3e69`, API addendum `2db5d3c`). Four other canonical docs updated in source-safety commits `93909de`, `fba4891`, `6e00810`, `206b4ce` and API follow-up `9a8603f`, `4d55618`, `9e05b80`, `43e001a`. This handoff and the worklog-closing commit are newer than tested source; fetch newest `main` SHA on return, and inspect any newer CI job.
+
+**Production/deployment:** No Oct 28 deployed image SHA, current Coolify release ID or public HTTPS `/healthz` was verified. Public web fetch failed; container HTTP client could not resolve `pppmtl.com` from this environment. This is **not** a claim that the customer website is unavailable to normal users, only a verification limitation. The known hosting channel remains **native Coolify GitHub-App auto-deploy to `main`**, with Actions fallback intentionally skipped. **Do not enable both**. Source checkout must remain fail-closed (#5/#6/#13) until durable production PostgreSQL, TAKATAK-auth tenant scope, verified live Clover merchant secrets/HMAC, outbox idempotency and refund/reconciliation are actually tested.
+
+**Known UX risk / future improvement:** Invalid saved cart lines are now removed rather than silently treated as valid; the user sees no explanation. Add a user-visible saved-cart-needs-review warning after real-device QA. Modal initial focus/body-scroll is improved but a complete focus trap, actual iOS Safari testing and exact production SHA remain unverified.
+
+**Exact next action:** Fetch newest `main` and `WORKLOG.md`, latest CI, and check for concurrent active agents. Obtain authorized Coolify app deployment status + running SHA and `/healthz`; inspect Desserts navigation, modal product swapping, saved-cart/reorder and keyboard interactions on real mobile browsers. Verify live Clover item groups with authorized merchant API, without changing approved Canva photos (#18). Continue production #5/#6/#13 gate work only with confirmed DB/merchant/tenant context. Keep GitHub and the **existing** [PPP Pizzeria Google Drive project handoff](https://docs.google.com/document/d/1M9aEd9S-IN-oH_ZcMB5i5cCFgd5Q2CFCXzACnQxP83k/edit) synchronized, no secrets, no duplicate Drive file.
+
+---
+
+
 ## CURRENT HANDOFF — 2026-10-28 (America/Toronto) — UX mobile, Clover and CI
 
 
