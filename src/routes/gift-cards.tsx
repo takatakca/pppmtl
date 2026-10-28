@@ -103,17 +103,26 @@ function GiftCards() {
                 {
                   Icon: Mail,
                   title: t("Digital delivery pending", "Envoi numérique à venir"),
-                  body: t("No card is sent from this preview.", "Aucune carte n'est envoyée depuis cet aperçu."),
+                  body: t(
+                    "No card is sent from this preview.",
+                    "Aucune carte n'est envoyée depuis cet aperçu.",
+                  ),
                 },
                 {
                   Icon: Store,
                   title: t("Ask the restaurant", "Informez-vous au restaurant"),
-                  body: t("Confirm purchase and redemption with our team.", "Confirmez l'achat et l'utilisation avec notre équipe."),
+                  body: t(
+                    "Confirm purchase and redemption with our team.",
+                    "Confirmez l'achat et l'utilisation avec notre équipe.",
+                  ),
                 },
                 {
                   Icon: Check,
                   title: t("Check card terms", "Vérifiez les conditions"),
-                  body: t("Ask about validity and remaining balance.", "Renseignez-vous sur la validité et le solde."),
+                  body: t(
+                    "Ask about validity and remaining balance.",
+                    "Renseignez-vous sur la validité et le solde.",
+                  ),
                 },
               ].map((f) => (
                 <li key={f.title} className="border border-border bg-card p-3">
@@ -131,7 +140,10 @@ function GiftCards() {
               {t("Preview a gift card", "Aperçu d’une carte-cadeau")}
             </h2>
 
-            <p role="status" className="mt-3 border border-border bg-background p-3 text-sm text-muted-foreground">
+            <p
+              role="status"
+              className="mt-3 border border-border bg-background p-3 text-sm text-muted-foreground"
+            >
               {t(
                 "Preview only. No payment is collected and no gift card is sent. Please contact PPP to confirm available gift cards.",
                 "Aperçu seulement. Aucun paiement n’est perçu et aucune carte n’est envoyée. Communiquez avec PPP pour confirmer les cartes disponibles.",
