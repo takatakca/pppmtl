@@ -85,3 +85,11 @@ See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.m
 | GitHub notes first, Drive second on each agent session | Prevent duplicate/overwriting work when multiple agents commit simultaneously | Claim WORKLOG active at start; append handoff and canonical docs before stopping, mirror substantive decisions under PPP project in Google Drive |
 | Preserve approved finished yellow Canva product images | Owner decision logged in #18 | Do not replace with plain raw photo or unapproved AI/Canva variants |
 | Treat prepared Clover merchant keys and production activation as distinct | Central Drive journal describes secure credentials but no confirmed deployment of them to Coolify | Never copy secrets to docs; keep real payment blocked until tenant DB + webhook/outbox + end-to-end tests |
+
+## 2026-10-28 — Evidence-based release decision
+
+| Decision | Evidence | Consequence |
+|---|---|---|
+| Accept current menu/Clover source as **CI validated**, not as live UI validated | GitHub Actions run 40639386985 on `23043b5` passed quality and PostgreSQL jobs; the public site remains unreachable from this agent's verification tool | Verify Coolify running SHA and real mobile Desserts/modal swipes before closing the owner-reported UX bug |
+| Use only the narrow one-shot formatter for the reported failures | Formatter 40639106678 succeeded, commit `783fe3e` changed formatting in 9 named files, no force push | Do not keep a broad automated formatter or enable duplicate Coolify Actions deployment |
+| Preserve PostgreSQL and Clover live release gates | CI tests in disposable PostgreSQL 16 passed, but real production database and merchant credentials were not examined | Keep production card charges fail-closed until durable runtime, TAKATAK authorization and provider end-to-end tests pass |
