@@ -1,6 +1,29 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
 
+## LATEST HANDOFF — 2026-10-28 — Saved-cart transparency and keyboard dialogs (third pass)
+
+**Source of truth:** `takatakca/pppmtl`, `main`. Source CI and chronological notes supersede historical paragraphs below. Started from `f02b614beaa0a861aaf18ca6f3e9369abfd1d156` with successful CI `40645720067`, no open PR; read `AGENTS.md`, `WORKLOG.md`, newest handoff, issues and CI. Claimed task BEFORE source changes in WORKLOG at `e1ab1f65c46b577e1e4613528c3928f43275dcdc`. Preserve prior agents' menu/Clover fixes and official yellow Canva images (#18).
+
+**Verified code SHA:** `297c0f9e2d4a657228638f90d7a0f5c5546acdd3`, **GitHub CI [40646740316](https://github.com/takatakca/pppmtl/actions/runs/40646740316) COMPLETED SUCCESS**: both jobs green (Nitro/Bun server build, TypeScript, lint/Prettier, Vitest, PostgreSQL 16 migrations 0001-0003, tenant-isolation, atomic payments and worker leases). Subsequent **documentation-only HEAD `9b67267c1cab8ebb4c341ba2687b6c4ef2262583` also passed CI [40646956048](https://github.com/takatakca/pppmtl/actions/runs/40646956048)**; fetch latest main and workflow after this handoff/worklog update.
+
+**What changed:**
+- `src/lib/cart.ts` (commit `5fe6009`; Prettier fix `d54e746`): safe `reconcileSavedCart(saved, findItem, locationId)` reports removed/updated historical cart lines, preserving real Clover groups/IDs, re-pricing retained lines from verified published menu, and rejecting invalid groups/items/quantities/serialized choices. Does not invent mandatory options.
+- `src/context/ppp-store.tsx` (`565bea3`): restores/sanitizes and re-persists saved cart; user gets an accessible, dismissible **FR/EN/ES** notification on removed/changed lines, with Review cart action instead of silent loss. No payment enablement.
+- `src/lib/integration/__tests__/clover.test.ts` (`2ead295`, format `b8287ad`): tests real pita modifier choices, stale price/optional choices, missing required selections, invalid location/quantity/product and malicious stored JSON.
+- `src/lib/use-dialog-keyboard.ts` (`5270f21`, format `297c0f9`): reusable modal focus/scroll handler; Tab/Shift+Tab loop, Escape close, return focus after dismissal; onClose identity updates do not restart focus effects.
+- `src/components/order/item-sheet.tsx` (`19a87c5`) and `src/components/order/cart-panel.tsx` (`4535e28`): wired modal keyboard focus trap; related-product swap no longer restores focus behind an open item modal.
+- Full technical record (no new duplicate audit file): [`docs/agent-notes/2026-10-28-cart-reliability-audit.md`](agent-notes/2026-10-28-cart-reliability-audit.md), appended commit `6d9493c`. Canonical `PROJECT_STATUS`, `TASK_QUEUE`, `DEPLOYMENT`, `DECISIONS` updated in commits `46d122f`, `4c87990`, `3e7ab87`, `9b67267`.
+
+**Google Drive mirror DONE AND READ BACK:** appended third-pass details in place to the pre-existing [PPP Pizzeria 28 Oct technical document](https://docs.google.com/document/d/1M9aEd9S-IN-oH_ZcMB5i5cCFgd5Q2CFCXzACnQxP83k/edit) and central [TAKATAK live journal](https://docs.google.com/document/d/14ONf8gWaMnX5cHiOWMheI0IDUugLfsR_MZ_gj0Szoqk/edit). Both dated entries verified by Google Docs readback; no new duplicate file and no secrets.
+
+**Not verified:** Actual `pppmtl.com` live deployed SHA/HTTPS `/healthz`, real Android/iOS swipe or Tab behavior (browser session tool reports that the originating browser context is missing), real Clover merchant API and production PostgreSQL/TAKATAK-tenant sign-in. Public website fetch via this environment failed, not proof of downtime. Native Coolify GitHub App is the historically active deploy path; skipped Actions fallback is expected. **Payments stay fail-closed** pending durable production transactions/webhook/outbox, real signed merchant callbacks, customer and admin tenant authorization and controlled charge/refund (#5/#6/#13).
+
+**Next exact step:** fetch newest `main`/WORKLOG, confirm CI; inspect actual running Coolify SHA + health, test Desserts category mobile taps/swipe, restored-cart alert and keyboard focus on real Android/iOS browsers; compare current live Clover modifiers to real merchant data; finish durable production DB/TAKATAK-scoped orders/webhook/print prerequisites without enabling checkout based only on CI. Do not mark customer production ready until verified.
+
+---
+
+
 ## LATEST HANDOFF — 2026-10-28 — menu → cart → server checkout reliability
 
 **What was done / ownership:** This is a NEW follow-up task after the 28 Oct menu/Desserts and Clover option-order UX passes. Agent GPT-6 claimed `WORKLOG.md` first at `925cd83de5996373235776ee4f730cee640019f4` and preserved prior agents' source and notes. Read `AGENTS.md`, `WORKLOG.md`, current branch and the five canonical docs before continuing. No open PR was found at session start.
