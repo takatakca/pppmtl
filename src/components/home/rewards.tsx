@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Gift, Smartphone, Star } from "lucide-react";
 import { usePPP } from "@/context/ppp-store";
 import { Reveal, usePrefersReducedMotion } from "@/components/motion/reveal";
@@ -105,16 +106,16 @@ export function Rewards() {
             </h3>
             <p className="mt-2 text-sm text-muted-foreground">
               {t(
-                "Send a PPP card in seconds — usable for pickup and delivery.",
-                "Envoyez une carte PPP en quelques secondes — valide en cueillette et en livraison.",
+                "Preview PPP gift cards; online purchase is not available yet.",
+                "Découvrez les cartes-cadeaux PPP; l'achat en ligne n'est pas encore disponible.",
               )}
             </p>
-            <a
-              href="#account"
+            <Link
+              to="/gift-cards"
               className="mt-3 inline-block text-[0.65rem] font-bold uppercase tracking-[0.25em] text-accent focus-ppp"
             >
-              {t("Buy a gift card", "Acheter une carte")}
-            </a>
+              {t("View gift cards", "Voir les cartes-cadeaux")}
+            </Link>
           </Reveal>
           <Reveal delay={140} className="border border-border bg-card p-5">
             <Smartphone className="h-5 w-5 text-accent" />
