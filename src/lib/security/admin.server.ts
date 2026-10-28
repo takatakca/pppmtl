@@ -31,7 +31,9 @@ export function adminConfigured(): boolean {
 
 export function validateAdminCredential(candidate: string): boolean {
   const config = secrets();
-  return Boolean(config && isReasonableAdminCredential(candidate) && equals(candidate, config.access));
+  return Boolean(
+    config && isReasonableAdminCredential(candidate) && equals(candidate, config.access),
+  );
 }
 
 function signature(payload: string, signing: string): string {
