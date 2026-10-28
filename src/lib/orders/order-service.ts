@@ -71,7 +71,8 @@ const toCents = (dollars: number | null): number | null =>
 function hasCheckoutPayloadShape(value: unknown): value is CheckoutRequest {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const input = value as Partial<CheckoutRequest>;
-  const nullableString = (field: unknown) => field == null || typeof field === "string";
+  const limitedText = (field: unknown, max: number) =>
+    field == null || (typeof field === "string" && field.length <= max);
   if (
     typeof input.locationId !== "string" ||
     input.locationId.length > 128 ||
@@ -80,10 +81,11 @@ function hasCheckoutPayloadShape(value: unknown): value is CheckoutRequest {
     !input.customer ||
     typeof input.customer !== "object" ||
     Array.isArray(input.customer) ||
-    !nullableString(input.customer.name) ||
-    !nullableString(input.customer.phone) ||
-    !nullableString(input.deliveryAddress) ||
-    !nullableString(input.notes)
+    !limitedText(input.customer.name, 120) ||
+    !limitedText(input.customer.phone, 40) ||
+    !limitedText(input.customer.email, 254) ||
+    !limitedText(input.deliveryAddress, 500) ||
+    !limitedText(input.notes, 480)
   ) {
     return false;
   }
@@ -92,8 +94,13 @@ function hasCheckoutPayloadShape(value: unknown): value is CheckoutRequest {
       !!line &&
       typeof line === "object" &&
       typeof line.itemId === "string" &&
+      line.itemId.length <= 128 &&
       typeof line.quantity === "number" &&
-      nullableString(line.notes),
+      limitedText(line.notes, 240) &&
+      (line.selections == null ||
+        (typeof line.selections === "object" &&
+          !Array.isArray(line.selections) &&
+          Object.keys(line.selections).length <= 100)),
   );
 }
 
@@ -101,14 +108,26 @@ function hasCheckoutPayloadShape(value: unknown): value is CheckoutRequest {
  * Rebuild priced items from the verified catalog. Unknown ids are dropped; a line whose options break the
  * item's rules (a required choice missing, too many, an option it does not offer) counts as dropped too.
  */
-function buildItems(request: CheckoutRequest): { items: OrderItem[]; dropped: number } {
+function buildItems(request: CheckoutRequest): {
+  items: OrderItem[];
+  dropped: number;
+  unavailable: number;
+} {
   const items: OrderItem[] = [];
   let dropped = 0;
+  let unavailable = 0;
 
   request.lines.forEach((line, index) => {
     const item = menuRepository.getItem(line.itemId);
     if (!item) {
       dropped += 1;
+      return;
+    }
+    // getItems(locationId) returns ONLY currently available products. Building
+    // an availability map from that filtered list cannot detect sold-out items.
+    // Enforce BOTH inventory availability and per-store catalog membership here.
+    if (!item.isAvailable || !item.locationIds.includes(request.locationId)) {
+      unavailable += 1;
       return;
     }
     // Never round a malformed quantity up into a paid order or exceed Clover's 50-unit limit.
@@ -144,7 +163,7 @@ function buildItems(request: CheckoutRequest): { items: OrderItem[]; dropped: nu
     });
   });
 
-  return { items, dropped };
+  return { items, dropped, unavailable };
 }
 
 /**
@@ -182,22 +201,32 @@ export function validateOrder(request: CheckoutRequest): ValidationReport {
   if (!hasCheckoutPayloadShape(request)) {
     return { valid: false, errors: [orderError("menu_changed")] };
   }
-  const { items, dropped } = buildItems(request);
+  const { items, dropped, unavailable } = buildItems(request);
   const draft = toDraft(request, items);
   const location = restaurantLocations.find((l) => l.id === request.locationId);
 
+  const route = routeFor(request.locationId);
   const report = validateOrderDraft(draft, {
     locationKnown: Boolean(location),
-    locationMapped: Boolean(routeFor(request.locationId).providerLocationId),
-    availability: Object.fromEntries(
-      menuRepository.getItems(request.locationId).map((i) => [i.id, i.isAvailable]),
-    ),
+    locationMapped: Boolean(route.providerLocationId),
   });
-
-  if (dropped > 0 && !report.errors.some((e) => e.code === "menu_changed")) {
-    return { valid: false, errors: [...report.errors, orderError("menu_changed")] };
+  const errors = [...report.errors];
+  if (unavailable > 0 && !errors.some((e) => e.code === "item_unavailable")) {
+    errors.push(orderError("item_unavailable"));
   }
-  return report;
+  if (dropped > 0 && !errors.some((e) => e.code === "menu_changed")) {
+    errors.push(orderError("menu_changed"));
+  }
+  // This merchant's Clover Hosted Checkout is pickup-only; reject unsupported
+  // fulfilment before an order id, payment session, or guest grant is created.
+  if (
+    route.provider === "clover" &&
+    request.orderType !== "PICKUP" &&
+    !errors.some((e) => e.code === "unsupported_order_type")
+  ) {
+    errors.push(orderError("unsupported_order_type"));
+  }
+  return { valid: errors.length === 0, errors };
 }
 
 /** 2 — CREATE. An internal order exists before any provider is contacted. */
