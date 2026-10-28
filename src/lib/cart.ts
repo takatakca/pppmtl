@@ -1,5 +1,5 @@
 import type { MenuItem, OrderMode } from "@/data/menu";
-import { optionsTotal, selectionSummary, type LineSelections } from "@/lib/modifiers";
+import { checkSelections, optionsTotal, selectionSummary, type LineSelections } from "@/lib/modifiers";
 
 /** Chosen option per modifier group: `{ [groupId]: choiceId }` (several options: comma-separated). */
 export type { LineSelections };
@@ -25,6 +25,27 @@ export interface CartTotals {
   /** How many lines could not be priced from the published menu. */
   unpricedLines: number;
   itemCount: number;
+}
+
+/**
+ * The customer cart shares Clover's real min/max modifier rules with server
+ * checkout. Reject incomplete or stale lines before they reach the checkout
+ * page; never change provider choice ids or prices to make a cart fit.
+ */
+export function canAddCartLine(
+  item: MenuItem,
+  quantity: number,
+  selections: LineSelections,
+  locationId?: string | null,
+): boolean {
+  return (
+    item.isAvailable &&
+    (locationId == null || item.locationIds.includes(locationId)) &&
+    Number.isSafeInteger(quantity) &&
+    quantity >= 1 &&
+    quantity <= 50 &&
+    checkSelections(item.modifierGroups ?? [], selections).ok
+  );
 }
 
 /** One unit of the item with these options, in dollars (null without a published price). */
