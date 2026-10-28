@@ -1,0 +1,44 @@
+# PPPMTL — 28 October 2026 release security gate
+
+Date: 2026-10-28, America/Toronto · author: GPT-6 · source of truth: `takatakca/pppmtl`, branch `main`.
+
+## Before writing code
+
+Read `AGENTS.md`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, `docs/TASK_QUEUE.md`, `docs/DEPLOYMENT.md`, `docs/DECISIONS.md`, open GitHub issues/PRs, main SHA and workflow runs. No open pull requests. Initial `main` SHA `280b916763c2a5e935d5687bae6557722aeb167f`, CI [40647117549](https://github.com/takatakca/pppmtl/actions/runs/40647117549) completed SUCCESS; claimed a new release-security task in `WORKLOG.md` **before modifying source**, commit `b21fb002b82458f3c7b22aeb591e63eda1d6fc49`.
+
+## Critical defect found and fixed — server-only inventory/store validation
+
+**Finding:** `validateOrder` previously constructed `availability` with `menuRepository.getItems(locationId)`, which internally filters out unavailable items and products outside the chosen location. `validateOrderDraft` only blocked entries whose map value was exactly `false`. Therefore items not present in that already-filtered map could evade the item-availability check, even though the browser cart had an independent validation guard.
+
+**Fix in `src/lib/orders/order-service.ts`, commit `59613ab373149d4e2c7bb18e4ff506c7095df6ce`:**
+- Server `buildItems` now rejects any `!item.isAvailable` or product whose `locationIds` do not contain the *requested real location*. It counts unavailable/skipped items separately from unknown products and invalid modifiers.
+- `validateOrder` returns `item_unavailable` if any sold-out/wrong-location line was rejected. No order ID or hosted checkout session may be created from the resulting invalid draft. The filtered availability map no longer masquerades as a source of negative inventory evidence.
+- Because this merchant's Clover Hosted Checkout adapter handles **PICKUP ONLY**, the server rejects `DELIVERY` for a Clover-routed location during validation, **before** creating an order ID or guest receipt. The adapter still separately rejects unsupported fulfilment.
+- Browser JSON trust boundary: bounded length of customer name (120), phone (40), email (254), delivery address (500), order notes (480), line item ID (128), line notes (240), and maximum 100 modifier-group keys per line; existing safe integer quantity/line-list limits stay in place. No payments or provider credentials were changed.
+
+**Tests:** `src/lib/orders/__tests__/order-engine.test.ts` added real NDG menu product cases: sold-out product, valid product posted to a different real PPP location, Clover delivery rejected before an order can be created, malformed oversized request fields; commit `1044e4c05eb862a52136991a126912e493c30474`, formatter `eff248a211680e96b0879e455bdadc219e963202`. Existing integration test expected the unsupported Clover delivery to be created and then rejected on `submitOrder`; it was corrected to assert the now-safer early rejection **while preserving the forged webhook test** in `src/lib/integration/__tests__/clover.test.ts`, commit `00b2011cd84131adc4885840dba2e0b8bdd8004f`.
+
+**Verified CI:** [PPPMTL CI 40648225513](https://github.com/takatakca/pppmtl/actions/runs/40648225513) = **completed SUCCESS for source SHA `eff248a211680e96b0879e455bdadc219e963202`**. BOTH real Actions jobs green: Nitro Node build, TypeScript, ESLint/Prettier, all application tests, PostgreSQL 16 migrations 0001/0002/0003 and tenant isolation, atomic payments, worker-leasing probes. Prior intermediate runs failed either because tests still asserted late Clover delivery rejection or formatting; these were addressed and subsequently green.
+
+## RELEASE DECISION — split site from customer payment
+
+**A. Source-quality approval:** Code at `eff248a` is **source-CI-green**. It is legitimate to submit it for an *authorized staging or existing-site content/UX deployment* subject to checking the actual Coolify deployment SHA, HTTP health, mobile behavior and rollback. A green CI does not confirm that production has actually deployed it.
+
+**B. Production storefront:** **UNVERIFIED**. Historically confirmed on 26 Oct: `pppmtl.com` on Contabo VPS2, native Coolify GitHub App auto-deploy to the `pppmtl` application (Coolify UUID `r13hz1mmbi4eeoc6ssxbvxnv`). Last historical verified live SHA was `48c00a4`. This session's `curl` could not resolve `pppmtl.com` from the execution environment; public web browse showed a previously indexed homepage, but `/menu` and `/healthz` could not be fetched live; Browser connector requires the originating browser context. This is a **tool verification blocker**, not evidence the site is down. Coolify's current deployment UUID, image tag, application SHA, health and rollback revision were **not observed**. GitHub's “Deploy PPPMTL to Coolify” workflow being **skipped** is intentional because native Coolify is used instead; do not enable both.
+
+**C. Live customer Clover charge:** **NO-GO**. Runtime `src/lib/orders/order-store.server.ts` still uses a bounded *in-memory* order ring with `ordersPersistAcrossRestarts = false`. Production `cloverCheckoutConfigured` refuses real checkout under this condition and requires a live REST inventory connection. Production Clover webhook refuses reconciliation/titling/printing when the store is not durable. The SQL procedures/adapters/worker have passed ephemeral PostgreSQL CI but are not proven connected to a real provisioned production DB/tenant/merchant. Do **not** flip the flag or claim ready simply because CI is green.
+
+## Exact pre-release verification sequence for the operator / next agent
+
+1. Read current `main`, `WORKLOG.md`, `docs/AGENT_HANDOFF.md`, and GitHub Actions for that same SHA. Confirm all quality and database tests completed. Preserve Lovable history: no force-push, no production secret in commits.
+2. In the authorized native Coolify control plane, inspect application UUID `r13hz1mmbi4eeoc6ssxbvxnv`, environment, domain, running container health, **exact deployed source SHA**, image creation time, current/recent release log, and a working rollback. A GitHub skip/queued deploy or a successful build is not proof.
+3. From an independently reachable browser/network, check `https://pppmtl.com/healthz` returns a no-store `{status:"ok",service:"pppmtl"}` JSON body (liveness only), then `/menu`, `/checkout`, return navigation and basic site SEO metadata. Confirm DNS/TLS and no mixed-content or asset 404. Confirm the live running SHA in Coolify rather than inferring it from HTML.
+4. Real smartphone/desktop QA: open Desserts; repeatedly tap/swipe category rail and navigate back; open a pita/plate with required groups and choose sauce/vegetables/drink; switch related products; check price/subtotal and real options; quantity max 50; cart restore alert; Tab/Shift-Tab/Escape dialog behavior; reduced-motion; browse both EN/FR. Never place a paid test order until the separate payments gate has been approved.
+5. Separately verify authorized Clover *current* merchant inventory and modifier membership/price, proper NDG merchant ID, staging/production environment, Hosted Checkout URL, HTTPS HMAC webhook, webhook replay semantics and a properly scoped, durable persisted order. Do not send provider tokens, private keys, customer records or card information to logs or Google Drive.
+6. For live charge **only after approvals and implementation:** approved real PostgreSQL instance/backups/restore; migrations 0001/0002/0003 applied once with reviewed history; runtime app role no SUPERUSER/BYPASSRLS; verified TAKATAK tenant context from server entitlements; actual pool and order creation linked before Clover redirect; signed/merchant-correlated webhook inbox and exactly-once DB claim; monitored outbox worker for Clover title/print, retry quarantine and manual review; negative and failure-injection tests (restart, duplicate callbacks, declined/cancelled/refunded, network timeouts); controlled authorized payment/refund with merchant reconciliation. Issues [#5](https://github.com/takatakca/pppmtl/issues/5), [#6](https://github.com/takatakca/pppmtl/issues/6), [#13](https://github.com/takatakca/pppmtl/issues/13) remain open.
+7. Rollback: if the storefront fails checks, use the previously verified Coolify release through the authorized control plane. Do NOT force-push or toggle payment credentials to “fix” a broken site. Keep the current payment fail-closed protection.
+
+### Explicit boundaries
+
+- Changes here touched the order validation and tests, **not** the approved finished yellow Canva product artwork (#18), brand/price catalog, provider secrets, Coolify deployment configuration, RLS code or checkout enablement.
+- GitHub canonical agent log is updated at start and end; append this evidence to existing PPP Pizzeria Google Drive project note and existing TAKATAK live journal, rather than creating a duplicate Drive document.
