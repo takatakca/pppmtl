@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { computeSubtotal, canTransition, type OrderDraft, type OrderItem } from "../types";
 import { validateOrderDraft } from "../validation";
 import { deriveIdempotencyKey, claimOrderKey, resetIdempotencyForTests } from "../idempotency";
@@ -8,6 +8,10 @@ import { classifyProviderFailure, orderError } from "../errors";
 import { mapDraftToUrbanPiperOrder } from "@/lib/integration/providers/urbanpiper/mapping";
 import { createOrder, getOrderById, listCustomerOrders, validateOrder } from "../order-service";
 import { resetOrderStoreForTests, saveOrder } from "../order-store.server";
+import { menuItems } from "@/data/menu";
+import { menuRepository } from "@/lib/menu-repository";
+import { restaurantLocations } from "@/config/locations";
+import { groupMin } from "@/lib/modifiers";
 import type { InternalOrder } from "../types";
 
 const item = (over: Partial<OrderItem> = {}): OrderItem => ({
@@ -151,6 +155,97 @@ describe("malformed browser checkout payloads", () => {
       expect(validateOrder(request).errors[0]?.code).toBe("menu_changed");
       expect(() => createOrder(request)).not.toThrow();
       expect(createOrder(request).ok).toBe(false);
+    }
+  });
+});
+
+describe("pre-launch checkout catalog isolation and bounded input", () => {
+  const availableProduct = () => {
+    const product = menuItems.find(
+      (candidate) =>
+        candidate.isAvailable &&
+        !candidate.modifierGroups?.some((group) => groupMin(group) > 0),
+    );
+    if (!product) throw new Error("Expected an available no-required-options menu item");
+    return product;
+  };
+  const requestFor = (product = availableProduct()) => ({
+    locationId: product.locationIds[0]!,
+    orderType: "PICKUP" as const,
+    lines: [{ itemId: product.id, quantity: 1, notes: "", selections: {} }],
+    customer: {
+      customerId: null,
+      takatakCustomerId: null,
+      name: "Test Customer",
+      phone: "5145550001",
+      email: null,
+      isGuest: true,
+    },
+    deliveryAddress: null,
+    notes: "",
+  });
+
+  it("rejects products that the merchant marked sold out before creating an order", () => {
+    const product = availableProduct();
+    const spy = vi
+      .spyOn(menuRepository, "getItem")
+      .mockImplementation((id) => (id === product.id ? { ...product, isAvailable: false } : null));
+    try {
+      const request = requestFor(product);
+      expect(validateOrder(request).errors.map((e) => e.code)).toContain("item_unavailable");
+      const created = createOrder(request);
+      expect(created.ok).toBe(false);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it("rejects an otherwise valid product submitted to a different restaurant", () => {
+    const product = availableProduct();
+    const other = restaurantLocations.find((location) => !product.locationIds.includes(location.id));
+    if (!other) throw new Error("Expected another real PPP location");
+    const request = { ...requestFor(product), locationId: other.id };
+    expect(validateOrder(request).errors.map((e) => e.code)).toContain("item_unavailable");
+    expect(createOrder(request).ok).toBe(false);
+  });
+
+  it("rejects Clover delivery before creating a checkout session", () => {
+    const request = {
+      ...requestFor(),
+      orderType: "DELIVERY" as const,
+      deliveryAddress: "123 Test Street, Montreal",
+    };
+    expect(validateOrder(request).errors.map((e) => e.code)).toContain(
+      "unsupported_order_type",
+    );
+    expect(createOrder(request).ok).toBe(false);
+  });
+
+  it("rejects oversized untrusted customer fields and modifier maps at the API boundary", () => {
+    const baseline = requestFor();
+    const malformed = [
+      { ...baseline, customer: { ...baseline.customer, name: "A".repeat(121) } },
+      { ...baseline, customer: { ...baseline.customer, phone: "9".repeat(41) } },
+      { ...baseline, customer: { ...baseline.customer, email: "a".repeat(255) } },
+      { ...baseline, notes: "n".repeat(481) },
+      { ...baseline, deliveryAddress: "x".repeat(501) },
+      { ...baseline, lines: [{ ...baseline.lines[0]!, itemId: "x".repeat(129) }] },
+      { ...baseline, lines: [{ ...baseline.lines[0]!, notes: "x".repeat(241) }] },
+      {
+        ...baseline,
+        lines: [
+          {
+            ...baseline.lines[0]!,
+            selections: Object.fromEntries(
+              Array.from({ length: 101 }, (_, i) => [`group-${i}`, "choice"]),
+            ),
+          },
+        ],
+      },
+    ];
+    for (const input of malformed) {
+      expect(validateOrder(input).errors[0]?.code).toBe("menu_changed");
+      expect(createOrder(input).ok).toBe(false);
     }
   });
 });
