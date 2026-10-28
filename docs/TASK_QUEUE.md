@@ -94,3 +94,8 @@ The opt-in `processPppCloverFulfillmentBatch` worker and mocked tests have been 
 3. **P1 UX follow-up:** notify customers when outdated saved selections/lines are dropped from localStorage on restore; safety is now fail-closed, but silently losing a previously selected item is confusing. Verify focus trapping/scroll behavior on iOS.
 4. **Keep payment release gates #5/#6/#13:** confirm actual production role-scoped DB, signed Clover callbacks and durable order/outbox, merchant keys configured in protected environment, TAKATAK identity and controlled refund/reconciliation. Do not activate live checkout based solely on green CI.
 5. **Full technical evidence:** [2026-10-28 cart reliability audit](agent-notes/2026-10-28-cart-reliability-audit.md); append updates to the *existing* PPP Pizzeria Drive project handoff and global summary, not duplicate folders.
+
+### 2026-10-28 — Checked off additional server input-safety task
+
+- **Completed in source:** `db58af73` validates untrusted checkout JSON at runtime before creating orders or sanitizing guest identity. New malformed-body tests passed in **CI 40645275982 (success)** together with build, lint and PostgreSQL tenant/atomic-payment probes. It supplements the browser cart guards; do not redo it.
+- **Still blocking release:** current Coolify container SHA/health not verified here, no real Android/iOS modal/cart QA or live Clover inventory assertion, production tenant/DB/merchant/outbox gates #5/#6/#13 unresolved. Do not activate payments.
