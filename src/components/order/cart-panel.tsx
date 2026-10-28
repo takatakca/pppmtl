@@ -102,8 +102,9 @@ export function CartPanel() {
                         <span className="w-7 text-center text-sm">{line.quantity}</span>
                         <button
                           onClick={() => setLineQuantity(line.lineId, line.quantity + 1)}
+                          disabled={line.quantity >= 50}
                           aria-label={t("Increase quantity", "Augmenter la quantité")}
-                          className="p-2 focus-ppp"
+                          className="p-2 focus-ppp disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           <Plus className="h-3.5 w-3.5" />
                         </button>
