@@ -1,11 +1,12 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useRef } from "react";
 import { Minus, Phone, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { menuRepository } from "@/lib/menu-repository";
 import { cartTotals, selectionLabels } from "@/lib/cart";
 import { marketplaceChannels } from "@/lib/channels";
 import { track } from "@/lib/analytics";
+import { useDialogKeyboard } from "@/lib/use-dialog-keyboard";
 
 /**
  * Customer cart. Only published prices are summed — no tax, delivery fee,
@@ -19,26 +20,17 @@ export function CartPanel() {
   const location = useSelectedLocation();
   const totals = cartTotals(cart);
   const marketplaces = marketplaceChannels(location, mode).filter((c) => c.href);
-
-  useEffect(() => {
-    if (!cartOpen) return undefined;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeCart();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [cartOpen, closeCart]);
+  const dialogRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  useDialogKeyboard(cartOpen, closeCart, dialogRef, closeButtonRef);
 
   if (!cartOpen) return null;
 
   return (
     <div className="dim-in fixed inset-0 z-[88] flex justify-end bg-background/80 backdrop-blur-sm">
       <aside
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={t("Your order", "Votre commande")}
@@ -52,6 +44,7 @@ export function CartPanel() {
             </span>
           </h2>
           <button
+            ref={closeButtonRef}
             onClick={closeCart}
             aria-label={t("Close", "Fermer")}
             className="border border-border p-2 focus-ppp"
