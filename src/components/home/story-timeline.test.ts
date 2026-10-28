@@ -16,9 +16,7 @@ describe("PPP franchise story timeline", () => {
     expect(timeline.find((entry) => entry.place.en === "Sainte-Catherine E")?.note.en).toBe(
       "Temporarily closed",
     );
-    expect(timeline.find((entry) => entry.place.en === "Saint-Léonard")?.note.en).toBe(
-      "Open now",
-    );
+    expect(timeline.find((entry) => entry.place.en === "Saint-Léonard")?.note.en).toBe("Open now");
   });
 
   it("reacts to future lifecycle changes without changing the page copy", () => {
