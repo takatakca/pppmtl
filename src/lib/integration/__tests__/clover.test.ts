@@ -31,7 +31,7 @@ import {
   toggleChoice,
   type LineSelections,
 } from "@/lib/modifiers";
-import { unitPriceFor } from "@/lib/cart";
+import { canAddCartLine, unitPriceFor } from "@/lib/cart";
 import { resetWebhookReplayForTests } from "@/lib/integration/core/webhook-security";
 import { resetOrderStoreForTests } from "@/lib/orders/order-store.server";
 import { resetIdempotencyForTests } from "@/lib/orders/idempotency";
@@ -111,6 +111,30 @@ describe("Clover preparation sequence", () => {
     expect(preparationRank("Breuvage inclus")).toBe(3);
     expect(preparationRank("Trio")).toBe(4);
     expect(preparationRank("Combo")).toBe(5);
+  });
+});
+
+describe("client cart and server options agree on real Clover requirements", () => {
+  it("never adds a pita without its required options", () => {
+    expect(canAddCartLine(pita(), 1, {})).toBe(false);
+    const complete = pitaCombo();
+    expect(canAddCartLine(pita(), 1, complete, pita().locationIds[0])).toBe(true);
+    expect(canAddCartLine(pita(), 0, complete)).toBe(false);
+    expect(canAddCartLine(pita(), 1.5, complete)).toBe(false);
+    expect(canAddCartLine(pita(), 51, complete)).toBe(false);
+    expect(canAddCartLine(pita(), 50, complete)).toBe(true);
+    expect(canAddCartLine(pita(), 1, complete, "invalid-store")).toBe(false);
+  });
+
+  it("rejects malformed JSON option values without throwing or silently pricing them", () => {
+    const groups = pita().modifierGroups!;
+    const first = groups[0]!.id;
+    const invalid = { [first]: 42 } as unknown as LineSelections;
+    expect(() => checkSelections(groups, invalid)).not.toThrow();
+    expect(checkSelections(groups, invalid).ok).toBe(false);
+    expect(checkSelections(groups, invalid).unknown).toContain(first);
+    expect(checkSelections(groups, [] as unknown as LineSelections).ok).toBe(false);
+    expect(checkSelections(groups, null as unknown as LineSelections).ok).toBe(false);
   });
 });
 
