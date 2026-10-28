@@ -1,6 +1,42 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
 
+## CURRENT HANDOFF — 2026-10-28 01:xx (America/Toronto) — menu / Clover / CI / Drive
+
+**Repo:** `takatakca/pppmtl`, `main`; latest main reviewed just before this handoff: `74e1767606a` (another agent's SQL fixture correction). **Fetching current HEAD is mandatory before working; ongoing agents are publishing concurrently.** Prior October 26 verified Coolify release was `48c00a4`, NOT proof the 28 October source is live.
+
+**Owner's current request:** fix Desserts and other category swipe/lag, order product choices correctly (required dish → sauce → vegetables/garnishes → beverage → trio → combo → extras, only if applicable), preserve all actual Clover IDs/min-max/prices, audit website/Clover connection, record notes to GitHub first and mirror to the correct Google Drive project folder before finishing.
+
+### Completed in this session / duplicate-work warning
+
+- Claimed this work at startup in `WORKLOG.md` (commit `4dae445b2`). Found another agent with a parallel active claim `77b3102b6`. On re-fetching `src/routes/menu.tsx` discovered that agent had just changed it; aborted conflicting edit rather than overwriting progress.
+- **Other agent's independently committed UX changes reviewed:** `b927e59f8` for sticky category strip/vertical scroll competition; `a9389f835` for Clover group preparation rank while retaining actual backend constraints; `c88097721` adds group-order tests; `b88ec0f62` confines required-option focus to modal scroll; `747cb837c` reduces staggered grid entry latency. Later another agent pushed `95eaba2b` CI targeted formatting workflow, `783fe3e3` formatting, `26b1a8e8` and `74e176760` SQL-fixture corrections. **Do not redo or revert these commits.**
+- **This GPT-6 agent's CI repairs:** inspected GitHub Actions CI `40364935041` logs; runners are now allocated. Build and TypeScript passed; lint failed with Prettier errors; PostgreSQL preflight passed but `node --test` had one incorrect fixture (4/5). Changed fixture and moved Node tests out of Vitest discovery to `scripts/sql-migration-check.cases.mjs` (`004e9c903`), updated `.github/workflows/ci.yml` (`e1d64aa`), deleted conflicting `scripts/__tests__/check-sql-migrations.test.mjs` (`9702122`). Follow-on `74e176760` correctly ensures `$$;` in the current fixture. None of this establishes a new green end-to-end CI without inspecting the latest run.
+- GitHub detailed dated history and audit: [`docs/agent-notes/2026-10-28-menu-clover-audit.md`](agent-notes/2026-10-28-menu-clover-audit.md), committed `1f211c1e48b9d30759bd564be39ba4601ee7d8da`. Updated the other four canonical docs.
+- **Google Drive mirror actually created, populated, moved and verified** in `PPP Pizzeria` folder (`1yM2IlDsbgPlQyVaWmawnotFN0TxIQMwj`): [2026-10-28 — PPPMTL — Relève technique menu, Clover, CI et déploiement — GPT-6](https://docs.google.com/document/d/1M9aEd9S-IN-oH_ZcMB5i5cCFgd5Q2CFCXzACnQxP83k/edit). It records the previous Oct 26 release, PR #12, owner image decision #18, Clover integration boundaries, this session's Git SHA work and next actions. Google Drive's `TAKATAK — MAIN / 00 — JOURNAL — État en direct` already contained a **separate** concurrent agent's summary of menu/Clover work; do not create duplicates or overwrite it.
+
+### Verification and limits
+
+- Used authenticated GitHub connector to read `AGENTS.md`, `WORKLOG.md`, five canonical docs, source files, menu snapshot, branches, issues, commits, `40364935041` job logs and later Action runs.
+- GitHub provided actual assigned runners, Nitro build success, TypeScript success, lint failure, broken Node fixture. Latest looked-up `40639198899` on `74e176760` was pending; no green status is claimed.
+- Direct external read of `https://pppmtl.com/menu` failed with cache miss and `https://pppmtl.com/healthz` was unavailable via this environment. **No true mobile browser interaction or exact current production SHA could be verified.**
+- Current Clover menu snapshot: 175 items, 218 option groups, mapped to site products. Central TAKATAK Drive journal says merchant e-commerce/webhook/REST credentials prepared in another session, **not yet shown injected into Coolify**, and `DATABASE_URL` + end-to-end test outstanding. No secrets read or committed. Keep live payments fail-closed.
+- Production app's known historical deployment: Coolify GitHub-App native autodeploy on Contabo VPS2 (26 Oct documentation), alternative `.github/workflows/deploy-coolify.yml` intentionally disabled. Do not enable both.
+
+### Next exact actions (without duplicating another agent)
+
+1. Re-read current HEAD, `WORKLOG.md` and `docs/agent-notes/2026-10-28-menu-clover-audit.md`; inspect CI runs/jobs for the **latest** SHA. Fix remaining lint/Vitest/PostgreSQL errors only if not already corrected by concurrent agent, then verify passing actual jobs.
+2. Obtain approved deployed Coolify revision and browse PPPMTL live menu on mobile; test tap Desserts, large category list, sticky strip, item-sheet required-field scrolling, keyboard and reduced motion. Record evidence and any discovered residual bug, do not claim deployed based on push alone.
+3. On real representative products check that every group belongs to that specific Clover item; preserve ID, min/max, prices and unknown-group ordering; keep the owner's Canva finished-yellow imagery decision (#18).
+4. The direct Clover payment/customer connection remains gated by issues #5/#6: verified TAKATAK identity and PostgreSQL persistent checkout/webhook/outbox, safe worker/printer replays, secure server-only credentials, tested live merchant configuration. **Do not deploy paid checkout as a shortcut.**
+5. Continue canonical GitHub handoff notes and append only new facts to the PPP Google Drive project doc above and main central journal, never repeat an existing agent's note or expose tokens.
+
+**Last session files:** `WORKLOG.md`; `scripts/sql-migration-check.cases.mjs`; `.github/workflows/ci.yml`; deleted `scripts/__tests__/check-sql-migrations.test.mjs`; `docs/agent-notes/2026-10-28-menu-clover-audit.md`; `docs/PROJECT_STATUS.md`, `docs/TASK_QUEUE.md`, `docs/DEPLOYMENT.md`, `docs/DECISIONS.md`, this handoff. **No verified new site deployment**.
+
+---
+
+
+
 ## CURRENT HANDOFF — 2026-10-26 (UTC)
 
 **Production now runs on Coolify, verified.** `https://pppmtl.com` and `https://www.pppmtl.com` are served by Coolify application `pppmtl` (uuid `r13hz1mmbi4eeoc6ssxbvxnv`, project PPPMTL) on server **vps2** (Contabo, 209.145.49.63), branch `main`, native **Coolify GitHub-App auto-deploy ON**. The MochaHost Passenger copy (`~/pppmtl_node`) is no longer receiving traffic and is kept only as a rollback.
