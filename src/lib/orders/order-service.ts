@@ -97,7 +97,6 @@ function hasCheckoutPayloadShape(value: unknown): value is CheckoutRequest {
   );
 }
 
-
 /**
  * Rebuild priced items from the verified catalog. Unknown ids are dropped; a line whose options break the
  * item's rules (a required choice missing, too many, an option it does not offer) counts as dropped too.
