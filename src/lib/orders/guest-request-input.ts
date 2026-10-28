@@ -46,7 +46,6 @@ export function isGuestOrderListInput(input: unknown): input is GuestOrderListIn
     isRecord(input) &&
     (input["customerId"] === null ||
       (typeof input["customerId"] === "string" && input["customerId"].length <= 128)) &&
-    (input["phone"] === null ||
-      (typeof input["phone"] === "string" && input["phone"].length <= 40))
+    (input["phone"] === null || (typeof input["phone"] === "string" && input["phone"].length <= 40))
   );
 }
