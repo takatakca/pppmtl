@@ -2,6 +2,11 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import {
+  devRequestAuthorized,
+  devUnauthorizedResponse,
+  isProtectedDevPath,
+} from "./lib/security/dev-route-guard.server";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -47,6 +52,10 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      // Authenticate internal /dev pages before SSR, never public API or storefront routes.
+      if (isProtectedDevPath(new URL(request.url).pathname) && !devRequestAuthorized(request)) {
+        return devUnauthorizedResponse();
+      }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);

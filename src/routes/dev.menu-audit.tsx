@@ -1,7 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { adminAuthStatus } from "@/lib/security/admin.functions";
 import { auditMenu } from "@/lib/menu-audit";
 
 export const Route = createFileRoute("/dev/menu-audit")({
+  // Client-side navigation must not bypass the SSR /dev access boundary.
+  beforeLoad: async () => {
+    const { authenticated } = await adminAuthStatus();
+    if (!authenticated) throw redirect({ to: "/admin/sign-in" });
+  },
   head: () => ({
     meta: [
       { title: "Menu source audit (internal) | PPP NDG" },
