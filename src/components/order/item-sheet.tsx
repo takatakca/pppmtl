@@ -39,6 +39,7 @@ export function ItemSheet({
   /** Set when the customer confirms with a required group incomplete: those groups get highlighted. */
   const [attempted, setAttempted] = useState(false);
   const optionScroller = useRef<HTMLDivElement>(null);
+  const closeButton = useRef<HTMLButtonElement>(null);
   const favourited = isFavourite(item?.id ?? "");
 
   useEffect(() => {
@@ -50,9 +51,17 @@ export function ItemSheet({
 
   useEffect(() => {
     if (!item) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement;
+    document.body.style.overflow = "hidden";
+    closeButton.current?.focus();
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+      if (previousFocus instanceof HTMLElement) previousFocus.focus();
+    };
   }, [item, onClose]);
 
   const groups = useMemo(() => item?.modifierGroups ?? [], [item]);
@@ -72,6 +81,7 @@ export function ItemSheet({
     <div className="fixed inset-0 z-[90] flex items-end justify-center bg-background/85 backdrop-blur-sm sm:items-center">
       <div
         role="dialog"
+        aria-modal="true"
         aria-label={name}
         className="flex max-h-[92dvh] w-full max-w-2xl flex-col border border-border bg-card promo-in"
       >
@@ -98,6 +108,7 @@ export function ItemSheet({
               />
             </button>
             <button
+              ref={closeButton}
               onClick={onClose}
               aria-label={t("Close", "Fermer")}
               className="border border-border bg-background/85 p-2 focus-ppp"
@@ -107,7 +118,7 @@ export function ItemSheet({
           </div>
         </div>
 
-        <div ref={optionScroller} className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+        <div ref={optionScroller} className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-5 py-5">
           <h2 className="font-display text-3xl uppercase leading-none">{name}</h2>
           <p className="mt-3 text-sm text-muted-foreground">{description}</p>
 
