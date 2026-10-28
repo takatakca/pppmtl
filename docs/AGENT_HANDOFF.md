@@ -1,5 +1,14 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 04:56 EDT 2026-10-28 — /dev security guard: code and CI verified; live deploy unverified
+
+**Verified source:** claim `4db58cf`, security fix `27a0077ce55ff8ed9e02784740cc29a8286eb87a`, [CI 40660026700](https://github.com/takatakca/pppmtl/actions/runs/40660026700) completed **SUCCESS** on that exact code SHA (Nitro build, TS, lint, app/security tests, PostgreSQL 16 tenant/payment/worker). Prior anonymous `/dev/menu-audit` exposure documented in issue #5 (HTTP 200 at 02:20 EDT). New `src/server.ts` guard returns HTTP **401 no-store** before SSR for unauthenticated `/dev/*`, verifies existing signed admin cookie, rejects duplicate cookies/encoded aliases; SPA route redirects unauthenticated client navigation. Public Clover webhook and storefront paths unaffected in code. Full evidence appended to [release-security-gate note](agent-notes/2026-10-28-release-security-gate.md).
+
+**Do not claim deployed:** Native Coolify current running SHA, 401 live response and rollback are not yet independently verified. Another agent reported live `/healthz` OK at 04:32 EDT in central journal; liveness is not source-version proof. Journal also reports three Clover env vars pending redeploy and missing/unconfirmed webhook signing secret at 04:02 EDT; no secrets were copied. Verify live anonymous `/dev/menu-audit=401`, `/healthz=200`, public Clover webhook GET=405 and deployed SHA after an authorized native release; no parallel Actions deploy. **Real checkout NO-GO** pending production PostgreSQL, TAKATAK tenant authorization, signed webhook, durable outbox/worker #5/#6/#13. Both existing PPP Pizzeria and TAKATAK Google Docs updated and read back. No server/DNS/payment changes.
+
+---
+
+
 
 ## EVENING RELEASE SECURITY HANDOFF — 2026-10-28
 
