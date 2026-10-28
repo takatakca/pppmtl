@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Heart, Minus, Plus, X } from "lucide-react";
 import type { MenuItem } from "@/data/menu";
 import { usePPP } from "@/context/ppp-store";
@@ -38,6 +38,7 @@ export function ItemSheet({
   const [selections, setSelections] = useState<LineSelections>({});
   /** Set when the customer confirms with a required group incomplete: those groups get highlighted. */
   const [attempted, setAttempted] = useState(false);
+  const optionScroller = useRef<HTMLDivElement>(null);
   const favourited = isFavourite(item?.id ?? "");
 
   useEffect(() => {
@@ -106,7 +107,7 @@ export function ItemSheet({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+        <div ref={optionScroller} className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
           <h2 className="font-display text-3xl uppercase leading-none">{name}</h2>
           <p className="mt-3 text-sm text-muted-foreground">{description}</p>
 
@@ -309,9 +310,24 @@ export function ItemSheet({
                 if (missing.length > 0) {
                   // Not a dead end: highlight the incomplete groups and scroll to the first one.
                   setAttempted(true);
-                  document
-                    .querySelector(`[data-sheet-group="${missing[0]!.id}"]`)
-                    ?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  // Only scroll INSIDE the item sheet. scrollIntoView also
+                  // scrolled the document behind the dialog on mobile.
+                  const scroller = optionScroller.current;
+                  const field = Array.from(
+                    scroller?.querySelectorAll<HTMLElement>("[data-sheet-group]") ?? [],
+                  ).find((node) => node.dataset["sheetGroup"] === missing[0]?.id);
+                  if (scroller && field) {
+                    scroller.scrollTo({
+                      top: Math.max(
+                        0,
+                        scroller.scrollTop +
+                          field.getBoundingClientRect().top -
+                          scroller.getBoundingClientRect().top -
+                          12,
+                      ),
+                      behavior: "auto",
+                    });
+                  }
                   return;
                 }
                 addToCart(item.id, qty, notes.trim(), selections);
