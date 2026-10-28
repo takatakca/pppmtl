@@ -3,6 +3,14 @@
 
 ## CURRENT HANDOFF — 2026-10-28 (America/Toronto) — UX mobile, Clover and CI
 
+
+**LATEST VERIFIED CI (after source/SQL repairs):** GitHub Actions [PPPMTL CI run 40639386985](https://github.com/takatakca/pppmtl/actions/runs/40639386985) **completed SUCCESS for source SHA `23043b539acdea63385d56bb3da6d31b2959c96e`**. Verified actual job steps: Nitro Node build, TypeScript, ESLint and application tests SUCCESS; PostgreSQL 16 migrations 0001/0002/0003, limited-role tenant-isolation tests, atomic Clover payment tests and fenced fulfillment-worker leasing tests SUCCESS. Runner provisioning is now functional. This is test evidence **only**, not verified live Coolify release or real credit card transaction.
+
+**Subsequent documentation-only commits:** `ac0f3ebd` PROJECT_STATUS, `8dc72b9b` TASK_QUEUE, `a6009d07` DEPLOYMENT, `06ecf430` DECISIONS, and this handoff. The latest exact `main` SHA will be newer than the green CI source commit; fetch and inspect the current branch and its own latest workflow on next resume. This handoff supersedes its older queued-CI paragraph for that specific source revision; don't misread the historical logs below.
+
+**Still incomplete:** actual pppmtl.com mobile touch/browser regression (Desserts swipe/scroll, product modal), the exact deployed Coolify container SHA and HTTPS health for 28 October, live authorized Clover inventory/merchant connection, durable production PostgreSQL wiring and true payments/print/retry/reconciliation. Issue #5/#6/#13 gates remain intact. Do not publish a customer-facing launch claim or real payment switch without these checks.
+
+
 **Source of truth:** GitHub `takatakca/pppmtl`, branch `main`; read `AGENTS.md` and `WORKLOG.md` before touching files. **Latest HEAD observed before this handoff commit:** `74e1767606a0388c725d5244505053027731443b`. This handoff and WORKLOG will produce newer SHA(s), so fetch actual HEAD on resumption. Two agents were working in parallel on 28 Oct; preserve their different work and check active claims before proceeding. No PR was open at initial check.
 
 **Owner's explicit priorities (28 Oct):** fix sticky/swipe/lag of `/menu` categories (especially Desserts); present product's *existing* Clover modifier groups in kitchen order (required main choice, sauce, garnishes/vegetables, beverage, trio, combo, extras, where present); keep real IDs/prices/limits, never add fake categories; code notes at entry and exit in GitHub, then project-specific mirror in Google Drive. Don't change separate franchise UI/brands or owner-approved finished yellow Canva imagery (#18).
