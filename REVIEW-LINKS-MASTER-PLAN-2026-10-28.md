@@ -23,7 +23,7 @@ PPP | Yelp NDG | TO-VERIFY | TO-VERIFY | Second listing to be created/cloned fro
 PPP | Trustindex aggregator | https://www.trustindex.io/reviews/pppmtl.com | VERIFIED | Aggregates Google / Facebook / TripAdvisor / Yelp reviews, 93 reviews, 3.9/5 at last check — aggregator, not a place to post a new review
 PPP | Google Business Profile Saint-Léonard | TO-VERIFY | TO-VERIFY | GBP Saint-Léonard verification pending (Matt, video verification) — no public review URL recorded yet
 PPP | Google Business Profile NDG | TO-VERIFY | TO-VERIFY | NDG is the only PPP profile with live Google Posts in notes — public review URL not yet recorded
-PPP | Bing Places Saint-Léonard | NONE FOUND | VERIFIED-ABSENT 2026-10-28 | No PPP listing found on Bing, dashboard holds zero listings — creation decision pending Pierre, no review link exists yet
+PPP | Bing Places Saint-Léonard | TO-VERIFY (listing created, not yet published) | CREATED 2026-10-28, NEEDS VERIFICATION | New listing "PPP Pizzeria Montréal -Saint Léonard-", 5839 rue Jean-Talon E, Montréal, QC H1S 1M4, phone 450-999-4999, website https://www.pppmtl.com, listing ID 029b9016-1f6d-4df5-9aeb-263b2c6821b6 — status "Needs verification — Verify now to publish your listing", verification by Mail PIN postcard only, no PIN requested yet, hours daily 11 AM-11 PM pending verification — no public review link until published, do not publish as live yet
 PPP | TripAdvisor | TO-VERIFY | TO-VERIFY | No verified PPP TripAdvisor review URL in notes
 PPP | DoorDash | TO-VERIFY | TO-VERIFY | Stores 28040070 (Hochelaga, deactivated 2026-10-28 16:01) and 33598081 (Saint-Léonard) — do not touch without a Matt/DoorDash decision, no review URL published here
 
