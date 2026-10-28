@@ -113,7 +113,13 @@ export const placeOrder = createServerFn({ method: "POST" })
     if (!orderAccessConfigured()) {
       return { ok: false, order: null, error: orderError("provider_unavailable") };
     }
-    const { createOrder, submitOrder } = await import("./order-service");
+    const { createOrder, submitOrder, validateOrder } = await import("./order-service");
+    // Check the full untrusted JSON shape before passing customer properties
+    // to the guest identity sanitizer (or attempting an order write).
+    const validation = validateOrder(data);
+    if (!validation.valid) {
+      return { ok: false, order: null, error: validation.errors[0] ?? orderError("menu_changed") };
+    }
 
     const { unverifiedCheckoutCustomer } = await import("@/lib/security/guest-identity");
     const guestRequest: PlaceOrderInput = {
