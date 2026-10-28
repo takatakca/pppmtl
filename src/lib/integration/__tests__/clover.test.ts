@@ -22,7 +22,7 @@ import {
   websiteOrderTitle,
 } from "@/lib/integration/providers/clover/checkout";
 import { cloverInventoryToUniversalMenu } from "@/lib/integration/providers/clover/menu";
-import { siteGroupsFor } from "@/lib/integration/providers/clover/site-groups";
+import { preparationRank, siteGroupsFor } from "@/lib/integration/providers/clover/site-groups";
 import {
   checkSelections,
   defaultSelections,
@@ -52,6 +52,57 @@ function pitaCombo(): LineSelections {
   s = toggleChoice(s, group(/^Trio/), choice(group(/^Trio/), /^frites \+ pepsi$/i));
   return s;
 }
+
+describe("Clover preparation sequence", () => {
+  it("puts sauce, garnishes, drinks, trios, combos and extras in kitchen order", () => {
+    const groupSpecs = [
+      ["extras", "EXTRA FROMAGE", 0],
+      ["combo", "Combo famille", 0],
+      ["drink", "Boisson incluse", 0],
+      ["vegetables", "GARNITURES INCLUSES", 0],
+      ["sauce", "SAUCE INCLUSE", 0],
+      ["trio", "Trio", 0],
+      ["dish", "Choix de hamburger", 1],
+    ] as const;
+    const synthetic = {
+      source: "test",
+      generatedAt: "2026-10-28T00:00:00Z",
+      categories: [{ id: "cat", name: "Menu", sortOrder: 0 }],
+      items: [{
+        id: "burger",
+        name: "Hamburger",
+        price: 1000,
+        description: null,
+        categoryIds: ["cat"],
+        modifierGroupIds: groupSpecs.map(([id]) => id),
+        available: true,
+      }],
+      modifierGroups: groupSpecs.map(([id, name, min]) => ({
+        id,
+        name,
+        min,
+        max: 1,
+        modifiers: [{ id: `choice-${id}`, slug: `choice-${id}`, name: "Option", price: 125, available: true }],
+      })),
+    };
+    const actual = siteGroupsFor(synthetic, "burger");
+    expect(actual.map((g) => g.id)).toEqual([
+      "dish", "sauce", "vegetables", "drink", "trio", "combo", "extras",
+    ]);
+    expect(actual[0]).toMatchObject({ required: true, min: 1, max: 1 });
+    expect(actual[6]?.choices[0]).toMatchObject({ id: "choice-extras", priceDelta: 1.25 });
+  });
+
+  it("never promotes paid sauce or paid drink extras above regular drink choice", () => {
+    expect(preparationRank("Extra sauces")).toBe(6);
+    expect(preparationRank("Boisson extra")).toBe(6);
+    expect(preparationRank("Choix De Sauce Salade")).toBe(1);
+    expect(preparationRank("Choix De Garniture Sous-Marin")).toBe(2);
+    expect(preparationRank("Breuvage inclus")).toBe(3);
+    expect(preparationRank("Trio")).toBe(4);
+    expect(preparationRank("Combo")).toBe(5);
+  });
+});
 
 describe("site slot -> Clover item map", () => {
   it("maps every site item to exactly one existing Clover item (none flagged)", () => {
