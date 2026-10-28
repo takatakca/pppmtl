@@ -118,7 +118,10 @@ export function ItemSheet({
           </div>
         </div>
 
-        <div ref={optionScroller} className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-5 py-5">
+        <div
+          ref={optionScroller}
+          className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-5 py-5"
+        >
           <h2 className="font-display text-3xl uppercase leading-none">{name}</h2>
           <p className="mt-3 text-sm text-muted-foreground">{description}</p>
 
