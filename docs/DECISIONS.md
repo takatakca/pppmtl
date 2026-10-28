@@ -93,3 +93,13 @@ See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.m
 | Accept current menu/Clover source as **CI validated**, not as live UI validated | GitHub Actions run 40639386985 on `23043b5` passed quality and PostgreSQL jobs; the public site remains unreachable from this agent's verification tool | Verify Coolify running SHA and real mobile Desserts/modal swipes before closing the owner-reported UX bug |
 | Use only the narrow one-shot formatter for the reported failures | Formatter 40639106678 succeeded, commit `783fe3e` changed formatting in 9 named files, no force push | Do not keep a broad automated formatter or enable duplicate Coolify Actions deployment |
 | Preserve PostgreSQL and Clover live release gates | CI tests in disposable PostgreSQL 16 passed, but real production database and merchant credentials were not examined | Keep production card charges fail-closed until durable runtime, TAKATAK authorization and provider end-to-end tests pass |
+
+## 2026-10-28 — Second-pass menu-to-cart safety decisions
+
+| Decision | Reason | Consequence |
+|---|---|---|
+| Apply actual Clover modifier min/max rules **before adding to browser cart**, not only on checkout server | Earlier local cart accepted incomplete required options and stale reorders, causing late failures | `canAddCartLine` and server `checkSelections` share constraints; preserve source IDs/prices. Reorders and persisted cart must be revalidated and re-priced. |
+| Fail closed on invalid historical cart lines or hostile modifier JSON | Do not invent replacement choice or free extra; server must not throw on a wrong JSON type | Invalid lines are dropped on restore; follow up with UX notice rather than silently losing the line; malformed options rejected before pricing. |
+| Preserve immutable React cart state and enforce Clover's 50 unit cap | Mutating `state.cart` can break reactive updates and cart limit mismatch creates checkout errors | Reorders copy array; cart quantity control stops at 50, server continues its own independent gate. |
+| Keep item/cart dialogs from causing unwanted mobile background scroll | The owner reported swipe/jump and hidden main item when moving from extras to another product | Lock background overflow when dialog shown, contain sheet scroll, reset next item's scroll to top, maintain Escape and focus restoration; full device/keyboard QA still required. |
+| Treat `40644711329` as CI proof only | Source checks passed but no live Coolify revision or real devices were inspected | Payment remains blocked until verified DB, tenant identity, provider/HMAC and operational recovery; see `docs/agent-notes/2026-10-28-cart-reliability-audit.md`. |
