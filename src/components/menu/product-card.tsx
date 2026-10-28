@@ -32,8 +32,8 @@ export function ProductCard({
 
   return (
     <li
-      className={`rise-in group relative ${fluid ? "w-full" : "w-[13.5rem] shrink-0 sm:w-[15rem]"}`}
-      style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
+      className={`${fluid ? "group relative w-full" : "rise-in group relative w-[13.5rem] shrink-0 sm:w-[15rem]"}`}
+      style={fluid ? undefined : { animationDelay: `${Math.min(index, 8) * 35}ms` }}
     >
       <button
         type="button"
