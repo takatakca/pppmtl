@@ -71,3 +71,11 @@ Updated: 2026-10-15 · GitHub is the source of truth.
 ### 2026-10-16 — next integration after worker source
 
 The opt-in `processPppCloverFulfillmentBatch` worker and mocked tests have been committed. Migration 0003 excludes unrelated CUSTOMER_NOTIFICATION tasks from Clover claims. Next: wire a real PostgreSQL pool and trusted TAKATAK-verified tenant mapping; schedule bounded worker runs with alerts and operator reconciliation UI; resolve crash/retry tests under real PostgreSQL; validate that the signed webhook always persists the session/payment event before worker processing; verify merchant print behavior. Keep the server gate shut before these checks.
+
+## 2026-10-28 — Owner-reported UX bug and verified next actions
+
+1. **Menu lag / Desserts category:** commits `b927e59f8`, `b88ec0f62` and `747cb837c` changed scroll/sticky/animations; perform real mobile/desktop and keyboard test on deployed exact SHA, not just source review. Preserve PR #12 simplified layout.
+2. **Required Clover modifier sequencing:** `a9389f835` sorts base / sauce / garnish / beverage / trio / combo / extras while keeping Clover min/max/ids/prices; `c88097721` adds tests. Check representative burger, pita, pizza, chicken, desserts/trio/combos and group membership. No fake group on unrelated items.
+3. **CI repair:** runner now provisioned (supersedes earlier issue #7 status). Run 40364935041 had real execution: build/typecheck pass, lint 25 Prettier errors, SQL Node fixture 4/5. GPT-6 changed test to `scripts/sql-migration-check.cases.mjs` and fixed `$$` fixture; await newest build/lint/Vitest/SQL success, repair other formatting failures without bypassing tests.
+4. **Real Clover and #5/#6:** project Drive journal reports merchant ecomm/webhook/REST credentials prepared externally, but **not installed in Coolify**. Do not enable card charges before verified PostgreSQL, webhook/outbox, tenant identity and signed end-to-end reconciliation. Keep the source-only distinction.
+5. **Handoff:** [GitHub 2026-10-28 notes](agent-notes/2026-10-28-menu-clover-audit.md) and [Drive PPP project notes](https://docs.google.com/document/d/1M9aEd9S-IN-oH_ZcMB5i5cCFgd5Q2CFCXzACnQxP83k/edit). Update both after further changes.
