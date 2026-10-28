@@ -1,5 +1,10 @@
 import type { MenuItem, OrderMode } from "@/data/menu";
-import { checkSelections, optionsTotal, selectionSummary, type LineSelections } from "@/lib/modifiers";
+import {
+  checkSelections,
+  optionsTotal,
+  selectionSummary,
+  type LineSelections,
+} from "@/lib/modifiers";
 
 /** Chosen option per modifier group: `{ [groupId]: choiceId }` (several options: comma-separated). */
 export type { LineSelections };
