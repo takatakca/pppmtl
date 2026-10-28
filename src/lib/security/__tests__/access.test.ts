@@ -49,6 +49,10 @@ describe("temporary administrator authorization", () => {
     expect(validateAdminCredential("x".repeat(1025))).toBe(false);
   });
 
+  it("rejects oversized cookie values before parsing a temporary admin session", () => {
+    expect(verifyAdminSession("x".repeat(257), signing, now)).toBe(false);
+  });
+
   it("accepts valid session and rejects expired, future-dated, tampered or foreign cookies", () => {
     const t = Math.floor(now / 1000);
     const valid = signedAdmin(t + 60);
@@ -64,6 +68,11 @@ describe("temporary administrator authorization", () => {
 });
 
 describe("signed browser-scoped order receipts", () => {
+  it("rejects oversized receipt cookies before HMAC or payload parsing", () => {
+    expect(verifyOrderGrant("a".repeat(4097), customerSecret, now)).toEqual([]);
+    expect(verifyOrderGrant(signedOrders(["ord_checkout123"], Math.floor(now / 1000) + 60), customerSecret, now)).toEqual(["ord_checkout123"]);
+  });
+
   it("returns only authorized order ids, not names or phone-based matches", () => {
     const t = Math.floor(now / 1000);
     const ids = ["ord_checkout123", "ord_checkout456"];
