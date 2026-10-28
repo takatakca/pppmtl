@@ -1,4 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Minus, Phone, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { menuRepository } from "@/lib/menu-repository";
@@ -19,12 +20,27 @@ export function CartPanel() {
   const totals = cartTotals(cart);
   const marketplaces = marketplaceChannels(location, mode).filter((c) => c.href);
 
+  useEffect(() => {
+    if (!cartOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeCart();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [cartOpen, closeCart]);
+
   if (!cartOpen) return null;
 
   return (
     <div className="dim-in fixed inset-0 z-[88] flex justify-end bg-background/80 backdrop-blur-sm">
       <aside
         role="dialog"
+        aria-modal="true"
         aria-label={t("Your order", "Votre commande")}
         className="slide-in-right-panel flex h-full w-full max-w-md flex-col border-l border-border bg-card"
       >
@@ -44,7 +60,7 @@ export function CartPanel() {
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+        <div className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-5 py-4">
           {cart.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center">
               <ShoppingBag className="h-8 w-8 text-muted-foreground" />
