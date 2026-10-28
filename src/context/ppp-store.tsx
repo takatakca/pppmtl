@@ -13,6 +13,7 @@ import { track } from "@/lib/analytics";
 import {
   canAddCartLine,
   newLine,
+  reconcileSavedCart,
   unitPriceFor,
   type CartLine,
   type LineSelections,
@@ -138,6 +139,9 @@ export function PPPProvider({ children }: { children: ReactNode }) {
   const [locationSheetOpen, setLocationSheetOpen] = useState(false);
   const [orderSheetOpen, setOrderSheetOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [cartRecovery, setCartRecovery] = useState<{ removed: number; updated: number } | null>(
+    null,
+  );
 
   useEffect(() => {
     try {
@@ -159,19 +163,26 @@ export function PPPProvider({ children }: { children: ReactNode }) {
         ) {
           stored.selectedLocationId = defaults.selectedLocationId;
         }
-        // A saved cart is priced again from today's menu (Clover prices and options); gone items are dropped.
-        if (Array.isArray(stored.cart)) {
-          stored.cart = stored.cart.flatMap((line) => {
-            if (!line || typeof line.itemId !== "string") return [];
-            const item = menuRepository.getItem(line.itemId);
-            if (!item) return [];
-            const selections = keepKnownSelections(
-              item.modifierGroups ?? [],
-              line.selections ?? {},
-            );
-            if (!canAddCartLine(item, line.quantity, selections, stored.locationId)) return [];
-            return [{ ...line, selections, unitPrice: unitPriceFor(item, selections) }];
-          });
+        // Always reconcile historical localStorage against today's Clover-backed catalog.
+        // Tell the guest when obsolete items/options/prices changed instead of hiding it.
+        if (stored.cart !== undefined) {
+          const savedCart = stored.cart;
+          const recovery = reconcileSavedCart(
+            savedCart,
+            menuRepository.getItem,
+            stored.locationId ?? defaults.locationId,
+          );
+          stored.cart = recovery.lines;
+          const removed = recovery.removed + (Array.isArray(savedCart) ? 0 : 1);
+          if (removed || recovery.updated) {
+            setCartRecovery({ removed, updated: recovery.updated });
+          }
+          // Save the sanitized copy so a reload does not repeat the same warning.
+          try {
+            window.localStorage.setItem(KEY, JSON.stringify(stored));
+          } catch {
+            /* storage unavailable */
+          }
         }
         setState((s) => ({ ...s, ...stored }));
       }
@@ -248,7 +259,10 @@ export function PPPProvider({ children }: { children: ReactNode }) {
         persist({ ...state, cart: state.cart.filter((l) => l.lineId !== lineId) }),
       clearCart: () => persist({ ...state, cart: [] }),
       cartOpen,
-      openCart: () => setCartOpen(true),
+      openCart: () => {
+        setCartRecovery(null);
+        setCartOpen(true);
+      },
       closeCart: () => setCartOpen(false),
       searchOpen,
       searchSeed,
@@ -311,7 +325,51 @@ export function PPPProvider({ children }: { children: ReactNode }) {
     };
   }, [state, persist, searchOpen, searchSeed, locationSheetOpen, orderSheetOpen, cartOpen]);
 
-  return <PPPContext.Provider value={value}>{children}</PPPContext.Provider>;
+  const recoveryMessage = cartRecovery
+    ? state.lang === "fr"
+      ? `Votre panier sauvegardé a changé : ${cartRecovery.removed} article(s) retiré(s), ${cartRecovery.updated} article(s) mis à jour. Vérifiez les choix et les prix avant de commander.`
+      : state.lang === "es"
+        ? `Tu pedido guardado cambió: ${cartRecovery.removed} artículo(s) eliminado(s) y ${cartRecovery.updated} actualizado(s). Revisa las opciones y los precios.`
+        : `Your saved cart changed: ${cartRecovery.removed} item(s) removed and ${cartRecovery.updated} updated. Review choices and prices before ordering.`
+    : "";
+
+  return (
+    <PPPContext.Provider value={value}>
+      {children}
+      {cartRecovery && !cartOpen && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-20 left-3 right-3 z-[96] mx-auto max-w-lg border border-primary bg-card p-4 text-foreground shadow-xl sm:bottom-5"
+        >
+          <p className="text-sm leading-relaxed">{recoveryMessage}</p>
+          <div className="mt-3 flex flex-wrap gap-3 text-xs font-bold uppercase tracking-wider">
+            <button
+              type="button"
+              className="bg-primary px-4 py-2 text-primary-foreground focus-ppp"
+              onClick={() => {
+                setCartRecovery(null);
+                setCartOpen(true);
+              }}
+            >
+              {state.lang === "fr"
+                ? "Vérifier mon panier"
+                : state.lang === "es"
+                  ? "Revisar mi pedido"
+                  : "Review my cart"}
+            </button>
+            <button
+              type="button"
+              className="border border-border px-4 py-2 focus-ppp"
+              onClick={() => setCartRecovery(null)}
+            >
+              {state.lang === "fr" ? "Fermer" : state.lang === "es" ? "Cerrar" : "Dismiss"}
+            </button>
+          </div>
+        </div>
+      )}
+    </PPPContext.Provider>
+  );
 }
 
 export function usePPP() {
