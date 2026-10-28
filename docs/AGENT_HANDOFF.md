@@ -1,6 +1,46 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
 
+## CURRENT HANDOFF — 2026-10-28 (America/Toronto) — UX mobile, Clover and CI
+
+**Source of truth:** GitHub `takatakca/pppmtl`, branch `main`; read `AGENTS.md` and `WORKLOG.md` before touching files. **Latest HEAD observed before this handoff commit:** `74e1767606a0388c725d5244505053027731443b`. This handoff and WORKLOG will produce newer SHA(s), so fetch actual HEAD on resumption. Two agents were working in parallel on 28 Oct; preserve their different work and check active claims before proceeding. No PR was open at initial check.
+
+**Owner's explicit priorities (28 Oct):** fix sticky/swipe/lag of `/menu` categories (especially Desserts); present product's *existing* Clover modifier groups in kitchen order (required main choice, sauce, garnishes/vegetables, beverage, trio, combo, extras, where present); keep real IDs/prices/limits, never add fake categories; code notes at entry and exit in GitHub, then project-specific mirror in Google Drive. Don't change separate franchise UI/brands or owner-approved finished yellow Canva imagery (#18).
+
+### Completed source changes (pushed, not mobile/live verified)
+
+- `77b3102b6`: WORKLOG claim **before** coding; another agent simultaneously claimed a related task in a separate WORKLOG line, which must be reconciled, not deleted.
+- `b927e59f8` `src/routes/menu.tsx`: take sticky category nav out of short intro section; replace competing IntersectionObserver / `scrollIntoView` scroll effects with passive requestAnimationFrame scrollspy, in-nav horizontal chip centering and immediate calculated category jump. Prevent unexpected vertical document scroll when selecting Desserts.
+- `a9389f835` `src/lib/integration/providers/clover/site-groups.ts`: sort Clover groups by base/required first, sauce, garnish, drink, trio, combo, extra; retain actual menu-product group membership, option choice order, Clover min/max/price and ID. `c88097721` adds synthetic tests.
+- `b88ec0f62` `src/components/order/item-sheet.tsx`: when required selection missing, scroll inside item-sheet content, not the page behind modal.
+- `747cb837c` `src/components/menu/product-card.tsx`: remove staggered entrance animation from category grid cards, reducing perceived tap lag.
+- Another active agent committed a focused detailed report `docs/agent-notes/2026-10-28-menu-clover-audit.md` (`1f211c1`), moved Node-only fixture out of Vitest discovery to `scripts/sql-migration-check.cases.mjs` (`004e9c9`, `e1d64aa`, `9702122`) and updated canonical `PROJECT_STATUS`, `TASK_QUEUE`, `DEPLOYMENT`, `DECISIONS` (commits `22d286a`, `d89c50c`, `ef3df22`, `d1c3145`). **Do not re-create these notes**.
+- **Real GitHub CI now assigns runners**, superseding old runnerless #7. Run `40638818589` on `747cb837c` executed Nitro build **pass** and TypeScript **pass**, but lint blocked on 68 formatting errors and DB Node fixture 4/5. This session corrected the `$;` to `$$;` SQL valid-fixture typo at `74e1767606` (earlier `26b1a8e` edit was a no-op because JS `String.replace` interprets `$$` specially). Verified updated blob SHA changed to `5f2be452`.
+- One-shot narrowly scoped Prettier workflow `.github/workflows/format-once.yml` modified in `95eaba2b`: push-triggered only when that workflow file itself changes, no infinite loop, no destructive force-push; format only 9 CI-reported source paths. GitHub Actions formatter run `40639106678` **succeeded**, bot pushed `783fe3e3b09a20d62dd9cb21bcb4f5f2e0405f71`; this is formatting only. Fresh CI `40639198899` for `74e1767606` was **queued** at last observation. Read jobs/logs of *newest main* run, fix any remaining actual Vitest/SQL/lint issues.
+- Google Drive documentation: project-specific existing file **`2026-10-28 — PPPMTL — Relève technique menu, Clover, CI et déploiement — GPT-6`** at https://docs.google.com/document/d/1M9aEd9S-IN-oH_ZcMB5i5cCFgd5Q2CFCXzACnQxP83k/edit (other agent wrote full past context). Global TAKATAK `00 — JOURNAL — État en direct` at https://docs.google.com/document/d/14ONf8gWaMnX5cHiOWMheI0IDUugLfsR_MZ_gj0Szoqk/edit received a separate, dated high-level PPP section through Docs API, preserving old content. Update project-specific doc with final CI result and commit, not a duplicate Google Doc.
+
+### Current verification limits and actual environment
+
+- **Historically verified 26 Oct:** `pppmtl.com` served via native GitHub-App auto deploy to Coolify resource `pppmtl` on Contabo vps2; exact `48c00a4` had been verified finished/healthy. **No October 28 deployed SHA/interactive mobile test confirmed by this session.** Public `/menu` and `/healthz` could not be fetched via the current public verification tool; connected browser could not open tabs because not launched in originating browser context.
+- **Clover:** site catalog is a 2026-10-07 snapshot export (175 items, 218 groups); server can query live Clover if a valid configured token exists, but **this session did not confirm a live connected merchant account**. Drive central journal says merchant e-commerce/webhook/REST credentials were prepared, yet not installed in Coolify. Never expose/copy secrets. Live checkout remains intentionally off pending #5/#6.
+- **Build/typecheck on `747cb837c`: passed (CI 40638818589).** Lint on that SHA failed before format bot; SQL test failed fixture before correction. Newest checks not yet green. `PPPMTL One-Time Formatter` run succeeded on 783fe3e; do not mistake this for full suite passing.
+- GitHub Actions deployment-fallback `.github/workflows/deploy-coolify.yml` is **skipped by design**: native Coolify auto-deploy is the active channel, and both must never be enabled together.
+- GitHub Issues still include #5 central TAKATAK entitlement/tenant gate, #6/#13 durable PostgreSQL checkout/webhooks/outbox, #7 historical runner issue, and newer #14–#18. These are not closed by menu UX changes.
+
+### Next exact sequence
+
+1. Fetch latest `main` (there were concurrent agents); read open WORKLOG claims, latest CI jobs and logs. Confirm build, typecheck, ESLint, Vitest, PostgreSQL 0001–0003 and SQL rollback probes. If red, fix demonstrated defects without disabling checks.
+2. Verify Coolify deployment status and **exact SHA** for `main`; check `/healthz`, ensure no accidental Clover payment enabled. If inaccessible, record that instead of claiming instant deploy succeeded.
+3. Interactive smoke tests: mobile Desserts category tap, swipe, sticky nav, browser back, modal required-group scroll; desktop mouse and keyboard, reduced-motion. Source code review is *not* the same as end-to-end test.
+4. Validate real burger/pita/pizza/chicken/dessert modifier groups against Clover (required constraints and payload parity); remove no options or prices. If verified authenticated Clover credentials + DB durable release exist then resume scoped integration; otherwise keep checkout fail-closed.
+5. Update the *same* project Google Drive handoff note and GitHub docs after new evidence, then finish WORKLOG line; never disclose secrets or create duplicate project records.
+
+**Access and blockers:** A current Coolify deployment status inspector/authorized cloud browser, legitimate app-side Clover credentials and `DATABASE_URL` (not exposed in documents), verified TAKATAK authorization scope, and hands-on device inspection are still needed for end-to-end verification. No payment, order or print success claimed.
+
+---
+
+
+
 ## CURRENT HANDOFF — 2026-10-28 01:xx (America/Toronto) — menu / Clover / CI / Drive
 
 **Repo:** `takatakca/pppmtl`, `main`; latest main reviewed just before this handoff: `74e1767606a` (another agent's SQL fixture correction). **Fetching current HEAD is mandatory before working; ongoing agents are publishing concurrently.** Prior October 26 verified Coolify release was `48c00a4`, NOT proof the 28 October source is live.
