@@ -109,3 +109,11 @@ See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.m
 | Decision | Rationale | Consequence |
 |---|---|---|
 | Reject malformed checkout requests **before** guest identity sanitizer or order creation | TypeScript and generic `inputValidator` do not check runtime JSON shape; missing customer/lines could previously raise a 500 | `hasCheckoutPayloadShape` and `validateOrder` reject invalid values/oversized line lists with a safe `menu_changed` error; `placeOrder` validates before sanitizing guest identity; CI [40645275982](https://github.com/takatakca/pppmtl/actions/runs/40645275982) green at `db58af73`. Keep real Clover/DB/identity release gates unchanged. |
+
+## 2026-10-28 — Saved-cart transparency and dialog keyboard containment
+
+| Decision | Reason | Outcome |
+|---|---|---|
+| Inform guests when restoring old cart alters or removes saved lines | Silently dropping invalid options/products is safe but confusing | Pure `reconcileSavedCart` preserves valid Clover prices/choices, reports removed/updated counts, and client shows dismissible FR/EN/ES notice and Review cart action; no fabricated required choice. |
+| Keep focus in a product/cart dialog until dismissed | Tab could escape behind a visually modal panel; changing related products could reset focus outside | Shared hook handles Tab/Shift-Tab, Escape, background scroll and previous-focus restoration on close. Source CI `40646740316` green; real device/screen-reader behavior remains to verify. |
+| Do not conflate successful CI with live Coolify deployment or card payments | Source is testable but server secrets and durable order integration are unverified | Payments remain disabled; first verify running Coolify SHA/health and requirements #5/#6/#13 before production launch. |
