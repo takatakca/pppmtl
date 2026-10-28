@@ -96,3 +96,11 @@ Production Clover webhook processing is **fail-closed** (HTTP 503) while `orders
 ### 2026-10-16 — worker activation prerequisites
 
 The codebase now contains `processPppCloverFulfillmentBatch(pool, verifiedServerTenantId, maxTasks)`, but **no deployed scheduler or database connection starts it**. Never expose it as an unauthenticated HTTP route. Invoke only from a trusted background job with PPP-scoped TAKATAK entitlement and a restricted database role after applying and testing 0001–0003. Each worker batch must be monitored for `manualReview`/`quarantinedPrints`; uncertain physical prints require a restaurant operator to verify and clear them, not automated replay.
+
+## 2026-10-28 — Live deployment vs source verification
+
+- Historical Coolify production server/application was verified on 26 Oct for SHA `48c00a4`; native GitHub-App push deployment is active. **Do not enable Actions fallback alongside native deployment.**
+- Mobile menu corrections `b927e59f8`/`b88ec0f62`/`747cb837c`, modifier ranking `a9389f835` and Node SQL suite corrections `004e9c9`/`e1d64aa`/`9702122` are committed; their exact current-running Coolify SHA has not been verified here. The public `/menu` and `/healthz` pages were inaccessible to the external verification tool; verify Coolify deployment ID, current container SHA and health using an authorized connector before success claim.
+- GitHub Actions runner allocation now works; latest inspected initial CI run `40364935041` failed at Prettier and Node test fixture, NOT runner provisioning. Don't skip required build/test gate.
+- Clover credentials may exist in secure merchant administration per TAKATAK central journal but were not confirmed set in Coolify; no `DATABASE_URL` validated. Production card checkout must remain disabled until #5/#6 end-to-end verified.
+- Project documentation mirrored into Drive at https://docs.google.com/document/d/1M9aEd9S-IN-oH_ZcMB5i5cCFgd5Q2CFCXzACnQxP83k/edit, GitHub source note `docs/agent-notes/2026-10-28-menu-clover-audit.md`.
