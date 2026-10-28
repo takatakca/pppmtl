@@ -126,3 +126,9 @@ See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.m
 | Reject unsupported Clover DELIVERY before creating an order | Clover Hosted Checkout integration is documented as pickup-only; a prior integration test expected late refusal but now expects safer pre-creation refusal. | Clear error with no erroneous temporary order/guest grant. |
 | Reject abnormally long untrusted checkout/admin sign-in fields before data processing | Typed input validators alone do not validate runtime JSON. | Length/shape gates, test coverage, and no new secrets or rate-limit bypass; full tenant-specific auth and trusted edge rate limiting remain open #5. |
 | Separate storefront release approval from production card payment approval | Source CI proves Node/PostgreSQL test suite; production durable DB/runtime/Clover keys/worker and exact Coolify running image remain unverified. | **Storefront: pending exact SHA + mobile smoke. Paid Clover checkout: NO-GO** until all #5/#6/#13 prerequisites are demonstrated. |
+
+## 2026-10-28 — Guest order public endpoint boundary
+
+- Reject malformed customer order list/read/cancel runtime inputs before dereferencing fields or calling cancellation. TanStack generic inputValidator type alone is not a runtime parser. Return safe empty/null/not-found results and keep signed HttpOnly guest grant as the only authorization; phone filters are never credentials.
+- Reject oversized untrusted signed cookie values before cryptographic verification: order receipt 4096 chars max, admin session 256 chars max; signed fixtures continue to work. Source CI 40740449073 and 40740927778 SUCCESS.
+- A green CI and readable /menu page do not prove native Coolify running SHA or safe real payment. Keep production checkout NO-GO until durable orders/TAKATAK tenant/Clover signed webhook/outbox and charge/refund verified.

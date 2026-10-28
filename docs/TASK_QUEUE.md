@@ -113,3 +113,7 @@ The opt-in `processPppCloverFulfillmentBatch` worker and mocked tests have been 
 3. **Then:** real Android/iOS and desktop smoke (Desserts swipe, required Clover options, cross-sell, cart saved-state warning, keyboard focus trap, no asset 404, checkout fail-closed).
 4. **Payment release NO-GO until #5/#6/#13:** actual tenant-authorized PostgreSQL, applied migrations and backup/restore, order persistence before redirect, signed merchant-verified webhooks, durable inbox/outbox/worker, printer reconciliation and controlled refund test. No replacement of `ordersPersistAcrossRestarts=false` without wiring and proving all of these.
 5. [Detailed source and production checklist](agent-notes/2026-10-28-release-security-gate.md).
+
+## 2026-10-28 — Guest order input boundary (source completed)
+
+DONE: validate guest order read/history/cancel runtime JSON, limit malformed receipt/admin cookies before signature verification and test the safe behavior. CI 40740927778 SUCCESS at 762972778 (both jobs). NEXT: verify native Coolify running SHA, anonymous /dev/menu-audit=401, /healthz=200, webhook GET=405, real mobile menu/cart, approved Canva imagery and rollback. NO-GO real Clover payments until authorized production PostgreSQL, tenant-scoped auth, signed webhook/outbox/worker and controlled charge/refund #5/#6/#13.

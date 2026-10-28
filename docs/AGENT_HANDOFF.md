@@ -1,5 +1,22 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-10-28 ~14 h EDT — Guest-order runtime security, CI GREEN and Drive sync
+
+Verified resumption: main at 82a1feb7c4cfe2794d3a9c04a5864f83939e4551, full CI 40660324160 SUCCESS; 13 branches, zero open PR; reviewed AGENTS.md, WORKLOG.md, handoff, status, queue, deployment, decisions, open issues and BOTH Google Docs. The /dev SSR security work 27a0077 was already present; not duplicated. An unrelated concurrent social note in WORKLOG, SHA 7606dc5, was preserved. This task was claimed before coding in WORKLOG commit 410cb21bea2a8fd6d25e1c1985d28c0a4987f0ef.
+
+Code: added pure runtime guards in src/lib/orders/guest-request-input.ts; wired them into cancelMyOrder, listMyOrders, getOrderById in src/lib/orders/orders.functions.ts so malformed/oversized JSON returns safe not-found/null/empty results before reading fields or touching orders. Signed same-browser HttpOnly guest receipt grants STILL exclusively authorize access, never a caller-supplied phone or customer ID. Tests: src/lib/orders/__tests__/guest-request-input.test.ts. Additional bounded signed guest receipt cookies (4096 chars) and admin session cookies (256 chars) before HMAC/JSON/splitting in order-access.server.ts and admin.server.ts, with regression tests in security/__tests__/access.test.ts.
+
+Every source commit on main, in order: 4cebd8cc22c254ca6e8c9fe1d167b38629cfc348; bd7569801732a180d0d75cf80c3fae19e2a8f5ae; a27bcdb9ed13697a386f8a85c2849628c90bd353; c4661daa651498c8fe72c85dce11a17768a8ea5e; fec0009a5d163e828a14444eda4dce77a0372b5e; df190758e193630739f20d2be045aec36ccc5ab8; d1654e88d3655efdded1dd890dc1161c71e02c6e; b3f78b0046560d80d7b17bb4dfca53e9d1ee4abf; ec4e6e24b9c6e10106b2e311e401fc765a97e60f; 762972778b989236279ef8447cd79de170339e9b. Intermediate CI failed formatting only, which was repaired. VERIFIED exact source CI 40740449073 SUCCESS on df190758e193630739f20d2be045aec36ccc5ab8, and CI 40740927778 SUCCESS on 762972778b989236279ef8447cd79de170339e9b; quality (Nitro/Bun build, TypeScript, lint, Vitest) and PostgreSQL 16 tenant/RLS/atomic payment/worker tests both GREEN. Check CI again after this documentation-only commit.
+
+Google Drive confirmed appended/read back in-place: project technical document https://docs.google.com/document/d/1M9aEd9S-IN-oH_ZcMB5i5cCFgd5Q2CFCXzACnQxP83k/edit and TAKATAK live journal https://docs.google.com/document/d/14ONf8gWaMnX5cHiOWMheI0IDUugLfsR_MZ_gj0Szoqk/edit. The PPP document previously lacked latest verified main 82a1feb7/CI 40660324160, now corrected; no duplicate files, no secrets.
+
+Live evidence remains incomplete: public /menu crawl dated today showed 17 categories/175 products, but /healthz fetch unavailable and container curl DNS failed; no running native Coolify container SHA, live anonymous /dev/menu-audit 401, device tests or rollback observed. The GitHub Actions Coolify fallback skip is intentional. No real Clover payments: ordersPersistAcrossRestarts=false, missing proven production DB + TAKATAK tenant identity + signed merchant-correlated webhook/outbox/worker/charge-refund gates #5/#6/#13. No server, DNS, credentials, payment or artwork changed.
+
+Next: fetch newest main/WORKLOG and last CI; verify Coolify app r13hz1mmbi4eeoc6ssxbvxnv actual running SHA, /healthz 200, anonymous /dev/menu-audit 401, Clover webhook GET 405 and mobile UX; keep payment NO-GO pending durable backend proof.
+
+---
+
+
 ## 04:56 EDT 2026-10-28 — /dev security guard: code and CI verified; live deploy unverified
 
 **Verified source:** claim `4db58cf`, security fix `27a0077ce55ff8ed9e02784740cc29a8286eb87a`, [CI 40660026700](https://github.com/takatakca/pppmtl/actions/runs/40660026700) completed **SUCCESS** on that exact code SHA (Nitro build, TS, lint, app/security tests, PostgreSQL 16 tenant/payment/worker). Prior anonymous `/dev/menu-audit` exposure documented in issue #5 (HTTP 200 at 02:20 EDT). New `src/server.ts` guard returns HTTP **401 no-store** before SSR for unauthenticated `/dev/*`, verifies existing signed admin cookie, rejects duplicate cookies/encoded aliases; SPA route redirects unauthenticated client navigation. Public Clover webhook and storefront paths unaffected in code. Full evidence appended to [release-security-gate note](agent-notes/2026-10-28-release-security-gate.md).
