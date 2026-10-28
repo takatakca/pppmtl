@@ -102,9 +102,7 @@ export function reconcileSavedCart(
     }
     const unitPrice = unitPriceFor(item, selections);
     const lineId =
-      typeof line.lineId === "string" &&
-      line.lineId.length > 0 &&
-      !seenLineIds.has(line.lineId)
+      typeof line.lineId === "string" && line.lineId.length > 0 && !seenLineIds.has(line.lineId)
         ? line.lineId
         : `${item.id}:restored:${result.lines.length}`;
     const changed =
