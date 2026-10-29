@@ -31,7 +31,9 @@ function status(capability: CapabilityStatus["capability"]): CapabilityStatus {
 }
 
 const unavailable = () =>
-  notConfigured<never>("Food Hub bridge is not activated; no order or sync was transmitted.");
+  notConfigured<never>(
+    "Food Hub bridge is not activated; no order or sync was transmitted.",
+  );
 
 export const foodhubAdapters: ProviderAdapterSet = {
   provider: "foodhub",
