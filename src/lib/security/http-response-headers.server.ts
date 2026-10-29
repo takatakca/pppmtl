@@ -67,7 +67,9 @@ export function applyHttpSecurityHeaders(request: Request, response: Response): 
   if (!FRAME_ANCESTORS.test(existingCsp)) {
     headers.set(
       "content-security-policy",
-      existingCsp ? `${existingCsp.replace(/;\s*$/, "")}; frame-ancestors 'self'` : "frame-ancestors 'self'",
+      existingCsp
+        ? `${existingCsp.replace(/;\s*$/, "")}; frame-ancestors 'self'`
+        : "frame-ancestors 'self'",
     );
   }
 
