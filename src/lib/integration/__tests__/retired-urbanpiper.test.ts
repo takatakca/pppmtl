@@ -10,8 +10,7 @@ import { locationIntegrationMappings } from "@/config/integration-locations";
 import { foodhubBridgeConfigured, foodhubAdapters } from "@/lib/integration/providers/foodhub/bridge";
 import {
   credentialPresence,
-  hasCredentials,
-  optionalCredential,
+  INTEGRATION_ENV_KEYS,
 } from "@/lib/integration/core/credentials.server";
 
 const route = Route as unknown as {
@@ -41,7 +40,7 @@ describe("owner-directed retirement of UrbanPiper", () => {
   });
 
   it("does not register the retired provider or select it for any PPP store", () => {
-    expect(adaptersFor("urbanpiper")).toBeUndefined();
+    expect(adaptersFor("urbanpiper" as never)).toBeUndefined();
     expect(providerHealth("loc-ndg-somerled").map((x) => x.provider)).toEqual([
       "foodhub",
       "clover",
@@ -62,8 +61,7 @@ describe("owner-directed retirement of UrbanPiper", () => {
     vi.stubEnv("URBANPIPER_API_KEY", "obsolete-do-not-use");
     vi.stubEnv("URBANPIPER_API_URL", "https://example.invalid");
     vi.stubEnv("URBANPIPER_WEBHOOK_SECRET", "obsolete-do-not-use");
-    expect(optionalCredential("URBANPIPER_API_KEY")).toBeUndefined();
-    expect(hasCredentials("URBANPIPER_API_KEY")).toBe(false);
+    expect(INTEGRATION_ENV_KEYS.every((key) => !key.startsWith("URBANPIPER_"))).toBe(true);
     expect(credentialPresence()).not.toHaveProperty("URBANPIPER_API_KEY");
     expect(credentialPresence()).not.toHaveProperty("URBANPIPER_WEBHOOK_SECRET");
   });
