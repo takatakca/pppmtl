@@ -45,8 +45,7 @@ export function optionalCredential(key: IntegrationEnvKey): string | undefined {
 
 /** Only names and presence bits, never secrets. */
 export function credentialPresence(): Record<IntegrationEnvKey, boolean> {
-  return Object.fromEntries(INTEGRATION_ENV_KEYS.map((key) => [key, read(key) !== undefined])) as Record<
-    IntegrationEnvKey,
-    boolean
-  >;
+  return Object.fromEntries(
+    INTEGRATION_ENV_KEYS.map((key) => [key, read(key) !== undefined]),
+  ) as Record<IntegrationEnvKey, boolean>;
 }
