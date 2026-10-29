@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { applyHttpSecurityHeaders } from "./lib/security/http-response-headers.server";
 import {
   devRequestAuthorized,
   devUnauthorizedResponse,
@@ -54,17 +55,20 @@ export default {
     try {
       // Authenticate internal /dev pages before SSR, never public API or storefront routes.
       if (isProtectedDevPath(new URL(request.url).pathname) && !devRequestAuthorized(request)) {
-        return devUnauthorizedResponse();
+        return applyHttpSecurityHeaders(request, devUnauthorizedResponse());
       }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      return applyHttpSecurityHeaders(request, await normalizeCatastrophicSsrResponse(response));
     } catch (error) {
       console.error(error);
-      return new Response(renderErrorPage(), {
-        status: 500,
-        headers: { "content-type": "text/html; charset=utf-8" },
-      });
+      return applyHttpSecurityHeaders(
+        request,
+        new Response(renderErrorPage(), {
+          status: 500,
+          headers: { "content-type": "text/html; charset=utf-8" },
+        }),
+      );
     }
   },
 };
