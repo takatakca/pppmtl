@@ -45,9 +45,7 @@ describe("owner-directed retirement of UrbanPiper", () => {
       "foodhub",
       "clover",
     ]);
-    expect(locationIntegrationMappings.every((m) => m.orderingProvider !== "urbanpiper")).toBe(
-      true,
-    );
+    expect(locationIntegrationMappings.every((m) => ["foodhub", "clover"].includes(m.orderingProvider))).toBe(true);
     for (const m of locationIntegrationMappings) {
       if (m.orderingProvider === "foodhub") {
         expect(m.providerLocationId).toBeNull();
