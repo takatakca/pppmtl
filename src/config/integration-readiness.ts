@@ -15,7 +15,8 @@ export const providerPlans: ProviderPlan[] = [
   {
     id: "foodhub",
     label: "TAKATAK Food Hub",
-    role: "Our first-party kitchen, order routing, marketplace connections and operations console.",
+    role:
+      "Our first-party kitchen, order routing, marketplace connections and operations console.",
     ppmOwns: "Brand, catalog, customer experience, store/tenant identity, verified checkout data.",
     providerOwns: "Kitchen state, dispatch, integrations, durable inbox, outbox and operator controls.",
     // The website-order API exists in foodhubca, but there is no approved
@@ -51,9 +52,28 @@ export interface ChecklistItem {
 }
 
 export const integrationRoadmap: ChecklistItem[] = [
-  { label: "1. Store + tenant mapping", detail: "Resolve exact PPP branch, TAKATAK tenant, Food Hub location code and brand; never guess." },
-  { label: "2. Own menu & images", detail: "Keep real Clover product facts and official PPP Canva images; publish only verified versions." },
-  { label: "3. Durable signed order handoff", detail: "Approve a server-to-server Food Hub contract, authentication, replay protection and persistent transactions before sending an order." },
-  { label: "4. Kitchen & delivery statuses", detail: "Only signed, merchant-matched, durable events may update orders and rider tracking." },
-  { label: "5. Controlled release", detail: "Run automated and staging failure tests, validate Coolify release SHA; keep real checkout disabled until #5/#6/#13 close." },
+  {
+    label: "1. Store + tenant mapping",
+    detail:
+      "Resolve exact PPP branch, TAKATAK tenant, Food Hub location code and brand; never guess.",
+  },
+  {
+    label: "2. Own menu & images",
+    detail:
+      "Keep real Clover product facts and official PPP Canva images; publish only verified versions.",
+  },
+  {
+    label: "3. Durable signed order handoff",
+    detail:
+      "Approve a server-to-server Food Hub contract, authentication, replay protection and persistent transactions before sending an order.",
+  },
+  {
+    label: "4. Kitchen & delivery statuses",
+    detail: "Only signed, merchant-matched, durable events may update orders and rider tracking.",
+  },
+  {
+    label: "5. Controlled release",
+    detail:
+      "Run automated and staging failure tests, validate Coolify release SHA; keep real checkout disabled until #5/#6/#13 close.",
+  },
 ];
