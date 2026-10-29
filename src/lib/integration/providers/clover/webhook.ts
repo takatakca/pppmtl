@@ -9,7 +9,8 @@
  *    pickup / paid note, then ONE print on the order printer (and the KDS set as order printer). An order that
  *    already carries the title is left alone, so a repeated webhook never prints a second ticket. The Food Hub
  *    kitchen tablet recognises website orders by that title.
- * It does not depend on the in-memory order store: on Cloudflare Workers another instance may hold the order.
+ * Signed events must match a locally tracked PPP checkout before Clover REST changes.
+ * Lost linkage is retryable, never permission to title/print another merchant order.
  */
 import type { WebhookAdapter, WebhookEvent } from "@/lib/integration/core/adapter";
 import type { IntegrationResult } from "@/lib/integration/core/contracts";
@@ -151,6 +152,19 @@ export async function handleCloverHostedCheckoutWebhook(request: Request): Promi
   try {
     const { applyCloverPayment } = await import("@/lib/orders/order-service");
     order = applyCloverPayment(event.checkoutSessionId, event.paymentId, approved);
+    if (!order) {
+      releaseWebhookDelivery(key);
+      logIntegrationEvent({
+        provider: "clover",
+        eventType: "payment.checkout_unmatched",
+        status: "error",
+        payloadReference: event.checkoutSessionId,
+      });
+      return new Response("Checkout session not linked to a PPP order", {
+        status: 503,
+        headers: { "Retry-After": "30", "Cache-Control": "no-store" },
+      });
+    }
     confirmation = approved ? await confirmInClover(event.paymentId, order) : null;
   } catch {
     // A transient exception after claiming a delivery is not a completed
