@@ -353,15 +353,15 @@ export async function submitOrder(orderId: string): Promise<OrderResult<Internal
 
 /**
  * Clover's Hosted Checkout webhook said the payment for this checkout session went through (or was declined).
- * Null when this server does not hold the order (another instance, or a restart): the Clover side is handled
- * by the webhook anyway.
+ * Null when the linked Clover checkout is unknown (another instance, restart,
+ * or an unrelated provider). The webhook must fail closed without touching Clover.
  */
 export function applyCloverPayment(
   checkoutSessionId: string,
   paymentId: string | null,
   approved: boolean,
 ): InternalOrder | null {
-  const order = findOrderByProviderId(checkoutSessionId);
+  const order = findOrderByProviderId("clover", checkoutSessionId);
   if (!order) return null;
   if (!approved) return updateOrder(order.id, { providerStatus: "payment_declined" });
   updateOrder(order.id, {
@@ -411,11 +411,12 @@ export async function getOrderStatus(orderId: string): Promise<OrderResult<Order
 
 /** Applied by the verified webhook receiver. */
 export function applyProviderStatusUpdate(
+  provider: IntegrationProviderId,
   providerOrderId: string,
   status: OrderStatus,
   providerStatus: string,
 ): InternalOrder | null {
-  const order = findOrderByProviderId(providerOrderId);
+  const order = findOrderByProviderId(provider, providerOrderId);
   if (!order) return null;
   return applyStatus(order.id, status, providerStatus);
 }
