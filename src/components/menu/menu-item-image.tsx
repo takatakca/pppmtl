@@ -1,4 +1,10 @@
 import { useState } from "react";
+import {
+  imageSourceKey,
+  markImageStatus,
+  visibleImageStatus,
+  type MenuImageLoadStatus,
+} from "./image-load-state";
 
 /**
  * THE single restaurant image component. The website decides the box; the
@@ -82,7 +88,16 @@ export function MenuItemImage({
   className?: string;
   priority?: boolean;
 }) {
-  const [status, setStatus] = useState<"loading" | "loaded" | "broken">(src ? "loading" : "broken");
+  const [loadState, setLoadState] = useState(() => ({
+    source: imageSourceKey(src),
+    status: (src ? "loading" : "broken") as MenuImageLoadStatus,
+  }));
+  // A reused product card may receive a different image URL. Never carry
+  // "broken" or "loaded" from the previous item into that new source.
+  const status = visibleImageStatus(loadState, src);
+  const markStatus = (next: MenuImageLoadStatus) => {
+    setLoadState((previous) => markImageStatus(previous, src, next));
+  };
   const box = BOX[variant ?? size];
 
   return (
@@ -90,15 +105,15 @@ export function MenuItemImage({
       {src && status !== "broken" && (
         <img
           ref={(el) => {
-            if (el?.complete && el.naturalWidth > 0) setStatus("loaded");
+            if (el?.complete && el.naturalWidth > 0) markStatus("loaded");
           }}
           src={src}
           alt={alt}
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : "auto"}
           decoding="async"
-          onLoad={() => setStatus("loaded")}
-          onError={() => setStatus("broken")}
+          onLoad={() => markStatus("loaded")}
+          onError={() => markStatus("broken")}
           className={`h-full w-full transition-opacity duration-300 ${
             fit === "contain" ? "object-contain p-1.5" : "object-cover"
           } ${status === "loaded" ? "opacity-100" : "opacity-0"}`}
