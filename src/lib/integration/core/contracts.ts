@@ -10,7 +10,7 @@
  */
 
 export type IntegrationProviderId =
-  "local" | "foodhub" | "urbanpiper" | "ordermark" | "clover" | "takatak" | "uber_eats" | "doordash" | "skip";
+  "local" | "foodhub" | "ordermark" | "clover" | "takatak" | "uber_eats" | "doordash" | "skip";
 
 export type IntegrationCapability =
   "menu" | "orders" | "customers" | "locations" | "payments" | "webhooks";
@@ -133,7 +133,7 @@ export interface UniversalOrderLine {
 export interface UniversalCustomerRef {
   /** TAKATAK master identity id — the authority. */
   takatakCustomerId: string | null;
-  /** Provider-side customer id (UrbanPiper/Clover), when one exists. */
+  /** Provider-side customer id (Food Hub/Clover), when one exists. */
   externalCustomerId: string | null;
   preferredName: string | null;
   email: string | null;
