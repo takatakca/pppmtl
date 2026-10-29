@@ -3,7 +3,7 @@
 Newest first, one line per piece of work. Rule: `AGENTS.md` › Work log rule.
 Format: `YYYY-MM-DD | agent | branch → PR | status | what | next step`
 
-- 2026-10-28 | GPT-6 (menu image recovery + gift-card CTA a11y) | fix/franchise-truthful-status-gifts-20261028 → PR #19 | active | Fix stale broken/loaded menu photo state on product source changes and misleading phone CTA; tests and focus/pressed semantics only; no real checkout | Verify exact PR CI then update Tak Tak #20
+- 2026-10-28 | GPT-6 (menu image recovery + gift-card CTA a11y) | fix/franchise-truthful-status-gifts-20261028 → draft PR #19 | PR #19: code CI GREEN, no merge/deploy | Scoped menu photo load/error status by source (3 Vitest regression cases); repaired direct tel: gift-card CTA, aria-pressed amount selectors, working sender/message preview; source head e76326c2, exact quality+PostgreSQL CI 40792139824 SUCCESS | Tak Tak: check final doc-only SHA CI, QA FR/EN/ES on devices, inspect real Canva mapping & verify running Coolify SHA; preserve checkout NO-GO
 
 - 2026-10-28 | GPT-6 (PPP franchise copy consistency) | fix/franchise-truthful-status-gifts-20261028 → draft PR #19 + issue #20 | PR #19 (no merge/deploy; latest head CI pending) | Registry-backed location timeline + 3 tests; honest non-transactional gift-card copy/logo/links across pages; initial PR CI 40790238039: DB green, 5 Prettier errors fixed in 8ec9a43/a6d20fc; handoff 6b3ce45 | Tak Tak: check exact final PR SHA/CI, review operational location facts, QA FR/EN/ES, then authorized native Coolify SHA verification and controlled merge; checkout NO-GO
 
