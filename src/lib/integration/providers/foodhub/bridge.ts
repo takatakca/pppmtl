@@ -26,14 +26,13 @@ function status(capability: CapabilityStatus["capability"]): CapabilityStatus {
     capability,
     available: false,
     reasonEn: "TAKATAK Food Hub bridge awaits verified tenant, store and durable order handoff.",
-    reasonFr: "Le pont TAKATAK Food Hub attend la validation du tenant, du restaurant et des commandes durables.",
+    reasonFr:
+      "Le pont TAKATAK Food Hub attend la validation du tenant, du restaurant et des commandes durables.",
   };
 }
 
 const unavailable = () =>
-  notConfigured<never>(
-    "Food Hub bridge is not activated; no order or sync was transmitted.",
-  );
+  notConfigured<never>("Food Hub bridge is not activated; no order or sync was transmitted.");
 
 export const foodhubAdapters: ProviderAdapterSet = {
   provider: "foodhub",
