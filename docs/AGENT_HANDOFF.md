@@ -1,5 +1,22 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-10-28 ~20:20 EDT — Controlled source security audit / PR #21 DRAFT / CI GREEN
+
+**Owner request:** Authorized non-destructive PPP security assessment; no production exploit, brute force, traffic surge, real checkout, Clover/UrbanPiper call or DNS/server write. Public "/" and "/menu" returned readable SSR text (175 menu items / 17 categories). "/healthz", "/dev/menu-audit" and "/admin/sign-in" could not be retrieved by the web client; container DNS returned HTTP 000 for all attempted routes. Connected browser lacked originating session. These are **tool/access limitations**, NOT a production outage or live security weakness. Do not claim a verified live penetration-test result.
+
+**Finding in source only:** Main src/server.ts did not apply a central security header policy. Native Coolify/proxy might already provide headers; edge status is unverified. New independent **draft PR #21** https://github.com/takatakca/pppmtl/pull/21 applies conservative X-Frame-Options SAMEORIGIN, CSP frame-ancestors self, X-Content-Type-Options nosniff, and Referrer-Policy strict-origin-when-cross-origin. It enforces Cache-Control no-store on private/account/admin/checkout/orders/track/dev/API/write/Set-Cookie/error responses and X-Robots-Tag noindex on private paths; preserves redirects, cookies and stronger pre-existing CSP. Deliberately avoids global script/style CSP and HSTS, which require approved live browser/TLS checks. Six Vitest suites test clickjacking policies, cache behavior, URL-encoded path aliases, cookies, existing CSP and immutable redirects. No code merged, no server updated.
+
+**Exact source CI:** https://github.com/takatakca/pppmtl/actions/runs/40793223598 = completed SUCCESS on code SHA ff1024b954125d70c421074bbd0ac0d811a329e9, both jobs green (Nitro TypeScript lint tests + PostgreSQL 16 tenant/RLS atomic payments/outbox). First CI run failed on only two Prettier formatting issues, subsequently fixed. Doc-only commits follow; recheck HEAD CI before merge. Base main was c6aacee9f180c1bc0849cf86b3e708c8f4ed2057.
+
+**Coordination:** UX PR #19 remains independent; concurrent other-agent security PR #22 (https://github.com/takatakca/pppmtl/pull/22) covers bounded Clover/UrbanPiper callbacks and cross-provider ID isolation. DO NOT redo that work, force-push or merge either PR blindly. Handoff issue https://github.com/takatakca/pppmtl/issues/20 should receive current SHA, CI and production proof.
+
+**Tak Tak to verify:** In native Coolify app uuid r13hz1mmbi4eeoc6ssxbvxnv, read-only inspect running SHA, logs/proxy headers, TLS, healthz, public pages, anonymous /dev 401, redirect/cookie behavior, Google Maps iframe and sign-in integrations. Make only a few GET/HEAD requests, not a destructive pentest or scripted login. Confirm X-Frame/CSP frame-ancestors, nosniff, referrer policy, non-cacheability of private pages and unchanged checkout disablement. Do not enable Actions deploy alongside native Coolify. Obtain release authorization and green exact-SHA CI before any merge/deployment.
+
+**Live payment NO-GO:** src/lib/orders/order-store.server.ts still says ordersPersistAcrossRestarts=false. Issues #5/#6/#13 require production PostgreSQL, TAKATAK tenant-scoped identity, merchant-matched signed Clover webhooks, durable outbox/worker proven after restart/replay. No real payment, order, refund, DNS or secret write authorized.
+
+---
+
+
 ## 2026-10-28 ~14 h EDT — Guest-order runtime security, CI GREEN and Drive sync
 
 Verified resumption: main at 82a1feb7c4cfe2794d3a9c04a5864f83939e4551, full CI 40660324160 SUCCESS; 13 branches, zero open PR; reviewed AGENTS.md, WORKLOG.md, handoff, status, queue, deployment, decisions, open issues and BOTH Google Docs. The /dev SSR security work 27a0077 was already present; not duplicated. An unrelated concurrent social note in WORKLOG, SHA 7606dc5, was preserved. This task was claimed before coding in WORKLOG commit 410cb21bea2a8fd6d25e1c1985d28c0a4987f0ef.
