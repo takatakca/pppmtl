@@ -25,7 +25,7 @@ describe("PPP first-party Food Hub location mapping", () => {
   });
 
   it("has no retired vendor adapter and does not fake Food Hub connectivity", async () => {
-    expect(adaptersFor("urbanpiper")).toBeUndefined();
+    expect(adaptersFor("urbanpiper" as never)).toBeUndefined();
     expect(adaptersFor("foodhub")?.provider).toBe("foodhub");
     expect(foodhubAdapters.orders?.status("loc-ndg-somerled").available).toBe(false);
     const result = await foodhubAdapters.orders!.getOrder("unverified");
