@@ -128,10 +128,12 @@ export interface NormalizedProduct extends UniversalProduct {
 export interface NormalizedMenu {
   locationId: string;
   provider: IntegrationProviderId;
-  categories: Array<UniversalCategory & {
-    pppCategoryId: string;
-    providerCategoryId: string;
-  }>;
+  categories: Array<
+    UniversalCategory & {
+      pppCategoryId: string;
+      providerCategoryId: string;
+    }
+  >;
   products: NormalizedProduct[];
   syncedAt: string;
 }
