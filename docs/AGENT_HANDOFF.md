@@ -1,5 +1,22 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-10-28 ~20:12 EDT — PPP product photo recovery / gift-card UX: CI GREEN; Tak Tak next
+
+**Scope:** Safe, reviewed source changes appended to existing draft [PR #19](https://github.com/takatakca/pppmtl/pull/19) on branch `fix/franchise-truthful-status-gifts-20261028`. No merge, production deployment, DNS, secrets, real payments, provider calls or server commands. Base `main` remained `c6aacee9f180c1bc0849cf86b3e708c8f4ed2057` with full CI [40786387653](https://github.com/takatakca/pppmtl/actions/runs/40786387653) success.
+
+**New proven UI bug + fix:** `src/components/menu/menu-item-image.tsx` previously held one persistent `broken`/`loaded` status even when a reusable product card received a new `src`. Once an old image failed, the component hid its `img`, leaving the next product's valid URL permanently blocked. New `src/components/menu/image-load-state.ts` scopes load status to the current source; three unit cases in `image-load-state.test.ts` cover failed-old/new-success, loaded-old/new-loading/null, and unchanged-source stability. A product's new photo can now load. No product art, Clover photo URLs, Canva designs or menu price data modified.
+
+**Gift-card accessibility/functionality:** `src/routes/gift-cards.tsx` had a prominent "Call PPP" button that merely set `sent=true` and revealed the phone number; it did not actually call anyone. Replaced it with an actual `tel:` link to the verified business phone from `pppBusiness.phone.href`; no gift card is sold or issued. Preview now reflects sender and note already typed in the unused fields, bounds recipient/sender to 40 chars and uses `aria-pressed` for selected denomination buttons. This is a safe visual-only/non-transactional change.
+
+**CI exact:** [PPPMTL CI 40792139824](https://github.com/takatakca/pppmtl/actions/runs/40792139824) = **completed SUCCESS for source SHA `e76326c2ba2a4ddf97b9d1b6054f4a3fff16573a`**, both quality (Nitro build, TS, ESLint, Vitest) and PostgreSQL 16 (tenant isolation/RLS, atomic payments, outbox leases) jobs green. Additional WORKLOG/handoff-only commits followed: recheck latest HEAD CI before concluding release readiness.
+
+**Image inventory evidence:** GitHub `public/menu/clover/` currently has **336 WebP files**, 168 pairs of 400px/1200px Clover item images. `src/data/clover/overlay.ts` prefers `/menu/clover/{id}-1200.webp` if a photo ID exists, otherwise falls back to `src/data/catalog.generated.ts` generic category files. This is **not** evidence that Clover files are the owner's 158 verified **yellow finished Canva JPGs**. Do not bulk overwrite. Issue [#18](https://github.com/takatakca/pppmtl/issues/18) and its manifests are authoritative; 175 public menu entries, 198 master Canva entries and reported 179 Clover menu entries must be reconciled by stable ID / exact product name before attaching new art.
+
+**Tak Tak server handoff:** [issue #20](https://github.com/takatakca/pppmtl/issues/20); review PR #19, verify exact latest CI, real FR/EN/ES/mobile/keyboard QA, approved location statuses, then read-only native Coolify running SHA and rollback on app `r13hz1mmbi4eeoc6ssxbvxnv`. Public /menu crawler currently shows 17 categories/175 products; HTTP health and private routes could not be independently read via this session's browser tools. Never infer running SHA from a public page or successful CI. Actions deploy skip remains intentional. **Live Clover checkout NO-GO**: `ordersPersistAcrossRestarts=false` and #5/#6/#13 not proven in production. Google Docs PPP project and TAKATAK journal to receive these exact CI and handoff updates in place.
+
+---
+
+
 ## 2026-10-28 ~19:55 EDT — RELAIS TAK TAK / franchise copy / PR #19 (DRAFT)
 
 **Owner request:** Continue safe PPP franchise-level UX/brand cleanup and delegate native Coolify validation to the server-capable agent **Tak Tak**. The handoff ticket is [issue #20](https://github.com/takatakca/pppmtl/issues/20); the actual fix is [draft PR #19](https://github.com/takatakca/pppmtl/pull/19), branch `fix/franchise-truthful-status-gifts-20261028`, based on verified main `c6aacee9f180c1bc0849cf86b3e708c8f4ed2057`. Main [CI 40786387653](https://github.com/takatakca/pppmtl/actions/runs/40786387653) SUCCESS for this exact SHA (quality + PostgreSQL 16), while Actions Coolify alternative SKIPPED intentionally (native Coolify only). Zero open PRs at start; this draft PR is new and deliberately **not merged**. Existing agent SOCIO changes preserved.
