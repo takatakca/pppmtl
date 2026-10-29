@@ -1,5 +1,24 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-10-28 ~20:27 EDT — OFFENSIVE SOURCE SECURITY AUDIT / PR #22
+
+**Owner-approved task, safely scoped:** examine owned PPP source as an attacker might, but **no live exploit, stress load, merchant/payout operations, production credentials, DNS, server mutation or deployment**. Source-of-truth base main `c6aacee9f180c1bc0849cf86b3e708c8f4ed2057`; [main CI 40786387653](https://github.com/takatakca/pppmtl/actions/runs/40786387653) SUCCESS. Existing [UX PR #19](https://github.com/takatakca/pppmtl/pull/19) and parallel [SSR headers PR #21](https://github.com/takatakca/pppmtl/pull/21) belong to other tasks and remain untouched. This work is isolated on `security/webhook-ingress-guards-20261028` in [**DRAFT PR #22**](https://github.com/takatakca/pppmtl/pull/22).
+
+**Proven issues / fixes / negative tests:**
+1. Public UrbanPiper `/api/public/webhooks/provider?provider=urbanpiper` formerly did unbounded `request.text()` before verifying HMAC. Now streams to shared 128 KiB maximum, 413 on oversized declared or actual stream, 400 on read failures, no-store. Tests call the public route handler offline with oversized, forged Content-Length and unsigned data (`src/lib/integration/__tests__/provider-ingress.test.ts`).
+2. `findOrderByProviderId` formerly matched only external ID across all providers. Source changed to **require provider id** when finding orders; signed UP status callback and Clover payment cannot accidentally bind each other's matching ID. Regression tests cover overlapping IDs in both storage orders, invalid provider, and wrong ID.
+3. A signed, merchant-correct Clover event with **no linked local PPP checkout** could previously call remote Clover title/print in sandbox. New guard responds retryable 503, releases process claim, and refuses Clover REST side effects. Test verifies no order/payments/print request for unrelated signed checkout; existing REST failure/exception replay cases remain exercised with linked mock sandbox orders.
+4. Clover checkout identity is immutable once payment linked; a second payment id or an event against a `CANCELLED`/`FAILED` order is rejected rather than reassigning or printing automatically; tests cover same-ID replay and refusal of changed payment ids/terminal orders.
+
+**Verified code CI:** [40793163596](https://github.com/takatakca/pppmtl/actions/runs/40793163596) **COMPLETED SUCCESS** for earlier security code SHA `ed092dc4f52ab62e55a02516d60728412d3e2413`. [40793359989](https://github.com/takatakca/pppmtl/actions/runs/40793359989) **COMPLETED SUCCESS for later security code+tests SHA `523004164e2411d624e09d4cb64a73ca51b24af6`**: two jobs successful (Nitro/TypeScript/ESLint/Vitest and PostgreSQL 16 tenant RLS/payment/outbox). A report note `docs/agent-notes/2026-10-28-offensive-source-security-audit.md` was committed afterward; **check PR final exact HEAD CI again** after these documentation writes. This is code-source CI only, not a real penetration-test certificate or proof of a deploy.
+
+**Remaining security launch NO-GO:** `ordersPersistAcrossRestarts=false`, no production-persistent database/backup/recovery, no verified central TAKATAK tenant RBAC, durable signed webhook inbox/idempotency/outbox/worker and no controlled checkout/print/refund failure-injection (issues #5/#6/#13). Generic webhook replay rings remain in memory, and timestamped-vs-body-only UrbanPiper signing contract must be verified against the actual vendor setup before tightening signature compatibility. Temporary admin login needs trusted-edge rate limiting and eventual RBAC. Native Coolify running SHA, live /dev access enforcement, security headers and rollback have not been independently checked from this session.
+
+**Tak Tak / handoff:** See [issue #20](https://github.com/takatakca/pppmtl/issues/20) and the detailed report in this PR. Verify latest CI and conflicts with PR #21, review branch and tests, then perform strictly read-only/native Coolify and authorized staging checks. No two deployment mechanisms simultaneously. Keep real checkout disabled until launch gates are demonstrated. Update both existing Google Docs (PPP technical and TAKATAK journal) with exact CI and running SHA only once verified.
+
+---
+
+
 ## 2026-10-28 ~14 h EDT — Guest-order runtime security, CI GREEN and Drive sync
 
 Verified resumption: main at 82a1feb7c4cfe2794d3a9c04a5864f83939e4551, full CI 40660324160 SUCCESS; 13 branches, zero open PR; reviewed AGENTS.md, WORKLOG.md, handoff, status, queue, deployment, decisions, open issues and BOTH Google Docs. The /dev SSR security work 27a0077 was already present; not duplicated. An unrelated concurrent social note in WORKLOG, SHA 7606dc5, was preserved. This task was claimed before coding in WORKLOG commit 410cb21bea2a8fd6d25e1c1985d28c0a4987f0ef.
