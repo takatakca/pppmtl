@@ -8,7 +8,10 @@ function request(path: string, method = "GET") {
 describe("PPP HTTP security response baseline", () => {
   it("protects public SSR against clickjacking/MIME sniffing without blocking scripts", () => {
     const original = new Response("<h1>PPP</h1>", {
-      headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=60" },
+      headers: {
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "public, max-age=60",
+      },
     });
     const result = applyHttpSecurityHeaders(request("/menu"), original);
     expect(result.status).toBe(200);
