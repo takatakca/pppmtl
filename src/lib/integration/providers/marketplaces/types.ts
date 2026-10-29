@@ -8,7 +8,7 @@ import type { IntegrationProviderId } from "@/lib/integration/core/contracts";
 export interface MarketplaceChannel {
   id: Extract<IntegrationProviderId, "uber_eats" | "doordash" | "skip">;
   label: string;
-  /** The aggregator responsible for menu + order sync with this channel. */
-  aggregatedBy: IntegrationProviderId;
+  /** Intended first-party operations owner; this is NOT evidence of an active connection. */
+  managedBy: IntegrationProviderId;
   storefrontUrl: (locationId: string) => string | null;
 }
