@@ -686,6 +686,41 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
     expect(printed).toBe(0);
   });
 
+  it("refuses a signed merchant payment that is not linked to a PPP checkout", async () => {
+    vi.stubEnv("CLOVER_API_TOKEN", "rest_test");
+    const { handleCloverHostedCheckoutWebhook } =
+      await import("@/lib/integration/providers/clover/webhook");
+    // Even a valid Clover merchant signature cannot authorize relabeling and
+    // printing an unrelated merchant payment in the sandbox or in production.
+    const raw = JSON.stringify({
+      status: "APPROVED",
+      type: "PAYMENT",
+      id: "PAY1",
+      merchantId: "MTEST",
+      data: "SESSION_NOT_OURS",
+    });
+    const timestamp = Math.floor(Date.now() / 1000);
+    const digest = createHmac("sha256", "whsec_test").update(`${timestamp}.${raw}`).digest("hex");
+    const send = () =>
+      handleCloverHostedCheckoutWebhook(
+        new Request("https://pppmtl.com/api/public/webhooks/clover", {
+          method: "POST",
+          body: raw,
+          headers: { "clover-signature": `t=${timestamp},v1=${digest}` },
+        }),
+      );
+
+    const first = await send();
+    expect(first.status).toBe(503);
+    expect(first.headers.get("retry-after")).toBe("30");
+    // An untracked payment must NEVER reach Clover REST title/print methods.
+    expect(calls.filter((call) => call.url.includes("/payments/"))).toHaveLength(0);
+    expect(calls.filter((call) => call.url.includes("/orders/"))).toHaveLength(0);
+    expect(printed).toBe(0);
+    // Retryable untracked events are not treated as completed.
+    expect((await send()).status).toBe(503);
+  });
+
   it("does not reconcile or print real Clover payments without a durable store", async () => {
     vi.stubEnv("CLOVER_ENV", "production");
     vi.stubEnv("CLOVER_API_TOKEN", "rest_test");
@@ -750,6 +785,29 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
     vi.stubEnv("CLOVER_API_TOKEN", "rest_test");
     const { handleCloverHostedCheckoutWebhook } =
       await import("@/lib/integration/providers/clover/webhook");
+    // Link the signed webhook's session to a real PPP-created Clover order.
+    // This tests Clover REST failure after linkage, not the new untracked gate.
+    const { createOrder } = await import("@/lib/orders/order-service");
+    const { updateOrder } = await import("@/lib/orders/order-store.server");
+    const created = createOrder({
+      locationId: "loc-ndg-somerled",
+      orderType: "PICKUP",
+      lines: [{ itemId: PITA, quantity: 1, notes: "", selections: pitaCombo() }],
+      customer: {
+        customerId: null,
+        takatakCustomerId: null,
+        name: "Marie",
+        phone: "5145550100",
+        email: null,
+        isGuest: true,
+      },
+      deliveryAddress: null,
+      notes: "",
+    });
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+    updateOrder(created.data.id, { providerOrderId: "MISSING_SESSION" });
+
     const raw = JSON.stringify({
       status: "APPROVED",
       type: "PAYMENT",
@@ -782,6 +840,29 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
     vi.stubEnv("PUBLIC_SITE_URL", "not a valid URL");
     const { handleCloverHostedCheckoutWebhook } =
       await import("@/lib/integration/providers/clover/webhook");
+    // Link the signed webhook's session to a real PPP-created Clover order.
+    // This exercises the exception after a legitimately linked checkout.
+    const { createOrder } = await import("@/lib/orders/order-service");
+    const { updateOrder } = await import("@/lib/orders/order-store.server");
+    const created = createOrder({
+      locationId: "loc-ndg-somerled",
+      orderType: "PICKUP",
+      lines: [{ itemId: PITA, quantity: 1, notes: "", selections: pitaCombo() }],
+      customer: {
+        customerId: null,
+        takatakCustomerId: null,
+        name: "Marie",
+        phone: "5145550100",
+        email: null,
+        isGuest: true,
+      },
+      deliveryAddress: null,
+      notes: "",
+    });
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+    updateOrder(created.data.id, { providerOrderId: "SESSION_RETRY" });
+
     const raw = JSON.stringify({
       status: "APPROVED",
       type: "PAYMENT",
