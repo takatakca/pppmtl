@@ -363,6 +363,15 @@ export function applyCloverPayment(
 ): InternalOrder | null {
   const order = findOrderByProviderId("clover", checkoutSessionId);
   if (!order) return null;
+  // A cancelled/failed checkout cannot be resurrected by a late callback,
+  // and one checkout cannot silently switch to a different Clover payment.
+  // Both conditions require explicit merchant review, not automatic printing.
+  if (order.status === "CANCELLED" || order.status === "FAILED") return null;
+  if (
+    approved &&
+    (!paymentId || (order.providerPaymentId && order.providerPaymentId !== paymentId))
+  )
+    return null;
   if (!approved) return updateOrder(order.id, { providerStatus: "payment_declined" });
   updateOrder(order.id, {
     paymentStatus: "PAID",
