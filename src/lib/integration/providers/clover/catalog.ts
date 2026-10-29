@@ -248,6 +248,8 @@ const GROUP_EN: Array<[RegExp, string]> = [
   [/^desserts sugg/i, "Suggested desserts"],
   [/^boisson extra/i, "Extra drink"],
   [/^boisson incluse/i, "Included drink"],
+  [/^breuvage incluse/i, "Included drink"],
+  [/^duo\b.*breuvage/i, "Add a drink"],
   [/^trio\b/i, "Make it a combo — fries + drink"],
   [/^combo\b.*poutine/i, "Make it a combo — poutine + drink"],
   [/^sauce incluse/i, "Included sauce"],

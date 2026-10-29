@@ -119,9 +119,14 @@ Production checkout stays off without `DATABASE_URL` or without `CLOVER_API_TOKE
 
 Open `src/config/clover-item-map.ts`, find the slot (`site:` is the id in the site's links), replace `clover:` with
 the other item's id (Clover → Items → open the item: the id is the end of the page address) and `cloverName:` with its
-exact Clover name. Run `npx vitest run`: the test says if an id does not exist or is used twice. After changing
-prices or options in Clover, run `npm run clover:snapshot -- --api` (with `CLOVER_API_TOKEN` and `CLOVER_MERCHANT_ID`
-set) so the site shows them too; the checkout already uses the live Clover prices.
+exact Clover name. Run `npx vitest run`: the test says if an id does not exist or is used twice.
+
+**After changing items, prices or options in Clover, the snapshot MUST be refreshed.** The site shows the committed
+snapshot, but checkout re-checks every cart on the live Clover menu: when they differ, customers get "Something
+changed with your order" (2026-10-29: the Oct 7 export snapshot no longer matched 144 of 175 items). Refresh with
+`npm run clover:snapshot -- --url https://pppmtl.com/api/public/clover-menu` (no token needed; or `-- --api` with
+`CLOVER_API_TOKEN` and `CLOVER_MERCHANT_ID`), update any `cloverName` the test reports, run `npx vitest run`, push.
+A refused cart logs `checkout.menu_changed` with the item and options that no longer match.
 
 ## 7. To review on the site (content, not changed here)
 - The three "offers" no longer say "20 % off" (that was the Uber promotion); they show the real Clover price.

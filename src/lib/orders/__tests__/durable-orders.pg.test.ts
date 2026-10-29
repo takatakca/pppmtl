@@ -28,7 +28,7 @@ function pitaCombo() {
   let s = defaultSelections(groups);
   s = toggleChoice(s, group(/^Choix pita/), pick(/^Choix pita/, /^pita$/i));
   s = toggleChoice(s, group(/^Sauce incluse/), pick(/^Sauce incluse/, /ail/i));
-  s = toggleChoice(s, group(/^Trio/), pick(/^Trio/, /^frites \+ pepsi$/i));
+  s = toggleChoice(s, group(/^Trio/), pick(/^Trio/, /^petite frite \+ pepsi$/i));
   return s;
 }
 

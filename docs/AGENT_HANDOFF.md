@@ -1,5 +1,13 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-10-29 (later) — "Something changed with your order" fixed (Claude)
+
+Cause: the site's menu was the Oct 7 Clover **export** snapshot; production checkout re-prices every cart on the **live** Clover API menu, and the owner had reorganised Clover since (144 of 175 items: "Boisson incluse" → required "Breuvage incluse", new Duo/Trio/Combo groups, price changes). Every changed item was refused with `menu_changed`.
+
+Fix: `GET /api/public/clover-menu` (live menu, snapshot format, public menu data only); `npm run clover:snapshot -- --url https://pppmtl.com/api/public/clover-menu` refreshes the snapshot and keeps mapped items Clover removed as unavailable (`cheesecake-chocolat-chips`, `clean-water` — owner to remap or remove); 11 `cloverName` updated; refused carts now log `checkout.menu_changed` with the exact mismatch. Verified: all 173 orderable site items, built as the browser builds them, price on the downloaded live menu with site price = Clover price; 165 tests pass incl. 6 real-PostgreSQL.
+
+**Rule for every agent:** after any Clover menu edit, refresh the snapshot as above or checkout breaks for the changed items. Still NOT verified: a real paid order + refund.
+
 ## 2026-10-29 — Durable Clover checkout wired (Claude, 1e57831)
 
 **What changed:** `ordersPersistAcrossRestarts` is gone. With `DATABASE_URL` set, Clover orders use PostgreSQL (`src/lib/orders/database.server.ts` pool, `durable-orders.server.ts` operations, existing `postgres-transactions.server.ts` + `clover-fulfillment-worker.server.ts`). Order stored before Clover's page opens; session linked before redirect (either failure refuses checkout); signed webhook → `ppp.record_verified_clover_payment` → 200 once stored; kitchen outbox titles then prints once; `src/server.ts` starts a 30 s retry loop. Production gate is now `DATABASE_URL` + `CLOVER_API_TOKEN` + merchant/ecomm/webhook keys.
