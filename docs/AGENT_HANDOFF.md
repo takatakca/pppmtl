@@ -1,5 +1,11 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-10-28 ~21:40 EDT — SECURITY RECONCILIATION ON FOOD HUB PR #23
+
+Reconciled Clover-specific safety guards from draft PR #22 on existing draft PR #23 **without restoring UrbanPiper**. Provider-scoped external IDs, immutable payment association, terminal-status refusal, retryable 503 on unmatched signed Clover checkout **before** REST title/print; added Food Hub-vs-Clover collision test and signed unrelated-payment regression test. Code-and-test SHA `9173cbabbd74218346a7146d2f0ee8dfaf21f4ce`. See [technical note](agent-notes/2026-10-28-foodhub-clover-reconciliation.md). Latest exact-HEAD CI and native Coolify proof **pending**, no merge/deploy, no live payment or Food Hub order transport. Next: CI and Prettier review, reconcile PR #21/#22/#19, owner staging review; Food Hub issue #103 gates remain NO-GO.
+
+---
+
 ## 2026-10-28 — OWNER DIRECTIVE: URBANPIPER RETIRED; FIRST-PARTY FOOD HUB PR #23
 
 **Owner explicitly cancelled UrbanPiper.** Source-only implementation: [draft PPP PR #23](https://github.com/takatakca/pppmtl/pull/23), branch `refactor/ppp-retire-urbanpiper-foodhub-20261028`, base main `c6aacee9f180c1bc0849cf86b3e708c8f4ed2057`. Another security PR #22 touches the same provider webhook and order-service files; MUST reconcile or adapt its still-relevant Clover safeguards in the merged SHA. Existing PRs #19/#21/#22 preserved.
