@@ -1,5 +1,29 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-10-29 (latest) — Clover payment page opens on pppmtl.com (Claude)
+
+"We could not send your order to the kitchen" = Clover refused every Hosted Checkout session with HTTP 400 "Please provide either itemRefUuid or name, price." Lines now send name + price (+ note, taxes), no `itemRefUuid`; `User-Agent` sent on all Clover calls; refusals are logged as `checkout.session_refused` with Clover's masked reason (`cloverRefusalDetail`). Verified with Playwright on the live site: Clover's page opens with the right item, $14.99 + $2.25 tax = CA$17.24. NOT verified: a real payment, webhook, title + print, refund. Clover's page is branded "On2GO.CA" (merchant setting in Clover).
+
+## 2026-10-29 (later) — "Something changed with your order" fixed (Claude)
+
+Cause: the site's menu was the Oct 7 Clover **export** snapshot; production checkout re-prices every cart on the **live** Clover API menu, and the owner had reorganised Clover since (144 of 175 items: "Boisson incluse" → required "Breuvage incluse", new Duo/Trio/Combo groups, price changes). Every changed item was refused with `menu_changed`.
+
+Fix: `GET /api/public/clover-menu` (live menu, snapshot format, public menu data only); `npm run clover:snapshot -- --url https://pppmtl.com/api/public/clover-menu` refreshes the snapshot and keeps mapped items Clover removed as unavailable (`cheesecake-chocolat-chips`, `clean-water` — owner to remap or remove); 11 `cloverName` updated; refused carts now log `checkout.menu_changed` with the exact mismatch. Verified: all 173 orderable site items, built as the browser builds them, price on the downloaded live menu with site price = Clover price; 165 tests pass incl. 6 real-PostgreSQL.
+
+**Rule for every agent:** after any Clover menu edit, refresh the snapshot as above or checkout breaks for the changed items. Still NOT verified: a real paid order + refund.
+
+## 2026-10-29 — Durable Clover checkout wired (Claude, 1e57831)
+
+**What changed:** `ordersPersistAcrossRestarts` is gone. With `DATABASE_URL` set, Clover orders use PostgreSQL (`src/lib/orders/database.server.ts` pool, `durable-orders.server.ts` operations, existing `postgres-transactions.server.ts` + `clover-fulfillment-worker.server.ts`). Order stored before Clover's page opens; session linked before redirect (either failure refuses checkout); signed webhook → `ppp.record_verified_clover_payment` → 200 once stored; kitchen outbox titles then prints once; `src/server.ts` starts a 30 s retry loop. Production gate is now `DATABASE_URL` + `CLOVER_API_TOKEN` + merchant/ecomm/webhook keys.
+
+**Database (owner, 2026-10-29):** Coolify PostgreSQL 17 resource on vps2 (container `mfcs2guqflcf1o9sfgonrznd`), database `pppmtl`, migrations 0001–0003 applied, runtime role `ppp_app` (NOSUPERUSER NOBYPASSRLS, grants in DB_ROLLOUT.md), `DATABASE_URL` set on the app. Tenant id = `PPP_TENANT_ID` or `pppmtl` (server config, never the browser).
+
+**Verified:** locally on PostgreSQL 16 as the limited role: 165/165 tests incl. `durable-orders.pg.test.ts` (restart survival, one ticket across redeliveries, Clover-outage retry, unknown session ignored, unlinkable session refused, DB down refuses before Clover, retry after failure). Built Nitro server tested: `/healthz`, signed webhook stored payment as PAID, background loop retried the title. CI database job now runs the same test.
+
+**NOT verified:** a real Clover payment, the live Hosted Checkout request against production Clover, the REST token's permissions, printing on the real printer. Next: owner redeploys, places one small pickup order, checks the `🌐 Site web · PPP-…` ticket, refunds in Clover; read Coolify runtime logs for `[integration_events]`.
+
+---
+
 ## 2026-10-28 ~21:40 EDT — SECURITY RECONCILIATION ON FOOD HUB PR #23
 
 Reconciled Clover-specific safety guards from draft PR #22 on existing draft PR #23 **without restoring UrbanPiper**. Provider-scoped external IDs, immutable payment association, terminal-status refusal, retryable 503 on unmatched signed Clover checkout **before** REST title/print; added Food Hub-vs-Clover collision test and signed unrelated-payment regression test. Code-and-test SHA `9173cbabbd74218346a7146d2f0ee8dfaf21f4ce`. See [technical note](agent-notes/2026-10-28-foodhub-clover-reconciliation.md). Latest exact-HEAD CI and native Coolify proof **pending**, no merge/deploy, no live payment or Food Hub order transport. Next: CI and Prettier review, reconcile PR #21/#22/#19, owner staging review; Food Hub issue #103 gates remain NO-GO.

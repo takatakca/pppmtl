@@ -18,6 +18,8 @@ describe("Clover payment safety gate", () => {
   it("never starts real production charges with an in-memory order store", () => {
     credentials();
     vi.stubEnv("CLOVER_ENV", "production");
+    vi.stubEnv("CLOVER_API_TOKEN", "rest-for-test");
+    vi.stubEnv("DATABASE_URL", "");
     for (const nodeEnv of ["production", "development", "test"]) {
       vi.stubEnv("NODE_ENV", nodeEnv);
       expect(cloverCheckoutConfigured(locationId)).toBe(false);
@@ -28,8 +30,27 @@ describe("Clover payment safety gate", () => {
     });
   });
 
+  it("opens production checkout only with the PostgreSQL store and the Clover REST token", () => {
+    credentials();
+    vi.stubEnv("CLOVER_ENV", "");
+    vi.stubEnv("DATABASE_URL", "postgres://ppp_app:pw@db:5432/pppmtl");
+    vi.stubEnv("CLOVER_API_TOKEN", "");
+    vi.stubEnv("CLOVER_API_KEY", "");
+    expect(cloverCheckoutConfigured(locationId)).toBe(false);
+    vi.stubEnv("CLOVER_API_TOKEN", "rest-for-test");
+    expect(cloverCheckoutConfigured(locationId)).toBe(true);
+    expect(cloverReadiness(locationId)).toMatchObject({
+      environment: "production",
+      durableOrderStore: true,
+      checkoutReady: true,
+    });
+    vi.stubEnv("CLOVER_WEBHOOK_SECRET", "");
+    expect(cloverCheckoutConfigured(locationId)).toBe(false);
+  });
+
   it("allows only configured test/sandbox checkout and requires webhook verification", () => {
     credentials();
+    vi.stubEnv("DATABASE_URL", "");
     vi.stubEnv("NODE_ENV", "test");
     vi.stubEnv("CLOVER_ENV", "sandbox");
     expect(cloverCheckoutConfigured(locationId)).toBe(true);

@@ -30,8 +30,9 @@ DoorDash / Skip; online payment is for pickup.
    [webhook + signature](https://docs.clover.com/dev/docs/ecomm-hosted-checkout-webhook).
 2. Hosted Checkout has **no modifier field** and does not use the Clover inventory or its taxes. Each cart line is sent
    as one Clover line: unit price = item + options, the options in the line note (the kitchen reads them on the
-   ticket), `itemRefUuid` = the Clover item id, and the taxes (TPS 5 % + TVQ 9.975 %, or the merchant's own default
-   rates) on every line. The session lasts 15 minutes.
+   ticket), and the taxes (TPS 5 % + TVQ 9.975 %, or the merchant's own default rates) on every line. No
+   `itemRefUuid`: Clover answers HTTP 400 "Please provide either itemRefUuid or name, price." when a line has both.
+   The session lasts 15 minutes.
 3. The webhook gives a payment id and the checkout session id; Clover has no API to read a session. After the
    APPROVED webhook the site finds the Clover order of that payment, titles it **`🌐 Site web · PPP-AB12C · Marie`**
    with a pickup / paid note, then fires **one** print (`print_event`: the order printer, and the KDS when it is set
@@ -72,14 +73,15 @@ Run it on:
 (Lovable hosting is NOT an option: the owner refused Lovable categorically on 2026-10-26. GitHub → Coolify is the
 only route.)
 
-Note: orders are kept in memory (the site has no database yet). After a restart, the order page may
-not find an order; the customer still sees "payment received" and Clover keeps the order. Nothing is lost on the
-Clover side.
+Orders are stored in PostgreSQL (`DATABASE_URL`): the order before Clover's page opens, the payment when Clover's
+signed webhook arrives, and the title + single print as a kitchen task that is retried after an outage or a restart.
+Production checkout stays off without `DATABASE_URL` or without `CLOVER_API_TOKEN`.
 
 ### Server variables (never in the browser, never in git)
 
 | Variable | Value |
 |---|---|
+| `DATABASE_URL` | `postgres://ppp_app:…@<db>:5432/pppmtl`, the limited role (docs/DB_ROLLOUT.md). Required for real cards. |
 | `CLOVER_MERCHANT_ID` | the restaurant's Clover merchant id |
 | `CLOVER_ECOMM_PRIVATE_KEY` | private key of the Ecommerce token of type **Hosted checkout** |
 | `CLOVER_WEBHOOK_SECRET` | the Hosted Checkout webhook **signing secret** |
@@ -118,9 +120,14 @@ Clover side.
 
 Open `src/config/clover-item-map.ts`, find the slot (`site:` is the id in the site's links), replace `clover:` with
 the other item's id (Clover → Items → open the item: the id is the end of the page address) and `cloverName:` with its
-exact Clover name. Run `npx vitest run`: the test says if an id does not exist or is used twice. After changing
-prices or options in Clover, run `npm run clover:snapshot -- --api` (with `CLOVER_API_TOKEN` and `CLOVER_MERCHANT_ID`
-set) so the site shows them too; the checkout already uses the live Clover prices.
+exact Clover name. Run `npx vitest run`: the test says if an id does not exist or is used twice.
+
+**After changing items, prices or options in Clover, the snapshot MUST be refreshed.** The site shows the committed
+snapshot, but checkout re-checks every cart on the live Clover menu: when they differ, customers get "Something
+changed with your order" (2026-10-29: the Oct 7 export snapshot no longer matched 144 of 175 items). Refresh with
+`npm run clover:snapshot -- --url https://pppmtl.com/api/public/clover-menu` (no token needed; or `-- --api` with
+`CLOVER_API_TOKEN` and `CLOVER_MERCHANT_ID`), update any `cloverName` the test reports, run `npx vitest run`, push.
+A refused cart logs `checkout.menu_changed` with the item and options that no longer match.
 
 ## 7. To review on the site (content, not changed here)
 - The three "offers" no longer say "20 % off" (that was the Uber promotion); they show the real Clover price.

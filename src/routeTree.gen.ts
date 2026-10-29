@@ -20,6 +20,7 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as FranchiseRouteImport } from './routes/franchise'
 import { Route as GiftCardsRouteImport } from './routes/gift-cards'
+import { Route as HealthzRouteImport } from './routes/healthz'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as MenuRouteImport } from './routes/menu'
@@ -36,6 +37,7 @@ import { Route as AccountSignInRouteImport } from './routes/account_.sign-in'
 import { Route as AccountSignUpRouteImport } from './routes/account_.sign-up'
 import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminSignInRouteImport } from './routes/admin.sign-in'
 import { Route as DevMenuAuditRouteImport } from './routes/dev.menu-audit'
 import { Route as LocationsIndexRouteImport } from './routes/locations.index'
 import { Route as LocationsSlugRouteImport } from './routes/locations.$slug'
@@ -45,6 +47,8 @@ import { Route as OrdersIndexRouteImport } from './routes/orders.index'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 import { Route as SupportIndexRouteImport } from './routes/support.index'
 import { Route as SupportOrderRouteImport } from './routes/support.order'
+import { Route as ApiPublicCloverCheckoutStatusRouteImport } from './routes/api/public/clover-checkout-status'
+import { Route as ApiPublicCloverMenuRouteImport } from './routes/api/public/clover-menu'
 import { Route as ApiPublicWebhooksCloverRouteImport } from './routes/api/public/webhooks/clover'
 import { Route as ApiPublicWebhooksProviderRouteImport } from './routes/api/public/webhooks/provider'
 
@@ -101,6 +105,11 @@ const FranchiseRoute = FranchiseRouteImport.update({
 const GiftCardsRoute = GiftCardsRouteImport.update({
   id: '/gift-cards',
   path: '/gift-cards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HealthzRoute = HealthzRouteImport.update({
+  id: '/healthz',
+  path: '/healthz',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HelpRoute = HelpRouteImport.update({
@@ -183,6 +192,11 @@ const AdminOrdersRoute = AdminOrdersRouteImport.update({
   path: '/admin/orders',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSignInRoute = AdminSignInRouteImport.update({
+  id: '/admin/sign-in',
+  path: '/admin/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DevMenuAuditRoute = DevMenuAuditRouteImport.update({
   id: '/dev/menu-audit',
   path: '/dev/menu-audit',
@@ -228,6 +242,17 @@ const SupportOrderRoute = SupportOrderRouteImport.update({
   path: '/order',
   getParentRoute: () => SupportRoute,
 } as any)
+const ApiPublicCloverCheckoutStatusRoute =
+  ApiPublicCloverCheckoutStatusRouteImport.update({
+    id: '/api/public/clover-checkout-status',
+    path: '/api/public/clover-checkout-status',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicCloverMenuRoute = ApiPublicCloverMenuRouteImport.update({
+  id: '/api/public/clover-menu',
+  path: '/api/public/clover-menu',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicWebhooksCloverRoute = ApiPublicWebhooksCloverRouteImport.update({
   id: '/api/public/webhooks/clover',
   path: '/api/public/webhooks/clover',
@@ -252,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/franchise': typeof FranchiseRoute
   '/gift-cards': typeof GiftCardsRoute
+  '/healthz': typeof HealthzRoute
   '/help': typeof HelpRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/menu': typeof MenuRoute
@@ -268,6 +294,7 @@ export interface FileRoutesByFullPath {
   '/account/sign-up': typeof AccountSignUpRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/sign-in': typeof AdminSignInRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
   '/marques/$brandId': typeof MarquesBrandIdRoute
@@ -277,6 +304,8 @@ export interface FileRoutesByFullPath {
   '/marques/': typeof MarquesIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/support/': typeof SupportIndexRoute
+  '/api/public/clover-checkout-status': typeof ApiPublicCloverCheckoutStatusRoute
+  '/api/public/clover-menu': typeof ApiPublicCloverMenuRoute
   '/api/public/webhooks/clover': typeof ApiPublicWebhooksCloverRoute
   '/api/public/webhooks/provider': typeof ApiPublicWebhooksProviderRoute
 }
@@ -292,6 +321,7 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/franchise': typeof FranchiseRoute
   '/gift-cards': typeof GiftCardsRoute
+  '/healthz': typeof HealthzRoute
   '/help': typeof HelpRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/menu': typeof MenuRoute
@@ -306,6 +336,7 @@ export interface FileRoutesByTo {
   '/account/sign-up': typeof AccountSignUpRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/sign-in': typeof AdminSignInRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
   '/marques/$brandId': typeof MarquesBrandIdRoute
@@ -315,6 +346,8 @@ export interface FileRoutesByTo {
   '/marques': typeof MarquesIndexRoute
   '/orders': typeof OrdersIndexRoute
   '/support': typeof SupportIndexRoute
+  '/api/public/clover-checkout-status': typeof ApiPublicCloverCheckoutStatusRoute
+  '/api/public/clover-menu': typeof ApiPublicCloverMenuRoute
   '/api/public/webhooks/clover': typeof ApiPublicWebhooksCloverRoute
   '/api/public/webhooks/provider': typeof ApiPublicWebhooksProviderRoute
 }
@@ -331,6 +364,7 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/franchise': typeof FranchiseRoute
   '/gift-cards': typeof GiftCardsRoute
+  '/healthz': typeof HealthzRoute
   '/help': typeof HelpRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/menu': typeof MenuRoute
@@ -347,6 +381,7 @@ export interface FileRoutesById {
   '/account_/sign-up': typeof AccountSignUpRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/sign-in': typeof AdminSignInRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
   '/marques/$brandId': typeof MarquesBrandIdRoute
@@ -356,6 +391,8 @@ export interface FileRoutesById {
   '/marques/': typeof MarquesIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/support/': typeof SupportIndexRoute
+  '/api/public/clover-checkout-status': typeof ApiPublicCloverCheckoutStatusRoute
+  '/api/public/clover-menu': typeof ApiPublicCloverMenuRoute
   '/api/public/webhooks/clover': typeof ApiPublicWebhooksCloverRoute
   '/api/public/webhooks/provider': typeof ApiPublicWebhooksProviderRoute
 }
@@ -373,6 +410,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/franchise'
     | '/gift-cards'
+    | '/healthz'
     | '/help'
     | '/llms.txt'
     | '/menu'
@@ -389,6 +427,7 @@ export interface FileRouteTypes {
     | '/account/sign-up'
     | '/admin/integrations'
     | '/admin/orders'
+    | '/admin/sign-in'
     | '/dev/menu-audit'
     | '/locations/$slug'
     | '/marques/$brandId'
@@ -398,6 +437,8 @@ export interface FileRouteTypes {
     | '/marques/'
     | '/orders/'
     | '/support/'
+    | '/api/public/clover-checkout-status'
+    | '/api/public/clover-menu'
     | '/api/public/webhooks/clover'
     | '/api/public/webhooks/provider'
   fileRoutesByTo: FileRoutesByTo
@@ -413,6 +454,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/franchise'
     | '/gift-cards'
+    | '/healthz'
     | '/help'
     | '/llms.txt'
     | '/menu'
@@ -427,6 +469,7 @@ export interface FileRouteTypes {
     | '/account/sign-up'
     | '/admin/integrations'
     | '/admin/orders'
+    | '/admin/sign-in'
     | '/dev/menu-audit'
     | '/locations/$slug'
     | '/marques/$brandId'
@@ -436,6 +479,8 @@ export interface FileRouteTypes {
     | '/marques'
     | '/orders'
     | '/support'
+    | '/api/public/clover-checkout-status'
+    | '/api/public/clover-menu'
     | '/api/public/webhooks/clover'
     | '/api/public/webhooks/provider'
   id:
@@ -451,6 +496,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/franchise'
     | '/gift-cards'
+    | '/healthz'
     | '/help'
     | '/llms.txt'
     | '/menu'
@@ -467,6 +513,7 @@ export interface FileRouteTypes {
     | '/account_/sign-up'
     | '/admin/integrations'
     | '/admin/orders'
+    | '/admin/sign-in'
     | '/dev/menu-audit'
     | '/locations/$slug'
     | '/marques/$brandId'
@@ -476,6 +523,8 @@ export interface FileRouteTypes {
     | '/marques/'
     | '/orders/'
     | '/support/'
+    | '/api/public/clover-checkout-status'
+    | '/api/public/clover-menu'
     | '/api/public/webhooks/clover'
     | '/api/public/webhooks/provider'
   fileRoutesById: FileRoutesById
@@ -492,6 +541,7 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   FranchiseRoute: typeof FranchiseRoute
   GiftCardsRoute: typeof GiftCardsRoute
+  HealthzRoute: typeof HealthzRoute
   HelpRoute: typeof HelpRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   MenuRoute: typeof MenuRoute
@@ -508,11 +558,14 @@ export interface RootRouteChildren {
   AccountSignUpRoute: typeof AccountSignUpRoute
   AdminIntegrationsRoute: typeof AdminIntegrationsRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminSignInRoute: typeof AdminSignInRoute
   DevMenuAuditRoute: typeof DevMenuAuditRoute
   LocationsSlugRoute: typeof LocationsSlugRoute
   MarquesBrandIdRoute: typeof MarquesBrandIdRoute
   LocationsIndexRoute: typeof LocationsIndexRoute
   MarquesIndexRoute: typeof MarquesIndexRoute
+  ApiPublicCloverCheckoutStatusRoute: typeof ApiPublicCloverCheckoutStatusRoute
+  ApiPublicCloverMenuRoute: typeof ApiPublicCloverMenuRoute
   ApiPublicWebhooksCloverRoute: typeof ApiPublicWebhooksCloverRoute
   ApiPublicWebhooksProviderRoute: typeof ApiPublicWebhooksProviderRoute
 }
@@ -594,6 +647,13 @@ declare module '@tanstack/react-router' {
       path: '/gift-cards'
       fullPath: '/gift-cards'
       preLoaderRoute: typeof GiftCardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/healthz': {
+      id: '/healthz'
+      path: '/healthz'
+      fullPath: '/healthz'
+      preLoaderRoute: typeof HealthzRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/help': {
@@ -708,6 +768,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrdersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/sign-in': {
+      id: '/admin/sign-in'
+      path: '/admin/sign-in'
+      fullPath: '/admin/sign-in'
+      preLoaderRoute: typeof AdminSignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dev/menu-audit': {
       id: '/dev/menu-audit'
       path: '/dev/menu-audit'
@@ -771,6 +838,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SupportOrderRouteImport
       parentRoute: typeof SupportRoute
     }
+    '/api/public/clover-checkout-status': {
+      id: '/api/public/clover-checkout-status'
+      path: '/api/public/clover-checkout-status'
+      fullPath: '/api/public/clover-checkout-status'
+      preLoaderRoute: typeof ApiPublicCloverCheckoutStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/clover-menu': {
+      id: '/api/public/clover-menu'
+      path: '/api/public/clover-menu'
+      fullPath: '/api/public/clover-menu'
+      preLoaderRoute: typeof ApiPublicCloverMenuRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/webhooks/clover': {
       id: '/api/public/webhooks/clover'
       path: '/api/public/webhooks/clover'
@@ -826,6 +907,7 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   FranchiseRoute: FranchiseRoute,
   GiftCardsRoute: GiftCardsRoute,
+  HealthzRoute: HealthzRoute,
   HelpRoute: HelpRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
   MenuRoute: MenuRoute,
@@ -842,11 +924,14 @@ const rootRouteChildren: RootRouteChildren = {
   AccountSignUpRoute: AccountSignUpRoute,
   AdminIntegrationsRoute: AdminIntegrationsRoute,
   AdminOrdersRoute: AdminOrdersRoute,
+  AdminSignInRoute: AdminSignInRoute,
   DevMenuAuditRoute: DevMenuAuditRoute,
   LocationsSlugRoute: LocationsSlugRoute,
   MarquesBrandIdRoute: MarquesBrandIdRoute,
   LocationsIndexRoute: LocationsIndexRoute,
   MarquesIndexRoute: MarquesIndexRoute,
+  ApiPublicCloverCheckoutStatusRoute: ApiPublicCloverCheckoutStatusRoute,
+  ApiPublicCloverMenuRoute: ApiPublicCloverMenuRoute,
   ApiPublicWebhooksCloverRoute: ApiPublicWebhooksCloverRoute,
   ApiPublicWebhooksProviderRoute: ApiPublicWebhooksProviderRoute,
 }

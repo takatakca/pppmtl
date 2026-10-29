@@ -5,6 +5,10 @@
  *     CLOVER_API_TOKEN=… CLOVER_MERCHANT_ID=… [CLOVER_ENV=sandbox] npm run clover:snapshot -- --api
  *   From a Clover export kept OUTSIDE this repository (clover-items.json + clover-modifiers.json, prices in $):
  *     npm run clover:snapshot -- --export <clover-items.json> <clover-modifiers.json>
+ *   From the deployed site's live menu, no Clover token needed (the menu checkout prices with):
+ *     npm run clover:snapshot -- --url https://pppmtl.com/api/public/clover-menu
+ *     A mapped item Clover no longer sells is kept, unavailable, so its site slot shows as sold out until it is
+ *     remapped in src/config/clover-item-map.ts.
  *
  * The snapshot never contains the merchant id, a token, costs or staff-only items (see catalog.ts for the rules).
  * After it changes, run `npm test`: the map test says if a site slot points at an item Clover no longer sells.
@@ -12,8 +16,10 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import {
   normalizeCloverInventory,
+  type CloverInventory,
   type RawCloverInventory,
 } from "../../src/lib/integration/providers/clover/catalog.ts";
+import { cloverItemMap } from "../../src/config/clover-item-map.ts";
 
 const OUT = new URL("../../src/data/clover/inventory.snapshot.json", import.meta.url);
 
@@ -95,7 +101,38 @@ function fromExport(
   };
 }
 
+/** The live menu as the site serves it (already normalised), plus removed mapped items kept unavailable. */
+async function fromUrl(url: string): Promise<CloverInventory> {
+  const res = await fetch(url, { headers: { Accept: "application/json" } });
+  if (!res.ok) throw new Error(`${url} HTTP ${res.status}`);
+  const live = (await res.json()) as CloverInventory;
+  if (!Array.isArray(live.items) || !Array.isArray(live.modifierGroups)) {
+    throw new Error(`${url} is not a Clover menu`);
+  }
+  const previous = JSON.parse(readFileSync(OUT, "utf8")) as CloverInventory;
+  const liveIds = new Set(live.items.map((i) => i.id));
+  const liveGroups = new Set(live.modifierGroups.map((g) => g.id));
+  const mapped = new Set(cloverItemMap.map((s) => s.clover));
+  const kept = previous.items
+    .filter((i) => mapped.has(i.id) && !liveIds.has(i.id))
+    .map((i) => ({
+      ...i,
+      available: false,
+      modifierGroupIds: i.modifierGroupIds.filter((g) => liveGroups.has(g)),
+    }));
+  for (const i of kept) console.log(`Not sold in Clover any more, kept unavailable: ${i.name}`);
+  return { ...live, items: [...live.items, ...kept] };
+}
+
 const args = process.argv.slice(2);
+if (args[0] === "--url" && args[1]) {
+  const inventory = await fromUrl(args[1]);
+  writeFileSync(OUT, `${JSON.stringify(inventory, null, 1)}\n`);
+  console.log(
+    `Snapshot: ${inventory.items.length} items, ${inventory.categories.length} categories, ${inventory.modifierGroups.length} option groups.`,
+  );
+  process.exit(0);
+}
 const input =
   args[0] === "--export" && args[1] && args[2]
     ? fromExport(args[1], args[2])

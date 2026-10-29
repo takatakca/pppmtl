@@ -20,9 +20,10 @@ import { checkSelections, chosenOptions } from "@/lib/modifiers";
 import type { IntegrationProviderId } from "@/lib/integration/core/contracts";
 import { logIntegrationEvent } from "@/lib/integration/core/logging";
 import { cloverCheckoutConfigured } from "@/lib/integration/providers/clover/config.server";
+import { durableOrderStoreConfigured } from "./database.server";
 import type { ProviderOrderAdapter } from "./provider-order-adapter";
 import { orderError, orderFailure, type OrderErrorCode, type OrderResult } from "./errors";
-import { claimOrderKey, deriveIdempotencyKey } from "./idempotency";
+import { claimOrderKey, deriveIdempotencyKey, releaseOrderKey } from "./idempotency";
 import { orderToUniversalDraft } from "./order-mapping";
 import { validateOrderDraft, type ValidationReport } from "./validation";
 import {
@@ -302,8 +303,24 @@ async function adapterFor(order: InternalOrder): Promise<ProviderOrderAdapter | 
   return cloverOrderSubmitAdapter;
 }
 
-function fail(order: InternalOrder, code: OrderErrorCode): OrderResult<InternalOrder> {
-  updateOrder(order.id, { status: "FAILED", failureCode: code });
+/** Clover orders live in PostgreSQL when DATABASE_URL is set; other providers stay in memory. */
+function isDurable(order: InternalOrder): boolean {
+  return order.provider === "clover" && durableOrderStoreConfigured();
+}
+
+const durableOrders = () => import("./durable-orders.server");
+
+async function fail(
+  order: InternalOrder,
+  code: OrderErrorCode,
+): Promise<OrderResult<InternalOrder>> {
+  const failed = updateOrder(order.id, { status: "FAILED", failureCode: code });
+  // Every failure here happens before a payment page reaches the customer, so "Pay" again is a new order.
+  releaseOrderKey(order.idempotencyKey);
+  if (failed && isDurable(failed)) {
+    // Best effort: a stored order that never got a payment page cannot be paid either way.
+    await (await durableOrders()).recordUnpaidOutcome(failed).catch(() => undefined);
+  }
   logIntegrationEvent({
     provider: order.provider,
     eventType: "order.submit_failed",
@@ -316,20 +333,39 @@ function fail(order: InternalOrder, code: OrderErrorCode): OrderResult<InternalO
 
 /** 3 — SUBMIT. Idempotent by construction; refuses rather than pretends. */
 export async function submitOrder(orderId: string): Promise<OrderResult<InternalOrder>> {
-  const order = readOrder(orderId);
+  let order = readOrder(orderId);
   if (!order) return orderFailure("order_not_found");
+  // Never answer a retry with an earlier failed attempt as if it had been placed.
+  if (order.status === "FAILED") return orderFailure("provider_unavailable");
   if (order.status !== "CREATED") return { ok: true, data: order };
 
-  if (!order.providerLocationId) return fail(order, "location_not_mapped");
+  const providerLocationId = order.providerLocationId;
+  if (!providerLocationId) return fail(order, "location_not_mapped");
 
   const adapter = await adapterFor(order);
   if (!adapter || !adapter.isConfigured(order.locationId)) {
     return fail(order, "provider_unavailable");
   }
 
+  // The order is stored before Clover is asked for a payment page: no money without a durable order.
+  const durable = isDurable(order);
+  if (durable) {
+    let stored: InternalOrder;
+    try {
+      stored = await (await durableOrders()).persistNewOrder(order);
+    } catch {
+      return fail(order, "provider_unavailable");
+    }
+    if (stored.id !== order.id) {
+      // Same browser, same cart, same window, across a restart: continue the first order.
+      order = saveOrder(stored);
+      if (order.status !== "CREATED") return { ok: true, data: order };
+    }
+  }
+
   const result = await adapter.createOrder(
     orderToUniversalDraft(order),
-    order.providerLocationId,
+    providerLocationId,
     order.idempotencyKey,
     { orderId: order.id },
   );
@@ -345,7 +381,17 @@ export async function submitOrder(orderId: string): Promise<OrderResult<Internal
     total: result.data.total,
     ...(result.data.paymentUrl ? { paymentUrl: result.data.paymentUrl } : {}),
   });
-  return updated ? { ok: true, data: updated } : orderFailure("order_not_found");
+  if (!updated) return orderFailure("order_not_found");
+
+  // The customer is only sent to Clover once the session is linked to the stored order.
+  if (durable) {
+    try {
+      await (await durableOrders()).linkCheckoutSession(updated);
+    } catch {
+      return fail(updated, "provider_unavailable");
+    }
+  }
+  return { ok: true, data: updated };
 }
 
 /**
@@ -382,7 +428,7 @@ export async function cancelOrder(
   orderId: string,
   reason: string,
 ): Promise<OrderResult<InternalOrder>> {
-  const order = readOrder(orderId);
+  const order = await getOrderById(orderId);
   if (!order) return orderFailure("order_not_found");
   if (order.status === "CANCELLED" || order.status === "FAILED") return { ok: true, data: order };
   if (order.status === "READY" || order.status === "COMPLETED") {
@@ -396,12 +442,16 @@ export async function cancelOrder(
   }
 
   const updated = applyStatus(order.id, "CANCELLED");
+  if (updated) releaseOrderKey(updated.idempotencyKey);
+  if (updated && isDurable(updated)) {
+    await (await durableOrders()).recordUnpaidOutcome(updated).catch(() => undefined);
+  }
   return updated ? { ok: true, data: updated } : orderFailure("order_not_found");
 }
 
 /** 5 — STATUS. Reads the provider when one exists, otherwise our own record. */
 export async function getOrderStatus(orderId: string): Promise<OrderResult<OrderStatus>> {
-  const order = readOrder(orderId);
+  const order = await getOrderById(orderId);
   if (!order) return orderFailure("order_not_found");
   if (!order.providerOrderId) return { ok: true, data: order.status };
 
@@ -426,7 +476,16 @@ export function applyProviderStatusUpdate(
   return applyStatus(order.id, status, providerStatus);
 }
 
-export function getOrderById(orderId: string): InternalOrder | null {
+/** The stored copy when there is one (it survives restarts), refreshed into this process; else memory. */
+export async function getOrderById(orderId: string): Promise<InternalOrder | null> {
+  if (durableOrderStoreConfigured()) {
+    try {
+      const stored = await (await durableOrders()).loadDurableOrder(orderId);
+      if (stored) return saveOrder(stored);
+    } catch {
+      // Database briefly unreachable: this process's copy is the best answer.
+    }
+  }
   return readOrder(orderId);
 }
 
@@ -434,6 +493,17 @@ export function listCustomerOrders(customerId: string | null, phone: string | nu
   return listOrdersForCustomer(customerId, phone);
 }
 
-export function listRecentOrders(limit = 50) {
-  return listAllOrders(limit);
+export async function listRecentOrders(limit = 50): Promise<InternalOrder[]> {
+  const local = listAllOrders(limit);
+  if (!durableOrderStoreConfigured()) return local;
+  let stored: InternalOrder[];
+  try {
+    stored = await (await durableOrders()).listDurableOrders(limit);
+  } catch {
+    return local;
+  }
+  const ids = new Set(stored.map((o) => o.id));
+  return [...stored, ...local.filter((o) => !ids.has(o.id))]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, limit);
 }

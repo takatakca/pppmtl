@@ -84,3 +84,23 @@ The `src/lib/orders/postgres-transactions.server.ts` adapter now exposes injecte
 GitHub Actions runner provisioning now works. **CI `40648225513` completed SUCCESS** on `eff248a211680e96b0879e455bdadc219e963202`, including ephemeral PostgreSQL 16 application/migrations 0001/0002/0003, tenant RLS, atomic verified payment and worker lease/print safety probes. This is an executed test database with limited role, not a production/staging PostgreSQL service or an applied production migration. All earlier notes about runnerless SQL testing are historical.
 
 The runtime still imports `src/lib/orders/order-store.server.ts` with `ordersPersistAcrossRestarts=false`. Do not flip that flag, store DB credentials in GitHub, or enable production Clover charges. An authorized real DB connection/pool, per-request verified TAKATAK tenant, migration history, backups, signed webhook inbox and monitored fulfillment workers require an actual approved deployment and failure/restart testing (#5/#6/#13). Source-level pre-launch improvement additionally rejects unavailable/cross-restaurant catalog items and unsupported Clover DELIVERY before an order is created. See [28 Oct release gate](agent-notes/2026-10-28-release-security-gate.md).
+
+## 2026-10-29 — Runtime wiring and the production role
+
+The runtime now uses PostgreSQL whenever `DATABASE_URL` is set (`src/lib/orders/database.server.ts`). Apply 0001 → 0003 as the admin user, then connect the site as a separate login role with exactly these grants (the same as CI's `ppp_ci_role`):
+
+```sql
+CREATE ROLE ppp_app LOGIN PASSWORD '<random>' NOSUPERUSER NOBYPASSRLS;
+GRANT USAGE ON SCHEMA ppp TO ppp_app;
+GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA ppp TO ppp_app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA ppp TO ppp_app;
+GRANT EXECUTE ON FUNCTION ppp.create_order_once(text,text,text,text,jsonb,text) TO ppp_app;
+GRANT EXECUTE ON FUNCTION ppp.record_verified_clover_payment(text,text,text,text,text) TO ppp_app;
+GRANT EXECUTE ON FUNCTION ppp.claim_due_fulfillment(integer,integer) TO ppp_app;
+GRANT EXECUTE ON FUNCTION ppp.finish_fulfillment(bigint,uuid,boolean,boolean,text,boolean) TO ppp_app;
+GRANT EXECUTE ON FUNCTION ppp.quarantine_expired_prints() TO ppp_app;
+```
+
+A future migration that adds tables or functions must re-run the matching grants. Every query runs in `withPppTenantTransaction` with the tenant from `PPP_TENANT_ID` (default `pppmtl`). `src/lib/orders/__tests__/durable-orders.pg.test.ts` exercises the whole path as this role when `PPP_TEST_DATABASE_URL` is set.
+
+Manual review: `SELECT order_id, effect, state, attempts, last_error FROM ppp.fulfillment_outbox WHERE state = 'FAILED';` (run with `SELECT set_config('ppp.tenant_id','pppmtl',false);` first as `ppp_app`). A FAILED print means the ticket may or may not have printed: check the Clover order before reprinting by hand.

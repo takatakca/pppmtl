@@ -41,14 +41,14 @@ export const cloverItemMap: CloverSlot[] = [
   {
     site: "trio-2-cheeseburger-6-ailes-de-poulet-boisson-gazeus",
     clover: "TXR37X7C4MFQ2",
-    cloverName: "Trio #2 — Cheeseburger + 6 ailes de poulet + boisson gazeuse",
+    cloverName: "Trio #2 — Cheeseburger + 6 ailes de poulet + breuvage",
   },
   { site: "sous-marin-tacos", clover: "9CJ0N85E1WPNY", cloverName: "Sous-marin Tacos" },
   { site: "poutine-classique", clover: "7BF0CQ2WDEY2R", cloverName: "Poutine classique" },
   {
     site: "trio-5-burger-poulet-6-ailes-de-poulet-boisson-gazeu",
     clover: "K3GJ1FFGXMXH0",
-    cloverName: "Trio #5 — Burger poulet + 6 ailes de poulet + boisson gazeuse",
+    cloverName: "Trio #5 — Burger poulet + 6 ailes de poulet + breuvage",
   },
   {
     site: "assiette-mixte-shish-taouk-shawarma",
@@ -90,12 +90,12 @@ export const cloverItemMap: CloverSlot[] = [
   {
     site: "trio-6-burger-double-poulet-mozza-rondelles-d-oignon",
     clover: "1FWV6D7D22ZA8",
-    cloverName: "Trio #6 — Burger double poulet mozza + rondelles d’oignon + boisson gazeuse",
+    cloverName: "Trio #6 — Burger double poulet mozza + rondelles d’oignon + breuvage",
   },
   {
     site: "trio-3-cheeseburger-double-rondelles-d-oignon-boisso",
     clover: "V04ZTAZFAJHER",
-    cloverName: "Trio #3 — Cheeseburger double + rondelles d’oignon + boisson gazeuse",
+    cloverName: "Trio #3 — Cheeseburger double + rondelles d’oignon + breuvage",
   },
   {
     site: "trio-7-2-hot-dogs-vapeur-frite-breuvage",
@@ -110,7 +110,7 @@ export const cloverItemMap: CloverSlot[] = [
   {
     site: "trio-4-2-burgers-poulet-frite-boisson-gazeuse",
     clover: "ZMJFXFG7DZZJ4",
-    cloverName: "Trio #4 — 2 burgers poulet + frite + boisson gazeuse",
+    cloverName: "Trio #4 — 2 burgers poulet + frite + breuvage",
   },
   {
     site: "trio-8-2-hot-dogs-michigan-frites-breuvage",
@@ -157,7 +157,7 @@ export const cloverItemMap: CloverSlot[] = [
   {
     site: "trio-1-2-hamburgers-frite-boisson-gazeuse",
     clover: "ZR4DKS7XCBB06",
-    cloverName: "Trio #1 — 2 hamburgers + frite + boisson gazeuse",
+    cloverName: "Trio #1 — 2 hamburgers + frite + breuvage",
   },
   { site: "tacos-trio-familiale", clover: "MT73HS8BAH52C", cloverName: "Tacos Trio Familiale" },
   {
@@ -316,7 +316,7 @@ export const cloverItemMap: CloverSlot[] = [
   { site: "hot-dog-vapeur", clover: "T2Q5GSGQA9QM6", cloverName: "Hot-dog Vapeur" },
   { site: "hot-dog-michigan", clover: "BCFQM8RZZ9GMP", cloverName: "Hot-dog Michigan" },
   { site: "hot-dog-supreme", clover: "43472J9YW6ZA0", cloverName: "Hot-dog Suprême" },
-  { site: "samoussa-2-mcx", clover: "RGHG7YHPHPY1A", cloverName: "Samoussa (2 MCX)" },
+  { site: "samoussa-2-mcx", clover: "RGHG7YHPHPY1A", cloverName: "Samoussa 2(MCX)" },
   { site: "pate-jamaicain", clover: "0WJWVRF0E30HY", cloverName: "Pâté jamaïcain" },
   { site: "hamburger", clover: "TNHW4S2PJPDET", cloverName: "Hamburger" },
   { site: "cheeseburger", clover: "HM49MB9XYVMWT", cloverName: "Cheeseburger" },
@@ -362,12 +362,12 @@ export const cloverItemMap: CloverSlot[] = [
   {
     site: "tacos-boeuf-viande-hache",
     clover: "K199BVVZJ3WEP",
-    cloverName: "Tacos Bœuf (viande hachée)",
+    cloverName: "Tacos Boeuf (Viande Hache)",
   },
   { site: "quesadillas-steak", clover: "7EF6BC6506X2A", cloverName: "Quesadillas Steak" },
   { site: "nachos-buf", clover: "43W3XWAZ78VKA", cloverName: "Nachos Bœuf" },
   { site: "nachos-poulet", clover: "DAZQFAT9RX7DY", cloverName: "Nachos Poulet" },
-  { site: "tacos-haricots-noir", clover: "9VT50FXQ4RFA6", cloverName: "Tacos Haricots Noirs" },
+  { site: "tacos-haricots-noir", clover: "9VT50FXQ4RFA6", cloverName: "Tacos Haricots Noir" },
   { site: "tacos-poulet", clover: "JDE3K8K9ETDB2", cloverName: "Tacos Poulet" },
   { site: "tacos-steak", clover: "CC2JG7EYN9QTG", cloverName: "Tacos Steak" },
   {
@@ -423,8 +423,8 @@ export const cloverItemMap: CloverSlot[] = [
   { site: "pepsi", clover: "JX7E4HAPBSHAA", cloverName: "Pepsi" },
   { site: "diet-pepsi", clover: "NPJQXA39K0QNA", cloverName: "Diet Pepsi" },
   { site: "1-pilon-de-poulet", clover: "DMC178ED7GTPC", cloverName: "(1) PILON DE POULET" },
-  { site: "1-ail-de-poulet", clover: "9YX4SG4B5KGPC", cloverName: "(1) AILE DE POULET" },
-  { site: "salade-de-choux", clover: "YR956YC5NHQQG", cloverName: "SALADE DE CHOU" },
+  { site: "1-ail-de-poulet", clover: "9YX4SG4B5KGPC", cloverName: "(1) AIL DE POULET" },
+  { site: "salade-de-choux", clover: "YR956YC5NHQQG", cloverName: "SALADE DE CHOUX" },
   { site: "clean-water", clover: "6W5G1JHJB5P8P", cloverName: "CLEAN WATER" },
   { site: "2-fromage-feta", clover: "SH6288Z189A7W", cloverName: "(2) FROMAGE FETA" },
 ];

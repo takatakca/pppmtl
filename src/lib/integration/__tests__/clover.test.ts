@@ -44,12 +44,12 @@ const group = (label: RegExp) => pita().modifierGroups!.find((g) => label.test(g
 const choice = (g: ModifierGroup, label: RegExp) =>
   g.choices.find((c) => label.test(c.labelFr))!.id;
 
-/** The pita, as a customer orders it: pita, garlic sauce, in a combo with fries + Pepsi. */
+/** The pita, as a customer orders it: pita, garlic sauce, in a trio with small fries + Pepsi. */
 function pitaCombo(): LineSelections {
   let s = defaultSelections(pita().modifierGroups!);
   s = toggleChoice(s, group(/^Choix pita/), choice(group(/^Choix pita/), /^pita$/i));
   s = toggleChoice(s, group(/^Sauce incluse/), choice(group(/^Sauce incluse/), /ail/i));
-  s = toggleChoice(s, group(/^Trio/), choice(group(/^Trio/), /^frites \+ pepsi$/i));
+  s = toggleChoice(s, group(/^Trio/), choice(group(/^Trio/), /^petite frite \+ pepsi$/i));
   return s;
 }
 
@@ -248,8 +248,9 @@ describe("site slot -> Clover item map", () => {
 describe("Clover inventory rules", () => {
   it("never lets a staff-only, in-store or archived category into the snapshot", () => {
     expect(cloverSnapshot.categories.some((c) => INTERNAL_CATEGORY.test(c.name))).toBe(false);
-    expect(cloverSnapshot.items).toHaveLength(175);
-    expect(cloverSnapshot.categories).toHaveLength(17);
+    // 176 sold in Clover + 2 mapped items Clover stopped selling, kept unavailable.
+    expect(cloverSnapshot.items).toHaveLength(178);
+    expect(cloverSnapshot.categories).toHaveLength(18);
   });
 
   it("leaves out hidden, staff, promo-only, archived and variable-price items; keeps 86'd ones flagged", () => {
@@ -325,7 +326,7 @@ describe("options (modifiers) nested in each item", () => {
     expect(groups.some((g) => /sugg/i.test(g.labelFr))).toBe(false);
     const trio = group(/^Trio/);
     expect(trio).toMatchObject({ required: false, min: 0, max: 1 });
-    expect(trio.choices.find((c) => c.id === "frites-pepsi")?.priceDelta).toBe(5.42);
+    expect(trio.choices.find((c) => c.id === "petite-frite-pepsi")?.priceDelta).toBe(5);
     expect(group(/^Choix pita/)).toMatchObject({ required: true, min: 1, max: 1 });
   });
 
@@ -340,8 +341,8 @@ describe("options (modifiers) nested in each item", () => {
     ]);
     const full = pitaCombo();
     expect(checkSelections(groups, full).ok).toBe(true);
-    expect(optionsTotal(groups, full)).toBe(5.42);
-    expect(unitPriceFor(pita(), full)).toBe(13.91);
+    expect(optionsTotal(groups, full)).toBe(5);
+    expect(unitPriceFor(pita(), full)).toBe(13.49);
     expect(checkSelections(groups, { ...full, nope: "x" }).unknown).toEqual(["nope"]);
   });
 
@@ -387,10 +388,10 @@ describe("cart -> Clover Hosted Checkout", () => {
     expect(priced.lines[0]).toMatchObject({
       cloverItemId: "MKHYNCFYDQXQY",
       basePrice: 849,
-      unitPrice: 1391,
+      unitPrice: 1349,
       quantity: 2,
     });
-    expect(priced.subtotal).toBe(2782);
+    expect(priced.subtotal).toBe(2698);
   });
 
   it("refuses a missing required option, an unknown item and an 86'd item", () => {
@@ -446,15 +447,16 @@ describe("cart -> Clover Hosted Checkout", () => {
     const line = body.shoppingCart.lineItems[0]!;
     expect(line).toMatchObject({
       name: "Pita / Wrap Mixte — Shish Taouk & Shawarma",
-      price: 1391,
+      price: 1349,
       unitQty: 1,
-      itemRefUuid: "MKHYNCFYDQXQY",
       taxRates: [
         { name: "TPS", rate: 500000 },
         { name: "TVQ", rate: 997500 },
       ],
     });
-    expect(line.note).toContain("Frites + Pepsi");
+    expect(line.note).toContain("PETITE FRITE + PEPSI");
+    // Clover accepts an inventory item OR its own name + price, never both.
+    expect(line).not.toHaveProperty("itemRefUuid");
     expect(line.note).toContain("Note: sans oignon");
     expect(taxesFor(1000, QUEBEC_TAX_RATES)).toBe(150);
   });
@@ -500,6 +502,24 @@ describe("Clover webhook", () => {
   });
 });
 
+describe("Clover checkout refusal, for diagnosis", () => {
+  it("keeps Clover's reason and masks personal data and ids", async () => {
+    const { cloverRefusalDetail } = await import("@/lib/integration/providers/clover/api.server");
+    const body = JSON.stringify({
+      error: {
+        type: "invalid_request_error",
+        param: "customer.email",
+        message: "Email marie@example.com required for merchant 7X9KQ2M4ZB81P, phone 5145550100",
+      },
+    });
+    expect(cloverRefusalDetail(400, body)).toBe(
+      "HTTP 400 · invalid_request_error · customer.email · Email [email] required for merchant [id], phone [number]",
+    );
+    expect(cloverRefusalDetail(401, '{"message":"UNAUTHORIZED"}')).toBe("HTTP 401 · UNAUTHORIZED");
+    expect(cloverRefusalDetail(403, "<html><b>Forbidden</b></html>")).toBe("HTTP 403 · Forbidden");
+  });
+});
+
 describe("universal menu from Clover", () => {
   it("lists categories in Clover's order with the options nested in each product", () => {
     const menu = cloverInventoryToUniversalMenu(
@@ -513,7 +533,7 @@ describe("universal menu from Clover", () => {
     expect(p.externalId).toBe("MKHYNCFYDQXQY");
     expect(p.price).toBe(849);
     expect(p.modifierGroups.find((g) => g.nameFr.startsWith("Trio"))?.choices[0]?.priceDelta).toBe(
-      542,
+      500,
     );
   });
 });
@@ -537,6 +557,7 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
     vi.stubEnv("CLOVER_ECOMM_PRIVATE_KEY", "priv_test");
     vi.stubEnv("CLOVER_WEBHOOK_SECRET", "whsec_test");
     vi.stubEnv("CLOVER_API_TOKEN", "");
+    vi.stubEnv("DATABASE_URL", "");
     vi.stubGlobal(
       "fetch",
       vi.fn(async (url: string, init?: RequestInit) => {
@@ -615,7 +636,7 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
     expect(headers["X-Clover-Merchant-Id"]).toBe("MTEST");
     expect(headers["Authorization"]).toBe("Bearer priv_test");
     const sent = JSON.parse(String(checkoutCall.init!.body));
-    expect(sent.shoppingCart.lineItems[0].price).toBe(1391);
+    expect(sent.shoppingCart.lineItems[0].price).toBe(1349);
     expect(sent.redirectUrls.success).toContain(`/orders/${created.data.id}?paid=1`);
 
     // Clover calls back: the order is paid; with a REST token the Clover order is titled and printed once.
@@ -642,7 +663,7 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
     const first = await (await send()).json();
     expect(first).toMatchObject({ received: true, applied: true, titled: true, printed: true });
     expect(title.startsWith("🌐 Site web · PPP-")).toBe(true);
-    expect(getOrderById(created.data.id)).toMatchObject({
+    expect(await getOrderById(created.data.id)).toMatchObject({
       paymentStatus: "PAID",
       status: "ACCEPTED",
     });

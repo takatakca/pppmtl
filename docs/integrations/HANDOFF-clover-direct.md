@@ -19,11 +19,11 @@ Living note, updated as the work goes. Last update: 2026-10-08 (task 12 of the F
      and Canada").
    - Create checkout: `POST /invoicingcheckoutservice/v1/checkouts`, headers `X-Clover-Merchant-Id` +
      `Authorization: Bearer <ecommerce private key>`; body `customer`, `redirectUrls {success, failure, cancel}`,
-     `shoppingCart.lineItems[{name, price, unitQty, note, itemRefUuid, taxRates}]`. Session lasts 15 minutes.
+     `shoppingCart.lineItems[{name, price, unitQty, note, taxRates}]` (no `itemRefUuid`: Clover refuses it next to name + price). Session lasts 15 minutes.
      https://docs.clover.com/dev/docs/creating-a-hosted-checkout-session · https://docs.clover.com/dev/reference/createcheckout
    - Hosted Checkout has **no modifier field** and does not use the Clover inventory or its default taxes, so each
      cart line is sent as one Clover line: unit price = item + chosen options, options listed in the line note,
-     `itemRefUuid` = the Clover item id, Québec taxes as `taxRates`.
+     Québec taxes as `taxRates`.
    - Webhook: `Clover-Signature: t=…,v1=…` (HMAC-SHA256 of `t.rawBody` with the signing secret); body gives the
      payment id, status APPROVED / DECLINED and the checkout session id. No GET endpoint exists for a session.
      https://docs.clover.com/dev/docs/ecomm-hosted-checkout-webhook · https://docs.clover.com/dev/docs/redirecting-customers

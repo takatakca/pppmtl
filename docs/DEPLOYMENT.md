@@ -139,3 +139,7 @@ GitHub Actions [40645275982](https://github.com/takatakca/pppmtl/actions/runs/40
 ## 2026-10-28 — Guest order security source verified, live still unverified
 
 Latest tested source 762972778b989236279ef8447cd79de170339e9b passed CI 40740927778 SUCCESS, both Nitro TypeScript lint tests and PostgreSQL 16 tenant/payments/worker. New boundary validates guest order list/read/cancel payloads and bounds signed cookie lengths. Website /menu was readable via web today with 17 categories and 175 items, but /healthz could not be fetched and container DNS failed. No live Coolify running SHA, /dev anonymous 401 or mobile interaction proven. Native Coolify GitHub-App path remains; Actions fallback intentionally skipped. Preserve payments fail-closed with in-process orders and unverified tenant DB/webhook/worker #5/#6/#13.
+
+## 2026-10-29 — Production Clover checkout requirements
+
+Production checkout opens when ALL are set on the Coolify app (runtime, not build time): `DATABASE_URL` (limited role, see DB_ROLLOUT.md), `CLOVER_MERCHANT_ID`, `CLOVER_ECOMM_PRIVATE_KEY`, `CLOVER_WEBHOOK_SECRET`, `CLOVER_API_TOKEN`, `PPP_ORDER_ACCESS_SECRET`; `CLOVER_ENV` empty. Missing any one keeps "Pay with Clover" refusing with "temporarily unavailable". Enable scheduled backups on the Coolify database resource. After each deploy, look in the runtime logs for `[ppp-db]` errors; a paid order logs `[integration_events]` `payment.approved` with `kitchen done 2`.

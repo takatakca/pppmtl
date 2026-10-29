@@ -86,6 +86,11 @@ export function claimOrderKey(
   return { fresh: true, orderId };
 }
 
+/** An order that failed before any payment page was shown frees its key: the retry is a new order. */
+export function releaseOrderKey(key: string): void {
+  claims.delete(key);
+}
+
 export function findClaim(key: string): string | null {
   return claims.get(key)?.orderId ?? null;
 }

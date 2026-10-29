@@ -6,9 +6,9 @@
  * The caller MUST obtain tenantId from verified TAKATAK membership/product
  * authorization (never from the request body, URL, or an unverified cookie).
  *
- * There is intentionally no production pool wiring in this file. Live checkout
- * remains fail-closed until the complete durable order + webhook/outbox path
- * is connected, migration-tested, and reviewed (issue #6).
+ * The pool is created in database.server.ts (DATABASE_URL) and these primitives
+ * are driven by durable-orders.server.ts; without DATABASE_URL live checkout
+ * stays fail-closed.
  */
 import type { InternalOrder } from "./types";
 
@@ -114,6 +114,15 @@ export async function persistGuestOrderOnce(
   });
 }
 
+/** What the priced Clover session adds to the stored order (number, Clover totals in cents). */
+export interface CheckoutSessionDetails {
+  orderNumber: string | null;
+  subtotal: number;
+  tax: number | null;
+  total: number | null;
+  providerStatus: string | null;
+}
+
 /** A checkout session must be durably associated with the pending order before redirect. */
 export async function attachCloverCheckoutSession(
   pool: PppSqlPool,
@@ -121,6 +130,7 @@ export async function attachCloverCheckoutSession(
   orderId: string,
   sessionId: string,
   paymentUrl: string,
+  details?: CheckoutSessionDetails,
 ): Promise<InternalOrder> {
   const url = new URL(paymentUrl);
   if (url.protocol !== "https:" || !/(^|\.)clover\.com$/.test(url.hostname) || !sessionId.trim()) {
@@ -133,7 +143,7 @@ export async function attachCloverCheckoutSession(
              order_status = 'SUBMITTED',
              order_document = jsonb_set(
                jsonb_set(
-                 jsonb_set(order_document, '{providerOrderId}', to_jsonb($2::text), true),
+                 jsonb_set(order_document || $4::jsonb, '{providerOrderId}', to_jsonb($2::text), true),
                  '{paymentUrl}', to_jsonb($3::text), true
                ),
                '{status}', '"SUBMITTED"'::jsonb, true
@@ -146,7 +156,7 @@ export async function attachCloverCheckoutSession(
          AND order_status IN ('CREATED', 'SUBMITTED')
          AND (provider_order_id IS NULL OR provider_order_id = $2)
        RETURNING id, order_document`,
-      [orderId, sessionId, paymentUrl],
+      [orderId, sessionId, paymentUrl, JSON.stringify(details ?? {})],
     );
     const updated = result.rows[0];
     if (!updated) throw new Error("Checkout session could not be durably linked");
@@ -157,7 +167,7 @@ export async function attachCloverCheckoutSession(
 /**
  * This operation MUST receive a previously HMAC-, merchant- and type-verified
  * Clover event. It creates a durable, deduplicated title outbox intent, but
- * does NOT print; the separate worker/recovery flow is not yet implemented.
+ * does NOT print; clover-fulfillment-worker.server.ts titles, then prints once.
  */
 export async function persistVerifiedCloverPayment(
   pool: PppSqlPool,

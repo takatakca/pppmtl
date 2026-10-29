@@ -7,8 +7,9 @@
  *   https://docs.clover.com/dev/reference/createcheckout                 (customer, redirectUrls, shoppingCart)
  *   https://docs.clover.com/dev/docs/ecomm-hosted-checkout-webhook       (Clover-Signature: t=…,v1=…)
  * Hosted Checkout has no modifier field and does not use the inventory's taxes, so each cart line becomes one
- * Clover line: unit price = item + options, options in the line note, the Clover item id in `itemRefUuid`, and
- * the Québec taxes as `taxRates` on every line.
+ * Clover line: unit price = item + options, options in the line note, and the Québec taxes as `taxRates` on every
+ * line. No `itemRefUuid`: Clover refuses a line that has both an inventory item and its own name + price (HTTP 400
+ * "Please provide either itemRefUuid or name, price.", seen live 2026-10-29), and the price must include options.
  */
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { checkSelections, chosenOptions, type LineSelections } from "@/lib/modifiers";
@@ -131,7 +132,6 @@ export interface HostedCheckoutLineItem {
   price: number;
   unitQty: number;
   note?: string;
-  itemRefUuid?: string;
   taxRates?: Array<{ name: string; rate: number; id?: string }>;
 }
 
@@ -186,7 +186,6 @@ export function buildHostedCheckoutRequest(input: {
           price: l.unitPrice,
           unitQty: l.quantity,
           ...(note ? { note } : {}),
-          itemRefUuid: l.cloverItemId,
           ...(taxRates.length ? { taxRates } : {}),
         };
       }),

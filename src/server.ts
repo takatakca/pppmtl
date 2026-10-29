@@ -12,6 +12,13 @@ type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
 
+// Paid website orders whose Clover title or ticket is still pending (an outage, a restart) are retried here.
+if (typeof process !== "undefined" && process.env?.["DATABASE_URL"]) {
+  void import("./lib/orders/durable-orders.server")
+    .then((m) => m.startCloverFulfillmentLoop())
+    .catch((error: unknown) => console.error("[ppp-db] kitchen outbox loop not started:", error));
+}
+
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
 async function getServerEntry(): Promise<ServerEntry> {

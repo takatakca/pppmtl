@@ -8,7 +8,7 @@
  *   CLOVER_ENV                "sandbox" for Clover's test environment, else production
  */
 import { mappingForLocation } from "@/config/integration-locations";
-import { ordersPersistAcrossRestarts } from "@/lib/orders/order-store.server";
+import { durableOrderStoreConfigured } from "@/lib/orders/database.server";
 import { SITE_URL } from "@/config/site";
 import { DEFAULT_BRAND_ID } from "@/config/brands";
 import { currentBrandId, currentIsPreview, currentOrigin } from "@/lib/brand/current";
@@ -58,13 +58,12 @@ export function cloverServesLocation(locationId: string): boolean {
 
 /** Online payment through Clover can start: the store uses Clover and the Hosted Checkout key exists. */
 export function cloverCheckoutConfigured(locationId: string): boolean {
-  // A redirect to real payment cannot be made safe by a signed return URL alone.
-  // The current in-memory order store loses payment reconciliation on process restart.
-  // Live checkout also requires the REST connection used to verify current
-  // inventory and reconcile/label the paid Clover order.
+  // Real cards need the PostgreSQL order store (DATABASE_URL): the in-memory one loses
+  // payment reconciliation on restart. Live checkout also requires the REST connection
+  // used to verify current inventory and title/print the paid Clover order.
   if (
     cloverEnvironment() === "production" &&
-    (!ordersPersistAcrossRestarts || !cloverRestToken())
+    (!durableOrderStoreConfigured() || !cloverRestToken())
   ) {
     return false;
   }
@@ -120,7 +119,7 @@ export function cloverReadiness(locationId: string) {
     checkoutKeySet: Boolean(cloverCheckoutKey()),
     webhookSecretSet: Boolean(cloverWebhookSecret()),
     restTokenSet: Boolean(cloverRestToken()),
-    durableOrderStore: ordersPersistAcrossRestarts,
+    durableOrderStore: durableOrderStoreConfigured(),
     checkoutReady: cloverCheckoutConfigured(locationId),
   };
 }

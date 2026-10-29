@@ -1,22 +1,15 @@
 /**
  * Internal order store. SERVER ONLY.
  *
- * PPP has no database yet (identity and persistence land with TAKATAK), so
- * orders live in a bounded in-memory ring. The interface is deliberately the
- * one a real repository will implement, so swapping storage touches this file
- * only. Nothing here is ever presented as a persisted history to a customer.
+ * A bounded in-memory ring: this process's working copy. Clover orders are also
+ * written to PostgreSQL when DATABASE_URL is set (durable-orders.server.ts), and
+ * that copy is the one that survives a restart. Without it, production Clover
+ * checkout stays off (clover/config.server.ts).
  */
 
 import type { InternalOrder, OrderStatus } from "./types";
 import type { IntegrationProviderId } from "@/lib/integration/core/contracts";
 import { canTransition } from "./types";
-
-/**
- * This repository is still an in-process ring. Production Clover Hosted Checkout
- * must remain disabled until this is replaced with transactional durable storage.
- * Never switch this flag alone: implement restart-safe writes/webhooks and test first.
- */
-export const ordersPersistAcrossRestarts = false;
 
 const MAX_ORDERS = 500;
 const orders = new Map<string, InternalOrder>();

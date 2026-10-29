@@ -21,6 +21,8 @@ import {
 
 const TIMEOUT_MS = 12_000;
 const CACHE_MS = 5 * 60_000;
+/** Clover's Hosted Checkout reference lists User-Agent as a required header. */
+const USER_AGENT = "PPPMTL/1.0 (+https://pppmtl.com)";
 
 type Json = Record<string, unknown>;
 
@@ -40,6 +42,7 @@ async function rest(
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: "application/json",
+          "User-Agent": USER_AGENT,
           ...(init.body ? { "Content-Type": "application/json" } : {}),
         },
         ...(init.body ? { body: JSON.stringify(init.body) } : {}),
@@ -109,7 +112,31 @@ export async function fetchDefaultTaxRates(now = Date.now()): Promise<CloverTaxR
 
 export type CreateCheckoutResult =
   | { ok: true; href: string; checkoutSessionId: string; expiresAt: number | null }
-  | { ok: false; status: number; reason: string };
+  | { ok: false; status: number; reason: string; detail: string };
+
+/**
+ * Why Clover refused, without personal data: Clover's error type / code / field / message, with e-mails, numbers
+ * and Clover ids masked. Clover answers `{ error: { type, code, message, param } }` or a bare `{ message }`.
+ */
+export function cloverRefusalDetail(status: number, text: string): string {
+  let json: Json | null = null;
+  try {
+    json = JSON.parse(text) as Json;
+  } catch {
+    json = null;
+  }
+  const error = json && typeof json["error"] === "object" ? (json["error"] as Json) : (json ?? {});
+  const fields = ["type", "code", "param", "message"]
+    .map((k) => error[k] ?? (k === "message" ? json?.["message"] : undefined))
+    .filter((v): v is string => typeof v === "string" && v.trim() !== "");
+  const raw = fields.length ? fields.join(" · ") : text.replace(/<[^>]*>/g, " ").trim();
+  const masked = raw
+    .replace(/[^\s@]+@[^\s@]+/g, "[email]")
+    .replace(/\d{4,}/g, "[number]")
+    .replace(/\b(?=[A-Z0-9]*\d)[A-Z0-9]{10,}\b/g, "[id]")
+    .replace(/\s+/g, " ");
+  return `HTTP ${status}${masked ? ` · ${masked.slice(0, 300)}` : ""}`;
+}
 
 /** POST /invoicingcheckoutservice/v1/checkouts. The response's `href` is Clover's payment page. */
 export async function createHostedCheckout(
@@ -117,28 +144,46 @@ export async function createHostedCheckout(
 ): Promise<CreateCheckoutResult> {
   const key = cloverCheckoutKey();
   const mid = cloverMerchantId();
-  if (!key || !mid) return { ok: false, status: 0, reason: "not_configured" };
+  if (!key || !mid) {
+    return { ok: false, status: 0, reason: "not_configured", detail: "keys not set" };
+  }
+  const refused = (status: number, reason: string, detail: string): CreateCheckoutResult => ({
+    ok: false,
+    status,
+    reason,
+    detail,
+  });
   try {
     const res = await fetch(`${cloverCheckoutBaseUrl()}/invoicingcheckoutservice/v1/checkouts`, {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        "User-Agent": USER_AGENT,
         "X-Clover-Merchant-Id": mid,
         Authorization: `Bearer ${key}`,
       },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
-    const json = (await res.json().catch(() => null)) as Json | null;
+    const text = await res.text().catch(() => "");
+    let json: Json | null = null;
+    try {
+      json = JSON.parse(text) as Json;
+    } catch {
+      json = null;
+    }
     const href = typeof json?.["href"] === "string" ? json["href"] : "";
     const id = typeof json?.["checkoutSessionId"] === "string" ? json["checkoutSessionId"] : "";
-    if (!res.ok || !href || !id) return { ok: false, status: res.status, reason: "provider_error" };
+    if (!res.ok || !href || !id) {
+      return refused(res.status, "provider_error", cloverRefusalDetail(res.status, text));
+    }
     const exp = Number(json?.["expirationTime"]);
     return { ok: true, href, checkoutSessionId: id, expiresAt: Number.isFinite(exp) ? exp : null };
   } catch (error) {
     const timeout = error instanceof Error && /timeout|abort/i.test(error.name + error.message);
-    return { ok: false, status: 0, reason: timeout ? "timeout" : "provider_error" };
+    const name = error instanceof Error ? error.name : "error";
+    return refused(0, timeout ? "timeout" : "provider_error", `no answer from Clover (${name})`);
   }
 }
 
