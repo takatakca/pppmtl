@@ -138,13 +138,6 @@ export function cloverRefusalDetail(status: number, text: string): string {
   return `HTTP ${status}${masked ? ` · ${masked.slice(0, 300)}` : ""}`;
 }
 
-let lastRefusal: { at: string; detail: string } | null = null;
-
-/** The last Hosted Checkout refusal seen by this server (no personal data), for diagnosis. */
-export function lastCheckoutRefusal(): { at: string; detail: string } | null {
-  return lastRefusal;
-}
-
 /** POST /invoicingcheckoutservice/v1/checkouts. The response's `href` is Clover's payment page. */
 export async function createHostedCheckout(
   body: HostedCheckoutRequest,
@@ -154,10 +147,12 @@ export async function createHostedCheckout(
   if (!key || !mid) {
     return { ok: false, status: 0, reason: "not_configured", detail: "keys not set" };
   }
-  const refused = (status: number, reason: string, detail: string): CreateCheckoutResult => {
-    lastRefusal = { at: new Date().toISOString(), detail };
-    return { ok: false, status, reason, detail };
-  };
+  const refused = (status: number, reason: string, detail: string): CreateCheckoutResult => ({
+    ok: false,
+    status,
+    reason,
+    detail,
+  });
   try {
     const res = await fetch(`${cloverCheckoutBaseUrl()}/invoicingcheckoutservice/v1/checkouts`, {
       method: "POST",

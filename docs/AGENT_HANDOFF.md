@@ -1,5 +1,9 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-10-29 (latest) — Clover payment page opens on pppmtl.com (Claude)
+
+"We could not send your order to the kitchen" = Clover refused every Hosted Checkout session with HTTP 400 "Please provide either itemRefUuid or name, price." Lines now send name + price (+ note, taxes), no `itemRefUuid`; `User-Agent` sent on all Clover calls; refusals are logged as `checkout.session_refused` with Clover's masked reason (`cloverRefusalDetail`). Verified with Playwright on the live site: Clover's page opens with the right item, $14.99 + $2.25 tax = CA$17.24. NOT verified: a real payment, webhook, title + print, refund. Clover's page is branded "On2GO.CA" (merchant setting in Clover).
+
 ## 2026-10-29 (later) — "Something changed with your order" fixed (Claude)
 
 Cause: the site's menu was the Oct 7 Clover **export** snapshot; production checkout re-prices every cart on the **live** Clover API menu, and the owner had reorganised Clover since (144 of 175 items: "Boisson incluse" → required "Breuvage incluse", new Duo/Trio/Combo groups, price changes). Every changed item was refused with `menu_changed`.
