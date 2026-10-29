@@ -140,6 +140,7 @@ export const Route = createFileRoute("/api/public/webhooks/provider")({
           const { applyProviderStatusUpdate } = await import("@/lib/orders/order-service");
           applied = Boolean(
             applyProviderStatusUpdate(
+              provider,
               parsed.data.externalOrderId,
               status,
               parsed.data.status ?? parsed.data.eventType,
