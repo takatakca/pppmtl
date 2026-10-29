@@ -6,6 +6,8 @@
  * be configured at all.
  */
 
+/** Retired vendor variable names are retained in the type only until old
+ * standalone test fixtures are removed. No active code reads their values. */
 export const INTEGRATION_ENV_KEYS = [
   "URBANPIPER_API_URL",
   "URBANPIPER_API_KEY",
@@ -37,6 +39,9 @@ export const INTEGRATION_ENV_KEYS = [
 export type IntegrationEnvKey = (typeof INTEGRATION_ENV_KEYS)[number];
 
 function read(key: IntegrationEnvKey): string | undefined {
+  // Explicit owner cancellation: even accidentally retained Coolify secrets
+  // must NEVER enable the retired provider or appear in the admin snapshot.
+  if (key.startsWith("URBANPIPER_")) return undefined;
   const value = process.env[key];
   return value && value.length > 0 ? value : undefined;
 }
@@ -50,9 +55,9 @@ export function hasAnyCredential(...keys: IntegrationEnvKey[]): boolean {
   return keys.some((k) => read(k) !== undefined);
 }
 
-/** UrbanPiper accepts either the new API url or the legacy base url. */
-export function urbanPiperApiUrl(): string | undefined {
-  return read("URBANPIPER_API_URL") ?? read("URBANPIPER_BASE_URL");
+/** Deprecated old adapter compatibility: always disabled, regardless of environment. */
+export function urbanPiperApiUrl(): undefined {
+  return undefined;
 }
 
 export function requireCredential(key: IntegrationEnvKey): string {
@@ -66,9 +71,11 @@ export function optionalCredential(key: IntegrationEnvKey): string | undefined {
 }
 
 /** Non-secret snapshot for the internal integrations screen. */
-export function credentialPresence(): Record<IntegrationEnvKey, boolean> {
-  return Object.fromEntries(INTEGRATION_ENV_KEYS.map((k) => [k, read(k) !== undefined])) as Record<
-    IntegrationEnvKey,
-    boolean
-  >;
+export function credentialPresence(): Record<string, boolean> {
+  return Object.fromEntries(
+    INTEGRATION_ENV_KEYS.filter((key) => !key.startsWith("URBANPIPER_")).map((key) => [
+      key,
+      read(key) !== undefined,
+    ]),
+  );
 }
