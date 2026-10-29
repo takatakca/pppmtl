@@ -7,7 +7,10 @@ import {
   marketplaceChannels,
 } from "@/lib/integration/core/registry";
 import { locationIntegrationMappings } from "@/config/integration-locations";
-import { foodhubBridgeConfigured, foodhubAdapters } from "@/lib/integration/providers/foodhub/bridge";
+import {
+  foodhubBridgeConfigured,
+  foodhubAdapters,
+} from "@/lib/integration/providers/foodhub/bridge";
 import {
   credentialPresence,
   INTEGRATION_ENV_KEYS,
@@ -29,10 +32,10 @@ describe("owner-directed retirement of UrbanPiper", () => {
   it("rejects its legacy public webhook before reading even an enormous body", async () => {
     const body = "x".repeat(4 * 1024 * 1024);
     const response = await route.options.server.handlers.POST({
-      request: new Request(
-        "https://pppmtl.com/api/public/webhooks/provider?provider=urbanpiper",
-        { method: "POST", body },
-      ),
+      request: new Request("https://pppmtl.com/api/public/webhooks/provider?provider=urbanpiper", {
+        method: "POST",
+        body,
+      }),
     });
     expect(response.status).toBe(410);
     expect(response.headers.get("cache-control")).toBe("no-store");
@@ -45,7 +48,9 @@ describe("owner-directed retirement of UrbanPiper", () => {
       "foodhub",
       "clover",
     ]);
-    expect(locationIntegrationMappings.every((m) => ["foodhub", "clover"].includes(m.orderingProvider))).toBe(true);
+    expect(
+      locationIntegrationMappings.every((m) => ["foodhub", "clover"].includes(m.orderingProvider)),
+    ).toBe(true);
     for (const m of locationIntegrationMappings) {
       if (m.orderingProvider === "foodhub") {
         expect(m.providerLocationId).toBeNull();
