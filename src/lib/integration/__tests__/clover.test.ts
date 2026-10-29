@@ -537,6 +537,7 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
     vi.stubEnv("CLOVER_ECOMM_PRIVATE_KEY", "priv_test");
     vi.stubEnv("CLOVER_WEBHOOK_SECRET", "whsec_test");
     vi.stubEnv("CLOVER_API_TOKEN", "");
+    vi.stubEnv("DATABASE_URL", "");
     vi.stubGlobal(
       "fetch",
       vi.fn(async (url: string, init?: RequestInit) => {
@@ -642,7 +643,7 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
     const first = await (await send()).json();
     expect(first).toMatchObject({ received: true, applied: true, titled: true, printed: true });
     expect(title.startsWith("🌐 Site web · PPP-")).toBe(true);
-    expect(getOrderById(created.data.id)).toMatchObject({
+    expect(await getOrderById(created.data.id)).toMatchObject({
       paymentStatus: "PAID",
       status: "ACCEPTED",
     });

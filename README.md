@@ -6,7 +6,7 @@ The source repository for **[pppmtl.com](https://pppmtl.com)** and the related f
 
 - **Frontend and server:** TanStack Start, React 19, Vite, Tailwind CSS, Nitro.
 - **One shared menu/cart:** PPP and franchise brands use one catalog and Clover item mapping. The hostname determines the storefront; see [franchise documentation](docs/brands.md).
-- **Checkout:** server-side Clover Hosted Checkout for supported **pickup** orders in properly configured sandbox environments. Prices and availability are verified by the server. Card details must never pass through PPPMTL code. **Real production checkout is fail-closed while the order repository is in memory** (see issue #6).
+- **Checkout:** server-side Clover Hosted Checkout for **pickup** orders. Prices and availability are verified by the server. Card details must never pass through PPPMTL code. **Real production checkout opens only with the PostgreSQL order store** (`DATABASE_URL`, migrations 0001–0003, limited role) and the Clover REST token; without either it stays fail-closed. See `src/lib/orders/durable-orders.server.ts`.
 - **Webhook:** `POST /api/public/webhooks/clover` verifies Clover's signature. Only a verified payment event may mark an order paid.
 - **Integrations:** Clover, with UrbanPiper and other marketplaces separately tracked. See [Clover integration](docs/integrations/clover.md) and [UrbanPiper notes](docs/integrations/urbanpiper.md).
 - **Ownership:** TAKATAK is the customer identity/data authority where shared customer services are subsequently connected; tenant data must remain isolated.
@@ -42,7 +42,7 @@ Coolify accepting a webhook does **not** confirm a healthy release. After deploy
 
 - **Deployment:** the exact pppmtl.com hosting/DNS/live commit and Coolify connection have not been verified from this repository. No live deployment is claimed here.
 - **Secrets + payment:** the production Clover merchant credentials and webhook registration must be configured securely; run a controlled paid order and refund before accepting production orders.
-- **Order persistence:** current order records and webhook replay protection are in process memory; a restart or multiple workers can lose local order history and replay state. A durable order store, idempotency and retry mechanism are needed.
+- **Order persistence:** with `DATABASE_URL`, Clover orders, signed webhook receipts and the kitchen outbox (title, then one print) are stored in PostgreSQL and survive restarts; a background loop retries pending titles every 30 s. Without it, orders live in process memory and production checkout stays off. Backups are configured in Coolify on the database resource.
 - **Admin/identity:** the operations endpoints now require a temporary signed administrator session (sign in at `/admin/sign-in`), configured using separate 32+ character server-only `PPP_ADMIN_ACCESS_TOKEN` and `PPP_ADMIN_SESSION_SECRET`. Customer order reads/cancellation are limited to signed same-browser grants using a third stable `PPP_ORDER_ACCESS_SECRET`; without that key new web checkouts fail closed. Replace the temporary admin login with TAKATAK Auth/tenant-specific entitlements and backed order history before launch.
 - **Brand data:** Hochelaga is present but its business hours are **not approved** and must remain unpublished. Align operating hours and location facts with the owner and external delivery channels.
 - **QA:** run `npm run typecheck`, `npm run lint`, `npm run test`, and `npm run build` before production launch (deferred at the owner's request).

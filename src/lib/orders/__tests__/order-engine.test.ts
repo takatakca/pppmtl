@@ -410,14 +410,14 @@ describe("order lookup", () => {
     ...over,
   });
 
-  it("reads a saved order back by id", () => {
+  it("reads a saved order back by id", async () => {
     const order = sampleOrder({
       id: "ord_lookup_1",
       customer: { ...sampleOrder().customer, phone: "5145550001" },
     });
     saveOrder(order);
 
-    const found = getOrderById("ord_lookup_1");
+    const found = await getOrderById("ord_lookup_1");
     expect(found).not.toBeNull();
     expect(found?.customer.phone).toBe("5145550001");
   });

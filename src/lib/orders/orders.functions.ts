@@ -140,6 +140,8 @@ export const placeOrder = createServerFn({ method: "POST" })
     if (!submitted.ok) {
       return { ok: false, order: toView(created.data), error: submitted.error };
     }
+    // The stored order for this same cart may be an earlier one (resubmitted across a restart).
+    if (submitted.data.id !== created.data.id) grantOrderAccess(submitted.data.id);
     return { ok: true, order: toView(submitted.data), error: null };
   });
 
@@ -169,8 +171,7 @@ export const listMyOrders = createServerFn({ method: "POST" })
     const { readableOrderIds } = await import("@/lib/security/order-access.server");
     const { getOrderById: findOrder } = await import("./order-service");
     const phone = data.phone?.replace(/\D/g, "") ?? "";
-    const orders = readableOrderIds()
-      .map(findOrder)
+    const orders = (await Promise.all(readableOrderIds().map(findOrder)))
       .filter((o): o is InternalOrder => o !== null)
       .filter((o) => !phone || (o.customer.phone ?? "").replace(/\D/g, "") === phone);
     return { orders: orders.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(toView) };
@@ -183,7 +184,7 @@ export const getOrderById = createServerFn({ method: "POST" })
     const { canReadOrder } = await import("@/lib/security/order-access.server");
     if (!canReadOrder(data.orderId)) return { order: null };
     const { getOrderById: findOrder } = await import("./order-service");
-    const order = findOrder(data.orderId);
+    const order = await findOrder(data.orderId);
     return { order: order ? toView(order) : null };
   });
 
@@ -209,7 +210,7 @@ export const getAdminOrders = createServerFn({ method: "GET" }).handler(
     const { listRecentOrders } = await import("./order-service");
     return {
       generatedAt: new Date().toISOString(),
-      orders: listRecentOrders(50).map((o) => ({
+      orders: (await listRecentOrders(50)).map((o) => ({
         id: o.id,
         orderNumber: o.orderNumber,
         provider: o.provider,

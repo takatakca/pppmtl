@@ -72,14 +72,15 @@ Run it on:
 (Lovable hosting is NOT an option: the owner refused Lovable categorically on 2026-10-26. GitHub → Coolify is the
 only route.)
 
-Note: orders are kept in memory (the site has no database yet). After a restart, the order page may
-not find an order; the customer still sees "payment received" and Clover keeps the order. Nothing is lost on the
-Clover side.
+Orders are stored in PostgreSQL (`DATABASE_URL`): the order before Clover's page opens, the payment when Clover's
+signed webhook arrives, and the title + single print as a kitchen task that is retried after an outage or a restart.
+Production checkout stays off without `DATABASE_URL` or without `CLOVER_API_TOKEN`.
 
 ### Server variables (never in the browser, never in git)
 
 | Variable | Value |
 |---|---|
+| `DATABASE_URL` | `postgres://ppp_app:…@<db>:5432/pppmtl`, the limited role (docs/DB_ROLLOUT.md). Required for real cards. |
 | `CLOVER_MERCHANT_ID` | the restaurant's Clover merchant id |
 | `CLOVER_ECOMM_PRIVATE_KEY` | private key of the Ecommerce token of type **Hosted checkout** |
 | `CLOVER_WEBHOOK_SECRET` | the Hosted Checkout webhook **signing secret** |
