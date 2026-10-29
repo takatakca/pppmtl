@@ -449,13 +449,14 @@ describe("cart -> Clover Hosted Checkout", () => {
       name: "Pita / Wrap Mixte — Shish Taouk & Shawarma",
       price: 1349,
       unitQty: 1,
-      itemRefUuid: "MKHYNCFYDQXQY",
       taxRates: [
         { name: "TPS", rate: 500000 },
         { name: "TVQ", rate: 997500 },
       ],
     });
     expect(line.note).toContain("PETITE FRITE + PEPSI");
+    // Clover accepts an inventory item OR its own name + price, never both.
+    expect(line).not.toHaveProperty("itemRefUuid");
     expect(line.note).toContain("Note: sans oignon");
     expect(taxesFor(1000, QUEBEC_TAX_RATES)).toBe(150);
   });

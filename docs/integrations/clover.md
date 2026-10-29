@@ -30,8 +30,9 @@ DoorDash / Skip; online payment is for pickup.
    [webhook + signature](https://docs.clover.com/dev/docs/ecomm-hosted-checkout-webhook).
 2. Hosted Checkout has **no modifier field** and does not use the Clover inventory or its taxes. Each cart line is sent
    as one Clover line: unit price = item + options, the options in the line note (the kitchen reads them on the
-   ticket), `itemRefUuid` = the Clover item id, and the taxes (TPS 5 % + TVQ 9.975 %, or the merchant's own default
-   rates) on every line. The session lasts 15 minutes.
+   ticket), and the taxes (TPS 5 % + TVQ 9.975 %, or the merchant's own default rates) on every line. No
+   `itemRefUuid`: Clover answers HTTP 400 "Please provide either itemRefUuid or name, price." when a line has both.
+   The session lasts 15 minutes.
 3. The webhook gives a payment id and the checkout session id; Clover has no API to read a session. After the
    APPROVED webhook the site finds the Clover order of that payment, titles it **`🌐 Site web · PPP-AB12C · Marie`**
    with a pickup / paid note, then fires **one** print (`print_event`: the order printer, and the KDS when it is set
