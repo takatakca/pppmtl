@@ -67,13 +67,16 @@ function IntegrationsAdmin() {
           Food Hub & integrations
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Our first-party restaurant platform. This screen only reports real capabilities;
-          it cannot transmit orders, publish menus or enable payments.
+          Our first-party restaurant platform. This screen only reports real capabilities; it cannot
+          transmit orders, publish menus or enable payments.
         </p>
       </header>
 
       {error && (
-        <p role="alert" className="mt-2 flex items-center gap-2 border border-border bg-card p-4 text-sm text-muted-foreground">
+        <p
+          role="alert"
+          className="mt-2 flex items-center gap-2 border border-border bg-card p-4 text-sm text-muted-foreground"
+        >
           <AlertTriangle className="h-4 w-4 shrink-0" /> Access denied or unavailable.{" "}
           <Link to="/admin/sign-in" className="underline focus-ppp">
             Sign in to operations
@@ -83,7 +86,10 @@ function IntegrationsAdmin() {
 
       {snapshot && (
         <>
-          <section className="mt-2 border border-border bg-card p-5" aria-label="Food Hub readiness">
+          <section
+            className="mt-2 border border-border bg-card p-5"
+            aria-label="Food Hub readiness"
+          >
             <div className="flex items-start gap-3">
               <StatusIcon available={snapshot.foodhub.connected} />
               <div>
@@ -94,8 +100,8 @@ function IntegrationsAdmin() {
                   {snapshot.foodhub.message}
                 </p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  First pilot: {snapshot.foodhub.pilotLocationId ?? "not selected"} ·
-                  own website ingress: <code>{snapshot.foodhub.ingressPath}</code>
+                  First pilot: {snapshot.foodhub.pilotLocationId ?? "not selected"} · own website
+                  ingress: <code>{snapshot.foodhub.ingressPath}</code>
                 </p>
                 <p className="mt-2 text-xs font-semibold text-destructive">
                   No active Food Hub order transport; no production checkout approval.
