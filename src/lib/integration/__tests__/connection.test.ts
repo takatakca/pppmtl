@@ -11,7 +11,6 @@ import {
   isConnectionEnabledFor,
   isLocationMapped,
   locationIntegrationMappings,
-  missingProviderFields,
 } from "@/config/integration-locations";
 
 describe("phase 1 location mapping", () => {
@@ -22,13 +21,10 @@ describe("phase 1 location mapping", () => {
     expect(phase1[0]!.address).toContain("6280");
   });
 
-  it("keeps every provider field empty until UrbanPiper supplies them", () => {
+  it("keeps Food Hub unmapped until its verified store identity exists", () => {
     const ndg = firstConnectionMapping()!;
-    expect(ndg.urbanPiperLocationId).toBeNull();
-    expect(ndg.urbanPiperStoreId).toBeNull();
-    expect(ndg.organizationId).toBeNull();
-    expect(ndg.merchantId).toBeNull();
-    expect(missingProviderFields(ndg)).toHaveLength(4);
+    expect(ndg.foodhubLocationCode).toBeNull();
+    expect(ndg.providerLocationId).toBeNull();
     expect(isLocationMapped(ndg.locationId)).toBe(false);
   });
 
@@ -97,28 +93,22 @@ describe("webhook security", () => {
   });
 });
 
-describe("provider gating without credentials", () => {
-  it("blocks menu sync and ordering for every store", async () => {
-    const { urbanPiperConfigured, urbanPiperReadiness } =
-      await import("@/lib/integration/providers/urbanpiper/config.server");
-    const { syncLocationMenu } = await import("@/lib/integration/providers/urbanpiper/menu-sync");
-    const { urbanPiperOrderingConfigured } =
-      await import("@/lib/integration/providers/urbanpiper/order-submit");
-
+describe("first-party Food Hub connection gates", () => {
+  it("reports every unmapped Food Hub store as disconnected", async () => {
+    const { foodhubBridgeConfigured, foodhubAdapters } =
+      await import("@/lib/integration/providers/foodhub/bridge");
     const ndg = firstConnectionMapping()!;
-    expect(urbanPiperConfigured(ndg.locationId)).toBe(false);
-    expect(urbanPiperOrderingConfigured(ndg.locationId)).toBe(false);
-    expect(urbanPiperReadiness(ndg.locationId).connected).toBe(false);
-
-    const sync = await syncLocationMenu(ndg.locationId);
-    expect(sync.ok).toBe(false);
-    if (!sync.ok) expect(sync.code).toBe("not_configured");
+    expect(foodhubBridgeConfigured(ndg.locationId)).toBe(false);
+    expect(foodhubAdapters.orders?.status(ndg.locationId).available).toBe(false);
+    const result = await foodhubAdapters.menu!.fetchMenu(ndg.locationId);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.code).toBe("not_configured");
   });
 
-  it("fails fast on an unknown store", async () => {
-    const { syncLocationMenu } = await import("@/lib/integration/providers/urbanpiper/menu-sync");
-    const result = await syncLocationMenu("loc-does-not-exist");
-    expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.code).toBe("invalid_request");
+  it("never guesses a store mapping for an unknown location", () => {
+    expect(isLocationMapped("loc-does-not-exist")).toBe(false);
+    expect(locationIntegrationMappings.some((m) => m.locationId === "loc-does-not-exist")).toBe(
+      false,
+    );
   });
 });
