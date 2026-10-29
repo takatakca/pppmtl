@@ -117,3 +117,7 @@ The opt-in `processPppCloverFulfillmentBatch` worker and mocked tests have been 
 ## 2026-10-28 — Guest order input boundary (source completed)
 
 DONE: validate guest order read/history/cancel runtime JSON, limit malformed receipt/admin cookies before signature verification and test the safe behavior. CI 40740927778 SUCCESS at 762972778 (both jobs). NEXT: verify native Coolify running SHA, anonymous /dev/menu-audit=401, /healthz=200, webhook GET=405, real mobile menu/cart, approved Canva imagery and rollback. NO-GO real Clover payments until authorized production PostgreSQL, tenant-scoped auth, signed webhook/outbox/worker and controlled charge/refund #5/#6/#13.
+
+## 2026-10-29 — #6 durable order store wired (1e57831)
+
+Source done and tested on real PostgreSQL (see AGENT_HANDOFF.md). Remaining: owner's first controlled real payment + refund on pppmtl.com, then close #6 with that evidence. #5 (TAKATAK identity/entitlements) still open; the tenant is server config for this single-merchant site.

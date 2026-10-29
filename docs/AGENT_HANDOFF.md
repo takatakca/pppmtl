@@ -1,5 +1,15 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-10-29 — Durable Clover checkout wired (Claude, 1e57831)
+
+**What changed:** `ordersPersistAcrossRestarts` is gone. With `DATABASE_URL` set, Clover orders use PostgreSQL (`src/lib/orders/database.server.ts` pool, `durable-orders.server.ts` operations, existing `postgres-transactions.server.ts` + `clover-fulfillment-worker.server.ts`). Order stored before Clover's page opens; session linked before redirect (either failure refuses checkout); signed webhook → `ppp.record_verified_clover_payment` → 200 once stored; kitchen outbox titles then prints once; `src/server.ts` starts a 30 s retry loop. Production gate is now `DATABASE_URL` + `CLOVER_API_TOKEN` + merchant/ecomm/webhook keys.
+
+**Database (owner, 2026-10-29):** Coolify PostgreSQL 17 resource on vps2 (container `mfcs2guqflcf1o9sfgonrznd`), database `pppmtl`, migrations 0001–0003 applied, runtime role `ppp_app` (NOSUPERUSER NOBYPASSRLS, grants in DB_ROLLOUT.md), `DATABASE_URL` set on the app. Tenant id = `PPP_TENANT_ID` or `pppmtl` (server config, never the browser).
+
+**Verified:** locally on PostgreSQL 16 as the limited role: 165/165 tests incl. `durable-orders.pg.test.ts` (restart survival, one ticket across redeliveries, Clover-outage retry, unknown session ignored, unlinkable session refused, DB down refuses before Clover, retry after failure). Built Nitro server tested: `/healthz`, signed webhook stored payment as PAID, background loop retried the title. CI database job now runs the same test.
+
+**NOT verified:** a real Clover payment, the live Hosted Checkout request against production Clover, the REST token's permissions, printing on the real printer. Next: owner redeploys, places one small pickup order, checks the `🌐 Site web · PPP-…` ticket, refunds in Clover; read Coolify runtime logs for `[integration_events]`.
+
 ## 2026-10-28 ~14 h EDT — Guest-order runtime security, CI GREEN and Drive sync
 
 Verified resumption: main at 82a1feb7c4cfe2794d3a9c04a5864f83939e4551, full CI 40660324160 SUCCESS; 13 branches, zero open PR; reviewed AGENTS.md, WORKLOG.md, handoff, status, queue, deployment, decisions, open issues and BOTH Google Docs. The /dev SSR security work 27a0077 was already present; not duplicated. An unrelated concurrent social note in WORKLOG, SHA 7606dc5, was preserved. This task was claimed before coding in WORKLOG commit 410cb21bea2a8fd6d25e1c1985d28c0a4987f0ef.
