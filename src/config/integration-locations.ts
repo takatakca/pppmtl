@@ -33,6 +33,8 @@ export interface LocationIntegrationMapping {
   merchantId: string | null;
   /** Clover merchant/device mapping, when POS is wired. */
   cloverMerchantId: string | null;
+  /** Food Hub's verified store code, never inferred from a PPP slug. */
+  foodhubLocationCode: string | null;
   /**
    * Phase 1 rollout: only one store is prepared for the first real provider
    * connection. Every other store stays on the local catalog.
@@ -40,13 +42,14 @@ export interface LocationIntegrationMapping {
   connectionPhase: 1 | null;
 }
 
-/** The single store prepared for the first UrbanPiper connection. */
+/** First owner-controlled Food Hub onboarding pilot, not an active connection. */
 export const FIRST_CONNECTION_LOCATION_SLUG = "ndg";
 
 /**
  * Stores whose menu and orders are the restaurant's own Clover (real items, Clover Hosted Checkout, ticket in
  * Clover). The Clover merchant and keys are server settings (docs/integrations/clover.md), never in this file.
- * UrbanPiper stays in the code for the other stores, switched off until its credentials exist.
+ * Other stores are reserved for TAKATAK Food Hub; no provider credentials or
+ * mapping are assumed and no order is submitted until a signed backend bridge exists.
  */
 export const CLOVER_LOCATION_SLUGS = ["ndg"];
 
@@ -61,13 +64,14 @@ export const locationIntegrationMappings: LocationIntegrationMapping[] = restaur
       : "local") as IntegrationProviderId,
     orderingProvider: (CLOVER_LOCATION_SLUGS.includes(l.slug)
       ? "clover"
-      : "urbanpiper") as IntegrationProviderId,
+      : "foodhub") as IntegrationProviderId,
     providerLocationId: null,
     urbanPiperLocationId: null,
     urbanPiperStoreId: null,
     organizationId: null,
     merchantId: null,
     cloverMerchantId: null,
+    foodhubLocationCode: null,
     connectionPhase: l.slug === FIRST_CONNECTION_LOCATION_SLUG ? (1 as const) : null,
   }),
 );
@@ -81,7 +85,7 @@ export function mappingForLocation(locationId: string): LocationIntegrationMappi
 /** True only when a real provider store id has been supplied. */
 export function isLocationMapped(locationId: string): boolean {
   const m = mappingForLocation(locationId);
-  return Boolean(m?.providerLocationId ?? m?.urbanPiperStoreId);
+  return Boolean(m?.providerLocationId);
 }
 
 /** The store currently prepared for the first real connection, if any. */
