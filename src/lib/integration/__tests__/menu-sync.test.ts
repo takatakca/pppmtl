@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  normalizeMenu,
-  validateProviderMenu,
-} from "@/lib/integration/core/menu-normalization";
+import { normalizeMenu, validateProviderMenu } from "@/lib/integration/core/menu-normalization";
 import { foodhubAdapters } from "@/lib/integration/providers/foodhub/bridge";
 import {
   imageRepository,
