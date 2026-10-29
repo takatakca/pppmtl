@@ -785,6 +785,29 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
     vi.stubEnv("CLOVER_API_TOKEN", "rest_test");
     const { handleCloverHostedCheckoutWebhook } =
       await import("@/lib/integration/providers/clover/webhook");
+    // Link the signed webhook's session to a real PPP-created Clover order.
+    // This tests Clover REST failure after linkage, not the new untracked gate.
+    const { createOrder } = await import("@/lib/orders/order-service");
+    const { updateOrder } = await import("@/lib/orders/order-store.server");
+    const created = createOrder({
+      locationId: "loc-ndg-somerled",
+      orderType: "PICKUP",
+      lines: [{ itemId: PITA, quantity: 1, notes: "", selections: pitaCombo() }],
+      customer: {
+        customerId: null,
+        takatakCustomerId: null,
+        name: "Marie",
+        phone: "5145550100",
+        email: null,
+        isGuest: true,
+      },
+      deliveryAddress: null,
+      notes: "",
+    });
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+    updateOrder(created.data.id, { providerOrderId: "MISSING_SESSION" });
+
     const raw = JSON.stringify({
       status: "APPROVED",
       type: "PAYMENT",
@@ -817,6 +840,29 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
     vi.stubEnv("PUBLIC_SITE_URL", "not a valid URL");
     const { handleCloverHostedCheckoutWebhook } =
       await import("@/lib/integration/providers/clover/webhook");
+    // Link the signed webhook's session to a real PPP-created Clover order.
+    // This exercises the exception after a legitimately linked checkout.
+    const { createOrder } = await import("@/lib/orders/order-service");
+    const { updateOrder } = await import("@/lib/orders/order-store.server");
+    const created = createOrder({
+      locationId: "loc-ndg-somerled",
+      orderType: "PICKUP",
+      lines: [{ itemId: PITA, quantity: 1, notes: "", selections: pitaCombo() }],
+      customer: {
+        customerId: null,
+        takatakCustomerId: null,
+        name: "Marie",
+        phone: "5145550100",
+        email: null,
+        isGuest: true,
+      },
+      deliveryAddress: null,
+      notes: "",
+    });
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+    updateOrder(created.data.id, { providerOrderId: "SESSION_RETRY" });
+
     const raw = JSON.stringify({
       status: "APPROVED",
       type: "PAYMENT",
