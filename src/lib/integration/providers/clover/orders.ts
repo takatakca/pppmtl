@@ -16,6 +16,7 @@ import type {
 import { cloverSlotFor, cloverSnapshot } from "@/data/clover/overlay";
 import type { ProviderOrderAdapter, ProviderOrderRef } from "@/lib/orders/provider-order-adapter";
 import { orderFailure, type OrderResult } from "@/lib/orders/errors";
+import { logIntegrationEvent } from "@/lib/integration/core/logging";
 import type { CloverInventory } from "./catalog";
 import {
   buildHostedCheckoutRequest,
@@ -150,6 +151,14 @@ export const cloverOrderSubmitAdapter: ProviderOrderAdapter = {
     }
     const priced = priceCloverCart(draftLines(draft), inventory, cloverSlotFor);
     if (!priced.ok) {
+      // Which item or option the Clover menu no longer matches: the snapshot may need a refresh.
+      logIntegrationEvent({
+        provider: "clover",
+        eventType: `checkout.${priced.code}`,
+        status: "rejected",
+        payloadReference: orderId,
+        detail: `${source} menu: ${priced.detail}`,
+      });
       return orderFailure(priced.code === "item_unavailable" ? "item_unavailable" : "menu_changed");
     }
     const taxRates = await taxRatesForCheckout();
