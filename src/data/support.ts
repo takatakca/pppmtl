@@ -258,9 +258,9 @@ export const faqEntries: FaqEntry[] = [
     questionEn: "How do gift cards work?",
     questionFr: "Comment fonctionnent les cartes-cadeaux?",
     answerEn:
-      "PPP gift cards can be sent by email or picked up in store. Choose an amount, add a message, and the card is ready to use for pickup, delivery or dine-in at participating locations. Online gift card checkout is coming soon — call the restaurant to buy one today.",
+      "Online gift-card checkout and email delivery are not yet available on this site. The gift-card page is only a preview: no payment is taken and no card is issued. Call the restaurant to confirm available cards, purchase options and redemption terms.",
     answerFr:
-      "Les cartes-cadeaux PPP peuvent être envoyées par courriel ou remises en magasin. Choisissez un montant, ajoutez un message, et la carte est prête pour la cueillette, la livraison ou sur place dans les emplacements participants. Le paiement en ligne arrive bientôt — appelez le restaurant pour en acheter une dès maintenant.",
+      "L'achat et l'envoi des cartes-cadeaux en ligne ne sont pas encore disponibles sur ce site. La page est un aperçu seulement : aucun paiement n'est perçu et aucune carte n'est émise. Appelez le restaurant pour confirmer les cartes offertes, les façons de les acheter et les conditions d'utilisation.",
     tags: ["gift card", "gift certificate"],
   },
   {

@@ -3,52 +3,16 @@ import { ArrowUpRight, MapPin } from "lucide-react";
 import storefront from "@/assets/storefront-night.jpg";
 import { usePPP } from "@/context/ppp-store";
 import { Reveal } from "@/components/motion/reveal";
+import { restaurantLocations } from "@/config/locations";
+import { buildStoryTimeline, type StoryStatus } from "./story-timeline";
 
-type StoneStatus = "past" | "present" | "next";
+const timeline = buildStoryTimeline(restaurantLocations);
 
-interface Stone {
-  status: StoneStatus;
-  place: { en: string; fr: string };
-  note: { en: string; fr: string };
-}
-
-const timeline: Stone[] = [
-  {
-    status: "past",
-    place: { en: "Montréal-Nord", fr: "Montréal-Nord" },
-    note: { en: "Where PPP started", fr: "Là où PPP a commencé" },
-  },
-  {
-    status: "present",
-    place: { en: "NDG", fr: "NDG" },
-    note: { en: "Flagship kitchen, open now", fr: "Cuisine phare, ouverte" },
-  },
-  {
-    status: "present",
-    place: { en: "Sainte-Catherine E", fr: "Sainte-Catherine E" },
-    note: { en: "Second kitchen, open now", fr: "Deuxième cuisine, ouverte" },
-  },
-  {
-    status: "next",
-    place: { en: "Saint-Léonard", fr: "Saint-Léonard" },
-    note: { en: "Coming soon", fr: "Bientôt" },
-  },
-  {
-    status: "next",
-    place: { en: "Chambly", fr: "Chambly" },
-    note: { en: "Coming soon", fr: "Bientôt" },
-  },
-  {
-    status: "next",
-    place: { en: "Brossard", fr: "Brossard" },
-    note: { en: "Coming soon", fr: "Bientôt" },
-  },
-];
-
-const dotClass: Record<StoneStatus, string> = {
+const dotClass: Record<StoryStatus, string> = {
   past: "bg-muted-foreground/50",
   present: "bg-primary",
   next: "border border-border bg-transparent",
+  paused: "border border-muted-foreground bg-muted-foreground/20",
 };
 
 /**
