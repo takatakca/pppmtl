@@ -73,6 +73,34 @@ describe("signed provider callback cannot cross a provider boundary", () => {
     expect(getOrder("ord_up_two")?.status).toBe("CREATED");
   });
 
+  it("rejects replacing an already linked Clover payment with a different payment", () => {
+    saveOrder({
+      ...recordedOrder("ord_clover_one", "clover", "SESSION1"),
+      providerPaymentId: "PAY_ORIGINAL",
+      paymentStatus: "PAID",
+      status: "ACCEPTED",
+    });
+    expect(applyCloverPayment("SESSION1", "PAY_FORGED", true)).toBeNull();
+    expect(getOrder("ord_clover_one")?.providerPaymentId).toBe("PAY_ORIGINAL");
+    expect(getOrder("ord_clover_one")?.paymentStatus).toBe("PAID");
+    expect(applyCloverPayment("SESSION1", "PAY_ORIGINAL", true)?.id).toBe("ord_clover_one");
+  });
+
+  it("does not automatically revive cancelled or failed Clover orders", () => {
+    saveOrder({
+      ...recordedOrder("ord_clover_cancel", "clover", "SESSION_CANCEL"),
+      status: "CANCELLED",
+    });
+    saveOrder({
+      ...recordedOrder("ord_clover_failed", "clover", "SESSION_FAILED"),
+      status: "FAILED",
+    });
+    expect(applyCloverPayment("SESSION_CANCEL", "PAY_CANCEL", true)).toBeNull();
+    expect(applyCloverPayment("SESSION_FAILED", "PAY_FAILED", true)).toBeNull();
+    expect(getOrder("ord_clover_cancel")?.paymentStatus).toBe("UNPAID");
+    expect(getOrder("ord_clover_failed")?.paymentStatus).toBe("UNPAID");
+  });
+
   it("fails closed on missing or wrong-provider ids", () => {
     saveOrder(recordedOrder("ord_up_only", "urbanpiper", "URBAN_ONLY"));
     expect(applyCloverPayment("URBAN_ONLY", "PAY_UNRELATED", true)).toBeNull();
