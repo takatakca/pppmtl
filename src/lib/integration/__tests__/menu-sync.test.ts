@@ -1,26 +1,20 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   normalizeMenu,
-  syncLocationMenu,
   validateProviderMenu,
-} from "@/lib/integration/providers/urbanpiper/menu-sync";
+} from "@/lib/integration/core/menu-normalization";
+import { foodhubAdapters } from "@/lib/integration/providers/foodhub/bridge";
 import {
   imageRepository,
   isAllowedProviderImage,
   DEFAULT_FALLBACK_IMAGE,
 } from "@/lib/integration/core/images";
 import {
-  lastMenuSyncFor,
-  recentMenuSyncEvents,
-  resetMenuSyncLogForTests,
-} from "@/lib/integration/core/menu-sync-log";
-import {
   mappingCoverage,
   pppCategoryForProviderRef,
   pppProductForProviderRef,
   categoryMappings,
 } from "@/config/integration-menu-map";
-import { restaurantLocations } from "@/config/locations";
 import type { UniversalMenu, UniversalProduct } from "@/lib/integration/core/contracts";
 
 const category = (id: string, name = "Pizza") => ({
@@ -54,7 +48,7 @@ const product = (over: Partial<UniversalProduct> = {}): UniversalProduct => ({
 
 const menuOf = (products: UniversalProduct[]): UniversalMenu => ({
   locationId: "loc",
-  provider: "urbanpiper",
+  provider: "foodhub",
   categories: [category("cat-1")],
   products,
   syncedAt: "2026-01-01T00:00:00.000Z",
@@ -202,26 +196,10 @@ describe("image strategy", () => {
   });
 });
 
-describe("location sync", () => {
-  beforeEach(() => resetMenuSyncLogForTests());
-
-  it("records a FAILED event and reports not connected for every store", async () => {
-    const id = restaurantLocations[0]!.id;
-    const result = await syncLocationMenu(id);
+describe("Food Hub connection is not active", () => {
+  it("does not publish or claim that menu sync has happened", async () => {
+    const result = await foodhubAdapters.menu!.fetchMenu("loc-ndg-somerled");
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.code).toBe("not_configured");
-    expect(lastMenuSyncFor(id)?.status).toBe("FAILED");
-  });
-
-  it("rejects an unknown location", async () => {
-    const result = await syncLocationMenu("not-a-store");
-    expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.code).toBe("invalid_request");
-  });
-
-  it("logs one event per sync attempt, per location", async () => {
-    await syncLocationMenu(restaurantLocations[0]!.id);
-    await syncLocationMenu(restaurantLocations[1]!.id);
-    expect(recentMenuSyncEvents().length).toBe(2);
   });
 });
