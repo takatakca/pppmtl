@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CreditCard, Lock, Phone, ShieldCheck, ShoppingBag, Bike, UserRound } from "lucide-react";
 import { PPPHeader } from "@/components/layout/ppp-header";
@@ -15,6 +15,8 @@ import { menuRepository } from "@/lib/menu-repository";
 import { GOOGLE_SIGN_IN_ENABLED } from "@/config/auth-flags";
 import { canonicalUrl } from "@/config/site";
 import { track } from "@/lib/analytics";
+import { orderError, type OrderError } from "@/lib/orders/errors";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -67,6 +69,26 @@ function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [orderMessage, setOrderMessage] = useState<string | null>(null);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  // After a "Pay" with a blank name or phone, those fields stay outlined in red until filled.
+  const [showMissing, setShowMissing] = useState(false);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const nameMissing = showMissing && !(name.trim() || customer?.preferredName);
+  const phoneMissing = showMissing && !phone.trim();
+  const errorText = (error: OrderError) =>
+    lang === "fr" ? error.messageFr : lang === "es" ? error.messageEs : error.messageEn;
+  // Follows the fields as they are filled in, so it never asks for something already entered.
+  const missingMessage =
+    nameMissing && phoneMissing
+      ? t(
+          "Add your name and phone number so the kitchen knows who the order is for.",
+          "Ajoutez votre nom et votre numéro de téléphone pour que la cuisine sache à qui est la commande.",
+          "Agrega tu nombre y tu teléfono para que la cocina sepa de quién es el pedido.",
+        )
+      : nameMissing || phoneMissing
+        ? errorText(orderError(nameMissing ? "missing_name" : "missing_phone"))
+        : null;
+  const statusMessage = missingMessage ?? orderMessage;
 
   const submitOrderFn = useServerFn(placeOrder);
 
@@ -99,6 +121,14 @@ function CheckoutPage() {
    * quantities only; every price and every decision happens on the server.
    */
   const finishOrder = async () => {
+    if (!(name.trim() || customer?.preferredName) || !phone.trim()) {
+      setShowMissing(true);
+      setOrderMessage(null);
+      const first = (name.trim() || customer?.preferredName ? phoneRef : nameRef).current;
+      first?.scrollIntoView({ block: "center", behavior: "smooth" });
+      first?.focus({ preventScroll: true });
+      return;
+    }
     setSubmitting(true);
     setOrderMessage(null);
     track("checkout_finish_attempted", { mode, lines: cart.length });
@@ -136,13 +166,10 @@ function CheckoutPage() {
         setOrderNumber(response.order.orderNumber ?? response.order.id);
         setOrderMessage(null);
       } else if (response.error) {
-        setOrderMessage(
-          lang === "fr"
-            ? response.error.messageFr
-            : lang === "es"
-              ? response.error.messageEs
-              : response.error.messageEn,
-        );
+        if (response.error.code === "missing_name" || response.error.code === "missing_phone") {
+          setShowMissing(true);
+        }
+        setOrderMessage(errorText(response.error));
       }
     } catch {
       setOrderMessage(
@@ -174,6 +201,8 @@ function CheckoutPage() {
     "mt-1.5 h-12 w-full border border-border bg-background px-3 text-sm outline-none focus-ppp";
   const labelClass =
     "block text-[0.6rem] font-bold uppercase tracking-[0.3em] text-muted-foreground";
+  const missingClass = "border-2 border-destructive";
+  const missingHintClass = "mt-1 block text-xs font-semibold text-destructive";
 
   return (
     <div className="min-h-dvh bg-background">
@@ -350,23 +379,39 @@ function CheckoutPage() {
                   <label className="block">
                     <span className={labelClass}>{t("Name", "Nom", "Nombre")}</span>
                     <input
+                      ref={nameRef}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       autoComplete="name"
-                      className={inputClass}
+                      aria-invalid={nameMissing || undefined}
+                      aria-describedby={nameMissing ? "checkout-name-missing" : undefined}
+                      className={cn(inputClass, nameMissing && missingClass)}
                     />
+                    {nameMissing && (
+                      <span id="checkout-name-missing" className={missingHintClass}>
+                        {t("Name required", "Nom obligatoire", "Nombre obligatorio")}
+                      </span>
+                    )}
                   </label>
                   <label className="block">
                     <span className={labelClass}>
                       {t("Phone number", "Numéro de téléphone", "Teléfono")}
                     </span>
                     <input
+                      ref={phoneRef}
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       inputMode="tel"
                       autoComplete="tel"
-                      className={inputClass}
+                      aria-invalid={phoneMissing || undefined}
+                      aria-describedby={phoneMissing ? "checkout-phone-missing" : undefined}
+                      className={cn(inputClass, phoneMissing && missingClass)}
                     />
+                    {phoneMissing && (
+                      <span id="checkout-phone-missing" className={missingHintClass}>
+                        {t("Phone number required", "Numéro obligatoire", "Teléfono obligatorio")}
+                      </span>
+                    )}
                   </label>
                 </div>
 
@@ -492,12 +537,12 @@ function CheckoutPage() {
                   {t("Order", "Commande", "Pedido")} #{orderNumber}
                 </p>
               ) : null}
-              {orderMessage ? (
+              {statusMessage ? (
                 <p
                   role="status"
                   className="mt-3 border border-border px-4 py-3 text-center text-sm text-muted-foreground"
                 >
-                  {orderMessage}
+                  {statusMessage}
                 </p>
               ) : (
                 <p className="mt-2 text-center text-[0.6rem] uppercase tracking-widest text-muted-foreground">
