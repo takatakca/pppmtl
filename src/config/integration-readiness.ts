@@ -15,10 +15,10 @@ export const providerPlans: ProviderPlan[] = [
   {
     id: "foodhub",
     label: "TAKATAK Food Hub",
-    role:
-      "Our first-party kitchen, order routing, marketplace connections and operations console.",
+    role: "Our first-party kitchen, order routing, marketplace connections and operations console.",
     ppmOwns: "Brand, catalog, customer experience, store/tenant identity, verified checkout data.",
-    providerOwns: "Kitchen state, dispatch, integrations, durable inbox, outbox and operator controls.",
+    providerOwns:
+      "Kitchen state, dispatch, integrations, durable inbox, outbox and operator controls.",
     // The website-order API exists in foodhubca, but there is no approved
     // production-safe cross-repository secret/tenant contract yet.
     requiredCredentials: [],
