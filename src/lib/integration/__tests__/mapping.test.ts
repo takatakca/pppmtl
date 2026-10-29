@@ -39,11 +39,12 @@ describe("generic signed event verification (no network)", () => {
     const secret = "unit-test-first-party-secret";
     const body = JSON.stringify({ event: "order.ready", order_id: "test" });
     const signature = computeWebhookSignature(body, secret);
-    expect(
-      verifyWebhookRequest({ rawBody: body, signature, timestamp: null, secret }),
-    ).toEqual({ ok: true });
-    expect(
-      verifyWebhookRequest({ rawBody: body, signature, timestamp: null, secret }),
-    ).toEqual({ ok: false, reason: "replayed" });
+    expect(verifyWebhookRequest({ rawBody: body, signature, timestamp: null, secret })).toEqual({
+      ok: true,
+    });
+    expect(verifyWebhookRequest({ rawBody: body, signature, timestamp: null, secret })).toEqual({
+      ok: false,
+      reason: "replayed",
+    });
   });
 });
