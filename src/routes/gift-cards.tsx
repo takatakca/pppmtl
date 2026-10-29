@@ -43,7 +43,6 @@ function GiftCards() {
   const [to, setTo] = useState("");
   const [from, setFrom] = useState("");
   const [note, setNote] = useState("");
-  const [sent, setSent] = useState(false);
 
   const value = custom ? Number(custom) || 0 : amount;
 
@@ -91,12 +90,23 @@ function GiftCards() {
                   <p className="font-display text-5xl leading-none text-flame sm:text-7xl">
                     ${value.toFixed(2)}
                   </p>
-                  <p className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">
+                  <p className="mt-2 break-words text-xs uppercase tracking-widest text-muted-foreground">
                     {to ? t(`For ${to}`, `Pour ${to}`) : pppBusiness.address.line1}
                   </p>
+                  {from && (
+                    <p className="mt-1 break-words text-xs text-muted-foreground">
+                      {t(`From ${from}`, `De ${from}`)}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
+
+            {note && (
+              <p className="mt-3 break-words border border-border bg-card p-3 text-sm text-muted-foreground">
+                {note}
+              </p>
+            )}
 
             <ul className="mt-4 grid gap-2 sm:grid-cols-3">
               {[
@@ -157,6 +167,7 @@ function GiftCards() {
                 <button
                   key={a}
                   type="button"
+                  aria-pressed={!custom && amount === a}
                   onClick={() => {
                     setAmount(a);
                     setCustom("");
@@ -188,6 +199,7 @@ function GiftCards() {
                 <input
                   value={to}
                   onChange={(e) => setTo(e.target.value)}
+                  maxLength={40}
                   className="mt-1.5 w-full border border-border bg-background px-3 py-2 text-sm focus-ppp"
                 />
               </label>
@@ -198,6 +210,7 @@ function GiftCards() {
                 <input
                   value={from}
                   onChange={(e) => setFrom(e.target.value)}
+                  maxLength={40}
                   className="mt-1.5 w-full border border-border bg-background px-3 py-2 text-sm focus-ppp"
                 />
               </label>
@@ -216,27 +229,22 @@ function GiftCards() {
               />
             </label>
 
-            <button
-              type="button"
-              onClick={() => setSent(true)}
-              disabled={value <= 0}
-              className="mt-5 w-full bg-primary py-3.5 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp disabled:opacity-50"
+            <a
+              href={pppBusiness.phone.href}
+              className="mt-5 flex w-full items-center justify-center bg-primary px-4 py-3.5 text-center font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
               style={{ boxShadow: "var(--shadow-glow)" }}
             >
-              {t("How to buy · call PPP", "Comment acheter · appeler PPP")}
-            </button>
-
-            {sent && (
-              <p className="mt-3 border border-border bg-background p-3 text-xs text-muted-foreground">
-                {t(
-                  "Gift card checkout is not live yet. Call the restaurant to buy a card today.",
-                  "Le paiement des cartes-cadeaux n'est pas encore actif. Appelez le restaurant pour en acheter une aujourd'hui.",
-                )}{" "}
-                <a href={pppBusiness.phone.href} className="text-accent focus-ppp">
-                  {pppBusiness.phone.display}
-                </a>
-              </p>
-            )}
+              {t("Call PPP for availability", "Appeler PPP pour la disponibilité")}
+            </a>
+            <p className="mt-3 text-center text-sm text-muted-foreground">
+              {t(
+                "No online purchase is submitted. Call the restaurant to confirm the options and terms.",
+                "Aucun achat en ligne n'est envoyé. Appelez le restaurant pour confirmer les options et les conditions.",
+              )}{" "}
+              <a href={pppBusiness.phone.href} className="text-accent underline focus-ppp">
+                {pppBusiness.phone.display}
+              </a>
+            </p>
           </div>
         </div>
       </main>
