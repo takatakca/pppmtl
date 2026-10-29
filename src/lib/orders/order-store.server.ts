@@ -8,6 +8,7 @@
  */
 
 import type { InternalOrder, OrderStatus } from "./types";
+import type { IntegrationProviderId } from "@/lib/integration/core/contracts";
 import { canTransition } from "./types";
 
 /**
@@ -36,9 +37,13 @@ export function getOrder(id: string): InternalOrder | null {
   return orders.get(id) ?? null;
 }
 
-export function findOrderByProviderId(providerOrderId: string): InternalOrder | null {
+/** External IDs are unique only within their provider namespace. */
+export function findOrderByProviderId(
+  provider: IntegrationProviderId,
+  providerOrderId: string,
+): InternalOrder | null {
   for (const order of orders.values()) {
-    if (order.providerOrderId === providerOrderId) return order;
+    if (order.provider === provider && order.providerOrderId === providerOrderId) return order;
   }
   return null;
 }
