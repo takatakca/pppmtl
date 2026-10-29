@@ -45,12 +45,9 @@ export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
     const { credentialPresence } = await import("./core/credentials.server");
     const { providerHealth } = await import("./core/registry");
     const { recentIntegrationEvents } = await import("./core/logging");
-    const {
-      locationIntegrationMappings,
-      firstConnectionMapping,
-    } = await import("@/config/integration-locations");
-    const { FOODHUB_WEBSITE_ORDER_INGRESS } =
-      await import("./providers/foodhub/bridge");
+    const { locationIntegrationMappings, firstConnectionMapping } =
+      await import("@/config/integration-locations");
+    const { FOODHUB_WEBSITE_ORDER_INGRESS } = await import("./providers/foodhub/bridge");
 
     const pilot = firstConnectionMapping();
     return {
