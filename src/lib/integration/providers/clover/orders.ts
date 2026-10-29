@@ -179,7 +179,17 @@ export const cloverOrderSubmitAdapter: ProviderOrderAdapter = {
         },
       }),
     );
-    if (!session.ok) return failureFor(session.reason);
+    if (!session.ok) {
+      console.error("[clover] Hosted Checkout refused:", session.detail);
+      logIntegrationEvent({
+        provider: "clover",
+        eventType: "checkout.session_refused",
+        status: "error",
+        payloadReference: orderId,
+        detail: session.detail,
+      });
+      return failureFor(session.reason);
+    }
     const tax = taxesFor(priced.subtotal, taxRates);
     const ref: ProviderOrderRef = {
       providerOrderId: session.checkoutSessionId,

@@ -501,6 +501,24 @@ describe("Clover webhook", () => {
   });
 });
 
+describe("Clover checkout refusal, for diagnosis", () => {
+  it("keeps Clover's reason and masks personal data and ids", async () => {
+    const { cloverRefusalDetail } = await import("@/lib/integration/providers/clover/api.server");
+    const body = JSON.stringify({
+      error: {
+        type: "invalid_request_error",
+        param: "customer.email",
+        message: "Email marie@example.com required for merchant 7X9KQ2M4ZB81P, phone 5145550100",
+      },
+    });
+    expect(cloverRefusalDetail(400, body)).toBe(
+      "HTTP 400 · invalid_request_error · customer.email · Email [email] required for merchant [id], phone [number]",
+    );
+    expect(cloverRefusalDetail(401, '{"message":"UNAUTHORIZED"}')).toBe("HTTP 401 · UNAUTHORIZED");
+    expect(cloverRefusalDetail(403, "<html><b>Forbidden</b></html>")).toBe("HTTP 403 · Forbidden");
+  });
+});
+
 describe("universal menu from Clover", () => {
   it("lists categories in Clover's order with the options nested in each product", () => {
     const menu = cloverInventoryToUniversalMenu(
