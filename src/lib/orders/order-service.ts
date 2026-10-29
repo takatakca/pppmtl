@@ -295,14 +295,11 @@ export function createOrder(
 }
 
 async function adapterFor(order: InternalOrder): Promise<ProviderOrderAdapter | null> {
-  if (order.provider === "clover") {
-    const { cloverOrderSubmitAdapter } = await import("@/lib/integration/providers/clover/orders");
-    return cloverOrderSubmitAdapter;
-  }
-  if (order.provider !== "urbanpiper") return null;
-  const { urbanPiperOrderSubmitAdapter } =
-    await import("@/lib/integration/providers/urbanpiper/order-submit");
-  return urbanPiperOrderSubmitAdapter;
+  // Owner retired UrbanPiper. Food Hub is not yet linked with signed, durable
+  // first-party order transmission; no fallback third-party transport is allowed.
+  if (order.provider !== "clover") return null;
+  const { cloverOrderSubmitAdapter } = await import("@/lib/integration/providers/clover/orders");
+  return cloverOrderSubmitAdapter;
 }
 
 function fail(order: InternalOrder, code: OrderErrorCode): OrderResult<InternalOrder> {

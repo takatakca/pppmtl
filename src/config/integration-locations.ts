@@ -1,105 +1,66 @@
 /**
- * PPP location -> provider mapping.
- *
- * Canonical store data (name, address, hours, phone) stays in
- * `src/config/locations.ts`. This file only records WHICH engine serves a
- * store. `providerLocationId: null` means "not mapped yet" and must render as
- * unavailable — never as connected.
+ * PPP-owned location routing. Canonical location facts remain in locations.ts.
+ * Clover continues to be the POS for NDG. Every other storefront is reserved
+ * for TAKATAK Food Hub, with NO inferred provider id or active order transport.
  */
-
 import type { IntegrationProviderId } from "@/lib/integration/core/contracts";
 import { restaurantLocations } from "@/config/locations";
 
 export interface LocationIntegrationMapping {
-  /** Stable PPP-side id, e.g. "PPP-NDG". */
   internalId: string;
-  /** Matches `RestaurantLocation.id` in the canonical registry. */
   locationId: string;
   name: string;
   address: string;
-  /** Where the catalog comes from today. */
   menuSource: IntegrationProviderId;
-  /** Who would process an order once credentials exist. */
   orderingProvider: IntegrationProviderId;
-  /** Provider-side store id. Null until a real value is supplied. */
+  /** Null until explicitly verified against the active operator/provider store. */
   providerLocationId: string | null;
-  /** UrbanPiper location reference (biz location). Null until supplied. */
-  urbanPiperLocationId: string | null;
-  /** UrbanPiper store reference used by menu + order APIs. Null until supplied. */
-  urbanPiperStoreId: string | null;
-  /** UrbanPiper organization id. Null until supplied. */
-  organizationId: string | null;
-  /** UrbanPiper / POS merchant id. Null until supplied. */
-  merchantId: string | null;
-  /** Clover merchant/device mapping, when POS is wired. */
+  /** Food Hub store code, not necessarily the PPP display slug. */
+  foodhubLocationCode: string | null;
+  /** Food Hub brand identity must also be verified before any order transfer. */
+  foodhubBrandRef: string | null;
+  /** Clover merchant mapping remains server-side; never invent this field. */
   cloverMerchantId: string | null;
-  /**
-   * Phase 1 rollout: only one store is prepared for the first real provider
-   * connection. Every other store stays on the local catalog.
-   */
   connectionPhase: 1 | null;
 }
 
-/** The single store prepared for the first UrbanPiper connection. */
+/** Pilot location for future Food Hub onboarding, not active routing. */
 export const FIRST_CONNECTION_LOCATION_SLUG = "ndg";
 
-/**
- * Stores whose menu and orders are the restaurant's own Clover (real items, Clover Hosted Checkout, ticket in
- * Clover). The Clover merchant and keys are server settings (docs/integrations/clover.md), never in this file.
- * UrbanPiper stays in the code for the other stores, switched off until its credentials exist.
- */
+/** NDG still uses real Clover inventory and its gated Hosted Checkout. */
 export const CLOVER_LOCATION_SLUGS = ["ndg"];
 
 export const locationIntegrationMappings: LocationIntegrationMapping[] = restaurantLocations.map(
-  (l) => ({
-    internalId: `PPP-${l.slug.toUpperCase()}`,
-    locationId: l.id,
-    name: l.displayName,
-    address: `${l.address}, ${l.city}`,
-    menuSource: (CLOVER_LOCATION_SLUGS.includes(l.slug)
-      ? "clover"
-      : "local") as IntegrationProviderId,
-    orderingProvider: (CLOVER_LOCATION_SLUGS.includes(l.slug)
-      ? "clover"
-      : "urbanpiper") as IntegrationProviderId,
+  (location) => ({
+    internalId: `PPP-${location.slug.toUpperCase()}`,
+    locationId: location.id,
+    name: location.displayName,
+    address: `${location.address}, ${location.city}`,
+    menuSource: CLOVER_LOCATION_SLUGS.includes(location.slug) ? "clover" : "local",
+    orderingProvider: CLOVER_LOCATION_SLUGS.includes(location.slug) ? "clover" : "foodhub",
     providerLocationId: null,
-    urbanPiperLocationId: null,
-    urbanPiperStoreId: null,
-    organizationId: null,
-    merchantId: null,
+    foodhubLocationCode: null,
+    foodhubBrandRef: null,
     cloverMerchantId: null,
-    connectionPhase: l.slug === FIRST_CONNECTION_LOCATION_SLUG ? (1 as const) : null,
+    connectionPhase: location.slug === FIRST_CONNECTION_LOCATION_SLUG ? 1 : null,
   }),
 );
 
 export function mappingForLocation(locationId: string): LocationIntegrationMapping | undefined {
   return locationIntegrationMappings.find(
-    (m) => m.locationId === locationId || m.internalId === locationId,
+    (location) => location.locationId === locationId || location.internalId === locationId,
   );
 }
 
-/** True only when a real provider store id has been supplied. */
+/** Never report an unverified Food Hub / Clover store as connected. */
 export function isLocationMapped(locationId: string): boolean {
-  const m = mappingForLocation(locationId);
-  return Boolean(m?.providerLocationId ?? m?.urbanPiperStoreId);
+  return Boolean(mappingForLocation(locationId)?.providerLocationId);
 }
 
-/** The store currently prepared for the first real connection, if any. */
 export function firstConnectionMapping(): LocationIntegrationMapping | undefined {
-  return locationIntegrationMappings.find((m) => m.connectionPhase === 1);
+  return locationIntegrationMappings.find((location) => location.connectionPhase === 1);
 }
 
-/** Phase 1 gate: no other store may be connected before NDG works. */
 export function isConnectionEnabledFor(locationId: string): boolean {
   return mappingForLocation(locationId)?.connectionPhase === 1;
-}
-
-/** Fields UrbanPiper must supply before this store can be connected. */
-export function missingProviderFields(mapping: LocationIntegrationMapping): string[] {
-  const missing: string[] = [];
-  if (!mapping.urbanPiperLocationId) missing.push("urbanPiperLocationId");
-  if (!mapping.urbanPiperStoreId) missing.push("urbanPiperStoreId");
-  if (!mapping.organizationId) missing.push("organizationId");
-  if (!mapping.merchantId) missing.push("merchantId");
-  return missing;
 }

@@ -2,7 +2,7 @@
  * Provider-agnostic ordering contracts.
  *
  * The PPP frontend must never know whether menu, order and history data come
- * from UrbanPiper, Ordermark, Clover, TAKATAK or the local catalog. Every
+ * from Food Hub, Clover, TAKATAK or the local catalog. Every
  * integration implements these interfaces; screens only ever talk to them.
  *
  * Nothing here calls a network today. Adapters that are not wired report
@@ -11,7 +11,7 @@
 
 import type { MenuCategory, MenuItem, OrderMode } from "@/data/menu";
 
-export type IntegrationProvider = "local" | "urbanpiper" | "ordermark" | "clover" | "takatak";
+export type IntegrationProvider = "local" | "foodhub" | "ordermark" | "clover" | "takatak";
 
 export interface IntegrationStatus {
   provider: IntegrationProvider;

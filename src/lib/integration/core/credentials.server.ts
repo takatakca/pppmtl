@@ -1,33 +1,17 @@
 /**
- * Credential presence checks. SERVER ONLY.
- *
- * Values are read inside functions (never at module scope) and are never
- * returned to the client — only booleans describing whether a provider could
- * be configured at all.
+ * Active integration credential presence only. SERVER ONLY.
+ * The retired provider has NO keys, credentials, URLs or dispatch paths here.
+ * Values are never returned to browser clients.
  */
-
 export const INTEGRATION_ENV_KEYS = [
-  "URBANPIPER_API_URL",
-  "URBANPIPER_API_KEY",
-  "URBANPIPER_CLIENT_ID",
-  "URBANPIPER_CLIENT_SECRET",
-  "URBANPIPER_BASE_URL",
-  "URBANPIPER_LOCATION_ID",
-  "URBANPIPER_WEBHOOK_SECRET",
   "CLOVER_API_KEY",
   "CLOVER_MERCHANT_ID",
   "CLOVER_WEBHOOK_SECRET",
-  /** Clover: "sandbox" or "production" (default). */
   "CLOVER_ENV",
-  /** Clover REST API token (inventory read, orders read/write, payments read). Alias: CLOVER_API_KEY. */
   "CLOVER_API_TOKEN",
-  /** Clover Ecommerce private key of a "Hosted Checkout" API token. */
   "CLOVER_ECOMM_PRIVATE_KEY",
-  /** Optional JSON tax rates, e.g. [{"name":"TPS","rate":500000},{"name":"TVQ","rate":997500}]. */
   "CLOVER_TAX_RATES",
-  /** "off" = do not print paid website orders on the Clover order printer. */
   "CLOVER_PRINT_WEB_ORDERS",
-  /** Public address of this site for Clover's return links (default https://pppmtl.com). */
   "PUBLIC_SITE_URL",
   "STRIPE_SECRET_KEY",
   "TWILIO_ACCOUNT_SID",
@@ -42,17 +26,11 @@ function read(key: IntegrationEnvKey): string | undefined {
 }
 
 export function hasCredentials(...keys: IntegrationEnvKey[]): boolean {
-  return keys.every((k) => read(k) !== undefined);
+  return keys.every((key) => read(key) !== undefined);
 }
 
-/** True when at least one of the given keys is set (aliased credentials). */
 export function hasAnyCredential(...keys: IntegrationEnvKey[]): boolean {
-  return keys.some((k) => read(k) !== undefined);
-}
-
-/** UrbanPiper accepts either the new API url or the legacy base url. */
-export function urbanPiperApiUrl(): string | undefined {
-  return read("URBANPIPER_API_URL") ?? read("URBANPIPER_BASE_URL");
+  return keys.some((key) => read(key) !== undefined);
 }
 
 export function requireCredential(key: IntegrationEnvKey): string {
@@ -65,10 +43,9 @@ export function optionalCredential(key: IntegrationEnvKey): string | undefined {
   return read(key);
 }
 
-/** Non-secret snapshot for the internal integrations screen. */
+/** Only names and presence bits, never secrets. */
 export function credentialPresence(): Record<IntegrationEnvKey, boolean> {
-  return Object.fromEntries(INTEGRATION_ENV_KEYS.map((k) => [k, read(k) !== undefined])) as Record<
-    IntegrationEnvKey,
-    boolean
-  >;
+  return Object.fromEntries(
+    INTEGRATION_ENV_KEYS.map((key) => [key, read(key) !== undefined]),
+  ) as Record<IntegrationEnvKey, boolean>;
 }

@@ -1,7 +1,7 @@
 /**
  * Provider order contract.
  *
- * Any ordering engine (UrbanPiper today, Clover or a direct POS later)
+ * Any owner-approved engine (Food Hub, Clover or a direct POS later)
  * implements this. The order service knows nothing else about them.
  */
 
