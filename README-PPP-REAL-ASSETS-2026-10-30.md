@@ -13,7 +13,9 @@ Signed: SOCIO, Agent Lévesque.
 ## 2. Facebook header — USE THIS LAYOUT
 - Reference screenshot: `ppp-facebook-header-saint-leonard-reference.jpg`
 - As seen 2026-10-30 01:13 EDT: cover = pizza spread photo, profile = new logo in a round crop, page "PPP Pizzeria Montréal -Saint Léonard-", 966 followers / 9 following, bio "Pizza, pizza-ghetti, pain magique : les trois P de votre pizzeria de quartier à Saint-Léonard", Instagram @ppp_pizzeria, phone (450) 999-4999, View shop button.
-- Cover food photo (reference crop): `ppp-facebook-cover-pizzas-reference.jpg` — cropped from Pierre's Mar 2024 post screenshot. NOTE: that crop still carries the old "PPP MTL-NORD" watermark in the lower left. It is a layout / food reference only. The clean cover image URL from Facebook is being collected separately (read-only browser task 2026-10-30 01:13 EDT) and will replace this reference crop when it arrives.
+- Clean Facebook cover (USE THIS for headers): `ppp-facebook-cover-clean.jpg` — pizza spread, downloaded clean from Facebook CDN 2026-10-30 01:17 EDT, no phone UI. Drive file: PPP — Couverture Facebook pizzas (propre, Facebook 2026-10-30).jpg. NOTE: Facebook CDN URLs carry signed tokens that can expire — always use the Drive copy, not the CDN link, for lasting work. Older reference crop `ppp-facebook-cover-pizzas-reference.jpg` (old MTL-NORD watermark, layout only) is superseded for header use.
+- NDG gap found 2026-10-30 01:17 EDT: the public logged-out NDG page shows NO custom profile or cover photo (default silhouette, blank cover), 0 followers, and no post photos — the NDG header still needs the new logo + cover applied (owner step, not done in the read-only pass). Saint-Léonard is the complete header reference.
+- Signature v2: `ppp-email-signature-v2-2026-10-30.html` — cover banner + new logo, organized card, Saint-Léonard first. Preparation only, not applied live.
 
 ## 3. DO NOT USE as current
 - Old logo / watermark "PPP MTL-NORD" (seen on the Mar 2024 post). Old, superseded by the new PPP Pizzeria Montréal logo above.
@@ -29,9 +31,8 @@ The GitHub connector's snapshot push accepts UTF-8 text only and rejects binary 
 - `ppp-email-signature-template-2026-10-30.html` (local, to be filed with this index): Rogers-style top bar, R2Net-style contact card, Rogers-style footer, Saint-Léonard first, "Voir nos magasins" to pppmtl.com. NOT applied live in Gmail. Pierre rejected the first plain-text version 2026-10-30 01:13 EDT as ugly / unorganized — the rebuild must use the real logo + real Facebook header above.
 - Still flagged, not invented: exact pppmtl.com policies page path, real unsubscribe / subscribe URLs.
 
-## Drive IDs (vérifiés 2026-10-30)
+## Drive IDs (vérifiés 2026-10-30, mise à jour couverture propre)
 - Logo: 1fADHtJSiUem3IvZC0YL-FjtMKNWEU2Xk
-- Couverture pizzas (référence): 1XjnGo-6wbkP0Sct0CnxZUeTA6qskL_E0
-- Header Saint-Léonard (référence): 1OYohzv96PTM6zn_fF3EAzKgwcA0gqg-i
+- Couverture propre: 1i61TVxrBMb3NHczSsoPr_Db9i39Grd0l
+- Signature v2 HTML: 1P4U5ivjgzyrPkd6yxbOn6XoCTHVqZvq_
 - Ce README: 1qZG-TlY1X1kycS4kfrenf62fD1SS5oGx
-- Dossier Drive PPP: 08 — RESTAURANTS — FRANCHISES ET FICHES GOOGLE (parent 1GLh9CI_9uJ7m9fl6ZgOqelvCm9ZK5_lh)
