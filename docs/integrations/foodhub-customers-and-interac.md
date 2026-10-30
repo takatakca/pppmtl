@@ -60,8 +60,15 @@ et aucun mot de passe à réinitialiser.
 3. Au clic « Confirmer · Virement Interac », le serveur recalcule depuis les prix du catalogue, **refuse si le total
    affiché diffère** (`price_changed`), puis envoie `POST ${FOODHUB_URL}/api/foodhub/webhooks/website-order` :
    `payment: "interac"`, `fees: [{ code: "interac", name: "Frais Interac e-Transfer", amount }]`, `total` (celui
-   affiché), `customerToken` + `tenant` (si connecté), lignes et options payantes avec `ref` (identifiant Clover), `fulfillment`,
-   adresse, `id` idempotent.
+   affiché), `customerToken` + `tenant` (seulement si le client est connecté **et** que Food Hub confirme, à
+   l'instant, que le téléphone de la commande est celui du compte), lignes et options payantes avec `ref` +
+   `name` = identifiant et nom du modificateur **Clover** (ce que Food Hub reconnaît), `fulfillment`, adresse, `id`
+   idempotent. La clé anti-doublon inclut le mode de paiement (une carte annulée ne répond jamais à une demande
+   Interac).
+   Si la réponse se perd (délai de 30 s dépassé, connexion coupée, erreur 5xx), Food Hub a peut-être déjà créé la
+   commande et texté les instructions : le site garde la commande et **renvoie le même `id`** au prochain clic
+   « Confirmer » ; Food Hub répond `duplicate: true` avec les mêmes instructions, jamais une 2e commande. Deux clics
+   ou deux onglets en même temps = un seul envoi.
 4. Food Hub re-tarifie, vérifie les frais et le total (tolérance 0,02 $), garde la commande **« awaiting_payment »**
    et répond avec les instructions : destinataire, montant exact, message du virement, question de sécurité le cas
    échéant, dépôt automatique, date limite. Le site les montre sur l'écran de confirmation et sur le reçu
@@ -69,6 +76,12 @@ et aucun mot de passe à réinitialiser.
    aucune banque et ne marque jamais une commande Interac payée de lui-même.
 5. Une réponse 200 **sans** instructions Interac (vieille version de Food Hub) est traitée comme un échec, journalisée
    (`interac.instructions_missing`) et affichée honnêtement — d'où l'interrupteur `FOODHUB_INTERAC_ENABLED`.
+   Un refus de Food Hub qui ne concerne pas le panier (Interac éteint, pas de courriel Interac, magasin, marque ou
+   menu inconnus) est dit « Interac n'est pas disponible », pas « le total a changé ».
+6. Après la date limite du virement, le reçu n'affiche plus les instructions : il dit de ne plus envoyer de
+   virement et renvoie au texto du restaurant (et au suivi Food Hub s'il existe).
+7. Code par texto : au plus 6 demandes par 10 min par adresse IP et par navigateur, et 30 par minute pour tout le
+   site (Food Hub en permet 60) ; après un refus « trop de demandes », le bouton attend le délai indiqué.
 
 Ce qui n'arrive jamais : base de clients PPP, mot de passe, solde ou points inventés, prix affiché différent du
 prix envoyé, secret dans le navigateur, commande Interac envoyée sans l'interrupteur du propriétaire.
@@ -153,8 +166,13 @@ it is unreachable, the sheet says so plainly and guest ordering stays open. `/ac
 3. On "Confirm · Interac e-Transfer" the server re-prices from the catalog, **refuses if the displayed total
    differs** (`price_changed`), then sends `POST ${FOODHUB_URL}/api/foodhub/webhooks/website-order`:
    `payment: "interac"`, `fees: [{ code: "interac", name: "Frais Interac e-Transfer", amount }]`, `total` (what was
-   displayed), `customerToken` + `tenant` (when signed in), lines and paid options with `ref` (Clover id), `fulfillment`, address,
-   idempotent `id`.
+   displayed), `customerToken` + `tenant` (only when the customer is signed in **and** Food Hub confirms, right then,
+   that the order's phone is the account's), lines and paid options with `ref` + `name` = the **Clover** modifier's
+   id and name (what Food Hub matches), `fulfillment`, address, idempotent `id`. The double-submit key includes the
+   payment method (a cancelled card checkout never answers an Interac request).
+   If the answer is lost (30 s timeout, dropped connection, 5xx), Food Hub may already hold the order and have texted
+   the instructions: the site keeps the order and **resends the same `id`** on the next "Confirm"; Food Hub answers
+   `duplicate: true` with the same instructions, never a second order. Two taps or two tabs at once = one call.
 4. Food Hub re-prices, checks the fee and the total ($0.02 tolerance), holds the order **"awaiting_payment"** and
    answers with the instructions: recipient, exact amount, transfer message, security question if any, auto-deposit,
    deadline. The site shows them on the confirmation screen and on the receipt (`/orders/<id>`), status "Waiting for
@@ -162,6 +180,12 @@ it is unreachable, the sheet says so plainly and guest ordering stays open. `/ac
    order paid on its own.
 5. A 200 **without** Interac instructions (an older Food Hub) is treated as a failure, logged
    (`interac.instructions_missing`) and shown honestly — hence the `FOODHUB_INTERAC_ENABLED` switch.
+   A Food Hub refusal that is not about the cart (Interac off, no Interac e-mail, unknown store, brand or menu) is
+   worded "Interac is not available", not "the total changed".
+6. After the transfer deadline the receipt no longer shows the instructions: it says not to send a transfer and
+   points to the restaurant's text message (and Food Hub's tracking page when there is one).
+7. Text codes: at most 6 requests per 10 min per IP address and per browser, and 30 per minute for the whole site
+   (Food Hub allows 60); after a "too many requests" refusal the button waits the stated time.
 
 What never happens: a PPP customer database, a password, invented points or balances, a displayed price that
 differs from the price sent, the secret in the browser, an Interac order sent without the owner's switch.

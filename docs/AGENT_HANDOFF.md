@@ -1,5 +1,11 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-10-30 (review fixes) — PR #25 adversarial-review findings fixed (Claude, branch `feature/phone-verify-accounts`)
+
+**Fixed (with tests):** (1) a lost Food Hub answer (timeout 30 s, network, 5xx, 200 without instructions) no longer frees the order: it stays CREATED (`providerStatus: submit_unconfirmed`) and the retry resends the SAME id, even across the 5-minute bucket (`markSubmitUnresolved`, in `idempotency.ts`); concurrent submits of one order share one call (`inFlightSubmits`). (2) Paid options carry the Clover modifier id (`ref`) and Clover name (`overlay.ts cloverModifierFor`), which Food Hub's re-pricing matches. (3) The order key includes the payment method (`orderKeyFor`). (4) The customer token goes with an Interac order only for a signed-in checkout whose phone Food Hub's `/me` confirms (`customerTokenForOrder`). (5) `startPhoneVerification` is limited per IP / per browser (6 per 10 min) and site-wide (30/min) (`security/rate-limit.ts`); the sheet pauses after any 429 and no longer says "for this number". Minors: Interac-closed 422s worded `interac_unavailable`; the receipt hides instructions after the hold deadline.
+
+**Limits:** the in-memory guards (claims, unresolved submits, in-flight lock, rate windows) are per server process / isolate, like the in-memory order store. **Next step:** owner review/merge of PR #25.
+
 ## 2026-10-30 (latest) — Phone accounts + Interac e-Transfer via Food Hub (Claude, branch `feature/phone-verify-accounts`)
 
 **State:** branch = PR #23 (UrbanPiper retired) merged up to main + this work; PR #25 against `main` (merge it instead of #23). Nothing deployed.
