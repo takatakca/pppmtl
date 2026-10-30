@@ -651,3 +651,14 @@ lines is a stale header only, not a content error (the pack was verified
 against master §3 in the boost pass). Audit rows S3/S4 are stale (pre-finish
 SL-first bios, superseded by the NDG-first finish pass) — do NOT use them as
 current. No password, code, or secret in this section or in any filed file.
+
+## §12 — POST-FILING PASS — Day 1 NDG live post, 2026-10-29 21:28 EDT
+
+Signed: SOCIO, Agent Lévesque. Filing pass only: this section records a verified live post; it does NOT post, does NOT create a page, does NOT merge, does NOT change a Shop/catalogue, and does NOT create a second master. Filed once in Drive + GitHub, same edit, in place, verified by re-read.
+
+- Day 1 A6 Chef's Choice Bowl POSTED LIVE on PPP NDG Facebook only, 2026-10-29 ~21:28 EDT, Public, never backdated, as PPP Montreal -Notre Dame De Grâce-, post URL https://www.facebook.com/permalink.php?story_fbid=pfbid0f8bu9sc8VNQhw5XWL3TfGpKpyxDVjgGCwEDpec1xMWk1wsq143v96szs2edbtzPAl&id=61595655663633
+- Text posted: "Bol Choix du Chef : frites, riz, salade, pain pita, viande au choix du chef. En succursale seulement. PPP Pizzeria, NDG, Montréal." + location block 6280 av. Somerled, Montréal QC H3X 2B6, daily 4 PM-3 AM, phone 450-999-4999, sister tag Saint-Léonard, @ppp_pizzeria, #PPPPizzeria #MontrealEats #FastFoodMontreal. Text-only, in-store only, no order link, Facebook "Call Now" prompt declined, no approval card / 2FA / owner step encountered.
+- Source: live Google Business Profile PPP update from 7 days ago, verbatim copied; the separate 3-days-ago "-50% en ligne" promo for the same bowl was NOT used.
+- NOT done: Saint-Léonard version NOT posted (queued, at least 3h later, so earliest ~00:28 EDT 2026-10-30), Day 2 NOT posted, pinned 19 Apr 2024 post untouched, no merge, no Shop/catalogue change.
+- Status change, filed in the launch pack and clone bank in this same pass: Day 1 NDG from "ready pending browser" to "POSTED LIVE 2026-10-29 21:28 EDT" with the URL above; Day 1 Saint-Léonard stays QUEUED; Day 2 stays ready pending browser. Day 1 is NOT fully done (Saint-Léonard half still queued). No other item's status changed in this pass.
+- Occupancy: Filing / All — post-filing pass 2026-10-29 21:30 EDT, IN 21:30 EDT, OUT on filing verification, signed SOCIO, Agent Lévesque. No password, code, or secret in this section or in any filed file.
