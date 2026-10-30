@@ -19,9 +19,14 @@
 |---|---|---|---|---|---|---|---|
 | Facebook | PPP | Muse/SOCIO browser window | Check-first capture: Apr 19 dup, May 17, May 24, Jun 20 | 19:50 EDT 2026-10-29 | 19:56 EDT 2026-10-29 | COMPLETED — check-first capture: Apr 19 A (3 photo duplicates of each other, not pinned) / B (6 video text-duplicates of pinned), May 17 Foire Alimentaire, May 24 pizza 18" $27.30, Jun 20 thank-you share of pinned; P-1/P-2 dup=16/20 and 20/20 explicitly UNRESOLVED; nothing edited/published/deleted/pinned/unpinned; NDG untouched | SOCIO, Agent Lévesque |
 | Filing | All | Muse/SOCIO filing pass | Filing pass 2026-10-29 20:04 EDT: master OUT trace (a), clone-bank correction (b), base §7 filing (c), clone-set + gates filing (d), Drive=GitHub verification (e) | 20:06 EDT 2026-10-29 | 20:07 EDT 2026-10-29 | OUT — all five files filed to Drive in this pass; GitHub push_files submitted in the same pass (commit/blobs verified by re-read, see filing-pass report); no live Facebook edits, posts, or page creation in this pass | SOCIO, Agent Lévesque |
+| YouTube + LinkedIn | PPP | Agent 4 — YouTube + LinkedIn packs (generic subagent, NO live browser) | Pierre restart 2026-10-29 20:04 EDT: YouTube Publish pack + LinkedIn company-page pack ready, NO creation, NO sign-in, NO Publish by agent | 20:10 EDT 2026-10-29 | 20:11 EDT 2026-10-29 | OUT — packs ready only: YouTube Publish pack (staged D-YT description + Website link, owner Verify+Publish gate) + LinkedIn company-page pack (prepared details, gates un-cleared, count 0); anchor ~/workspace/ppp-youtube-linkedin-packs-2026-10-29.md (213 lines); no page created, no video reshared, no invitation sent, no live browser step | SOCIO, Agent Lévesque |
+| Facebook | PPP | SOCIO subagent AGENT 1 (generic, prep only, no live browser) | Paced-clone LAUNCH PACK from filed clone set (prep only, 0 posted) | 20:10 EDT 2026-10-29 | 20:10 EDT 2026-10-29 | OUT — launch pack built, 0 posted: Day 1 A6 + Day 2 A7 text-only ready pending browser window + live-text re-check; Days 3–7 A1–A5 photo-BLOCKED; Set B + Set C scoped; pinned untouched; NDG sister-link public NOT claimed; anchor ~/workspace/ppp-facebook-launch-pack-2026-10-29.md (130 lines, local; Drive/GitHub push left to parent browser/filing agent — generic subagent, no live browser) | SOCIO, Agent Lévesque |
+| Listings + Po Poulet prep | PPP / Po Poulet | Agent 5 (generic subagent, NO live browser) | READ-ONLY re-check of 12 PPP listings vs ~14:07 EDT baseline + Po Poulet live-check checklist kept ready (NOT a live Facebook writer) | 20:10 EDT 2026-10-29 | 20:10 EDT 2026-10-29 | OUT — NO CHANGE on all 12 listings in filed sources re-read; Po Poulet checklist READY, still BLOCKED on Pierre's facebook.com consent card + NDG 6280 vs 6284 + hours unanswered; no live browser work, no edits, no posts, no page creation — see §8.1 | SOCIO, Agent Lévesque |
 | Facebook | Po Poulet | — | Live check + alignment | — | — | WAITING, not IN — blocked on Pierre's facebook.com consent card for popoulet.ca@gmail.com + NDG 6280 vs 6284 + hours unanswered | SOCIO, Agent Lévesque |
 | Facebook | All other brands | — | — | — | — | OUT / available — live capture first, never clone from a placeholder; no page created without Pierre's per-brand approval | SOCIO, Agent Lévesque |
 | All other platforms | PPP | — | — | — | — | OUT / available unless a filed note says otherwise — one writer per platform, never two writers on the same platform/brand page | SOCIO, Agent Lévesque |
+| Pinterest + Twitch + Snapchat | PPP | Muse/SOCIO subagent (Agent 3) | Filed-state verification only (no live browser): bios/links/visibility + exact one-photo-set shopping list | 20:10 EDT 2026-10-29 | 20:10 EDT 2026-10-29 | OUT — VERIFIED, NO CHANGE vs MAIN §3/§8(b): Pinterest bio NDG-first + SL line (added 2026-10-29), 2 boards × 8 real combo pins, no price filed; Twitch bio NDG-first, Website pppmtl.com, clip sharing ON, 0 followers, offline; Snapchat pppmtl.com / PPP PIZZERIA, bio NDG-first, Website pppmtl.com, 0/0/0, nothing posted. Photo-set list: 5 slots (Pinterest old rooster logo → 1 real current logo; Twitch default avatar → 1 real logo/avatar; Twitch purple text banner → 1 real banner; Snapchat ghost Snapcode → 1 real logo/avatar; Snapchat missing hero → 1 real hero file). No upload without a granted real file, no AI/stock. Pinterest owner-only steps unchanged (domain claim + account-type + NDG postal blank). No live edit, no post, no sign-in. Anchor: this row + Agent 3 report to parent 2026-10-29 20:10 EDT | SOCIO, Agent Lévesque |
+| Instagram + Threads | PPP | Agent 2 (filed-state verification only, no live browser) | Re-verify filed state @ppp_pizzeria IG + Threads; post-recovery mobile checklist | 20:10 EDT 2026-10-29 | 20:10 EDT 2026-10-29 | OUT — NO CHANGE to filed state vs MAIN §3/§8(a); IG lock still owner-only, Threads lock NOT assumed; post-recovery mobile checklist prepared in report; anchor: local MAIN occupancy row + §3 IG/Threads rows, owner-gates Gate 4 | SOCIO, Agent Lévesque |
 
 ### §0.3 FIVE-MINUTE TRACE RULE — no silent work
 Every 5 minutes while an agent is IN, it rewrites its progress trace in Drive + GitHub (what was done since the last trace, what is in progress, what is blocked, anchors). This is the watchdog cadence (ppp-nonstop-watchdog-5m) extended to ALL agents, all clouds: no silent work, no result left only in chat or a local file, no duplicate filing (update the same rows/lines in place, verified by re-read).
@@ -283,6 +288,7 @@ verified info + real photos.
   Drive/GitHub.
 - PPP next paced clone set, ready-pending-photo, 0 posted (filed Drive + GitHub
   in the 2026-10-29 20:04 EDT filing pass): ~/workspace/ppp-next-clone-set-2026-10-29.md (61 lines).
+- PPP Facebook paced-clone LAUNCH PACK, preparation only, 0 posted (AGENT 1, 2026-10-29 20:10 EDT, single Facebook writer): ~/workspace/ppp-facebook-launch-pack-2026-10-29.md (130 lines) — Day 1 A6 + Day 2 A7 text-only ready pending browser window + live-text re-check; Days 3–7 A1–A5 photo-BLOCKED; pinned untouched; NDG sister-link public NOT claimed. Local file; Drive/GitHub push pending parent filing agent.
 - Owner gates checklists, gates 1–10 + parked list + brand order (filed Drive +
   GitHub in the 2026-10-29 20:04 EDT filing pass):
   ~/workspace/owner-gates-checklists-2026-10-29.md (82 lines).
@@ -386,6 +392,43 @@ Drive/GitHub itself — packs returned to the coordinator and merged here in pla
   Facebook visibility check every 3 hours (15:52 and 18:52 EDT runs completed, read-only, logged-out, no verified change; next ~21:52 EDT), daily Gmail summary
   (next 2026-10-30 08:20 EDT).
 
+## §8.1 — Agent 5 re-check, 2026-10-29 20:10 EDT (filed sources only, NO live browser)
+
+Signed: SOCIO, Agent Lévesque. Baseline: §3 + §8(d) as at ~14:07 EDT 2026-10-29.
+Sources re-read: this master file (§3, §5, §6, §8), local PPP audit
+(ppp-full-social-listings-audit-2026-10-29.md, last modified 2026-10-29 13:55 EDT,
+i.e. BEFORE the baseline — no newer audit text), owner gates checklists, Po Poulet
+inventory + social-requirements files (2026-10-28, unchanged). No live sign-in,
+clicking, form, or page navigation in this pass (generic subagent — live-browser
+verification is a parent-delegated step, not done here).
+Result — NO CHANGE on all 12 PPP listings vs baseline: (1) Setmore
+https://pppmtl.setmore.com — transferred Saint-Léonard, social links per baseline
+@pppmtlnord / @ppp_pizzeria / @pppmtl.com; (2) Yelp SL 91%; (3) Yelp NDG 55%,
+moderator approval pending, ordering toggle non-persistence unchanged, PARKED
+read-only only; (4) Bing SL PIN emailed, editors locked; (5) Bing NDG needs
+verification, locked; (6) TripAdvisor NDG locationId 34761146, claim submitted,
+Verify pending, phone still old +1 514-458-4587; (7) TripAdvisor SL under review,
+no public URL; (8) Foursquare NDG 6ae283a9093cc65e3aaaff81, unclaimed, $20/claim
+paused; (9) Foursquare SL 6ae285370dd00c556d88871a, unclaimed, paused;
+(10) Yellow Pages/411 — no public listing, owner Self-Serve registration pending;
+(11) RestoEnLigne Hochelaga HTTP 403, intact; (12) MainMenus Montréal-Nord intact,
+account creation owner-only. No new blocker, no new owner step.
+Reconciliation flag (NOT a change): the local audit file still carries its
+pre-baseline Setmore stale-handle wording (L7: legacy handles) — file-text lag
+only; it does not override the §3 baseline, and no live Setmore reload was done
+in this pass to re-verify it. Do not re-do the Setmore fix on the audit text alone.
+Po Poulet checklist KEPT READY, no live work done: NDG first Page ID
+110497128431808, SL second @popoulet.ca, sign in via Google only as
+popoulet.ca@gmail.com, stop at any password/code/2FA prompt, live-check verbatim
+(name, address, hours, phone, email, website, bio, links, visibility, pinned post,
+posts), align in place verified info only, sister link NDG ↔ SL via About → Links
+(Public) without merging, purge in place only verified wrong-current info, NDG
+hours BLANK until Pierre answers 6280 vs 6284 + hours (asked ~09:23 EDT,
+unanswered — never PPP hours, never DoorDash store 28719392 hours, never change
+NDG to 6284 until answered), no page created without Pierre's per-brand approval.
+Still BLOCKED on Pierre's facebook.com consent card for popoulet.ca@gmail.com.
+No password/code/secret in this entry.
+
 ## §9 — Update protocol (for every agent, every time)
 
 1. Read this master file FIRST (Drive or GitHub copy — if they differ, the
@@ -402,3 +445,57 @@ Drive/GitHub itself — packs returned to the coordinator and merged here in pla
 **End of master sync file, version 2026-10-29 (track-merged 2026-10-29 ~14:08
 EDT). All five parallel tracks (a)–(e) collected and merged in §8. Next update:
 after the next verified result, in place, Drive + GitHub, verified by re-read.**
+
+## §10 — Coordinator filing pass, 2026-10-29 20:12 EDT (restart agents, local → Drive + GitHub)
+
+Signed: SOCIO, Agent Lévesque. This pass propagates work already filed locally by
+the five restart agents; it does NOT re-do their work, does NOT post, does NOT
+create a page, does NOT create a second master, and does NOT push a stale version.
+Base for this pass, re-read fresh: local master 447 lines (merged, all five OUT
+rows present in the Occupancy Table); Drive master 404 lines, modified
+2026-10-29 20:07:40 EDT (behind local — this pass brings Drive up to the merged
+version); GitHub master blob 6ed5e8e695e9e62e8a626f5ae65766634ee0c566 (launch
+pack and YouTube/LinkedIn packs NOT yet in GitHub — this pass adds them).
+
+- Agent 1 launch pack, filed once: ~/workspace/ppp-facebook-launch-pack-2026-10-29.md
+  (130 lines, 0 posted). NDG first, then Saint-Léonard ≥3h later, 1 link max,
+  sister tag every time. Days 1–2 text-only items ready pending a live-text
+  re-check in the posting window; Days 3–7 + Set B blocked on a real photo file.
+  Occupancy row: Facebook PPP OUT 20:10 EDT, launch pack ready, 0 posted.
+- Agent 4 packs, filed once: ~/workspace/ppp-youtube-linkedin-packs-2026-10-29.md
+  (213 lines). YouTube Publish pack is owner-gated (owner Verify + Publish);
+  LinkedIn company-page pack is ready only, gates un-cleared, count 0, no page
+  created. Occupancy row: YouTube + LinkedIn OUT 20:11 EDT, packs ready, no creation.
+- Agents 1–5 OUT rows, confirmed present exactly once each in the merged master
+  (not re-added here): Facebook PPP OUT 20:10 EDT; Instagram + Threads OUT
+  20:10 EDT (no change, Instagram lock owner-only); Pinterest + Twitch +
+  Snapchat OUT 20:10 EDT (no change, photo slots queued); YouTube + LinkedIn
+  OUT 20:11 EDT (packs ready, no creation); Listings + Po Poulet prep OUT
+  20:10 EDT (no change on all 12 listings, Po Poulet checklist ready, still
+  waiting on Pierre's facebook.com consent card + NDG 6280 vs 6284 + hours answer).
+- Check-first capture, 2026-10-29 19:50–19:56 EDT, filed here as SUMMARIZED
+  capture only (Occupancy OUT row already in the table at line 20; full capture
+  detail is in the browser-window report, not pasted verbatim here):
+  Apr 19 group A — 3 photo posts, identical text to each other, duplicates of
+  each other, NOT duplicates of the pinned post; Apr 19 group B — 6 video posts,
+  text-duplicates of the pinned 19 Apr 2024 post, media differs (video vs the
+  pinned post's 2 photos); May 17 — Foire Alimentaire event post, 2 photos,
+  unique; May 24 — giant pizza offer post, 1 photo, unique, price filed in the
+  capture report; Jun 20 — thank-you milestone post sharing/embedding the
+  pinned post, unique as a share. P-1 (dup=16/20) and P-2 (dup=20/20) are
+  explicitly UNRESOLVED — no mapping to either group and no reaction-variant
+  guess was made. Nothing was edited, published, deleted, pinned, or unpinned
+  in the capture; NDG untouched. These items are NOT clone-ready on this
+  summary alone: a posting window must copy the live source text verbatim
+  before any clone goes out, and the Apr 19 groups carry old-location/24-7
+  content that must be handled under the purge rules, not reposted as-is.
+  The pinned 19 Apr 2024 post itself remains Matt A/B/C only.
+- LinkedIn gate-order flag, RECORDED, NOT cleared: owner-gates Gate 5 lists the
+  security checkpoint first, then connections, then creation; the restart task
+  lists connections first, then checkpoint, then creation. Both sequences end
+  at the same creation gate, and NO gate is skipped or cleared by this note:
+  checkpoint (Pierre, phone + QR + government ID, agent does NOT touch) AND
+  >1 accepted connection (real group/Pierre profiles only, one at a time,
+  Pierre authorises each) AND Pierre's explicit creation authorisation are all
+  still required, in either order, before any company page is created.
+- No password, code, or secret in this section or in either pack file.
