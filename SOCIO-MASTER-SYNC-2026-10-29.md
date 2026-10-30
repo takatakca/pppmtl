@@ -17,7 +17,8 @@
 ### §0.2 OCCUPANCY TABLE — who is IN, who is OUT, always signed
 | Platform | Brand | Agent/Program | Task | IN time | OUT time | Result/Anchor | Signature |
 |---|---|---|---|---|---|---|---|
-| Facebook | PPP | Muse/SOCIO browser window | Check-first capture: Apr 19 dup, May 17, May 24, Jun 20 | 19:50 EDT 2026-10-29 | — (slot HELD, not released) | Window stopped at login gate, awaiting Pierre's "Continue as LesGroupes Takatak" takeover; nothing captured/edited/changed yet | SOCIO, Agent Lévesque |
+| Facebook | PPP | Muse/SOCIO browser window | Check-first capture: Apr 19 dup, May 17, May 24, Jun 20 | 19:50 EDT 2026-10-29 | 19:56 EDT 2026-10-29 | COMPLETED — check-first capture: Apr 19 A (3 photo duplicates of each other, not pinned) / B (6 video text-duplicates of pinned), May 17 Foire Alimentaire, May 24 pizza 18" $27.30, Jun 20 thank-you share of pinned; P-1/P-2 dup=16/20 and 20/20 explicitly UNRESOLVED; nothing edited/published/deleted/pinned/unpinned; NDG untouched | SOCIO, Agent Lévesque |
+| Filing | All | Muse/SOCIO filing pass | Filing pass 2026-10-29 20:04 EDT: master OUT trace (a), clone-bank correction (b), base §7 filing (c), clone-set + gates filing (d), Drive=GitHub verification (e) | 20:06 EDT 2026-10-29 | 20:07 EDT 2026-10-29 | OUT — all five files filed to Drive in this pass; GitHub push_files submitted in the same pass (commit/blobs verified by re-read, see filing-pass report); no live Facebook edits, posts, or page creation in this pass | SOCIO, Agent Lévesque |
 | Facebook | Po Poulet | — | Live check + alignment | — | — | WAITING, not IN — blocked on Pierre's facebook.com consent card for popoulet.ca@gmail.com + NDG 6280 vs 6284 + hours unanswered | SOCIO, Agent Lévesque |
 | Facebook | All other brands | — | — | — | — | OUT / available — live capture first, never clone from a placeholder; no page created without Pierre's per-brand approval | SOCIO, Agent Lévesque |
 | All other platforms | PPP | — | — | — | — | OUT / available unless a filed note says otherwise — one writer per platform, never two writers on the same platform/brand page | SOCIO, Agent Lévesque |
@@ -256,7 +257,7 @@ verified info + real photos.
   draft pack D-LI/D-YT/D-X/D-BS/D-FB-NDG/D-IG/D-TT/D-FQ/D-TA/D-BI/D-YP/D-MM/D-RE/
   D-GB/D-LT): ~/workspace/ppp-full-social-listings-audit-2026-10-29.md (129 lines).
 - PPP clone bank + pacing: ~/workspace/ppp-post-clone-reshare-bank-2026-10-29.md
-  (427 lines). Phase 0 captured posts still to be appended as verified entries.
+  (434 lines after the 20:04 EDT filing-pass correction: purge 302, Dec/Jan queue 0, Dec/Jan lot completed 14:15 EDT — do NOT re-do the Dec/Jan lot). Phase 0 captured posts still to be appended as verified entries.
 - Facebook-only 18-brand inventory (preparation only, delivered 2026-10-29 ~04:43
   EDT): ~/workspace/facebook-all-brands-inventory-2026-10-29.md (544 lines).
   NOTE: its PPP section is superseded in part by the morning work — sister linking
@@ -274,13 +275,17 @@ verified info + real photos.
 - Review-links master (per-company review URLs, VERIFIED vs TO-VERIFY, never
   publish a TO-VERIFY link, never mix brands, never post a fake review):
   ~/workspace/review-links-master-plan-2026-10-28.md — Drive 84 lines, GitHub 84 lines.
-- Base instructions: ~/workspace/SOCIO-BASE-INSTRUCTIONS-2026-10-28.md (local copy
-  current; filed Drive/GitHub copies still behind — NDG-first line + 23:45
-  visibility/Google additions + 2026-10-29 full-create command / watchdog /
-  Facebook-only order not yet updated in the filed copies).
+- Base instructions: ~/workspace/SOCIO-BASE-INSTRUCTIONS-2026-10-28.md (60 lines,
+  filed Drive + GitHub in the 2026-10-29 20:04 EDT filing pass, §7 MAIN-protocol
+  addendum included; no second base file).
 - Too Good To Go final list (988 emails, 676 unique IDs, 652 store-sale + 24
   consumer): ~/workspace/too-good-to-go-orders-2026-10-28.md — NOT yet filed in
   Drive/GitHub.
+- PPP next paced clone set, ready-pending-photo, 0 posted (filed Drive + GitHub
+  in the 2026-10-29 20:04 EDT filing pass): ~/workspace/ppp-next-clone-set-2026-10-29.md (61 lines).
+- Owner gates checklists, gates 1–10 + parked list + brand order (filed Drive +
+  GitHub in the 2026-10-29 20:04 EDT filing pass):
+  ~/workspace/owner-gates-checklists-2026-10-29.md (82 lines).
 
 ## §8 — Parallel tracks: COMPLETED 2026-10-29 ~14:07–14:08 EDT, merged here
 
