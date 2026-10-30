@@ -28,6 +28,8 @@ export interface FoodhubSnapshot {
 export interface IntegrationSnapshot {
   generatedAt: string;
   credentials: Record<string, boolean>;
+  /** Per provider plan id: the variables it needs and whether each is set (names come from the server only). */
+  requiredCredentials: Record<string, Array<{ key: string; present: boolean }>>;
   providers: Array<{
     provider: IntegrationProviderId;
     capabilities: CapabilityStatus[];
@@ -55,7 +57,8 @@ export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
     const { requireAdmin } = await import("@/lib/security/admin.server");
     requireAdmin();
 
-    const { credentialPresence } = await import("./core/credentials.server");
+    const { credentialPresence, PROVIDER_REQUIRED_CREDENTIALS } =
+      await import("./core/credentials.server");
     const { providerHealth } = await import("./core/registry");
     const { recentIntegrationEvents } = await import("./core/logging");
     const { locationIntegrationMappings, firstConnectionMapping } =
@@ -81,9 +84,16 @@ export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
           ? `Connected (health: ${health.status ?? "answered"}). Phone sign-in is live; Interac e-Transfer orders are POSTed and held at Food Hub until the restaurant confirms the transfer.`
           : `Connected (health: ${health.status ?? "answered"}). Phone sign-in is live; Interac e-Transfer stays off until FOODHUB_INTERAC_ENABLED=true (set it once Food Hub's Interac branch is deployed).`;
 
+    const presence = credentialPresence();
     return {
       generatedAt: new Date().toISOString(),
-      credentials: credentialPresence(),
+      credentials: presence,
+      requiredCredentials: Object.fromEntries(
+        Object.entries(PROVIDER_REQUIRED_CREDENTIALS).map(([planId, keys]) => [
+          planId,
+          keys.map((key) => ({ key, present: presence[key] === true })),
+        ]),
+      ),
       providers: providerHealth(pilot?.locationId ?? "").map((p) => ({
         provider: p.provider,
         capabilities: p.capabilities,

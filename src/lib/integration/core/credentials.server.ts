@@ -30,6 +30,23 @@ export const INTEGRATION_ENV_KEYS = [
 
 export type IntegrationEnvKey = (typeof INTEGRATION_ENV_KEYS)[number];
 
+/**
+ * Variables each provider plan needs (keys = `providerPlans` ids in src/config/integration-readiness.ts). Kept here,
+ * server only, so not even the variable names ship in the browser bundle; the admin page gets them, with presence
+ * bits, from the admin-only integration snapshot.
+ */
+export const PROVIDER_REQUIRED_CREDENTIALS: Readonly<Record<string, readonly IntegrationEnvKey[]>> =
+  {
+    foodhub: ["FOODHUB_URL", "FOODHUB_WEBSITE_ORDER_SECRET", "FOODHUB_INTERAC_ENABLED"],
+    clover: [
+      "CLOVER_MERCHANT_ID",
+      "CLOVER_ECOMM_PRIVATE_KEY",
+      "CLOVER_WEBHOOK_SECRET",
+      "CLOVER_API_TOKEN",
+    ],
+    marketplaces: [],
+  };
+
 function read(key: IntegrationEnvKey): string | undefined {
   const value = process.env[key];
   return value && value.length > 0 ? value : undefined;

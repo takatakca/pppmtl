@@ -1,6 +1,8 @@
 /**
  * Owner-approved planning information for TAKATAK Food Hub and Clover.
  * This is NOT a connection status or a license to send merchant orders.
+ * This file ships in the browser bundle: the variables each plan needs live server-side
+ * (PROVIDER_REQUIRED_CREDENTIALS in src/lib/integration/core/credentials.server.ts).
  */
 export interface ProviderPlan {
   id: string;
@@ -8,7 +10,6 @@ export interface ProviderPlan {
   role: string;
   ppmOwns: string;
   providerOwns: string;
-  requiredCredentials: string[];
 }
 
 export const providerPlans: ProviderPlan[] = [
@@ -19,8 +20,6 @@ export const providerPlans: ProviderPlan[] = [
     ppmOwns: "Brand, catalog, customer experience, store/tenant identity, verified checkout data.",
     providerOwns:
       "Customer identity (phone verification), kitchen state, Interac e-Transfer holds, dispatch, integrations and operator controls.",
-    // Shared contract of 2026-10-29: customer routes + website-order with payment "interac".
-    requiredCredentials: ["FOODHUB_URL", "FOODHUB_WEBSITE_ORDER_SECRET", "FOODHUB_INTERAC_ENABLED"],
   },
   {
     id: "clover",
@@ -28,12 +27,6 @@ export const providerPlans: ProviderPlan[] = [
     role: "Restaurant POS, real pricing and modifiers, hosted card checkout, kitchen ticket.",
     ppmOwns: "PPP layout, product mappings, branded photos, order validation.",
     providerOwns: "POS inventory, payment authorization, merchant reconciliation and printing.",
-    requiredCredentials: [
-      "CLOVER_MERCHANT_ID",
-      "CLOVER_ECOMM_PRIVATE_KEY",
-      "CLOVER_WEBHOOK_SECRET",
-      "CLOVER_API_TOKEN",
-    ],
   },
   {
     id: "marketplaces",
@@ -41,7 +34,6 @@ export const providerPlans: ProviderPlan[] = [
     role: "Direct marketplace storefront links today; Food Hub manages authorized direct integrations.",
     ppmOwns: "Which trusted storefront links appear and the customer-facing presentation.",
     providerOwns: "Each marketplace's own checkout, fulfillment and authorized API operations.",
-    requiredCredentials: [],
   },
 ];
 

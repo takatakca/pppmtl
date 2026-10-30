@@ -257,11 +257,11 @@ function IntegrationsAdmin() {
                     Platform controls
                   </p>
                   <p className="text-sm">{plan.providerOwns}</p>
-                  {plan.requiredCredentials.length > 0 && (
+                  {(snapshot.requiredCredentials[plan.id] ?? []).length > 0 && (
                     <ul className="mt-3 space-y-1">
-                      {plan.requiredCredentials.map((key) => (
+                      {(snapshot.requiredCredentials[plan.id] ?? []).map(({ key, present }) => (
                         <li key={key} className="flex items-center gap-2">
-                          <StatusIcon available={snapshot.credentials[key] === true} />
+                          <StatusIcon available={present} />
                           <code className="text-xs">{key}</code>
                         </li>
                       ))}

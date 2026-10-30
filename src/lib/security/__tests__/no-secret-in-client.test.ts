@@ -22,6 +22,8 @@ const CLIENT_FACING = [
   "src/routes/account.tsx",
   "src/routes/account_.sign-in.tsx",
   "src/routes/admin.integrations.tsx",
+  // Imported by the admin page, so it ships in the browser bundle (the build had the secret's name from here).
+  "src/config/integration-readiness.ts",
 ];
 
 const read = (file: string) => readFileSync(join(process.cwd(), file), "utf8");
