@@ -264,6 +264,16 @@ function OrderReceiptPage() {
                   {interacInstructionText(order.interac, lang)}
                 </p>
               ) : null}
+              {order.interac.trackUrl?.startsWith("https://") ? (
+                <a
+                  href={order.interac.trackUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-block text-sm font-bold underline"
+                >
+                  {t("Follow this order", "Suivre cette commande", "Seguir este pedido")}
+                </a>
+              ) : null}
             </section>
           )}
 

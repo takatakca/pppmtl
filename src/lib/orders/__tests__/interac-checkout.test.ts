@@ -125,7 +125,6 @@ describe("Interac e-Transfer at checkout", () => {
     const quote = interacQuote({
       subtotalCents,
       interacFeeCents: 500,
-      feeTaxable: true,
       deliveryFeeCents: 0,
     });
     const created = createOrder(request(), "browser-nonce");

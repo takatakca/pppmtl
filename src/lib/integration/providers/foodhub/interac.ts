@@ -3,16 +3,20 @@
  *
  *   - `interacQuote` prices what the customer sees BEFORE committing: subtotal, the Interac fee, the delivery fee
  *     when delivering, Québec taxes and the all-inclusive total (Québec consumer rule). It mirrors Food Hub's
- *     own arithmetic (lib/foodhub/delivery/orders.ts `totalsFor`): tax = round2(taxable × 14.975 %), amounts in
- *     dollars rounded to the cent, so Food Hub's re-pricing lands on the same figure (its tolerance is $0.02).
- *   - `buildInteracWebsiteOrder` shapes the website-order payload of the shared contract (section B):
- *     `payment: "interac"`, `fees`, `customerToken`, `total` (what was displayed), lines with `ref`.
+ *     own arithmetic (lib/foodhub/delivery/orders.ts `totalsFor` + lib/foodhub/taxes.ts `foodTaxes`): GST and QST
+ *     are each round2(taxable × rate) on subtotal + delivery fee + the Interac fee (Food Hub always taxes the fee),
+ *     amounts in dollars rounded to the cent, so Food Hub's re-pricing lands on the same figure (tolerance $0.02).
+ *   - `buildInteracWebsiteOrder` shapes the website-order payload of the shared contract (section B, Food Hub
+ *     lib/foodhub/delivery/website.ts): `payment: "interac"`, `fees`, `total` (what was displayed), lines and paid
+ *     options with `ref`, and `customerToken` + `tenant` for a signed-in customer.
  *   - `parseInteracResponse` reads the instructions Food Hub returns; `interacInstructionRows` words them.
  */
 
 export const INTERAC_FEE_CODE = "interac";
 export const INTERAC_FEE_NAME = "Frais Interac e-Transfer";
-/** Québec sales taxes on prepared food: GST 5 % + QST 9.975 % (same constant as Food Hub). */
+/** Québec sales taxes on prepared food: GST 5 % + QST 9.975 % (Food Hub lib/foodhub/taxes.ts, province QC). */
+export const QC_GST_RATE = 0.05;
+export const QC_QST_RATE = 0.09975;
 export const QC_TAX_RATE = 0.14975;
 
 /** Food Hub's `round2` (lib/foodhub/config.ts), character for character: dollars to the cent. */
@@ -26,9 +30,8 @@ export const dollarsToCents = (dollars: number): number => Math.round(dollars * 
 export interface InteracQuoteInput {
   /** Cents: every cart line with a published price, options included. */
   subtotalCents: number;
+  /** Cents. Always taxed, as Food Hub does (GST + QST on subtotal + delivery fee + fees). */
   interacFeeCents: number;
-  /** Whether GST + QST apply to the Interac fee (Food Hub setting). */
-  feeTaxable: boolean;
   /** Cents; 0 for pickup. */
   deliveryFeeCents: number;
 }
@@ -46,8 +49,9 @@ export function interacQuote(input: InteracQuoteInput): InteracQuote {
   const subtotal = centsToDollars(Math.max(0, input.subtotalCents));
   const fee = centsToDollars(Math.max(0, input.interacFeeCents));
   const delivery = centsToDollars(Math.max(0, input.deliveryFeeCents));
-  const taxable = round2(subtotal + delivery + (input.feeTaxable ? fee : 0));
-  const tax = round2(taxable * QC_TAX_RATE);
+  // Food Hub: foodTaxes(province, subtotal + deliveryFee + fees) — each tax rounded on its own, then summed.
+  const taxable = round2(subtotal + delivery + fee);
+  const tax = round2(round2(taxable * QC_GST_RATE) + round2(taxable * QC_QST_RATE));
   const total = round2(subtotal + delivery + fee + tax);
   return {
     subtotalCents: dollarsToCents(subtotal),
@@ -74,7 +78,8 @@ export interface InteracOrderLine {
   quantity: number;
   /** Cents, the item alone. */
   unitPrice: number | null;
-  modifiers: Array<{ label: string; priceDelta: number | null }>;
+  /** `ref`: the Clover modifier id when the site maps one (Food Hub matches a paid option by ref, then by name). */
+  modifiers: Array<{ label: string; priceDelta: number | null; ref?: string | null }>;
   notes: string;
 }
 
@@ -105,7 +110,7 @@ export interface WebsiteOrderPayload {
     quantity: number;
     price: number;
     notes?: string;
-    options?: Array<{ name: string; price: number }>;
+    options?: Array<{ ref?: string; name: string; price: number }>;
   }>;
   payment: "interac";
   paid: false;
@@ -114,6 +119,8 @@ export interface WebsiteOrderPayload {
   /** Dollars, all included: exactly what the customer saw. */
   total: number;
   customerToken?: string;
+  /** The brand website the customer token belongs to: Food Hub refuses a token of another tenant (403). */
+  tenant?: string;
 }
 
 export interface BuildInteracOrderInput {
@@ -126,6 +133,8 @@ export interface BuildInteracOrderInput {
   lines: InteracOrderLine[];
   quote: InteracQuote;
   customerToken?: string | null;
+  /** Sent with the customer token only (FOODHUB_TENANT, default "pppmtl"). */
+  tenant?: string | null;
 }
 
 const cut = (value: string, max: number) => value.trim().slice(0, max);
@@ -146,6 +155,7 @@ export function buildInteracWebsiteOrder(input: BuildInteracOrderInput): Website
     fulfillment: input.fulfillment,
     items: input.lines.map((line) => {
       const options = line.modifiers.map((m) => ({
+        ...(m.ref?.trim() ? { ref: cut(m.ref, 80) } : {}),
         name: cut(m.label, 80),
         price: centsToDollars(m.priceDelta ?? 0),
       }));
@@ -173,7 +183,10 @@ export function buildInteracWebsiteOrder(input: BuildInteracOrderInput): Website
     if (input.deliveryAddress?.trim()) payload.address = cut(input.deliveryAddress, 500);
     payload.deliveryFee = centsToDollars(input.quote.deliveryFeeCents);
   }
-  if (input.customerToken) payload.customerToken = input.customerToken;
+  if (input.customerToken) {
+    payload.customerToken = input.customerToken;
+    if (input.tenant?.trim()) payload.tenant = cut(input.tenant, 40);
+  }
   return payload;
 }
 
@@ -201,6 +214,8 @@ export interface InteracOrderResponse {
   total: number | null;
   duplicate: boolean;
   interac: InteracInstructions;
+  /** Food Hub's tracking page for this order (`trackUrl`, https only), when the brand has one. */
+  trackUrl: string | null;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -242,7 +257,20 @@ export function parseInteracResponse(body: unknown): InteracOrderResponse | null
     total: Number.isFinite(total) ? round2(total) : null,
     duplicate: body["duplicate"] === true,
     interac,
+    trackUrl: httpsUrl(body["trackUrl"]),
   };
+}
+
+/** An absolute https URL, or null: a link is only kept when it is safe to put in an <a href>. */
+function httpsUrl(value: unknown): string | null {
+  const raw = text(value, 500);
+  if (!raw) return null;
+  try {
+    const url = new URL(raw);
+    return url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
 }
 
 /* ------------------------------------------------------------------ wording */

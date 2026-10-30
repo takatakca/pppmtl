@@ -8,7 +8,7 @@ import { createServerFn } from "@tanstack/react-start";
 import type { CapabilityStatus, IntegrationProviderId } from "./core/contracts";
 
 export interface FoodhubSnapshot {
-  /** FOODHUB_URL and FOODHUB_WEBSITE_ORDER_SECRET are both set on this server. */
+  /** FOODHUB_URL and the Food Hub server secret are both set on this server. */
   configured: boolean;
   /** Hostname of FOODHUB_URL (never the secret). */
   host: string | null;
@@ -19,7 +19,6 @@ export interface FoodhubSnapshot {
   interacEnabled: boolean;
   /** Dollars, as shown to customers. */
   interacFee: number;
-  interacFeeTaxable: boolean;
   /** PPP slug -> Food Hub location code (verified defaults, env override). */
   locationCodes: Record<string, string>;
   ingressPath: string;
@@ -68,7 +67,6 @@ export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
       foodhubLocationCodes,
       interacEnabled,
       interacFeeCents,
-      interacFeeTaxable,
     } = await import("./providers/foodhub/config.server");
     const { foodhubHealth } = await import("./providers/foodhub/client.server");
 
@@ -76,7 +74,7 @@ export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
     const configured = foodhubConfigured();
     const health = configured ? await foodhubHealth() : null;
     const message = !configured
-      ? "Not connected: set FOODHUB_URL and FOODHUB_WEBSITE_ORDER_SECRET on this service (Coolify). Phone sign-in and Interac e-Transfer stay closed until then."
+      ? "Not connected: set FOODHUB_URL and the Food Hub website-order secret on this service (Coolify). Phone sign-in and Interac e-Transfer stay closed until then."
       : !health?.reachable
         ? "Configured, but Food Hub's /api/health did not answer from this server. Phone sign-in and Interac orders will fail honestly until it does."
         : interacEnabled()
@@ -112,7 +110,6 @@ export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
         health: health?.status ?? null,
         interacEnabled: interacEnabled(),
         interacFee: interacFeeCents() / 100,
-        interacFeeTaxable: interacFeeTaxable(),
         locationCodes: foodhubLocationCodes(),
         ingressPath: FOODHUB_WEBSITE_ORDER_INGRESS,
         message,

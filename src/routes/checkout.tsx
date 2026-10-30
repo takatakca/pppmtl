@@ -184,7 +184,6 @@ function CheckoutPage() {
       ? interacQuote({
           subtotalCents,
           interacFeeCents: interacOptions.feeCents,
-          feeTaxable: interacOptions.feeTaxable,
           deliveryFeeCents: mode === "delivery" ? (interacOptions.deliveryFeeCents ?? 0) : 0,
         })
       : null;
@@ -672,9 +671,9 @@ function CheckoutPage() {
                     <span className="mt-1.5 block text-xs text-muted-foreground">
                       {interacOptions && interacAvailable
                         ? t(
-                            `Fee ${money(interacOptions.feeCents)}${interacOptions.feeTaxable ? " + taxes" : ""}, shown in your total before you confirm. You send the transfer after confirming; the restaurant starts your order once it is received.`,
-                            `Frais de ${money(interacOptions.feeCents)}${interacOptions.feeTaxable ? " + taxes" : ""}, inclus dans votre total avant de confirmer. Vous envoyez le virement après avoir confirmé; le restaurant lance votre commande dès réception.`,
-                            `Cargo de ${money(interacOptions.feeCents)}${interacOptions.feeTaxable ? " + impuestos" : ""}, incluido en tu total antes de confirmar. Envías la transferencia después; el restaurante inicia tu pedido al recibirla.`,
+                            `Fee ${money(interacOptions.feeCents)} + taxes, shown in your total before you confirm. You send the transfer after confirming; the restaurant starts your order once it is received.`,
+                            `Frais de ${money(interacOptions.feeCents)} + taxes, inclus dans votre total avant de confirmer. Vous envoyez le virement après avoir confirmé; le restaurant lance votre commande dès réception.`,
+                            `Cargo de ${money(interacOptions.feeCents)} + impuestos, incluido en tu total antes de confirmar. Envías la transferencia después; el restaurante inicia tu pedido al recibirla.`,
                           )
                         : interacUnavailableReason}
                     </span>

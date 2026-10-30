@@ -15,7 +15,7 @@ import type { OrderItem } from "@/lib/orders/types";
 import type { ProviderOrderAdapter, ProviderOrderRef } from "@/lib/orders/provider-order-adapter";
 import { orderFailure, type OrderErrorCode, type OrderResult } from "@/lib/orders/errors";
 import { foodhubRequest } from "./client.server";
-import { foodhubBrandName, interacAvailability } from "./config.server";
+import { foodhubBrandName, foodhubTenant, interacAvailability } from "./config.server";
 import {
   buildInteracWebsiteOrder,
   interacQuote,
@@ -40,7 +40,6 @@ export function quoteForOrder(
   const quote = interacQuote({
     subtotalCents,
     interacFeeCents: availability.feeCents,
-    feeTaxable: availability.feeTaxable,
     deliveryFeeCents: orderType === "DELIVERY" ? (availability.deliveryFeeCents ?? 0) : 0,
   });
   return { quote, available: availability.available };
@@ -107,11 +106,16 @@ export const foodhubInteracSubmitAdapter: ProviderOrderAdapter = {
         name: item.name,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
-        modifiers: item.modifiers.map((m) => ({ label: m.label, priceDelta: m.priceDelta })),
+        modifiers: item.modifiers.map((m) => ({
+          label: m.label,
+          priceDelta: m.priceDelta,
+          ref: m.providerModifierId,
+        })),
         notes: item.notes,
       })),
       quote,
       customerToken: context.customerToken ?? null,
+      tenant: foodhubTenant(),
     });
 
     const response = await foodhubRequest(FOODHUB_WEBSITE_ORDER_PATH, {
@@ -167,7 +171,7 @@ export const foodhubInteracSubmitAdapter: ProviderOrderAdapter = {
       tax: quote.taxCents,
       total: quote.totalCents,
       fees: [{ code: "interac", name: "Frais Interac e-Transfer", amount: quote.interacFeeCents }],
-      interac: parsed.interac,
+      interac: { ...parsed.interac, trackUrl: parsed.trackUrl },
     };
     return { ok: true, data: ref };
   },

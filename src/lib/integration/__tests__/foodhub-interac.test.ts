@@ -108,7 +108,6 @@ function configure(enabled = true) {
   vi.stubEnv("FOODHUB_WEBSITE_ORDER_SECRET", SECRET);
   vi.stubEnv("FOODHUB_INTERAC_ENABLED", enabled ? "true" : "");
   vi.stubEnv("FOODHUB_INTERAC_FEE", "");
-  vi.stubEnv("FOODHUB_INTERAC_FEE_TAXABLE", "");
   vi.stubEnv("FOODHUB_DELIVERY_FEE", "");
 }
 
@@ -123,11 +122,10 @@ afterEach(() => {
 
 describe("Interac quote (all-inclusive, before commitment)", () => {
   it("adds the fee, then GST + QST on subtotal + fee, like Food Hub's totalsFor", () => {
-    // 20.00 + 5.00 taxable = 25.00 × 14.975 % = 3.74375 -> 3.74; total 28.74
+    // 20.00 + 5.00 taxable = 25.00: GST 1.25 + QST 2.49375 -> 2.49 = 3.74; total 28.74
     const quote = interacQuote({
       subtotalCents: 2000,
       interacFeeCents: 500,
-      feeTaxable: true,
       deliveryFeeCents: 0,
     });
     expect(quote).toEqual({
@@ -139,24 +137,22 @@ describe("Interac quote (all-inclusive, before commitment)", () => {
     });
   });
 
-  it("leaves the fee untaxed when Food Hub does not tax it", () => {
-    // 19.99 × 14.975 % = 2.9935 -> 2.99; total 19.99 + 5.00 + 2.99 = 27.98
-    const quote = interacQuote({
-      subtotalCents: 1999,
-      interacFeeCents: 500,
-      feeTaxable: false,
-      deliveryFeeCents: 0,
-    });
-    expect(quote.taxCents).toBe(299);
-    expect(quote.totalCents).toBe(2798);
+  it("always taxes the Interac fee and rounds GST and QST each on its own, like Food Hub's foodTaxes", () => {
+    // 1.05 + 5.00 = 6.05: GST 0.3025 -> 0.30, QST 0.6034875 -> 0.60, tax 0.90 (one combined rounding would give 0.91)
+    const quote = interacQuote({ subtotalCents: 105, interacFeeCents: 500, deliveryFeeCents: 0 });
+    expect(quote.taxCents).toBe(90);
+    expect(quote.totalCents).toBe(695);
+    // 1.10 + 5.00 = 6.10: GST 0.305 -> 0.31, QST 0.608475 -> 0.61, tax 0.92 (combined: 0.91)
+    const other = interacQuote({ subtotalCents: 110, interacFeeCents: 500, deliveryFeeCents: 0 });
+    expect(other.taxCents).toBe(92);
+    expect(other.totalCents).toBe(702);
   });
 
   it("taxes the delivery fee too, as Food Hub does", () => {
-    // 20 + 3 + 5 = 28 × 14.975 % = 4.193 -> 4.19; total 32.19
+    // 20 + 3 + 5 = 28: GST 1.40 + QST 2.793 -> 2.79 = 4.19; total 32.19
     const quote = interacQuote({
       subtotalCents: 2000,
       interacFeeCents: 500,
-      feeTaxable: true,
       deliveryFeeCents: 300,
     });
     expect(quote.taxCents).toBe(419);
@@ -174,7 +170,6 @@ describe("website-order payload (contract section B)", () => {
     const quote = interacQuote({
       subtotalCents: 3198,
       interacFeeCents: 500,
-      feeTaxable: true,
       deliveryFeeCents: 0,
     });
     const payload = buildInteracWebsiteOrder({
@@ -190,11 +185,19 @@ describe("website-order payload (contract section B)", () => {
         name: i.name,
         quantity: i.quantity,
         unitPrice: i.unitPrice,
-        modifiers: i.modifiers.map((m) => ({ label: m.label, priceDelta: m.priceDelta })),
+        modifiers: [
+          ...i.modifiers.map((m) => ({
+            label: m.label,
+            priceDelta: m.priceDelta,
+            ref: m.providerModifierId,
+          })),
+          { label: "Extra cheese", priceDelta: 0, ref: "CLV-MOD-CHEESE" },
+        ],
         notes: i.notes,
       })),
       quote,
       customerToken: TOKEN,
+      tenant: "pppmtl",
     });
     expect(payload).toMatchObject({
       id: "ord_1",
@@ -207,7 +210,9 @@ describe("website-order payload (contract section B)", () => {
       fees: [{ code: "interac", name: "Frais Interac e-Transfer", amount: 5 }],
       total: quote.totalCents / 100,
       customerToken: TOKEN,
+      tenant: "pppmtl",
     });
+    // Food Hub matches a paid option by `ref` (Clover modifier id) first, then by name.
     expect(payload.items).toEqual([
       {
         ref: "CLV-PEP",
@@ -215,7 +220,10 @@ describe("website-order payload (contract section B)", () => {
         quantity: 2,
         price: 12.99,
         notes: "no onion",
-        options: [{ name: "Size: Large", price: 3 }],
+        options: [
+          { name: "Size: Large", price: 3 },
+          { ref: "CLV-MOD-CHEESE", name: "Extra cheese", price: 0 },
+        ],
       },
     ]);
     expect(payload).not.toHaveProperty("address");
@@ -226,7 +234,6 @@ describe("website-order payload (contract section B)", () => {
     const quote = interacQuote({
       subtotalCents: 3198,
       interacFeeCents: 500,
-      feeTaxable: true,
       deliveryFeeCents: 400,
     });
     const payload = buildInteracWebsiteOrder({
@@ -239,11 +246,13 @@ describe("website-order payload (contract section B)", () => {
       lines: [],
       quote,
       customerToken: null,
+      tenant: "pppmtl",
     });
     expect(payload.address).toBe("1 Rue Test, Montréal, QC, H1H1H1");
     expect(payload.deliveryFee).toBe(4);
     expect(payload.customer).toEqual({ phone: "5145550000", email: "x@example.com", lang: "en" });
     expect(payload).not.toHaveProperty("customerToken");
+    expect(payload).not.toHaveProperty("tenant");
   });
 });
 
@@ -262,6 +271,18 @@ describe("Food Hub's Interac answer", () => {
     expect(parseInteracResponse(null)).toBeNull();
   });
 
+  it("keeps Food Hub's tracking link only when it is https", () => {
+    expect(parseInteracResponse(heldResponse)?.trackUrl).toBeNull();
+    const tracked = { ...heldResponse, trackUrl: "https://foodhub.test/t/abc123" };
+    expect(parseInteracResponse(tracked)?.trackUrl).toBe("https://foodhub.test/t/abc123");
+    expect(
+      parseInteracResponse({ ...heldResponse, trackUrl: "javascript:alert(1)" })?.trackUrl,
+    ).toBeNull();
+    expect(
+      parseInteracResponse({ ...heldResponse, trackUrl: "http://foodhub.test/t/x" })?.trackUrl,
+    ).toBeNull();
+  });
+
   it("words the instructions for the customer in both languages", () => {
     const rowsFr = interacInstructionRows(parseInteracResponse(heldResponse)!.interac, "fr");
     expect(rowsFr.map((r) => r.key)).toEqual([
@@ -271,7 +292,7 @@ describe("Food Hub's Interac answer", () => {
       "autoDeposit",
       "deadline",
     ]);
-    expect(rowsFr.find((r) => r.key === "amount")?.value).toBe("36,78 $");
+    expect(rowsFr.find((r) => r.key === "amount")?.value).toBe("42,52 $");
     const rowsEn = interacInstructionRows(parseInteracResponse(heldResponse)!.interac, "en");
     expect(rowsEn.find((r) => r.key === "amount")?.value).toBe("$42.52");
     expect(rowsEn.find((r) => r.key === "reference")?.value).toBe("PPP-1A2B3");
@@ -405,6 +426,7 @@ describe("Interac order adapter -> Food Hub website-order", () => {
       fees: [{ code: "interac", name: "Frais Interac e-Transfer", amount: 5 }],
       total: 42.52,
       customerToken: TOKEN,
+      tenant: "pppmtl",
       customer: { name: "Mathieu", phone: "5145550000", lang: "fr" },
     });
     expect((body["items"] as Array<Record<string, unknown>>)[0]).toMatchObject({

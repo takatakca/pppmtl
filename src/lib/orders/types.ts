@@ -81,6 +81,8 @@ export interface OrderInteracInstructions {
   expiresAt: string | null;
   instructionsFr: string;
   instructionsEn: string;
+  /** Food Hub's tracking page for the held order (https), when the brand has one. */
+  trackUrl?: string | null;
 }
 
 export interface OrderItemModifier {

@@ -7,8 +7,8 @@
  *   FOODHUB_BRAND                 brand name as Food Hub's catalog spells it (default "PPP Pizzeria")
  *   FOODHUB_LOCATION_CODES        optional JSON { "<ppp slug>": "<FOOD HUB CODE>" } overriding the defaults below
  *   FOODHUB_INTERAC_ENABLED       "true" once Food Hub's Interac e-Transfer branch is deployed (fail-closed default)
- *   FOODHUB_INTERAC_FEE           Interac fee in dollars, must equal Food Hub's setting (default 5.00)
- *   FOODHUB_INTERAC_FEE_TAXABLE   "false" if Food Hub does not tax the fee (default true: GST + QST on it)
+ *   FOODHUB_INTERAC_FEE           Interac fee in dollars, must equal Food Hub's setting (default 5.00). Food Hub always
+ *                                 applies GST + QST to it (totalsFor), so the site always does too.
  *   FOODHUB_DELIVERY_FEE          delivery fee in dollars for Interac delivery orders; unset = pickup only
  */
 import { restaurantLocations } from "@/config/locations";
@@ -111,12 +111,6 @@ export function interacFeeCents(): number {
   return dollarsToCents(optionalCredential("FOODHUB_INTERAC_FEE")) ?? INTERAC_FEE_DEFAULT_CENTS;
 }
 
-export function interacFeeTaxable(): boolean {
-  return !/^(false|0|no|off)$/i.test(
-    optionalCredential("FOODHUB_INTERAC_FEE_TAXABLE")?.trim() ?? "",
-  );
-}
-
 /** Owner switch: Interac orders are POSTed only once Food Hub's Interac branch is live. */
 export function interacEnabled(): boolean {
   return /^(true|1|yes|on)$/i.test(optionalCredential("FOODHUB_INTERAC_ENABLED")?.trim() ?? "");
@@ -135,7 +129,6 @@ export interface InteracAvailability {
   reason: InteracUnavailableReason | null;
   locationCode: string | null;
   feeCents: number;
-  feeTaxable: boolean;
   deliveryFeeCents: number | null;
 }
 
@@ -147,7 +140,6 @@ export function interacAvailability(
   const base = {
     locationCode: foodhubLocationCode(locationId),
     feeCents: interacFeeCents(),
-    feeTaxable: interacFeeTaxable(),
     deliveryFeeCents: foodhubDeliveryFeeCents(),
   };
   if (!foodhubConfigured()) return { ...base, available: false, reason: "not_configured" };

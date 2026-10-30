@@ -129,7 +129,6 @@ export interface InteracOptions {
   reason: "not_configured" | "not_enabled" | "location_not_mapped" | "delivery_fee_unknown" | null;
   /** Cents. */
   feeCents: number;
-  feeTaxable: boolean;
   /** Cents; null when the owner set no delivery fee (Interac delivery stays closed). */
   deliveryFeeCents: number | null;
 }
@@ -146,7 +145,6 @@ export const getInteracOptions = createServerFn({ method: "POST" })
       available: availability.available,
       reason: availability.reason,
       feeCents: availability.feeCents,
-      feeTaxable: availability.feeTaxable,
       deliveryFeeCents: availability.deliveryFeeCents,
     };
   });

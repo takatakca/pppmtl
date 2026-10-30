@@ -123,7 +123,7 @@ function IntegrationsAdmin() {
                     {snapshot.foodhub.configured ? "served by Food Hub" : "closed"} · Interac
                     e-Transfer orders:{" "}
                     {snapshot.foodhub.interacEnabled
-                      ? `on — fee $${snapshot.foodhub.interacFee.toFixed(2)}${snapshot.foodhub.interacFeeTaxable ? " + taxes" : ""}`
+                      ? `on — fee $${snapshot.foodhub.interacFee.toFixed(2)} + taxes`
                       : "off (FOODHUB_INTERAC_ENABLED not set)"}
                   </li>
                   <li>
