@@ -211,7 +211,10 @@ function OrderReceiptPage() {
               </p>
             )}
           {order.interacExpired && (
-            <p role="status" className="mt-2 border border-border p-3 text-sm text-muted-foreground">
+            <p
+              role="status"
+              className="mt-2 border border-border p-3 text-sm text-muted-foreground"
+            >
               {t(
                 "The time to send the transfer is over. Do not send a transfer for this order now: the restaurant's text message tells you whether it was confirmed or cancelled. Questions? Call us.",
                 "Le délai pour envoyer le virement est passé. N'envoyez plus de virement pour cette commande : le texto du restaurant vous dit si elle est confirmée ou annulée. Une question ? Appelez-nous.",

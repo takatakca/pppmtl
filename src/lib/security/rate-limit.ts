@@ -40,7 +40,8 @@ export function createRateLimiter(): RateLimiter {
           retryAfterMs = Math.max(retryAfterMs, window.windowMs - (now - oldest));
         }
       }
-      if (retryAfterMs > 0) return { ok: false, retryAfterS: Math.max(1, Math.ceil(retryAfterMs / 1000)) };
+      if (retryAfterMs > 0)
+        return { ok: false, retryAfterS: Math.max(1, Math.ceil(retryAfterMs / 1000)) };
       for (const { key } of keys) {
         const list = hits.get(key) ?? [];
         list.push(now);

@@ -160,8 +160,7 @@ export function orderError(code: OrderErrorCode): OrderError {
  * 5xx, an answer without the expected fields). The retry must resend the SAME order id, never a new one.
  */
 export type OrderResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: OrderError; outcomeUnknown?: boolean };
+  { ok: true; data: T } | { ok: false; error: OrderError; outcomeUnknown?: boolean };
 
 export function orderFailure<T>(code: OrderErrorCode): OrderResult<T> {
   return { ok: false, error: orderError(code) };

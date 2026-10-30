@@ -6,6 +6,7 @@ import { classifyStatus, foodhubRequest } from "../providers/foodhub/client.serv
 import { foodhubLocationCode, interacAvailability } from "../providers/foodhub/config.server";
 import {
   buildInteracWebsiteOrder,
+  interacHoldExpired,
   interacInstructionRows,
   interacQuote,
   parseInteracResponse,
@@ -254,6 +255,45 @@ describe("website-order payload (contract section B)", () => {
     expect(payload).not.toHaveProperty("customerToken");
     expect(payload).not.toHaveProperty("tenant");
   });
+
+  it("names an option by its Clover name when known, never by the display label", () => {
+    const quote = interacQuote({ subtotalCents: 1675, interacFeeCents: 500, deliveryFeeCents: 0 });
+    const payload = buildInteracWebsiteOrder({
+      orderId: "ord_3",
+      brand: "PPP Pizzeria",
+      locationCode: "NDG_MAIN",
+      customer: { name: "Mathieu", phone: "5145550000", email: null, lang: "fr" },
+      fulfillment: "pickup",
+      deliveryAddress: null,
+      lines: [
+        {
+          productId: "sub-steak",
+          providerProductId: "81JCAM9M1V9QJ",
+          name: "Sub Steak",
+          quantity: 1,
+          unitPrice: 935,
+          modifiers: [
+            { label: "Size: 14 Pouce", name: "14 POUCE", priceDelta: 740, ref: "1GGCKVSSGA828" },
+          ],
+          notes: "",
+        },
+      ],
+      quote,
+    });
+    expect(payload.items[0]!.options).toEqual([
+      { ref: "1GGCKVSSGA828", name: "14 POUCE", price: 7.4 },
+    ]);
+  });
+});
+
+describe("Interac hold deadline", () => {
+  it("is past only for a readable deadline before now", () => {
+    const now = Date.parse("2026-10-30T20:00:00.000Z");
+    expect(interacHoldExpired("2026-10-30T19:59:59.000Z", now)).toBe(true);
+    expect(interacHoldExpired("2026-10-30T20:30:00.000Z", now)).toBe(false);
+    expect(interacHoldExpired(null, now)).toBe(false);
+    expect(interacHoldExpired("not a date", now)).toBe(false);
+  });
 });
 
 describe("Food Hub's Interac answer", () => {
@@ -457,28 +497,66 @@ describe("Interac order adapter -> Food Hub website-order", () => {
       await foodhubInteracSubmitAdapter.createOrder(draft(), "NDG_MAIN", "key", context()),
     ).toMatchObject({ ok: false, error: { code: "price_changed" } });
 
-    mockFetch(422, { ok: false, error: 'Unknown location "NDG_MAIN".' });
+    // Not about the cart: Interac is closed (store, brand, menu or Interac setup at Food Hub), retrying will not help.
+    for (const error of [
+      'Unknown location "NDG_MAIN".',
+      'Unknown brand "PPP Pizzeria".',
+      "Interac e-Transfer is turned off in Food Hub (Settings → Expansion → Delivery → Paiements).",
+      "No Interac e-mail for NDG_MAIN (Settings → Expansion → Delivery → Paiements, or FOODHUB_INTERAC_EMAIL).",
+      "No menu saved for PPP Pizzeria in Food Hub: prices cannot be confirmed.",
+    ]) {
+      mockFetch(422, { ok: false, error });
+      expect(
+        await foodhubInteracSubmitAdapter.createOrder(draft(), "NDG_MAIN", "key", context()),
+        error,
+      ).toMatchObject({ ok: false, error: { code: "interac_unavailable" } });
+    }
+
+    mockFetch(422, {
+      ok: false,
+      error:
+        'Option "14 POUCE" of "Sub Steak" is not on the menu: its price (7.40) cannot be confirmed.',
+    });
     expect(
       await foodhubInteracSubmitAdapter.createOrder(draft(), "NDG_MAIN", "key", context()),
     ).toMatchObject({ ok: false, error: { code: "menu_changed" } });
 
     mockFetch(404, null);
-    expect(
-      await foodhubInteracSubmitAdapter.createOrder(draft(), "NDG_MAIN", "key", context()),
-    ).toMatchObject({ ok: false, error: { code: "interac_unavailable" } });
+    const notDeployed = await foodhubInteracSubmitAdapter.createOrder(
+      draft(),
+      "NDG_MAIN",
+      "key",
+      context(),
+    );
+    expect(notDeployed).toMatchObject({ ok: false, error: { code: "interac_unavailable" } });
+    expect(notDeployed).not.toHaveProperty("outcomeUnknown");
 
     mockFetch(503, { ok: false, error: "Own orders are turned off." });
     expect(
       await foodhubInteracSubmitAdapter.createOrder(draft(), "NDG_MAIN", "key", context()),
     ).toMatchObject({ ok: false, error: { code: "interac_unavailable" } });
+  });
 
+  it("a lost answer (network, timeout, 5xx) is an UNKNOWN outcome: Food Hub may hold the order already", async () => {
+    configure();
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => Promise.reject(new TypeError("fetch failed"))),
     );
     expect(
       await foodhubInteracSubmitAdapter.createOrder(draft(), "NDG_MAIN", "key", context()),
-    ).toMatchObject({ ok: false, error: { code: "timeout" } });
+    ).toMatchObject({ ok: false, error: { code: "submit_unconfirmed" }, outcomeUnknown: true });
+
+    for (const status of [500, 502, 504]) {
+      mockFetch(status, null);
+      expect(
+        await foodhubInteracSubmitAdapter.createOrder(draft(), "NDG_MAIN", "key", context()),
+        String(status),
+      ).toMatchObject({ ok: false, error: { code: "submit_unconfirmed" }, outcomeUnknown: true });
+    }
+    expect(recentIntegrationEvents().map((e) => e.eventType)).toContain(
+      "interac.order_unconfirmed",
+    );
   });
 
   it("never reports success on a 200 without Interac instructions (old Food Hub), and logs it loudly", async () => {
@@ -490,7 +568,12 @@ describe("Interac order adapter -> Food Hub website-order", () => {
       "key",
       context(),
     );
-    expect(result).toMatchObject({ ok: false, error: { code: "interac_unavailable" } });
+    // An old Food Hub may have taken the order anyway: the order id is kept for the retry.
+    expect(result).toMatchObject({
+      ok: false,
+      error: { code: "interac_unavailable" },
+      outcomeUnknown: true,
+    });
     expect(recentIntegrationEvents().map((e) => e.eventType)).toContain(
       "interac.instructions_missing",
     );

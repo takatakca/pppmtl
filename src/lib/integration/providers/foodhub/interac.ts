@@ -274,7 +274,10 @@ export function parseInteracResponse(body: unknown): InteracOrderResponse | null
  * The site has no status feed for held orders, so after this it must not ask for a transfer any more.
  * An unreadable deadline counts as still open (Food Hub decides).
  */
-export function interacHoldExpired(expiresAt: string | null | undefined, now = Date.now()): boolean {
+export function interacHoldExpired(
+  expiresAt: string | null | undefined,
+  now = Date.now(),
+): boolean {
   if (!expiresAt) return false;
   const deadline = Date.parse(expiresAt);
   return Number.isFinite(deadline) && deadline <= now;

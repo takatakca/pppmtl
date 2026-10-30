@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { CustomerCookies } from "../customer-cookie.server";
 import {
   checkVerification,
+  customerTokenForOrder,
   deleteAccount,
   fetchMe,
   logout,
@@ -290,6 +291,31 @@ describe("me / profile / favourites / logout / delete", () => {
 
   it("rejects a projection without a customer instead of inventing one", () => {
     expect(parseMe({ ok: true, addresses: [] })).toBeNull();
+  });
+
+  it("links an order to the account only when Food Hub confirms the order's phone is the account's", async () => {
+    // Same verified phone (any spelling): the token goes with the order.
+    mockFetch(200, { customer });
+    expect(await customerTokenForOrder("(514) 555-0000", jar(TOKEN))).toBe(TOKEN);
+
+    // A leftover cookie of someone else (shared device): another phone on the order = guest order.
+    mockFetch(200, { customer });
+    expect(await customerTokenForOrder("438 555 1111", jar(TOKEN))).toBeNull();
+
+    // Food Hub cannot confirm the session right now: guest, never "probably them".
+    mockFetch(503, { ok: false, error: "down" });
+    expect(await customerTokenForOrder("5145550000", jar(TOKEN))).toBeNull();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Promise.reject(new TypeError("fetch failed"))),
+    );
+    expect(await customerTokenForOrder("5145550000", jar(TOKEN))).toBeNull();
+
+    // No cookie or no usable phone: no network call at all.
+    const calls = mockFetch(200, { customer });
+    expect(await customerTokenForOrder("5145550000", jar(null))).toBeNull();
+    expect(await customerTokenForOrder(null, jar(TOKEN))).toBeNull();
+    expect(calls).toHaveLength(0);
   });
 
   it("PATCHes only known profile fields and PUTs a bounded favourites list", async () => {
