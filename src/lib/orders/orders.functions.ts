@@ -7,6 +7,7 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
+import { interacHoldExpired } from "@/lib/integration/providers/foodhub/interac";
 import {
   isGuestOrderCancelInput,
   isGuestOrderListInput,
@@ -69,8 +70,15 @@ export interface OrderView {
   paymentUrl: string | null;
   /** Fees included in the total (cents), e.g. the Interac e-Transfer fee. */
   fees: OrderFee[];
-  /** Interac e-Transfer instructions while Food Hub holds the order; null otherwise. */
+  /** Interac e-Transfer instructions while Food Hub holds the order; null otherwise (also once the hold expired). */
   interac: OrderInteracInstructions | null;
+  /**
+   * True once Food Hub's hold deadline passed on an unpaid Interac order: Food Hub has cancelled it (or a person
+   * confirmed the transfer). The site has no status feed for held orders, so it never shows the instructions again.
+   */
+  interacExpired: boolean;
+  /** Food Hub's live tracking page for an Interac order (https), when the brand has one. */
+  trackUrl: string | null;
   items: Array<{
     productId: string;
     name: string;
@@ -87,7 +95,9 @@ export interface PlaceOrderResponse {
   error: OrderError | null;
 }
 
-function toView(order: InternalOrder): OrderView {
+function toView(order: InternalOrder, now = Date.now()): OrderView {
+  const heldInterac = order.paymentStatus === "UNPAID" ? (order.interac ?? null) : null;
+  const interacExpired = heldInterac ? interacHoldExpired(heldInterac.expiresAt, now) : false;
   return {
     id: order.id,
     orderNumber: order.orderNumber,
@@ -105,7 +115,10 @@ function toView(order: InternalOrder): OrderView {
     paymentMethod: order.paymentMethod ?? "card",
     paymentUrl: order.paymentStatus === "UNPAID" ? (order.paymentUrl ?? null) : null,
     fees: order.fees ?? [],
-    interac: order.paymentStatus === "UNPAID" ? (order.interac ?? null) : null,
+    // Never show "send your transfer" for an order Food Hub has already cancelled or released.
+    interac: heldInterac && !interacExpired ? heldInterac : null,
+    interacExpired,
+    trackUrl: order.interac?.trackUrl?.startsWith("https://") ? order.interac.trackUrl : null,
     items: order.items.map((i) => ({
       productId: i.productId,
       name: i.name,
@@ -186,11 +199,21 @@ export const placeOrder = createServerFn({ method: "POST" })
 
     // The cookie is issued before redirecting off-domain to Clover, even if the provider errors.
     grantOrderAccess(created.data.id);
-    // A signed-in customer's Food Hub token (HttpOnly cookie) links an Interac order to their account at Food Hub.
-    // The site never stores it on the order and never accepts it from the request body.
-    const { readCustomerToken } = await import("@/lib/customer/customer-cookie.server");
+    // A signed-in customer's Food Hub token (HttpOnly cookie) links an Interac order to their account at Food Hub,
+    // only when the checkout is a signed-in one AND Food Hub confirms the order's phone is that account's verified
+    // phone (a leftover cookie on a shared device must not attach a guest's order to someone else's account).
+    // The site never stores the token on the order and never accepts it from the request body.
+    let customerToken: string | null = null;
+    if (data.payment === "interac" && data.customer?.isGuest === false) {
+      const { customerTokenForOrder } = await import("@/lib/customer/foodhub-customers.server");
+      const { requestCustomerCookies } = await import("@/lib/customer/customer-cookie.server");
+      customerToken = await customerTokenForOrder(
+        created.data.customer.phone,
+        requestCustomerCookies,
+      ).catch(() => null);
+    }
     const submitted = await submitOrder(created.data.id, {
-      customerToken: data.payment === "interac" ? readCustomerToken() : null,
+      customerToken,
       ...(data.lang === "fr" || data.lang === "en" || data.lang === "es"
         ? { lang: data.lang }
         : {}),

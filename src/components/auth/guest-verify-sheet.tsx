@@ -77,24 +77,27 @@ export function GuestVerifySheet({
   const phoneValid = phoneDigits.length === 10;
   const locked = voided || attempts >= MAX_ATTEMPTS;
 
+  // The cooldown runs on both steps: "Edit number" must not re-open sending before it ends.
+  const cooling = cooldown > 0;
   useEffect(() => {
-    if (step !== "otp" || cooldown <= 0) return undefined;
+    if (!cooling) return undefined;
     const id = window.setInterval(() => setCooldown((c) => Math.max(0, c - 1)), 1000);
     return () => window.clearInterval(id);
-  }, [step, cooldown]);
+  }, [cooling]);
 
   /** Honest wording per outcome; Food Hub's own text is never shown raw. */
   function messageFor(code: AuthResultCode, fallback: string, retryAfterS?: number): string {
     switch (code) {
       case "rate_limited":
+        // Not "for this number": the limit may be the number's, this browser's or the whole site's.
         return retryAfterS
           ? t(
-              `Too many requests for this number. Try again in ${retryAfterS}s.`,
-              `Trop de demandes pour ce numéro. Réessayez dans ${retryAfterS}s.`,
+              `Too many code requests right now. Try again in ${retryAfterS}s.`,
+              `Trop de demandes de code pour le moment. Réessayez dans ${retryAfterS}s.`,
             )
           : t(
-              "Too many requests. Please wait a moment.",
-              "Trop de demandes. Patientez un instant.",
+              "Too many code requests right now. Please try again later.",
+              "Trop de demandes de code pour le moment. Réessayez plus tard.",
             );
       case "wrong_code":
         return t(
@@ -139,6 +142,7 @@ export function GuestVerifySheet({
   }
 
   async function requestCode(resending: boolean) {
+    if (cooldown > 0 || sending) return;
     if (!phoneValid) {
       setPhoneError(
         t("Enter a 10-digit phone number.", "Entrez un numéro de téléphone à 10 chiffres."),
@@ -153,12 +157,10 @@ export function GuestVerifySheet({
     setSending(false);
     if (!result.ok) {
       const message = unavailableFor(messageFor(result.code, result.message, result.retryAfterS));
-      if (resending) {
-        setOtpError(message);
-        if (result.code === "rate_limited" && result.retryAfterS) setCooldown(result.retryAfterS);
-      } else {
-        setPhoneError(message);
-      }
+      // A refusal for too many requests pauses sending on the first send as well as on a resend.
+      if (result.code === "rate_limited") setCooldown(result.retryAfterS ?? 60);
+      if (resending) setOtpError(message);
+      else setPhoneError(message);
       return;
     }
     setStep("otp");
@@ -287,11 +289,13 @@ export function GuestVerifySheet({
             <button
               type="button"
               onClick={sendCode}
-              disabled={sending}
+              disabled={sending || cooling}
               className="press-tap inline-flex items-center justify-center gap-2 bg-primary py-3.5 font-display text-lg uppercase leading-none text-primary-foreground disabled:opacity-60 focus-ppp"
             >
               {sending && <Loader2 className="h-4 w-4 animate-spin" />}
-              {t("Send code", "Envoyer le code")}
+              {cooling
+                ? t(`Send code in ${cooldown}s`, `Envoyer le code dans ${cooldown}s`)
+                : t("Send code", "Envoyer le code")}
             </button>
             {onCancel && (
               <button

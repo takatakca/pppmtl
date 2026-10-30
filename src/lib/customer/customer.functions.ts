@@ -29,6 +29,15 @@ export const startPhoneVerification = createServerFn({ method: "POST" })
     if (!isRecord(data) || typeof data["phone"] !== "string" || data["phone"].length > 40) {
       return { ok: false, code: "invalid_phone" };
     }
+    const { toE164Canada } = await import("./token");
+    if (!toE164Canada(data["phone"])) return { ok: false, code: "invalid_phone" };
+    // Food Hub sees only this server: per client IP, per browser and site-wide windows keep one client from
+    // texting arbitrary numbers or using up every customer's sign-in budget (Food Hub: 60 per minute per site).
+    const { allowVerifyStart } = await import("@/lib/security/rate-limit");
+    const { requestBrowserSession, requestClientIp } =
+      await import("@/lib/security/client-identity.server");
+    const gate = allowVerifyStart({ ip: requestClientIp(), session: requestBrowserSession() });
+    if (!gate.ok) return { ok: false, code: "rate_limited", retryAfterS: gate.retryAfterS };
     const { startVerification } = await import("./foodhub-customers.server");
     return startVerification({
       phone: data["phone"],

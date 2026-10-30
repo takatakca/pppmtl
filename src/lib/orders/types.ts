@@ -88,8 +88,11 @@ export interface OrderInteracInstructions {
 export interface OrderItemModifier {
   groupId: string;
   choiceId: string;
-  /** Provider-side option id. Null until menu mapping supplies one. */
+  /** Provider-side option id (the Clover modifier id). Null until menu mapping supplies one. */
   providerModifierId: string | null;
+  /** The option's provider-side name (the Clover modifier name), what another engine matches it by. */
+  providerName?: string | null;
+  /** Display label for the receipt ("Group: Choice"). */
   label: string;
   /** Cents. Null when no price adjustment is published. */
   priceDelta: number | null;

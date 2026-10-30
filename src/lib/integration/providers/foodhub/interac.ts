@@ -8,7 +8,7 @@
  *     amounts in dollars rounded to the cent, so Food Hub's re-pricing lands on the same figure (tolerance $0.02).
  *   - `buildInteracWebsiteOrder` shapes the website-order payload of the shared contract (section B, Food Hub
  *     lib/foodhub/delivery/website.ts): `payment: "interac"`, `fees`, `total` (what was displayed), lines and paid
- *     options with `ref`, and `customerToken` + `tenant` for a signed-in customer.
+ *     options with `ref` + name (the Clover modifier's), and `customerToken` + `tenant` for a signed-in customer.
  *   - `parseInteracResponse` reads the instructions Food Hub returns; `interacInstructionRows` words them.
  */
 
@@ -78,8 +78,16 @@ export interface InteracOrderLine {
   quantity: number;
   /** Cents, the item alone. */
   unitPrice: number | null;
-  /** `ref`: the Clover modifier id when the site maps one (Food Hub matches a paid option by ref, then by name). */
-  modifiers: Array<{ label: string; priceDelta: number | null; ref?: string | null }>;
+  /**
+   * `ref`: the Clover modifier id; `name`: the Clover modifier name. Food Hub matches a paid option by ref, then by
+   * its exact menu name, so the display `label` ("Size: 14 Pouce") is only the last resort.
+   */
+  modifiers: Array<{
+    label: string;
+    priceDelta: number | null;
+    ref?: string | null;
+    name?: string | null;
+  }>;
   notes: string;
 }
 
@@ -156,7 +164,7 @@ export function buildInteracWebsiteOrder(input: BuildInteracOrderInput): Website
     items: input.lines.map((line) => {
       const options = line.modifiers.map((m) => ({
         ...(m.ref?.trim() ? { ref: cut(m.ref, 80) } : {}),
-        name: cut(m.label, 80),
+        name: cut(m.name?.trim() ? m.name : m.label, 80),
         price: centsToDollars(m.priceDelta ?? 0),
       }));
       return {
@@ -259,6 +267,17 @@ export function parseInteracResponse(body: unknown): InteracOrderResponse | null
     interac,
     trackUrl: httpsUrl(body["trackUrl"]),
   };
+}
+
+/**
+ * Food Hub's hold deadline is past: it has cancelled the held order (or a person confirmed the transfer before).
+ * The site has no status feed for held orders, so after this it must not ask for a transfer any more.
+ * An unreadable deadline counts as still open (Food Hub decides).
+ */
+export function interacHoldExpired(expiresAt: string | null | undefined, now = Date.now()): boolean {
+  if (!expiresAt) return false;
+  const deadline = Date.parse(expiresAt);
+  return Number.isFinite(deadline) && deadline <= now;
 }
 
 /** An absolute https URL, or null: a link is only kept when it is safe to put in an <a href>. */

@@ -321,6 +321,23 @@ export async function fetchMe(cookies: CustomerCookies): Promise<CustomerResult<
   return me ? { ok: true, data: me } : failure("error");
 }
 
+/**
+ * The customer token to link an order to, or null (the order goes as a guest). A leftover cookie on a shared device
+ * must never attach someone else's account: the token is used only when Food Hub confirms it right now (/me) AND
+ * the phone on the order is that account's verified phone. Any doubt (no cookie, /me down, another phone) = guest.
+ */
+export async function customerTokenForOrder(
+  orderPhone: string | null,
+  cookies: CustomerCookies,
+): Promise<string | null> {
+  const wanted = orderPhone ? toE164Canada(orderPhone) : null;
+  const token = cookies.read();
+  if (!wanted || !token) return null;
+  const me = await fetchMe(cookies);
+  if (!me.ok) return null;
+  return toE164Canada(me.data.customer.phone) === wanted ? token : null;
+}
+
 export interface ProfilePatch {
   name?: string;
   email?: string;

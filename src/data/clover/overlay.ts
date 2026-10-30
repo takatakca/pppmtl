@@ -7,7 +7,11 @@ import snapshotJson from "./inventory.snapshot.json";
 import { cloverPhotoIds } from "./photos.generated";
 import { cloverItemMap } from "@/config/clover-item-map";
 import type { GeneratedItem, ModifierGroup } from "@/data/catalog-types";
-import type { CloverInventory, CloverItem } from "@/lib/integration/providers/clover/catalog";
+import type {
+  CloverInventory,
+  CloverItem,
+  CloverModifier,
+} from "@/lib/integration/providers/clover/catalog";
 import { siteGroupsFor } from "@/lib/integration/providers/clover/site-groups";
 
 export const cloverSnapshot = snapshotJson as CloverInventory;
@@ -34,6 +38,16 @@ export function cloverPhotoUrl(cloverItemId: string, size: 1200 | 400 = 1200): s
 /** The item's Clover option groups, as the site shows them (see site-groups.ts). */
 export function siteModifierGroups(cloverItemId: string): ModifierGroup[] {
   return siteGroupsFor(cloverSnapshot, cloverItemId);
+}
+
+const modifiersByGroup = new Map(cloverSnapshot.modifierGroups.map((g) => [g.id, g.modifiers]));
+
+/**
+ * The Clover modifier behind a site choice: the site's group id IS the Clover group id and its choice id is the
+ * modifier's slug (site-groups.ts). Gives the Clover id and name another engine (Food Hub) re-prices the option by.
+ */
+export function cloverModifierFor(groupId: string, choiceId: string): CloverModifier | undefined {
+  return modifiersByGroup.get(groupId)?.find((m) => m.slug === choiceId);
 }
 
 /** The old copy promised the kitchen would price the extras; Clover prices them now. */

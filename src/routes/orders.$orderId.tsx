@@ -198,14 +198,35 @@ function OrderReceiptPage() {
                   )}
             </p>
           )}
-          {order.paymentStatus === "UNPAID" && order.paymentMethod === "interac" && (
-            <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-              <Banknote className="h-4 w-4 text-primary" />
+          {order.paymentStatus === "UNPAID" &&
+            order.paymentMethod === "interac" &&
+            !order.interacExpired && (
+              <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+                <Banknote className="h-4 w-4 text-primary" />
+                {t(
+                  "Waiting for your transfer — the restaurant confirms it by text message.",
+                  "En attente du virement — le restaurant le confirme par texto.",
+                  "Esperando tu transferencia — el restaurante la confirma por SMS.",
+                )}
+              </p>
+            )}
+          {order.interacExpired && (
+            <p role="status" className="mt-2 border border-border p-3 text-sm text-muted-foreground">
               {t(
-                "Waiting for your transfer — the restaurant confirms it by text message.",
-                "En attente du virement — le restaurant le confirme par texto.",
-                "Esperando tu transferencia — el restaurante la confirma por SMS.",
+                "The time to send the transfer is over. Do not send a transfer for this order now: the restaurant's text message tells you whether it was confirmed or cancelled. Questions? Call us.",
+                "Le délai pour envoyer le virement est passé. N'envoyez plus de virement pour cette commande : le texto du restaurant vous dit si elle est confirmée ou annulée. Une question ? Appelez-nous.",
+                "El plazo para enviar la transferencia terminó. No envíes una transferencia para este pedido: el SMS del restaurante te dice si se confirmó o se canceló. ¿Preguntas? Llámanos.",
               )}
+              {order.trackUrl ? (
+                <a
+                  href={order.trackUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-2 font-bold underline focus-ppp"
+                >
+                  {t("Follow this order", "Suivre cette commande", "Seguir este pedido")}
+                </a>
+              ) : null}
             </p>
           )}
           {order.paymentStatus === "UNPAID" && order.paymentMethod !== "interac" && (

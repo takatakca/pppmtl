@@ -15,6 +15,7 @@
 import { randomUUID } from "node:crypto";
 import { restaurantLocations } from "@/config/locations";
 import { mappingForLocation } from "@/config/integration-locations";
+import { cloverModifierFor } from "@/data/clover/overlay";
 import { menuRepository } from "@/lib/menu-repository";
 import { checkSelections, chosenOptions } from "@/lib/modifiers";
 import type { IntegrationProviderId } from "@/lib/integration/core/contracts";
@@ -24,7 +25,14 @@ import { interacAvailability } from "@/lib/integration/providers/foodhub/config.
 import { durableOrderStoreConfigured } from "./database.server";
 import type { ProviderOrderAdapter } from "./provider-order-adapter";
 import { orderError, orderFailure, type OrderErrorCode, type OrderResult } from "./errors";
-import { claimOrderKey, deriveIdempotencyKey, releaseOrderKey } from "./idempotency";
+import {
+  claimOrderKey,
+  clearUnresolvedSubmit,
+  findUnresolvedSubmit,
+  markSubmitUnresolved,
+  orderKeyFor,
+  releaseOrderKey,
+} from "./idempotency";
 import { orderToUniversalDraft } from "./order-mapping";
 import { validateOrderDraft, type ValidationReport } from "./validation";
 import {
@@ -163,13 +171,18 @@ function buildItems(request: CheckoutRequest): {
       return;
     }
     const modifiers = chosenOptions(groups, selections).flatMap(({ group, choices }) =>
-      choices.map((choice) => ({
-        groupId: group.id,
-        choiceId: choice.id,
-        providerModifierId: null,
-        label: `${group.labelEn}: ${choice.labelEn}`,
-        priceDelta: toCents(choice.priceDelta),
-      })),
+      choices.map((choice) => {
+        // The Clover modifier behind the choice: its id and name are what Food Hub re-prices a paid option by.
+        const clover = item.cloverItemId ? cloverModifierFor(group.id, choice.id) : undefined;
+        return {
+          groupId: group.id,
+          choiceId: choice.id,
+          providerModifierId: clover?.id ?? null,
+          providerName: clover?.name ?? null,
+          label: `${group.labelEn}: ${choice.labelEn}`,
+          priceDelta: toCents(choice.priceDelta),
+        };
+      }),
     );
 
     items.push({
@@ -298,18 +311,24 @@ export function createOrder(
 
   const { items } = buildItems(request);
   const draft = toDraft(request, items);
+  const payment = paymentMethodOf(request);
 
   // The scope is generated server-side from an HttpOnly browser cookie for live checkout.
   // Without it, two guests placing identical orders could be assigned the same receipt.
-  const idempotencyKey = checkoutScope
-    ? `${deriveIdempotencyKey(draft)}:${checkoutScope}`
-    : deriveIdempotencyKey(draft);
+  // The payment method is part of the key: a cancelled card checkout never answers an Interac request.
+  const idempotencyKey = orderKeyFor(draft, payment, checkoutScope);
+
+  // A submit whose outcome is unknown (Food Hub may hold it already) is resent with the SAME id, even after
+  // the 5-minute bucket rolled over: a new id would make Food Hub create a second held order.
+  const unresolvedId = findUnresolvedSubmit(idempotencyKey);
+  const unresolved = unresolvedId ? readOrder(unresolvedId) : null;
+  if (unresolved && unresolved.status === "CREATED") return { ok: true, data: unresolved };
+
   // Opaque unpredictable ids: a timestamp must never double as a receipt authorization secret.
   const existingId = claimOrderKey(idempotencyKey, `ord_${randomUUID().replace(/-/g, "")}`);
   const existing = existingId.fresh ? null : readOrder(existingId.orderId);
   if (existing) return { ok: true, data: existing };
 
-  const payment = paymentMethodOf(request);
   const route = routeFor(request.locationId, payment);
   const now = new Date().toISOString();
 
@@ -387,8 +406,10 @@ async function fail(
   code: OrderErrorCode,
 ): Promise<OrderResult<InternalOrder>> {
   const failed = updateOrder(order.id, { status: "FAILED", failureCode: code });
-  // Every failure here happens before a payment page reaches the customer, so "Pay" again is a new order.
+  // Every failure here is a definite refusal before a payment page or transfer request reached the customer, so
+  // "Pay" again is a new order. (An unknown outcome never comes here: see holdUnresolved.)
   releaseOrderKey(order.idempotencyKey);
+  clearUnresolvedSubmit(order.idempotencyKey);
   if (failed && isDurable(failed)) {
     // Best effort: a stored order that never got a payment page cannot be paid either way.
     await (await durableOrders()).recordUnpaidOutcome(failed).catch(() => undefined);
@@ -403,10 +424,42 @@ async function fail(
   return orderFailure(code);
 }
 
+/**
+ * Food Hub may have created (and texted) the held Interac order although we got no usable answer. The order
+ * stays CREATED with its key and id, so the customer's retry resends the SAME id and Food Hub answers
+ * `duplicate: true` with the same instructions, never a second order.
+ */
+function holdUnresolved(order: InternalOrder, code: OrderErrorCode): OrderResult<InternalOrder> {
+  updateOrder(order.id, { failureCode: code, providerStatus: "submit_unconfirmed" });
+  markSubmitUnresolved(order.idempotencyKey, order.id);
+  logIntegrationEvent({
+    provider: order.provider,
+    eventType: "order.submit_unconfirmed",
+    status: "error",
+    payloadReference: order.id,
+    detail: `${code}: retry resends the same order id`,
+  });
+  return orderFailure(code);
+}
+
+/** One submit per order at a time in this process: a double tap or a second tab waits for the first answer. */
+const inFlightSubmits = new Map<string, Promise<OrderResult<InternalOrder>>>();
+
 /** 3 — SUBMIT. Idempotent by construction; refuses rather than pretends. */
 export async function submitOrder(
   orderId: string,
   options: SubmitOptions = {},
+): Promise<OrderResult<InternalOrder>> {
+  const running = inFlightSubmits.get(orderId);
+  if (running) return running;
+  const attempt = submitOnce(orderId, options).finally(() => inFlightSubmits.delete(orderId));
+  inFlightSubmits.set(orderId, attempt);
+  return attempt;
+}
+
+async function submitOnce(
+  orderId: string,
+  options: SubmitOptions,
 ): Promise<OrderResult<InternalOrder>> {
   let order = readOrder(orderId);
   if (!order) return orderFailure("order_not_found");
@@ -450,13 +503,20 @@ export async function submitOrder(
       displayedTotalCents: options.displayedTotalCents ?? null,
     },
   );
-  if (!result.ok) return fail(order, result.error.code);
+  if (!result.ok) {
+    if (result.outcomeUnknown && order.provider === "foodhub") {
+      return holdUnresolved(order, result.error.code);
+    }
+    return fail(order, result.error.code);
+  }
+  clearUnresolvedSubmit(order.idempotencyKey);
 
   const updated = updateOrder(order.id, {
     status: result.data.status,
     providerOrderId: result.data.providerOrderId,
     providerStatus: result.data.providerStatus,
     orderNumber: result.data.orderNumber,
+    failureCode: null,
     subtotal: result.data.subtotal ?? order.subtotal,
     tax: result.data.tax,
     total: result.data.total,
