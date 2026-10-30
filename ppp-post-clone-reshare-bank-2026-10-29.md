@@ -1,5 +1,9 @@
 # PPP POST HISTORY CLONE & RESHARE BANK — 2026-10-29
 
+## UPDATE 2026-10-29 21:28 EDT — DAY 1 NDG POSTED LIVE (filed once Drive + GitHub in this pass, signed SOCIO, Agent Lévesque)
+- Day 1 A6 Chef's Choice Bowl POSTED LIVE on PPP NDG Facebook only, 2026-10-29 ~21:28 EDT, Public, never backdated, as PPP Montreal -Notre Dame De Grâce-, post URL https://www.facebook.com/permalink.php?story_fbid=pfbid0f8bu9sc8VNQhw5XWL3TfGpKpyxDVjgGCwEDpec1xMWk1wsq143v96szs2edbtzPAl&id=61595655663633 — text "Bol Choix du Chef : frites, riz, salade, pain pita, viande au choix du chef. En succursale seulement. PPP Pizzeria, NDG, Montréal." + location block 6280 av. Somerled, Montréal QC H3X 2B6, daily 4 PM-3 AM, phone 450-999-4999, sister tag Saint-Léonard, @ppp_pizzeria, #PPPPizzeria #MontrealEats #FastFoodMontreal. Text-only, in-store only, no order link, Facebook "Call Now" prompt declined, no approval card / 2FA / owner step encountered. Source: live Google Business Profile PPP update from 7 days ago, verbatim copied; the separate 3-days-ago "-50% en ligne" promo for the same bowl was NOT used.
+- NOT done: Saint-Léonard version NOT posted (queued, earliest ~00:28 EDT 2026-10-30, at least 3h later), Day 2 NOT posted, pinned 19 Apr 2024 post untouched, no merge, no Shop/catalogue change. Day 1 is NOT fully done (Saint-Léonard half still queued). No other item's status changed in this pass. This update does NOT change any other bank content.
+
 ## UPDATE 2026-10-29 20:04 EDT — FILING PASS CORRECTION, supersedes the 13:55 EDT numbers below (filed once Drive + GitHub in this pass, signed SOCIO, Agent Lévesque)
 - Purge total now **302** (not 258): 258 + 44 in the Dec/Jan lot, 2026-10-29 13:51–14:15 EDT.
 - Dec/Jan queue now **0** (not 11). Dec/Jan lot **completed 14:15 EDT** (12 reviewed, 11 edited, 1 already clean, Facebook writer browser-task:e9ab7496, after Pierre's takeover/2FA).
