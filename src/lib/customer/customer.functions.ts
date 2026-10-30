@@ -54,7 +54,7 @@ export const checkPhoneVerification = createServerFn({ method: "POST" })
   });
 
 export interface CustomerMeResponse {
-  /** False while FOODHUB_URL / FOODHUB_WEBSITE_ORDER_SECRET are not set: sign-in entry points stay honest. */
+  /** False while the Food Hub URL and server secret are not set on this server: sign-in entry points stay honest. */
   accountsEnabled: boolean;
   result: CustomerCall<CustomerMe>;
 }

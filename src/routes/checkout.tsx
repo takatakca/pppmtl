@@ -77,7 +77,9 @@ function CheckoutPage() {
   const { accountsAvailable, customer, signOut } = useCustomerSession();
   const totals = cartTotals(cart);
   const money = (cents: number) =>
-    lang === "fr" ? `${(cents / 100).toFixed(2).replace(".", ",")} $` : `$${(cents / 100).toFixed(2)}`;
+    lang === "fr"
+      ? `${(cents / 100).toFixed(2).replace(".", ",")} $`
+      : `$${(cents / 100).toFixed(2)}`;
 
   /** Card payment happens on Clover's own secure page (Clover Hosted Checkout); PPP never sees the card. */
   const paymentCopy = t(
@@ -119,7 +121,6 @@ function CheckoutPage() {
   const statusMessage = missingMessage ?? orderMessage;
 
   const submitOrderFn = useServerFn(placeOrder);
-  const interacOptionsFn = useServerFn(getInteracOptions);
 
   // A signed-in customer's verified number is the order contact; the name is a suggestion they can change.
   useEffect(() => {
@@ -155,10 +156,11 @@ function CheckoutPage() {
 
   // Interac e-Transfer: the server says whether it is offered here and what the fee is, before anything is committed.
   const orderType = mode === "delivery" ? ("DELIVERY" as const) : ("PICKUP" as const);
+  const locationId = location?.id ?? null;
   useEffect(() => {
-    if (!location?.id) return;
+    if (!locationId) return;
     let alive = true;
-    interacOptionsFn({ data: { locationId: location.id, orderType } })
+    getInteracOptions({ data: { locationId, orderType } })
       .then((options) => {
         if (alive) setInteracOptions(options);
       })
@@ -168,7 +170,7 @@ function CheckoutPage() {
     return () => {
       alive = false;
     };
-  }, [location?.id, orderType, interacOptionsFn]);
+  }, [locationId, orderType]);
 
   const interacAvailable = Boolean(interacOptions?.available) && totals.unpricedLines === 0;
   const cardAvailable = mode === "pickup";
@@ -213,7 +215,11 @@ function CheckoutPage() {
       default:
         return interacOptions
           ? null
-          : t("Checking availability…", "Vérification de la disponibilité…", "Verificando disponibilidad…");
+          : t(
+              "Checking availability…",
+              "Vérification de la disponibilité…",
+              "Verificando disponibilidad…",
+            );
     }
   })();
 
@@ -327,7 +333,11 @@ function CheckoutPage() {
   const confirmLabel = submitting
     ? t("Sending…", "Envoi…", "Enviando…")
     : payment === "interac"
-      ? t("Confirm · Interac e-Transfer", "Confirmer · Virement Interac", "Confirmar · Interac e-Transfer")
+      ? t(
+          "Confirm · Interac e-Transfer",
+          "Confirmer · Virement Interac",
+          "Confirmar · Interac e-Transfer",
+        )
       : t("Pay with Clover", "Payer avec Clover", "Pagar con Clover");
 
   return (
@@ -462,7 +472,11 @@ function CheckoutPage() {
                       >
                         <span className="flex items-center gap-2 font-display text-lg uppercase leading-none">
                           <UserRound className="h-4 w-4 text-primary" />
-                          {t("Continue as guest", "Continuer sans compte", "Continuar como invitado")}
+                          {t(
+                            "Continue as guest",
+                            "Continuer sans compte",
+                            "Continuar como invitado",
+                          )}
                         </span>
                         <span className="mt-1.5 block text-xs text-muted-foreground">
                           {t(
@@ -481,7 +495,11 @@ function CheckoutPage() {
                       >
                         <span className="flex items-center gap-2 font-display text-lg uppercase leading-none">
                           <ShieldCheck className="h-4 w-4 text-primary" />
-                          {t("Sign in with my number", "Me connecter avec mon numéro", "Entrar con mi número")}
+                          {t(
+                            "Sign in with my number",
+                            "Me connecter avec mon numéro",
+                            "Entrar con mi número",
+                          )}
                         </span>
                         <span className="mt-1.5 block text-xs text-muted-foreground">
                           {t(
@@ -645,7 +663,11 @@ function CheckoutPage() {
                   >
                     <span className="flex items-center gap-2 font-display text-lg uppercase leading-none">
                       <Banknote className="h-4 w-4 text-primary" />
-                      {t("Interac e-Transfer (+ fee)", "Interac e-Transfer (+ frais)", "Interac e-Transfer (+ cargo)")}
+                      {t(
+                        "Interac e-Transfer (+ fee)",
+                        "Interac e-Transfer (+ frais)",
+                        "Interac e-Transfer (+ cargo)",
+                      )}
                     </span>
                     <span className="mt-1.5 block text-xs text-muted-foreground">
                       {interacOptions && interacAvailable
@@ -714,7 +736,11 @@ function CheckoutPage() {
                   <>
                     <div className="flex justify-between">
                       <dt className="text-muted-foreground">
-                        {t("Interac e-Transfer fee", "Frais Interac e-Transfer", "Cargo Interac e-Transfer")}
+                        {t(
+                          "Interac e-Transfer fee",
+                          "Frais Interac e-Transfer",
+                          "Cargo Interac e-Transfer",
+                        )}
                       </dt>
                       <dd>{money(quote.interacFeeCents)}</dd>
                     </div>
@@ -739,7 +765,9 @@ function CheckoutPage() {
                           {t("all included", "tout inclus", "todo incluido")}
                         </span>
                       </dt>
-                      <dd className="font-display text-2xl leading-none">{money(quote.totalCents)}</dd>
+                      <dd className="font-display text-2xl leading-none">
+                        {money(quote.totalCents)}
+                      </dd>
                     </div>
                   </>
                 ) : (

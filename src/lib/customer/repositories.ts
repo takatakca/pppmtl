@@ -122,10 +122,7 @@ export function toProfile(me: CustomerMe): CustomerProfile {
 
 export const authRepository: PhoneAuthRepository = {
   startVerification: async (phone, lang) =>
-    toAuthResult(
-      await startPhoneVerification({ data: { phone, lang } }),
-      (data) => data,
-    ),
+    toAuthResult(await startPhoneVerification({ data: { phone, lang } }), (data) => data),
   checkVerification: async (phone, code) =>
     toAuthResult(await checkPhoneVerification({ data: { phone, code } }), toRestaurantCustomer),
   signOut: async () => toAuthResult(await signOutCustomer(), () => null),

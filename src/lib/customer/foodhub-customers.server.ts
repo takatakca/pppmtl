@@ -13,8 +13,14 @@
  * A verified phone that Food Hub does not know is created on the spot: that IS the account. Codes are never
  * logged, returned or stored here.
  */
-import { foodhubRequest, type FoodhubFailure } from "@/lib/integration/providers/foodhub/client.server";
-import { foodhubConfigured, foodhubTenant } from "@/lib/integration/providers/foodhub/config.server";
+import {
+  foodhubRequest,
+  type FoodhubFailure,
+} from "@/lib/integration/providers/foodhub/client.server";
+import {
+  foodhubConfigured,
+  foodhubTenant,
+} from "@/lib/integration/providers/foodhub/config.server";
 import type { CustomerCookies } from "./customer-cookie.server";
 import { isCustomerToken, isVerificationCode, toE164Canada } from "./token";
 
@@ -64,8 +70,7 @@ export interface FoodhubAddress {
 }
 
 export type LoyaltyState =
-  | { connected: false; reason: string }
-  | { connected: true; points: number; tier: string | null };
+  { connected: false; reason: string } | { connected: true; points: number; tier: string | null };
 
 export type GiftCardState =
   | { connected: false; reason: string }
@@ -195,16 +200,18 @@ export function parseMe(body: unknown): CustomerMe | null {
   if (!isRecord(body)) return null;
   const customer = parseCustomer(body["customer"]);
   if (!customer) return null;
+  const addresses: unknown = body["addresses"];
+  const favourites: unknown = body["favourites"];
   return {
     customer,
-    addresses: Array.isArray(body["addresses"])
-      ? body["addresses"].flatMap((a) => {
+    addresses: Array.isArray(addresses)
+      ? addresses.flatMap((a: unknown) => {
           const parsed = parseAddress(a);
           return parsed ? [parsed] : [];
         })
       : [],
-    favourites: Array.isArray(body["favourites"])
-      ? body["favourites"].filter((f): f is string => typeof f === "string").slice(0, 50)
+    favourites: Array.isArray(favourites)
+      ? favourites.filter((f: unknown): f is string => typeof f === "string").slice(0, 50)
       : [],
     loyalty: parseLoyalty(body["loyalty"]),
     giftCards: parseGiftCards(body["giftCards"]),
@@ -373,8 +380,9 @@ export async function saveAddresses(
     if (response.kind === "unauthorized" || response.kind === "forbidden") cookies.clear();
     return fromTransport(response);
   }
-  const saved = Array.isArray(response.body?.addresses)
-    ? response.body.addresses.flatMap((a) => {
+  const returned: unknown = response.body?.addresses;
+  const saved = Array.isArray(returned)
+    ? returned.flatMap((a: unknown) => {
         const parsed = parseAddress(a);
         return parsed ? [parsed] : [];
       })
@@ -400,8 +408,9 @@ export async function saveFavourites(
     if (response.kind === "unauthorized" || response.kind === "forbidden") cookies.clear();
     return fromTransport(response);
   }
-  const saved = Array.isArray(response.body?.favourites)
-    ? response.body.favourites.filter((f): f is string => typeof f === "string")
+  const returned: unknown = response.body?.favourites;
+  const saved = Array.isArray(returned)
+    ? returned.filter((f: unknown): f is string => typeof f === "string")
     : clean;
   return { ok: true, data: saved };
 }

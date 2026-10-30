@@ -54,8 +54,8 @@ export const foodhubInteracSubmitAdapter: ProviderOrderAdapter = {
   },
 
   async createOrder(draft, providerLocationId, _idempotencyKey, context) {
-    const orderId = context?.orderId;
-    if (!orderId) return failure("provider_unavailable");
+    if (!context?.orderId) return failure("provider_unavailable");
+    const orderId = context.orderId;
     const orderType = draft.orderType === "DELIVERY" ? "DELIVERY" : "PICKUP";
     const availability = interacAvailability(draft.locationId, orderType);
     if (!availability.available || availability.locationCode !== providerLocationId) {

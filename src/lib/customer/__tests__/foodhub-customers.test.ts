@@ -15,7 +15,9 @@ import { customerTokenExpired, isCustomerToken, toE164Canada, formatPhoneDisplay
 const SECRET = "test-secret-0123456789abcdef";
 const TOKEN = `cust.c1.pppmtl.1900000000.1.${"a".repeat(43)}`;
 
-function jar(initial: string | null = null): CustomerCookies & { token: string | null; writes: string[] } {
+function jar(
+  initial: string | null = null,
+): CustomerCookies & { token: string | null; writes: string[] } {
   const state = {
     token: initial,
     writes: [] as string[],
@@ -93,7 +95,9 @@ describe("verify/start", () => {
     const result = await startVerification({ phone: "514 555 0123", lang: "fr" });
     expect(result).toEqual({ ok: true, data: { expiresInS: 600 } });
     expect(calls[0]!.url).toBe("https://foodhub.test/api/foodhub/customers/verify/start");
-    expect((calls[0]!.init.headers as Record<string, string>)["authorization"]).toBe(`Bearer ${SECRET}`);
+    expect((calls[0]!.init.headers as Record<string, string>)["authorization"]).toBe(
+      `Bearer ${SECRET}`,
+    );
     expect(JSON.parse(String(calls[0]!.init.body))).toEqual({
       tenant: "pppmtl",
       phone: "+15145550123",
@@ -132,7 +136,10 @@ describe("verify/start", () => {
       ok: false,
       code: "not_available",
     });
-    vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new TypeError("fetch failed"))));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Promise.reject(new TypeError("fetch failed"))),
+    );
     expect(await startVerification({ phone: "5145550123", lang: "en" })).toEqual({
       ok: false,
       code: "unreachable",
@@ -153,9 +160,18 @@ describe("verify/start", () => {
 describe("verify/check", () => {
   it("stores the Food Hub token as the session cookie and returns the customer", async () => {
     const cookies = jar();
-    const calls = mockFetch(200, { ok: true, token: TOKEN, expiresAt: "2030-01-01", customer, created: true });
+    const calls = mockFetch(200, {
+      ok: true,
+      token: TOKEN,
+      expiresAt: "2030-01-01",
+      customer,
+      created: true,
+    });
     const result = await checkVerification({ phone: "5145550000", code: "123456" }, cookies);
-    expect(result).toMatchObject({ ok: true, data: { id: "c1", phone: "+15145550000", name: "Mathieu" } });
+    expect(result).toMatchObject({
+      ok: true,
+      data: { id: "c1", phone: "+15145550000", name: "Mathieu" },
+    });
     expect(cookies.writes).toEqual([TOKEN]);
     expect(JSON.parse(String(calls[0]!.init.body))).toEqual({
       tenant: "pppmtl",
@@ -211,11 +227,29 @@ describe("me / profile / favourites / logout / delete", () => {
   const me = {
     ok: true,
     customer,
-    addresses: [{ label: "Home", street: "1 Rue Test", city: "Montréal", province: "QC", postalCode: "H1H 1H1" }],
+    addresses: [
+      {
+        label: "Home",
+        street: "1 Rue Test",
+        city: "Montréal",
+        province: "QC",
+        postalCode: "H1H 1H1",
+      },
+    ],
     favourites: ["pizza-pepperoni", 42],
     loyalty: { connected: false, reason: "LOY4LTY not connected yet" },
     giftCards: { connected: false, reason: "REW4RDS not connected yet" },
-    orders: [{ id: "dir_1", number: "PPP-1", at: "2026-10-29T12:00:00Z", total: 36.78, status: "awaiting_payment", brand: "PPP Pizzeria", fulfillment: "pickup" }],
+    orders: [
+      {
+        id: "dir_1",
+        number: "PPP-1",
+        at: "2026-10-29T12:00:00Z",
+        total: 36.78,
+        status: "awaiting_payment",
+        brand: "PPP Pizzeria",
+        fulfillment: "pickup",
+      },
+    ],
   };
 
   it("is signed out without a cookie and makes no call", async () => {
@@ -232,7 +266,10 @@ describe("me / profile / favourites / logout / delete", () => {
     if (!result.ok) return;
     expect((calls[0]!.init.headers as Record<string, string>)["x-customer-token"]).toBe(TOKEN);
     expect(result.data.loyalty).toEqual({ connected: false, reason: "LOY4LTY not connected yet" });
-    expect(result.data.giftCards).toEqual({ connected: false, reason: "REW4RDS not connected yet" });
+    expect(result.data.giftCards).toEqual({
+      connected: false,
+      reason: "REW4RDS not connected yet",
+    });
     expect(result.data.favourites).toEqual(["pizza-pepperoni"]);
     expect(result.data.addresses[0]).toMatchObject({ street: "1 Rue Test", postalCode: "H1H 1H1" });
     expect(result.data.orders[0]).toMatchObject({ number: "PPP-1", total: 36.78 });
@@ -261,7 +298,10 @@ describe("me / profile / favourites / logout / delete", () => {
     const result = await updateProfile({ marketingConsent: true, name: "  Mathieu  " }, cookies);
     expect(result).toMatchObject({ ok: true, data: { marketingConsent: true } });
     expect(calls[0]!.init.method).toBe("PATCH");
-    expect(JSON.parse(String(calls[0]!.init.body))).toEqual({ name: "Mathieu", marketingConsent: true });
+    expect(JSON.parse(String(calls[0]!.init.body))).toEqual({
+      name: "Mathieu",
+      marketingConsent: true,
+    });
 
     const favCalls = mockFetch(200, { ok: true, favourites: ["a", "b"] });
     const saved = await saveFavourites(["a", "b", "a"], cookies);
@@ -272,7 +312,10 @@ describe("me / profile / favourites / logout / delete", () => {
 
   it("logout clears the cookie whatever Food Hub answers; delete clears it only when Food Hub confirmed", async () => {
     const cookies = jar(TOKEN);
-    vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new TypeError("down"))));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Promise.reject(new TypeError("down"))),
+    );
     expect(await logout(cookies)).toEqual({ ok: true, data: null });
     expect(cookies.token).toBeNull();
 

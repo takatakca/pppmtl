@@ -73,7 +73,10 @@ function configure() {
   vi.stubEnv("FOODHUB_URL", "https://foodhub.test");
   vi.stubEnv("FOODHUB_WEBSITE_ORDER_SECRET", SECRET);
   vi.stubEnv("FOODHUB_INTERAC_ENABLED", "true");
-  vi.stubEnv("FOODHUB_LOCATION_CODES", JSON.stringify({ [slugOf(product.locationIds[0]!)]: "TEST_STORE" }));
+  vi.stubEnv(
+    "FOODHUB_LOCATION_CODES",
+    JSON.stringify({ [slugOf(product.locationIds[0]!)]: "TEST_STORE" }),
+  );
   vi.stubEnv("DATABASE_URL", "");
 }
 

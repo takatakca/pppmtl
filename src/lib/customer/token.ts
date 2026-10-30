@@ -13,7 +13,9 @@ export const CUSTOMER_TOKEN_MAX_LENGTH = 512;
 
 export function isCustomerToken(value: unknown): value is string {
   return (
-    typeof value === "string" && value.length <= CUSTOMER_TOKEN_MAX_LENGTH && TOKEN_SHAPE.test(value)
+    typeof value === "string" &&
+    value.length <= CUSTOMER_TOKEN_MAX_LENGTH &&
+    TOKEN_SHAPE.test(value)
   );
 }
 

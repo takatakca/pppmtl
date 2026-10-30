@@ -1,6 +1,18 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
-## 2026-10-29 (latest) — Clover payment page opens on pppmtl.com (Claude)
+## 2026-10-30 (latest) — Phone accounts + Interac e-Transfer via Food Hub (Claude, branch `feature/phone-verify-accounts`)
+
+**State:** branch = PR #23 (UrbanPiper retired) merged up to main + this work; PR against `main` (see WORKLOG for the number). Nothing deployed.
+
+**What is wired:** phone verification = sign-in = account through Food Hub's customer API (foodhubca main, `docs/CUSTOMER_IDENTITY.md`): HttpOnly cookie `ppp_customer` holds Food Hub's token; `/account` shows profile, addresses, favourites, Food Hub website orders, and the truthful `connected:false` loyalty / gift-card state; offers consent = Food Hub `marketingConsent`; "Delete my account" (Law 25). Checkout offers "Interac e-Transfer (+ frais)": fee, taxes and the all-inclusive total appear in the summary before confirm; the order is POSTed to Food Hub's website-order ingress with `payment:"interac"`, held until the restaurant confirms the transfer; instructions on the confirmation screen and the receipt. Card = Clover Hosted Checkout, unchanged.
+
+**Owner switches (Coolify, pppmtl service):** `FOODHUB_URL`, `FOODHUB_WEBSITE_ORDER_SECRET` (phone sign-in works as soon as they are set); `FOODHUB_INTERAC_ENABLED=true` only once Food Hub's Interac branch is deployed (until then no Interac order leaves the site); `FOODHUB_INTERAC_FEE_TAXABLE=false` if Food Hub does not tax the fee; `FOODHUB_DELIVERY_FEE` to open Interac delivery.
+
+**Read first:** `docs/integrations/foodhub-customers-and-interac.md`, `src/lib/integration/providers/foodhub/interac.ts`, `src/lib/customer/foodhub-customers.server.ts`. **Next step:** owner merges; after deploy, one test phone sign-in on pppmtl.com; after Food Hub's Interac branch, one test pickup order by Interac + "Virement reçu" in Food Hub.
+
+---
+
+## 2026-10-29 — Clover payment page opens on pppmtl.com (Claude)
 
 "We could not send your order to the kitchen" = Clover refused every Hosted Checkout session with HTTP 400 "Please provide either itemRefUuid or name, price." Lines now send name + price (+ note, taxes), no `itemRefUuid`; `User-Agent` sent on all Clover calls; refusals are logged as `checkout.session_refused` with Clover's masked reason (`cloverRefusalDetail`). Verified with Playwright on the live site: Clover's page opens with the right item, $14.99 + $2.25 tax = CA$17.24. NOT verified: a real payment, webhook, title + print, refund. Clover's page is branded "On2GO.CA" (merchant setting in Clover).
 
@@ -44,12 +56,11 @@ Reconciled Clover-specific safety guards from draft PR #22 on existing draft PR 
 
 ---
 
-
 ## 2026-10-28 ~14 h EDT — Guest-order runtime security, CI GREEN and Drive sync
 
 Verified resumption: main at 82a1feb7c4cfe2794d3a9c04a5864f83939e4551, full CI 40660324160 SUCCESS; 13 branches, zero open PR; reviewed AGENTS.md, WORKLOG.md, handoff, status, queue, deployment, decisions, open issues and BOTH Google Docs. The /dev SSR security work 27a0077 was already present; not duplicated. An unrelated concurrent social note in WORKLOG, SHA 7606dc5, was preserved. This task was claimed before coding in WORKLOG commit 410cb21bea2a8fd6d25e1c1985d28c0a4987f0ef.
 
-Code: added pure runtime guards in src/lib/orders/guest-request-input.ts; wired them into cancelMyOrder, listMyOrders, getOrderById in src/lib/orders/orders.functions.ts so malformed/oversized JSON returns safe not-found/null/empty results before reading fields or touching orders. Signed same-browser HttpOnly guest receipt grants STILL exclusively authorize access, never a caller-supplied phone or customer ID. Tests: src/lib/orders/__tests__/guest-request-input.test.ts. Additional bounded signed guest receipt cookies (4096 chars) and admin session cookies (256 chars) before HMAC/JSON/splitting in order-access.server.ts and admin.server.ts, with regression tests in security/__tests__/access.test.ts.
+Code: added pure runtime guards in src/lib/orders/guest-request-input.ts; wired them into cancelMyOrder, listMyOrders, getOrderById in src/lib/orders/orders.functions.ts so malformed/oversized JSON returns safe not-found/null/empty results before reading fields or touching orders. Signed same-browser HttpOnly guest receipt grants STILL exclusively authorize access, never a caller-supplied phone or customer ID. Tests: src/lib/orders/**tests**/guest-request-input.test.ts. Additional bounded signed guest receipt cookies (4096 chars) and admin session cookies (256 chars) before HMAC/JSON/splitting in order-access.server.ts and admin.server.ts, with regression tests in security/**tests**/access.test.ts.
 
 Every source commit on main, in order: 4cebd8cc22c254ca6e8c9fe1d167b38629cfc348; bd7569801732a180d0d75cf80c3fae19e2a8f5ae; a27bcdb9ed13697a386f8a85c2849628c90bd353; c4661daa651498c8fe72c85dce11a17768a8ea5e; fec0009a5d163e828a14444eda4dce77a0372b5e; df190758e193630739f20d2be045aec36ccc5ab8; d1654e88d3655efdded1dd890dc1161c71e02c6e; b3f78b0046560d80d7b17bb4dfca53e9d1ee4abf; ec4e6e24b9c6e10106b2e311e401fc765a97e60f; 762972778b989236279ef8447cd79de170339e9b. Intermediate CI failed formatting only, which was repaired. VERIFIED exact source CI 40740449073 SUCCESS on df190758e193630739f20d2be045aec36ccc5ab8, and CI 40740927778 SUCCESS on 762972778b989236279ef8447cd79de170339e9b; quality (Nitro/Bun build, TypeScript, lint, Vitest) and PostgreSQL 16 tenant/RLS/atomic payment/worker tests both GREEN. Check CI again after this documentation-only commit.
 
@@ -61,7 +72,6 @@ Next: fetch newest main/WORKLOG and last CI; verify Coolify app r13hz1mmbi4eeoc6
 
 ---
 
-
 ## 04:56 EDT 2026-10-28 — /dev security guard: code and CI verified; live deploy unverified
 
 **Verified source:** claim `4db58cf`, security fix `27a0077ce55ff8ed9e02784740cc29a8286eb87a`, [CI 40660026700](https://github.com/takatakca/pppmtl/actions/runs/40660026700) completed **SUCCESS** on that exact code SHA (Nitro build, TS, lint, app/security tests, PostgreSQL 16 tenant/payment/worker). Prior anonymous `/dev/menu-audit` exposure documented in issue #5 (HTTP 200 at 02:20 EDT). New `src/server.ts` guard returns HTTP **401 no-store** before SSR for unauthenticated `/dev/*`, verifies existing signed admin cookie, rejects duplicate cookies/encoded aliases; SPA route redirects unauthenticated client navigation. Public Clover webhook and storefront paths unaffected in code. Full evidence appended to [release-security-gate note](agent-notes/2026-10-28-release-security-gate.md).
@@ -70,13 +80,11 @@ Next: fetch newest main/WORKLOG and last CI; verify Coolify app r13hz1mmbi4eeoc6
 
 ---
 
-
-
 ## EVENING RELEASE SECURITY HANDOFF — 2026-10-28
 
 **Start-of-work evidence:** initial `main` `280b916763c2a5e935d5687bae6557722aeb167f`, CI `40647117549` SUCCESS, no open PR; read AGENTS/WORKLOG + latest canonical docs and open issues. New task claimed in `WORKLOG.md` **before code**, commit `b21fb002b82458f3c7b22aeb591e63eda1d6fc49`. Preserve prior menu, official Canva imagery and historical Lovable commits. No force-push.
 
-**New fixes:** `src/lib/orders/order-service.ts` commit `59613ab` fixes critical *filtered availability map* gap: server rejects sold-out and wrong-location item before creation, refuses unsupported Clover delivery early, and bounds untrusted checkout fields. `src/lib/orders/__tests__/order-engine.test.ts` `1044e4c`, formatter `eff248a`; `src/lib/integration/__tests__/clover.test.ts` `00b2011` updates the delivery rejection expectation but retains forged webhook coverage. **Full CI [40648225513](https://github.com/takatakca/pppmtl/actions/runs/40648225513) SUCCESS for code SHA `eff248a211680e96b0879e455bdadc219e963202`** (build, TypeScript, lint, Vitest, PostgreSQL 16 RLS/payments/worker). `src/lib/security/admin.server.ts` `77555eb` and formatter `28fbf21`, `src/lib/security/admin.functions.ts` `8ce7481`, `src/lib/security/__tests__/access.test.ts` `2ea9781` add runtime malformed/oversized temporary admin credential rejection; inspect CI of newest HEAD before claiming this addition green. Source/security documentation: [`docs/agent-notes/2026-10-28-release-security-gate.md`](agent-notes/2026-10-28-release-security-gate.md), created `1942c4f`, appended `60fe399`.
+**New fixes:** `src/lib/orders/order-service.ts` commit `59613ab` fixes critical _filtered availability map_ gap: server rejects sold-out and wrong-location item before creation, refuses unsupported Clover delivery early, and bounds untrusted checkout fields. `src/lib/orders/__tests__/order-engine.test.ts` `1044e4c`, formatter `eff248a`; `src/lib/integration/__tests__/clover.test.ts` `00b2011` updates the delivery rejection expectation but retains forged webhook coverage. **Full CI [40648225513](https://github.com/takatakca/pppmtl/actions/runs/40648225513) SUCCESS for code SHA `eff248a211680e96b0879e455bdadc219e963202`** (build, TypeScript, lint, Vitest, PostgreSQL 16 RLS/payments/worker). `src/lib/security/admin.server.ts` `77555eb` and formatter `28fbf21`, `src/lib/security/admin.functions.ts` `8ce7481`, `src/lib/security/__tests__/access.test.ts` `2ea9781` add runtime malformed/oversized temporary admin credential rejection; inspect CI of newest HEAD before claiming this addition green. Source/security documentation: [`docs/agent-notes/2026-10-28-release-security-gate.md`](agent-notes/2026-10-28-release-security-gate.md), created `1942c4f`, appended `60fe399`.
 
 **Deployment status:** HISTORICAL Coolify main native auto-deploy to app `pppmtl` UUID `r13hz1mmbi4eeoc6ssxbvxnv`, last documented live SHA `48c00a4` from 26 Oct. No direct 28 Oct authorized Coolify console, running SHA, or live HTTPS/mobile browser proof. `pppmtl.com` homepage appears in a cached web crawl, but direct `/healthz` and `/menu` fetch and container DNS failed; Browser connector requires original browser session. **Do not claim this code deployed**. GitHub Actions Coolify workflow skipped by design; leave native vs Actions split unchanged.
 
@@ -88,7 +96,6 @@ Next: fetch newest main/WORKLOG and last CI; verify Coolify app r13hz1mmbi4eeoc6
 
 ---
 
-
 ## LATEST HANDOFF — 2026-10-28 — Saved-cart transparency and keyboard dialogs (third pass)
 
 **Source of truth:** `takatakca/pppmtl`, `main`. Source CI and chronological notes supersede historical paragraphs below. Started from `f02b614beaa0a861aaf18ca6f3e9369abfd1d156` with successful CI `40645720067`, no open PR; read `AGENTS.md`, `WORKLOG.md`, newest handoff, issues and CI. Claimed task BEFORE source changes in WORKLOG at `e1ab1f65c46b577e1e4613528c3928f43275dcdc`. Preserve prior agents' menu/Clover fixes and official yellow Canva images (#18).
@@ -96,6 +103,7 @@ Next: fetch newest main/WORKLOG and last CI; verify Coolify app r13hz1mmbi4eeoc6
 **Verified code SHA:** `297c0f9e2d4a657228638f90d7a0f5c5546acdd3`, **GitHub CI [40646740316](https://github.com/takatakca/pppmtl/actions/runs/40646740316) COMPLETED SUCCESS**: both jobs green (Nitro/Bun server build, TypeScript, lint/Prettier, Vitest, PostgreSQL 16 migrations 0001-0003, tenant-isolation, atomic payments and worker leases). Subsequent **documentation-only HEAD `9b67267c1cab8ebb4c341ba2687b6c4ef2262583` also passed CI [40646956048](https://github.com/takatakca/pppmtl/actions/runs/40646956048)**; fetch latest main and workflow after this handoff/worklog update.
 
 **What changed:**
+
 - `src/lib/cart.ts` (commit `5fe6009`; Prettier fix `d54e746`): safe `reconcileSavedCart(saved, findItem, locationId)` reports removed/updated historical cart lines, preserving real Clover groups/IDs, re-pricing retained lines from verified published menu, and rejecting invalid groups/items/quantities/serialized choices. Does not invent mandatory options.
 - `src/context/ppp-store.tsx` (`565bea3`): restores/sanitizes and re-persists saved cart; user gets an accessible, dismissible **FR/EN/ES** notification on removed/changed lines, with Review cart action instead of silent loss. No payment enablement.
 - `src/lib/integration/__tests__/clover.test.ts` (`2ead295`, format `b8287ad`): tests real pita modifier choices, stale price/optional choices, missing required selections, invalid location/quantity/product and malicious stored JSON.
@@ -111,7 +119,6 @@ Next: fetch newest main/WORKLOG and last CI; verify Coolify app r13hz1mmbi4eeoc6
 
 ---
 
-
 ## LATEST HANDOFF — 2026-10-28 — menu → cart → server checkout reliability
 
 **What was done / ownership:** This is a NEW follow-up task after the 28 Oct menu/Desserts and Clover option-order UX passes. Agent GPT-6 claimed `WORKLOG.md` first at `925cd83de5996373235776ee4f730cee640019f4` and preserved prior agents' source and notes. Read `AGENTS.md`, `WORKLOG.md`, current branch and the five canonical docs before continuing. No open PR was found at session start.
@@ -119,6 +126,7 @@ Next: fetch newest main/WORKLOG and last CI; verify Coolify app r13hz1mmbi4eeoc6
 **Tested source SHA:** `db58af73e7c1c42d3d261772195eb28de918a5c9`. **Verifiable GitHub Actions result:** [PPPMTL CI 40645275982](https://github.com/takatakca/pppmtl/actions/runs/40645275982) = **completed/success** on that SHA. Actual jobs passed: Bun frozen install, Nitro Node build, TypeScript, ESLint, Vitest application tests, structural SQL preflight, PostgreSQL 16 migrations 0001/0002/0003, limited DB role + tenant isolation, atomic Clover payments and worker-leasing SQL fixtures. Earlier follow-up CI [40644711329](https://github.com/takatakca/pppmtl/actions/runs/40644711329) was also green at `3a584d6`.
 
 **Last new source changes (all on `main`):**
+
 - `src/lib/modifiers.ts` (`30f45af`): malformed option JSON safely rejected, no `.split` crash.
 - `src/lib/cart.ts` (`a3df45e`, format `55dca7c`): `canAddCartLine` checks item availability, location, valid safe integer quantity 1–50, and Clover min/max/actual choice rules.
 - `src/context/ppp-store.tsx` (`e969b6a`): invalid legacy cart lines removed on rehydration, valid lines re-priced; add-to-cart/reorders guarded; immutable reorder (no `state.cart.push`); capped setter.
@@ -139,9 +147,7 @@ Next: fetch newest main/WORKLOG and last CI; verify Coolify app r13hz1mmbi4eeoc6
 
 ---
 
-
 ## CURRENT HANDOFF — 2026-10-28 (America/Toronto) — UX mobile, Clover and CI
-
 
 **LATEST VERIFIED CI (after source/SQL repairs):** GitHub Actions [PPPMTL CI run 40639386985](https://github.com/takatakca/pppmtl/actions/runs/40639386985) **completed SUCCESS for source SHA `23043b539acdea63385d56bb3da6d31b2959c96e`**. Verified actual job steps: Nitro Node build, TypeScript, ESLint and application tests SUCCESS; PostgreSQL 16 migrations 0001/0002/0003, limited-role tenant-isolation tests, atomic Clover payment tests and fenced fulfillment-worker leasing tests SUCCESS. Runner provisioning is now functional. This is test evidence **only**, not verified live Coolify release or real credit card transaction.
 
@@ -149,10 +155,9 @@ Next: fetch newest main/WORKLOG and last CI; verify Coolify app r13hz1mmbi4eeoc6
 
 **Still incomplete:** actual pppmtl.com mobile touch/browser regression (Desserts swipe/scroll, product modal), the exact deployed Coolify container SHA and HTTPS health for 28 October, live authorized Clover inventory/merchant connection, durable production PostgreSQL wiring and true payments/print/retry/reconciliation. Issue #5/#6/#13 gates remain intact. Do not publish a customer-facing launch claim or real payment switch without these checks.
 
-
 **Source of truth:** GitHub `takatakca/pppmtl`, branch `main`; read `AGENTS.md` and `WORKLOG.md` before touching files. **Latest HEAD observed before this handoff commit:** `74e1767606a0388c725d5244505053027731443b`. This handoff and WORKLOG will produce newer SHA(s), so fetch actual HEAD on resumption. Two agents were working in parallel on 28 Oct; preserve their different work and check active claims before proceeding. No PR was open at initial check.
 
-**Owner's explicit priorities (28 Oct):** fix sticky/swipe/lag of `/menu` categories (especially Desserts); present product's *existing* Clover modifier groups in kitchen order (required main choice, sauce, garnishes/vegetables, beverage, trio, combo, extras, where present); keep real IDs/prices/limits, never add fake categories; code notes at entry and exit in GitHub, then project-specific mirror in Google Drive. Don't change separate franchise UI/brands or owner-approved finished yellow Canva imagery (#18).
+**Owner's explicit priorities (28 Oct):** fix sticky/swipe/lag of `/menu` categories (especially Desserts); present product's _existing_ Clover modifier groups in kitchen order (required main choice, sauce, garnishes/vegetables, beverage, trio, combo, extras, where present); keep real IDs/prices/limits, never add fake categories; code notes at entry and exit in GitHub, then project-specific mirror in Google Drive. Don't change separate franchise UI/brands or owner-approved finished yellow Canva imagery (#18).
 
 ### Completed source changes (pushed, not mobile/live verified)
 
@@ -163,7 +168,7 @@ Next: fetch newest main/WORKLOG and last CI; verify Coolify app r13hz1mmbi4eeoc6
 - `747cb837c` `src/components/menu/product-card.tsx`: remove staggered entrance animation from category grid cards, reducing perceived tap lag.
 - Another active agent committed a focused detailed report `docs/agent-notes/2026-10-28-menu-clover-audit.md` (`1f211c1`), moved Node-only fixture out of Vitest discovery to `scripts/sql-migration-check.cases.mjs` (`004e9c9`, `e1d64aa`, `9702122`) and updated canonical `PROJECT_STATUS`, `TASK_QUEUE`, `DEPLOYMENT`, `DECISIONS` (commits `22d286a`, `d89c50c`, `ef3df22`, `d1c3145`). **Do not re-create these notes**.
 - **Real GitHub CI now assigns runners**, superseding old runnerless #7. Run `40638818589` on `747cb837c` executed Nitro build **pass** and TypeScript **pass**, but lint blocked on 68 formatting errors and DB Node fixture 4/5. This session corrected the `$;` to `$$;` SQL valid-fixture typo at `74e1767606` (earlier `26b1a8e` edit was a no-op because JS `String.replace` interprets `$$` specially). Verified updated blob SHA changed to `5f2be452`.
-- One-shot narrowly scoped Prettier workflow `.github/workflows/format-once.yml` modified in `95eaba2b`: push-triggered only when that workflow file itself changes, no infinite loop, no destructive force-push; format only 9 CI-reported source paths. GitHub Actions formatter run `40639106678` **succeeded**, bot pushed `783fe3e3b09a20d62dd9cb21bcb4f5f2e0405f71`; this is formatting only. Fresh CI `40639198899` for `74e1767606` was **queued** at last observation. Read jobs/logs of *newest main* run, fix any remaining actual Vitest/SQL/lint issues.
+- One-shot narrowly scoped Prettier workflow `.github/workflows/format-once.yml` modified in `95eaba2b`: push-triggered only when that workflow file itself changes, no infinite loop, no destructive force-push; format only 9 CI-reported source paths. GitHub Actions formatter run `40639106678` **succeeded**, bot pushed `783fe3e3b09a20d62dd9cb21bcb4f5f2e0405f71`; this is formatting only. Fresh CI `40639198899` for `74e1767606` was **queued** at last observation. Read jobs/logs of _newest main_ run, fix any remaining actual Vitest/SQL/lint issues.
 - Google Drive documentation: project-specific existing file **`2026-10-28 — PPPMTL — Relève technique menu, Clover, CI et déploiement — GPT-6`** at https://docs.google.com/document/d/1M9aEd9S-IN-oH_ZcMB5i5cCFgd5Q2CFCXzACnQxP83k/edit (other agent wrote full past context). Global TAKATAK `00 — JOURNAL — État en direct` at https://docs.google.com/document/d/14ONf8gWaMnX5cHiOWMheI0IDUugLfsR_MZ_gj0Szoqk/edit received a separate, dated high-level PPP section through Docs API, preserving old content. Update project-specific doc with final CI result and commit, not a duplicate Google Doc.
 
 ### Current verification limits and actual environment
@@ -178,15 +183,13 @@ Next: fetch newest main/WORKLOG and last CI; verify Coolify app r13hz1mmbi4eeoc6
 
 1. Fetch latest `main` (there were concurrent agents); read open WORKLOG claims, latest CI jobs and logs. Confirm build, typecheck, ESLint, Vitest, PostgreSQL 0001–0003 and SQL rollback probes. If red, fix demonstrated defects without disabling checks.
 2. Verify Coolify deployment status and **exact SHA** for `main`; check `/healthz`, ensure no accidental Clover payment enabled. If inaccessible, record that instead of claiming instant deploy succeeded.
-3. Interactive smoke tests: mobile Desserts category tap, swipe, sticky nav, browser back, modal required-group scroll; desktop mouse and keyboard, reduced-motion. Source code review is *not* the same as end-to-end test.
+3. Interactive smoke tests: mobile Desserts category tap, swipe, sticky nav, browser back, modal required-group scroll; desktop mouse and keyboard, reduced-motion. Source code review is _not_ the same as end-to-end test.
 4. Validate real burger/pita/pizza/chicken/dessert modifier groups against Clover (required constraints and payload parity); remove no options or prices. If verified authenticated Clover credentials + DB durable release exist then resume scoped integration; otherwise keep checkout fail-closed.
-5. Update the *same* project Google Drive handoff note and GitHub docs after new evidence, then finish WORKLOG line; never disclose secrets or create duplicate project records.
+5. Update the _same_ project Google Drive handoff note and GitHub docs after new evidence, then finish WORKLOG line; never disclose secrets or create duplicate project records.
 
 **Access and blockers:** A current Coolify deployment status inspector/authorized cloud browser, legitimate app-side Clover credentials and `DATABASE_URL` (not exposed in documents), verified TAKATAK authorization scope, and hands-on device inspection are still needed for end-to-end verification. No payment, order or print success claimed.
 
 ---
-
-
 
 ## CURRENT HANDOFF — 2026-10-28 01:xx (America/Toronto) — menu / Clover / CI / Drive
 
@@ -222,8 +225,6 @@ Next: fetch newest main/WORKLOG and last CI; verify Coolify app r13hz1mmbi4eeoc6
 
 ---
 
-
-
 ## CURRENT HANDOFF — 2026-10-26 (UTC)
 
 **Production now runs on Coolify, verified.** `https://pppmtl.com` and `https://www.pppmtl.com` are served by Coolify application `pppmtl` (uuid `r13hz1mmbi4eeoc6ssxbvxnv`, project PPPMTL) on server **vps2** (Contabo, 209.145.49.63), branch `main`, native **Coolify GitHub-App auto-deploy ON**. The MochaHost Passenger copy (`~/pppmtl_node`) is no longer receiving traffic and is kept only as a rollback.
@@ -257,7 +258,7 @@ Next: fetch newest main/WORKLOG and last CI; verify Coolify app r13hz1mmbi4eeoc6
 
 ### Current and next work
 
-1. **#7 — CI infrastructure:** run 38848538433 from the previous session had both jobs fail with no assigned runner and `steps=[]`. Newly pushed commits launched fresh CI attempts, including `38883685755` (pending when checked); distinguish queued work from failed runnerless jobs. Inspect Actions account/repository billing, hosted runner availability and policy. Once a runner actually executes jobs, run the exact current-main quality/test/build + PostgreSQL 0001/0002 SQL smoke suite, fix *actual* failures. Do not keep rerunning identical runnerless attempts.
+1. **#7 — CI infrastructure:** run 38848538433 from the previous session had both jobs fail with no assigned runner and `steps=[]`. Newly pushed commits launched fresh CI attempts, including `38883685755` (pending when checked); distinguish queued work from failed runnerless jobs. Inspect Actions account/repository billing, hosted runner availability and policy. Once a runner actually executes jobs, run the exact current-main quality/test/build + PostgreSQL 0001/0002 SQL smoke suite, fix _actual_ failures. Do not keep rerunning identical runnerless attempts.
 2. **#6 — Production durability:** provision an approved PostgreSQL service + restricted role (no new billable Supabase project), apply both reviewed migrations and run the signed-payment/RLS tests. Connect the injected adapter to the existing synchronous order API by a carefully reviewed async/storage transition; ensure a checkout is durably committed before returning its payment URL. Add verified location→tenant scope, durable signed-webhook inbox, parallel/lease recovery, Clover title+print worker with ambiguous print/manual-review handling, reconciled refund/cancellation and backup/restart proof. **Keep `ordersPersistAcrossRestarts=false`.**
 3. **#5 — Verified central identity:** integrate a PPPMTL-specific TAKATAK authorization assertion and server-side tenant/product entitlements; never reuse 1LV keys. Keep guest ID null until verified. Replace temporary admin login with TAKATAK roles before launching.
 4. **Deployment:** identify the actual Coolify/Contabo/other PPPMTL application, HTTPS domain and scoped secrets; use CI-gated deployment only after successful checks; verify exact release SHA and `/healthz`, not just a queued deployment. At this handoff, public site fetch returned HTTP 403 and `/healthz` could not be read. These do not prove a release.
@@ -283,8 +284,6 @@ Next: fetch newest main/WORKLOG and last CI; verify Coolify app r13hz1mmbi4eeoc6
 Fetch `main` and latest CI jobs. If runnerless persists, implement/review the PostgreSQL-backed order/webhook/outbox path and scoped TAKATAK server assertions in source without enabling live payments. Execute full Postgres SQL/TypeScript checks as soon as an actual runner/DB exists; then complete deployment/rollback verification. Keep AGENTS/WORKLOG and these five docs in sync.
 
 ---
-
-
 
 ## CURRENT HANDOFF — 2026-10-15 late evening (America/Toronto)
 
@@ -333,8 +332,6 @@ Re-read the first sections here, then `AGENTS.md`, `WORKLOG.md`, queue, deployme
 
 ---
 
-
-
 ## CURRENT HANDOFF — 2026-10-15, session continued after 15:04 Montréal
 
 **Repository:** `takatakca/pppmtl` · **Release branch:** `main` (write permissions confirmed).  
@@ -381,7 +378,6 @@ Re-read the first sections here, then `AGENTS.md`, `WORKLOG.md`, queue, deployme
 Read this section and then the prior handoff. Do not redo merged PR #4 or previously shipped safety improvements. Maintain TAKATAK's central identity authority and strict tenant boundaries. An external orchestrator can restart future sessions only after it has been explicitly installed and authorized; a prompt cannot self-restart an interrupted agent. No orchestrator was connected or configured here.
 
 ---
-
 
 ## CURRENT HANDOFF — 2026-10-15, Montréal
 
@@ -432,7 +428,6 @@ Read `AGENTS.md`, this current section, `WORKLOG.md`, `docs/TASK_QUEUE.md` and `
 ---
 
 ## HISTORICAL HANDOFF — 2026-10-14
-
 
 **Date:** 2026-10-14 (America/Toronto)  
 **Repository:** [takatakca/pppmtl](https://github.com/takatakca/pppmtl) (private)  

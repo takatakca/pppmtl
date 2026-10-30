@@ -30,7 +30,13 @@ const items: OrderItem[] = [
     quantity: 2,
     unitPrice: 1299,
     modifiers: [
-      { groupId: "size", choiceId: "large", providerModifierId: null, label: "Size: Large", priceDelta: 300 },
+      {
+        groupId: "size",
+        choiceId: "large",
+        providerModifierId: null,
+        label: "Size: Large",
+        priceDelta: 300,
+      },
     ],
     notes: "no onion",
   },
@@ -69,10 +75,10 @@ const heldResponse = {
   ok: true,
   number: "PPP-1A2B3",
   id: "dir_abc",
-  total: 36.78,
+  total: 42.52,
   interac: {
     recipient: "paiements@example-ppp.test",
-    amount: 36.78,
+    amount: 42.52,
     reference: "PPP-1A2B3",
     question: null,
     autoDeposit: true,
@@ -247,7 +253,7 @@ describe("Food Hub's Interac answer", () => {
     expect(parsed?.number).toBe("PPP-1A2B3");
     expect(parsed?.interac.recipient).toBe("paiements@example-ppp.test");
     expect(parsed?.interac.autoDeposit).toBe(true);
-    expect(parsed?.total).toBe(36.78);
+    expect(parsed?.total).toBe(42.52);
   });
 
   it("never treats a 200 without instructions as a held order", () => {
@@ -258,10 +264,16 @@ describe("Food Hub's Interac answer", () => {
 
   it("words the instructions for the customer in both languages", () => {
     const rowsFr = interacInstructionRows(parseInteracResponse(heldResponse)!.interac, "fr");
-    expect(rowsFr.map((r) => r.key)).toEqual(["recipient", "amount", "reference", "autoDeposit", "deadline"]);
+    expect(rowsFr.map((r) => r.key)).toEqual([
+      "recipient",
+      "amount",
+      "reference",
+      "autoDeposit",
+      "deadline",
+    ]);
     expect(rowsFr.find((r) => r.key === "amount")?.value).toBe("36,78 $");
     const rowsEn = interacInstructionRows(parseInteracResponse(heldResponse)!.interac, "en");
-    expect(rowsEn.find((r) => r.key === "amount")?.value).toBe("$36.78");
+    expect(rowsEn.find((r) => r.key === "amount")?.value).toBe("$42.52");
     expect(rowsEn.find((r) => r.key === "reference")?.value).toBe("PPP-1A2B3");
   });
 });
@@ -327,7 +339,10 @@ describe("Food Hub HTTP client", () => {
     expect(headers["x-customer-token"]).toBe(TOKEN);
     expect(headers["x-customer-tenant"]).toBe("pppmtl");
 
-    vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new TypeError("fetch failed"))));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Promise.reject(new TypeError("fetch failed"))),
+    );
     const down = await foodhubRequest("/api/foodhub/customers/me", { method: "GET" });
     expect(down).toMatchObject({ ok: false, kind: "unreachable" });
   });
@@ -339,7 +354,7 @@ describe("Interac order adapter -> Food Hub website-order", () => {
     items,
     customerToken: TOKEN,
     lang: "fr" as const,
-    displayedTotalCents: 3678,
+    displayedTotalCents: 4252,
     ...over,
   });
 
@@ -353,7 +368,12 @@ describe("Interac order adapter -> Food Hub website-order", () => {
   it("POSTs the contract payload and returns a held order with instructions", async () => {
     configure();
     const calls = mockFetch(200, heldResponse);
-    const result = await foodhubInteracSubmitAdapter.createOrder(draft(), "NDG_MAIN", "key", context());
+    const result = await foodhubInteracSubmitAdapter.createOrder(
+      draft(),
+      "NDG_MAIN",
+      "key",
+      context(),
+    );
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.data).toMatchObject({
@@ -363,7 +383,7 @@ describe("Interac order adapter -> Food Hub website-order", () => {
       status: "SUBMITTED",
       subtotal: 3198,
       tax: 554,
-      total: 3678,
+      total: 4252,
       fees: [{ code: "interac", amount: 500 }],
     });
     expect(result.data.interac?.recipient).toBe("paiements@example-ppp.test");
@@ -383,7 +403,7 @@ describe("Interac order adapter -> Food Hub website-order", () => {
       payment: "interac",
       paid: false,
       fees: [{ code: "interac", name: "Frais Interac e-Transfer", amount: 5 }],
-      total: 36.78,
+      total: 42.52,
       customerToken: TOKEN,
       customer: { name: "Mathieu", phone: "5145550000", lang: "fr" },
     });
@@ -430,7 +450,10 @@ describe("Interac order adapter -> Food Hub website-order", () => {
       await foodhubInteracSubmitAdapter.createOrder(draft(), "NDG_MAIN", "key", context()),
     ).toMatchObject({ ok: false, error: { code: "interac_unavailable" } });
 
-    vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new TypeError("fetch failed"))));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Promise.reject(new TypeError("fetch failed"))),
+    );
     expect(
       await foodhubInteracSubmitAdapter.createOrder(draft(), "NDG_MAIN", "key", context()),
     ).toMatchObject({ ok: false, error: { code: "timeout" } });
@@ -438,8 +461,13 @@ describe("Interac order adapter -> Food Hub website-order", () => {
 
   it("never reports success on a 200 without Interac instructions (old Food Hub), and logs it loudly", async () => {
     configure();
-    mockFetch(200, { ok: true, number: "PPP-1", id: "dir_1", total: 36.78 });
-    const result = await foodhubInteracSubmitAdapter.createOrder(draft(), "NDG_MAIN", "key", context());
+    mockFetch(200, { ok: true, number: "PPP-1", id: "dir_1", total: 42.52 });
+    const result = await foodhubInteracSubmitAdapter.createOrder(
+      draft(),
+      "NDG_MAIN",
+      "key",
+      context(),
+    );
     expect(result).toMatchObject({ ok: false, error: { code: "interac_unavailable" } });
     expect(recentIntegrationEvents().map((e) => e.eventType)).toContain(
       "interac.instructions_missing",
@@ -449,7 +477,12 @@ describe("Interac order adapter -> Food Hub website-order", () => {
   it("does not POST while the owner switch is off", async () => {
     configure(false);
     const calls = mockFetch(200, heldResponse);
-    const result = await foodhubInteracSubmitAdapter.createOrder(draft(), "NDG_MAIN", "key", context());
+    const result = await foodhubInteracSubmitAdapter.createOrder(
+      draft(),
+      "NDG_MAIN",
+      "key",
+      context(),
+    );
     expect(result).toMatchObject({ ok: false, error: { code: "interac_unavailable" } });
     expect(calls).toHaveLength(0);
   });

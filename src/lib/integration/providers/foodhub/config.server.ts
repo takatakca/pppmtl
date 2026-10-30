@@ -112,7 +112,9 @@ export function interacFeeCents(): number {
 }
 
 export function interacFeeTaxable(): boolean {
-  return !/^(false|0|no|off)$/i.test(optionalCredential("FOODHUB_INTERAC_FEE_TAXABLE")?.trim() ?? "");
+  return !/^(false|0|no|off)$/i.test(
+    optionalCredential("FOODHUB_INTERAC_FEE_TAXABLE")?.trim() ?? "",
+  );
 }
 
 /** Owner switch: Interac orders are POSTed only once Food Hub's Interac branch is live. */
@@ -126,10 +128,7 @@ export function foodhubDeliveryFeeCents(): number | null {
 }
 
 export type InteracUnavailableReason =
-  | "not_configured"
-  | "not_enabled"
-  | "location_not_mapped"
-  | "delivery_fee_unknown";
+  "not_configured" | "not_enabled" | "location_not_mapped" | "delivery_fee_unknown";
 
 export interface InteracAvailability {
   available: boolean;

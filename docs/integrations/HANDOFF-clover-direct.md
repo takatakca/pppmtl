@@ -3,6 +3,7 @@
 Living note, updated as the work goes. Last update: 2026-10-08 (task 12 of the Food Hub task board).
 
 ## Goal (owner, 2026-10-08)
+
 - Keep pppmtl.com exactly as it is: same layout, rails, sections, scroll and item sheet. No per-item pages.
 - Replace the AI-generated product data with the real Clover items: real names (in the site's current writing
   style), real prices, real modifiers nested in each item, real photos.
@@ -12,6 +13,7 @@ Living note, updated as the work goes. Last update: 2026-10-08 (task 12 of the F
   mirrors it (Food Hub task 10). Card data never touches this site.
 
 ## Decisions (with the official sources)
+
 1. **Clover Online Ordering cannot receive a cart or an item from another site.** Clover documents no per-item
    link and no API to pre-fill its online-ordering cart; its pages also refuse to be framed
    (`frame-ancestors *.clover.com`). So the site keeps its own cart and pays through **Clover Hosted Checkout**.
@@ -39,40 +41,45 @@ Living note, updated as the work goes. Last update: 2026-10-08 (task 12 of the F
 4. **Pickup only** through Clover for now (no courier is wired for site orders).
 
 ## Status
+
 - [x] Research (above). Mapping analysis: all 175 site items map to a Clover item (163 same name, 12 near-name,
-  e.g. Clover's "(P. FRITS)" staff suffix). 168 have one of the owner's photos; 7 keep the site's category photo.
+      e.g. Clover's "(P. FRITS)" staff suffix). 168 have one of the owner's photos; 7 keep the site's category photo.
 - [x] `src/lib/integration/providers/clover/catalog.ts`: pure normaliser (internal categories / hidden / variable
-  price left out, cents, option slugs, display names for groups and options).
+      price left out, cents, option slugs, display names for groups and options).
 - [x] Snapshot (`src/data/clover/inventory.snapshot.json`, 175 items / 17 categories / 218 option groups),
-  map (`src/config/clover-item-map.ts`, 175/175), photos (`public/menu/clover/`, 168 items, 1200 + 400 px webp).
+      map (`src/config/clover-item-map.ts`, 175/175), photos (`public/menu/clover/`, 168 items, 1200 + 400 px webp).
 - [x] Overlay `src/data/clover/overlay.ts` applied in `src/data/menu.ts`: Clover price, options, photo,
-  availability, French description from Clover; site names/rails/placement unchanged. Offers read the real
-  item price (their "20 % off" wording was removed: it was the Uber promo). 4 site typos fixed (ids unchanged).
+      availability, French description from Clover; site names/rails/placement unchanged. Offers read the real
+      item price (their "20 % off" wording was removed: it was the Uber promo). 4 site typos fixed (ids unchanged).
 - [x] `src/lib/modifiers.ts` (min/max, multi-choice as "a,b", option prices) + item sheet + cart re-pricing.
 - [x] Clover provider in `src/lib/integration/providers/clover/` (config, pure checkout logic, API calls, order
-  adapters, menu adapter, webhook) + order service (NDG → Clover, pickup only, `paymentUrl`) + checkout redirect +
-  return page `/orders/$orderId?paid=1`.
+      adapters, menu adapter, webhook) + order service (NDG → Clover, pickup only, `paymentUrl`) + checkout redirect +
+      return page `/orders/$orderId?paid=1`.
 - [x] Tests `src/lib/integration/__tests__/clover.test.ts` (18; full suite 79/79), lint 0 errors, `vite build` OK,
-  tsc clean except the pre-existing `src/routes/__root.tsx` error (on main too).
+      tsc clean except the pre-existing `src/routes/__root.tsx` error (on main too).
 - [x] Owner doc `docs/integrations/clover.md` (hosting, env vars, Clover clicks, how to swap a slot).
 - [ ] Visual check of the item sheet in a browser (dev server).
 
 ## Important constraint
+
 The build targets Cloudflare Workers (Nitro, Lovable hosting): the in-memory order store is per isolate, so the
 Clover webhook works without it (payment id → Clover order → title + note + one print). The return page shows
 "paid" even when the order is not in memory (`?paid=1`).
 
 ## Open decision (owner)
+
 `CLOVER_API_TOKEN` (live menu, title + print): Clover documents dashboard API tokens for testing and OAuth tokens for
 production. If Clover refuses it, move the "title + print" step to Food Hub (it holds the merchant's OAuth token).
 
 ## Next step
+
 Owner: section 5 of docs/integrations/clover.md (Ecommerce key, Hosted Checkout webhook, REST token), choose the host
 (section 4), set the variables, then one real test order + refund. Code: open the PR
 https://github.com/takatakca/pppmtl/compare/main...clover-direct?expand=1 (Lovable syncs main on merge).
 Files to read first: docs/integrations/clover.md, `src/lib/integration/providers/clover/webhook.ts`.
 
 ## 2026-10-30 — Phone accounts + Interac e-Transfer (branch `feature/phone-verify-accounts`)
+
 Clover Hosted Checkout stays the **card** path exactly as above (pickup, NDG). A second path exists now: **Interac
 e-Transfer** through TAKATAK Food Hub (`src/lib/integration/providers/foodhub/`), gated by `FOODHUB_INTERAC_ENABLED`
 and shown with its fee in the total before the customer confirms. Customer identity (phone verification = account)

@@ -26,7 +26,10 @@ export function MarketingPreferencesPanel({ className = "" }: { className?: stri
     if (!result.ok) {
       setNotice(
         result.message ??
-          t("Your choice was not saved. Try again.", "Votre choix n'a pas été enregistré. Réessayez."),
+          t(
+            "Your choice was not saved. Try again.",
+            "Votre choix n'a pas été enregistré. Réessayez.",
+          ),
       );
     }
   }
@@ -104,7 +107,10 @@ export function MarketingPreferencesPanel({ className = "" }: { className?: stri
         </li>
       </ul>
       {notice && (
-        <p role="alert" className="mt-3 border border-border p-3 text-[0.75rem] text-muted-foreground">
+        <p
+          role="alert"
+          className="mt-3 border border-border p-3 text-[0.75rem] text-muted-foreground"
+        >
           {notice}
         </p>
       )}

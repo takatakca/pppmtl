@@ -21,7 +21,8 @@ export function foodhubBridgeConfigured(locationId: string): boolean {
   return interacAvailability(locationId, "PICKUP").available;
 }
 
-const MENU_EN = "Menus come from Clover (NDG) or the site catalog; Food Hub does not publish the menu yet.";
+const MENU_EN =
+  "Menus come from Clover (NDG) or the site catalog; Food Hub does not publish the menu yet.";
 const MENU_FR =
   "Les menus viennent de Clover (NDG) ou du catalogue du site; Food Hub ne publie pas encore le menu.";
 
@@ -86,7 +87,8 @@ export const foodhubAdapters: ProviderAdapterSet = {
       reasonFr: MENU_FR,
     }),
     fetchMenu: async () => notConfigured("Food Hub does not publish the menu to this site."),
-    fetchAvailability: async () => notConfigured("Food Hub does not publish availability to this site."),
+    fetchAvailability: async () =>
+      notConfigured("Food Hub does not publish availability to this site."),
   },
   orders: {
     provider: "foodhub",
@@ -99,7 +101,12 @@ export const foodhubAdapters: ProviderAdapterSet = {
       code: "invalid_request",
       message: "Read orders from the PPP order service.",
     }),
-    listOrders: async () => ({ ok: true, data: [] }),
+    listOrders: async () => ({
+      ok: false,
+      code: "invalid_request",
+      message:
+        "Website orders of a customer are read from Food Hub /customers/me, not listed here.",
+    }),
     cancelOrder: async () => ({
       ok: false,
       code: "invalid_request",

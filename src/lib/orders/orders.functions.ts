@@ -139,9 +139,8 @@ export const getInteracOptions = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<InteracOptions> => {
     const locationId = typeof data?.locationId === "string" ? data.locationId.slice(0, 128) : "";
     const orderType = data?.orderType === "DELIVERY" ? "DELIVERY" : "PICKUP";
-    const { interacAvailability } = await import(
-      "@/lib/integration/providers/foodhub/config.server"
-    );
+    const { interacAvailability } =
+      await import("@/lib/integration/providers/foodhub/config.server");
     const availability = interacAvailability(locationId, orderType);
     return {
       available: availability.available,
@@ -194,9 +193,12 @@ export const placeOrder = createServerFn({ method: "POST" })
     const { readCustomerToken } = await import("@/lib/customer/customer-cookie.server");
     const submitted = await submitOrder(created.data.id, {
       customerToken: data.payment === "interac" ? readCustomerToken() : null,
-      ...(data.lang === "fr" || data.lang === "en" || data.lang === "es" ? { lang: data.lang } : {}),
+      ...(data.lang === "fr" || data.lang === "en" || data.lang === "es"
+        ? { lang: data.lang }
+        : {}),
       displayedTotalCents:
-        typeof data.displayedTotalCents === "number" && Number.isSafeInteger(data.displayedTotalCents)
+        typeof data.displayedTotalCents === "number" &&
+        Number.isSafeInteger(data.displayedTotalCents)
           ? data.displayedTotalCents
           : null,
     });

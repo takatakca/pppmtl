@@ -99,7 +99,10 @@ function hasCheckoutPayloadShape(value: unknown): value is CheckoutRequest {
   }
   if (
     (input.payment !== undefined && input.payment !== "card" && input.payment !== "interac") ||
-    (input.lang !== undefined && input.lang !== "fr" && input.lang !== "en" && input.lang !== "es") ||
+    (input.lang !== undefined &&
+      input.lang !== "fr" &&
+      input.lang !== "en" &&
+      input.lang !== "es") ||
     (input.displayedTotalCents != null &&
       (typeof input.displayedTotalCents !== "number" ||
         !Number.isSafeInteger(input.displayedTotalCents) ||
@@ -358,9 +361,8 @@ async function adapterFor(order: InternalOrder): Promise<ProviderOrderAdapter | 
     return cloverOrderSubmitAdapter;
   }
   if (order.provider === "foodhub" && order.paymentMethod === "interac") {
-    const { foodhubInteracSubmitAdapter } = await import(
-      "@/lib/integration/providers/foodhub/interac-orders.server"
-    );
+    const { foodhubInteracSubmitAdapter } =
+      await import("@/lib/integration/providers/foodhub/interac-orders.server");
     return foodhubInteracSubmitAdapter;
   }
   return null;
@@ -475,17 +477,15 @@ export async function submitOrder(
   // Food Hub is the system of record for a held Interac order (it texts the customer and keeps the order); the
   // site keeps a copy for the receipt page, durably when PostgreSQL is configured, best effort.
   if (updated.provider === "foodhub" && durableOrderStoreConfigured()) {
-    await (await durableOrders())
-      .persistNewOrder(updated)
-      .catch((error: unknown) =>
-        logIntegrationEvent({
-          provider: "foodhub",
-          eventType: "order.persist_failed",
-          status: "error",
-          payloadReference: updated.id,
-          detail: error instanceof Error ? error.message : "unknown",
-        }),
-      );
+    await (await durableOrders()).persistNewOrder(updated).catch((error: unknown) =>
+      logIntegrationEvent({
+        provider: "foodhub",
+        eventType: "order.persist_failed",
+        status: "error",
+        payloadReference: updated.id,
+        detail: error instanceof Error ? error.message : "unknown",
+      }),
+    );
   }
   return { ok: true, data: updated };
 }

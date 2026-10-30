@@ -62,8 +62,14 @@ export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
     const { locationIntegrationMappings, firstConnectionMapping } =
       await import("@/config/integration-locations");
     const { FOODHUB_WEBSITE_ORDER_INGRESS } = await import("./providers/foodhub/bridge");
-    const { foodhubConfigured, foodhubHost, foodhubLocationCodes, interacEnabled, interacFeeCents, interacFeeTaxable } =
-      await import("./providers/foodhub/config.server");
+    const {
+      foodhubConfigured,
+      foodhubHost,
+      foodhubLocationCodes,
+      interacEnabled,
+      interacFeeCents,
+      interacFeeTaxable,
+    } = await import("./providers/foodhub/config.server");
     const { foodhubHealth } = await import("./providers/foodhub/client.server");
 
     const pilot = firstConnectionMapping();

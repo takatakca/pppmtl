@@ -4,7 +4,7 @@
 
 ## Current safe state of this change (PPP draft PR #23)
 
-- All non-Clover locations are tagged `foodhub` as their *intended future* engine, with **no fake store code, merchant, key, tenant or live connection**.
+- All non-Clover locations are tagged `foodhub` as their _intended future_ engine, with **no fake store code, merchant, key, tenant or live connection**.
 - PPP's old `POST /api/public/webhooks/provider?provider=urbanpiper` now returns HTTP **410 Gone before reading the body**, whether or not old secrets remain in Coolify.
 - UrbanPiper's eleven adapter/source modules, integration registry entry, outbound order adapter, admin test/sync/test-order buttons, API onboarding instructions and active credential keys are removed.
 - Independent PPP menu validation, image allow-list and stable internal item mappings remain under `src/lib/integration/core/`. The PPP official yellow Canva art rule remains unchanged.

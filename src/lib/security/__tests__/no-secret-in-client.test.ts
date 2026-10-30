@@ -34,13 +34,17 @@ describe("Food Hub secret stays on the server", () => {
         .filter((line) => !/^\s*import\s+type\s/.test(line))
         .join("\n");
       const staticServerImport = /^\s*import\s[^;]*?\sfrom\s+["'][^"']*\.server["']/m;
-      expect(staticServerImport.test(source), `${file} imports a .server module statically`).toBe(false);
+      expect(staticServerImport.test(source), `${file} imports a .server module statically`).toBe(
+        false,
+      );
     }
   });
 
   it("no client-facing module names the secret environment variable", () => {
     for (const file of CLIENT_FACING) {
-      expect(read(file), `${file} mentions the secret`).not.toContain("FOODHUB_WEBSITE_ORDER_SECRET");
+      expect(read(file), `${file} mentions the secret`).not.toContain(
+        "FOODHUB_WEBSITE_ORDER_SECRET",
+      );
       expect(read(file), `${file} reads process.env`).not.toMatch(/process\.env\b/);
     }
   });

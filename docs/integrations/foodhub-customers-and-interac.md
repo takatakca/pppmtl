@@ -1,6 +1,6 @@
 # Comptes clients (téléphone vérifié) et virement Interac via TAKATAK Food Hub
 
-*(English below.)*
+_(English below.)_
 
 ## En une phrase
 
@@ -14,17 +14,17 @@ PR #123) et la section B (commande de site web avec `payment: "interac"`, branch
 
 ## Variables d'environnement (service pppmtl dans Coolify — jamais dans le navigateur)
 
-| Variable | Rôle |
-| --- | --- |
-| `FOODHUB_URL` | Adresse de Food Hub, p. ex. `https://foodhub.on2go.ca` |
-| `FOODHUB_WEBSITE_ORDER_SECRET` | Le secret serveur-à-serveur déjà partagé avec Food Hub (`Authorization: Bearer`). |
-| `FOODHUB_TENANT` | Facultatif, `pppmtl` par défaut (doit être dans `FOODHUB_CUSTOMER_TENANTS` côté Food Hub). |
-| `FOODHUB_BRAND` | Facultatif, `PPP Pizzeria` par défaut : le nom de marque tel que le catalogue Food Hub l'écrit. |
-| `FOODHUB_LOCATION_CODES` | Facultatif, JSON `{ "<slug PPP>": "<CODE Food Hub>" }`. Par défaut, vérifié par adresse le 2026-10-29 : `ndg → NDG_MAIN`, `saint-leonard → SAINT_LEONARD`, `sainte-catherine → HOCHELAGA`. |
-| `FOODHUB_INTERAC_ENABLED` | **`true` seulement quand la branche Interac de Food Hub est déployée.** Sinon le site n'envoie aucune commande Interac (choix grisé « pas encore disponible »). |
-| `FOODHUB_INTERAC_FEE` | Frais Interac en dollars, `5.00` par défaut. Doit être égal au réglage Food Hub (sinon Food Hub refuse la commande : 422). |
-| `FOODHUB_INTERAC_FEE_TAXABLE` | `false` si Food Hub n'applique pas TPS + TVQ sur les frais. Par défaut `true`. À aligner avec la branche Interac. |
-| `FOODHUB_DELIVERY_FEE` | Frais de livraison en dollars pour une commande Interac livrée. Vide = Interac en cueillette seulement. |
+| Variable                       | Rôle                                                                                                                                                                                       |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `FOODHUB_URL`                  | Adresse de Food Hub, p. ex. `https://foodhub.on2go.ca`                                                                                                                                     |
+| `FOODHUB_WEBSITE_ORDER_SECRET` | Le secret serveur-à-serveur déjà partagé avec Food Hub (`Authorization: Bearer`).                                                                                                          |
+| `FOODHUB_TENANT`               | Facultatif, `pppmtl` par défaut (doit être dans `FOODHUB_CUSTOMER_TENANTS` côté Food Hub).                                                                                                 |
+| `FOODHUB_BRAND`                | Facultatif, `PPP Pizzeria` par défaut : le nom de marque tel que le catalogue Food Hub l'écrit.                                                                                            |
+| `FOODHUB_LOCATION_CODES`       | Facultatif, JSON `{ "<slug PPP>": "<CODE Food Hub>" }`. Par défaut, vérifié par adresse le 2026-10-29 : `ndg → NDG_MAIN`, `saint-leonard → SAINT_LEONARD`, `sainte-catherine → HOCHELAGA`. |
+| `FOODHUB_INTERAC_ENABLED`      | **`true` seulement quand la branche Interac de Food Hub est déployée.** Sinon le site n'envoie aucune commande Interac (choix grisé « pas encore disponible »).                            |
+| `FOODHUB_INTERAC_FEE`          | Frais Interac en dollars, `5.00` par défaut. Doit être égal au réglage Food Hub (sinon Food Hub refuse la commande : 422).                                                                 |
+| `FOODHUB_INTERAC_FEE_TAXABLE`  | `false` si Food Hub n'applique pas TPS + TVQ sur les frais. Par défaut `true`. À aligner avec la branche Interac.                                                                          |
+| `FOODHUB_DELIVERY_FEE`         | Frais de livraison en dollars pour une commande Interac livrée. Vide = Interac en cueillette seulement.                                                                                    |
 
 Les clés Twilio restent **dans Food Hub**, pas ici. Le navigateur ne voit jamais le secret ni les codes.
 
@@ -110,17 +110,17 @@ and section B (website order with `payment: "interac"`, Food Hub branch in progr
 
 ## Environment variables (pppmtl service in Coolify — never in the browser)
 
-| Variable | Role |
-| --- | --- |
-| `FOODHUB_URL` | Food Hub's address, e.g. `https://foodhub.on2go.ca` |
-| `FOODHUB_WEBSITE_ORDER_SECRET` | The server-to-server secret already shared with Food Hub (`Authorization: Bearer`). |
-| `FOODHUB_TENANT` | Optional, `pppmtl` by default (must be in Food Hub's `FOODHUB_CUSTOMER_TENANTS`). |
-| `FOODHUB_BRAND` | Optional, `PPP Pizzeria` by default: the brand name as Food Hub's catalog spells it. |
-| `FOODHUB_LOCATION_CODES` | Optional JSON `{ "<PPP slug>": "<Food Hub CODE>" }`. Defaults verified by street address on 2026-10-29: `ndg → NDG_MAIN`, `saint-leonard → SAINT_LEONARD`, `sainte-catherine → HOCHELAGA`. |
-| `FOODHUB_INTERAC_ENABLED` | **`true` only once Food Hub's Interac branch is deployed.** Otherwise the site sends no Interac order (choice greyed out, "not available yet"). |
-| `FOODHUB_INTERAC_FEE` | Interac fee in dollars, `5.00` by default. Must equal Food Hub's setting (otherwise Food Hub refuses the order: 422). |
-| `FOODHUB_INTERAC_FEE_TAXABLE` | `false` if Food Hub does not apply GST + QST to the fee. Default `true`. Align with the Interac branch. |
-| `FOODHUB_DELIVERY_FEE` | Delivery fee in dollars for an Interac delivery order. Empty = Interac for pickup only. |
+| Variable                       | Role                                                                                                                                                                                       |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `FOODHUB_URL`                  | Food Hub's address, e.g. `https://foodhub.on2go.ca`                                                                                                                                        |
+| `FOODHUB_WEBSITE_ORDER_SECRET` | The server-to-server secret already shared with Food Hub (`Authorization: Bearer`).                                                                                                        |
+| `FOODHUB_TENANT`               | Optional, `pppmtl` by default (must be in Food Hub's `FOODHUB_CUSTOMER_TENANTS`).                                                                                                          |
+| `FOODHUB_BRAND`                | Optional, `PPP Pizzeria` by default: the brand name as Food Hub's catalog spells it.                                                                                                       |
+| `FOODHUB_LOCATION_CODES`       | Optional JSON `{ "<PPP slug>": "<Food Hub CODE>" }`. Defaults verified by street address on 2026-10-29: `ndg → NDG_MAIN`, `saint-leonard → SAINT_LEONARD`, `sainte-catherine → HOCHELAGA`. |
+| `FOODHUB_INTERAC_ENABLED`      | **`true` only once Food Hub's Interac branch is deployed.** Otherwise the site sends no Interac order (choice greyed out, "not available yet").                                            |
+| `FOODHUB_INTERAC_FEE`          | Interac fee in dollars, `5.00` by default. Must equal Food Hub's setting (otherwise Food Hub refuses the order: 422).                                                                      |
+| `FOODHUB_INTERAC_FEE_TAXABLE`  | `false` if Food Hub does not apply GST + QST to the fee. Default `true`. Align with the Interac branch.                                                                                    |
+| `FOODHUB_DELIVERY_FEE`         | Delivery fee in dollars for an Interac delivery order. Empty = Interac for pickup only.                                                                                                    |
 
 The Twilio keys live **in Food Hub**, not here. The browser never sees the secret or the codes.
 

@@ -53,8 +53,7 @@ export interface CustomerFavorite {
 
 /** Truthful loyalty state from Food Hub: `connected: false` carries the reason the customer reads. */
 export type CustomerLoyalty =
-  | { connected: false; reason: string }
-  | { connected: true; points: number; tier: string | null };
+  { connected: false; reason: string } | { connected: true; points: number; tier: string | null };
 
 export type CustomerGiftCards =
   | { connected: false; reason: string }
@@ -93,11 +92,20 @@ export type AuthResultCode =
 
 export type AuthResult<T> =
   | { ok: true; data: T }
-  | { ok: false; code: AuthResultCode; message: string; retryAfterS?: number; attemptsLeft?: number };
+  | {
+      ok: false;
+      code: AuthResultCode;
+      message: string;
+      retryAfterS?: number;
+      attemptsLeft?: number;
+    };
 
 /** Phone verification is the only credential; nothing here ever handles a password. */
 export interface PhoneAuthRepository {
-  startVerification(phone: string, lang: "fr" | "en" | "es"): Promise<AuthResult<{ expiresInS: number }>>;
+  startVerification(
+    phone: string,
+    lang: "fr" | "en" | "es",
+  ): Promise<AuthResult<{ expiresInS: number }>>;
   checkVerification(phone: string, code: string): Promise<AuthResult<RestaurantCustomer>>;
   signOut(): Promise<AuthResult<null>>;
   /** Law 25: anonymise the account at Food Hub and end every session. */
@@ -122,7 +130,9 @@ export interface CustomerRepository {
 export interface AddressRepository {
   list(): Promise<AuthResult<CustomerAddress[]>>;
   /** Replaces the whole list at Food Hub (max 5). */
-  saveAll(addresses: Array<Omit<CustomerAddress, "id" | "customerId">>): Promise<AuthResult<CustomerAddress[]>>;
+  saveAll(
+    addresses: Array<Omit<CustomerAddress, "id" | "customerId">>,
+  ): Promise<AuthResult<CustomerAddress[]>>;
 }
 
 export interface FavoriteRepository {

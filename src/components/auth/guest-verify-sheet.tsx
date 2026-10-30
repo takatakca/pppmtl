@@ -92,7 +92,10 @@ export function GuestVerifySheet({
               `Too many requests for this number. Try again in ${retryAfterS}s.`,
               `Trop de demandes pour ce numéro. Réessayez dans ${retryAfterS}s.`,
             )
-          : t("Too many requests. Please wait a moment.", "Trop de demandes. Patientez un instant.");
+          : t(
+              "Too many requests. Please wait a moment.",
+              "Trop de demandes. Patientez un instant.",
+            );
       case "wrong_code":
         return t(
           "That code is not right. Check the text message and try again.",
@@ -413,8 +416,8 @@ export function GuestVerifySheet({
             {t("Number verified", "Numéro vérifié")}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            {t("You're signed in to PPP with", "Vous êtes connecté à PPP avec")} +1 {phoneDisplay}.
-            {verifiedPhone ? "" : ""}
+            {t("You're signed in to PPP with", "Vous êtes connecté à PPP avec")}{" "}
+            {verifiedPhone ?? `+1 ${phoneDisplay}`}.
           </p>
         </>
       )}

@@ -103,7 +103,10 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
       setConfirmDelete(false);
       setNotice(
         result.message ??
-          t("The account was not deleted. Try again.", "Le compte n'a pas été supprimé. Réessayez."),
+          t(
+            "The account was not deleted. Try again.",
+            "Le compte n'a pas été supprimé. Réessayez.",
+          ),
       );
     }
   }
@@ -151,7 +154,10 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
       </section>
 
       {notice && (
-        <p role="alert" className="mt-2 border border-border bg-card p-3 text-sm text-muted-foreground">
+        <p
+          role="alert"
+          className="mt-2 border border-border bg-card p-3 text-sm text-muted-foreground"
+        >
           {notice}
         </p>
       )}
@@ -167,7 +173,9 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
             : t("Points — coming soon", "Points — bientôt", "Puntos — próximamente")}
         </h2>
         <div className="mt-3 flex items-center gap-4 border border-dashed border-border p-4">
-          <Star className={`h-8 w-8 shrink-0 ${loyalty.connected ? "text-primary" : "text-muted-foreground"}`} />
+          <Star
+            className={`h-8 w-8 shrink-0 ${loyalty.connected ? "text-primary" : "text-muted-foreground"}`}
+          />
           {loyalty.connected ? (
             <p className="text-sm">
               <span className="font-display text-3xl leading-none">{loyalty.points}</span>{" "}
@@ -358,7 +366,9 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
             </h2>
           </div>
           <div className="mt-3 flex items-center gap-4 border border-dashed border-border p-4">
-            <Gift className={`h-8 w-8 shrink-0 ${giftCards.connected ? "text-primary" : "text-muted-foreground"}`} />
+            <Gift
+              className={`h-8 w-8 shrink-0 ${giftCards.connected ? "text-primary" : "text-muted-foreground"}`}
+            />
             {giftCards.connected ? (
               giftCards.cards.length > 0 ? (
                 <ul className="text-sm">
@@ -435,7 +445,9 @@ export function MemberDashboard({ customer }: { customer: RestaurantCustomer }) 
             </dt>
             <dd className="mt-1 break-all text-sm">
               {customer.email ?? (
-                <span className="text-muted-foreground">{t("Not set", "Non renseigné", "Sin definir")}</span>
+                <span className="text-muted-foreground">
+                  {t("Not set", "Non renseigné", "Sin definir")}
+                </span>
               )}
             </dd>
           </div>

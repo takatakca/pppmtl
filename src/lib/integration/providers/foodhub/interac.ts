@@ -278,7 +278,11 @@ export function interacInstructionRows(
   const rows: InstructionRow[] = [
     {
       key: "recipient",
-      label: fr ? "Envoyer le virement à" : lang === "es" ? "Enviar la transferencia a" : "Send the transfer to",
+      label: fr
+        ? "Envoyer le virement à"
+        : lang === "es"
+          ? "Enviar la transferencia a"
+          : "Send the transfer to",
       value: instructions.recipient,
     },
     {
@@ -288,14 +292,22 @@ export function interacInstructionRows(
     },
     {
       key: "reference",
-      label: fr ? "Message du virement" : lang === "es" ? "Mensaje de la transferencia" : "Transfer message",
+      label: fr
+        ? "Message du virement"
+        : lang === "es"
+          ? "Mensaje de la transferencia"
+          : "Transfer message",
       value: instructions.reference,
     },
   ];
   if (instructions.question) {
     rows.push({
       key: "question",
-      label: fr ? "Question de sécurité" : lang === "es" ? "Pregunta de seguridad" : "Security question",
+      label: fr
+        ? "Question de sécurité"
+        : lang === "es"
+          ? "Pregunta de seguridad"
+          : "Security question",
       value: instructions.question,
     });
   }

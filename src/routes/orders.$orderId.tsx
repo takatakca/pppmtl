@@ -231,7 +231,11 @@ function OrderReceiptPage() {
 
           {order.interac && (
             <section
-              aria-label={t("Interac e-Transfer instructions", "Instructions du virement Interac", "Instrucciones Interac")}
+              aria-label={t(
+                "Interac e-Transfer instructions",
+                "Instructions du virement Interac",
+                "Instrucciones Interac",
+              )}
               className="mt-6 border border-primary p-4"
             >
               <h2 className="font-display text-xl uppercase leading-none">
