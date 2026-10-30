@@ -39,7 +39,9 @@
 
 ## §4 — Launch queue, in order (NDG first, then Saint-Léonard, ≥3h apart)
 
-### DAY 1 — A6 — READY, pending browser window + live-text re-check (text-only)
+### DAY 1 — A6 — POSTED LIVE NDG 2026-10-29 21:28 EDT; Saint-Léonard QUEUED (text-only)
+- **NDG POSTED LIVE:** 2026-10-29 ~21:28 EDT, Public, never backdated, as PPP Montreal -Notre Dame De Grâce-, post URL https://www.facebook.com/permalink.php?story_fbid=pfbid0f8bu9sc8VNQhw5XWL3TfGpKpyxDVjgGCwEDpec1xMWk1wsq143v96szs2edbtzPAl&id=61595655663633 — text "Bol Choix du Chef : frites, riz, salade, pain pita, viande au choix du chef. En succursale seulement. PPP Pizzeria, NDG, Montréal." + location block 6280 av. Somerled, Montréal QC H3X 2B6, daily 4 PM–3 AM, phone 450-999-4999, sister tag Saint-Léonard, @ppp_pizzeria, #PPPPizzeria #MontrealEats #FastFoodMontreal. Text-only, in-store only, no order link, Facebook "Call Now" prompt declined, no approval card / 2FA / owner step encountered. Source: live Google Business Profile PPP update from 7 days ago, verbatim copied; the separate 3-days-ago "-50% en ligne" promo for the same bowl was NOT used.
+- **Saint-Léonard QUEUED, NOT posted:** earliest ~00:28 EDT 2026-10-30 (at least 3h after NDG). Day 1 is NOT fully done until the SL half posts. Day 2 stays ready pending browser. Pinned 19 Apr 2024 post untouched, no merge, no Shop/catalogue change. Signed: SOCIO, Agent Lévesque.
 - Source: Google listing "PPP Pizzeria", 6280 Av. Somerled — Google NDG post 6, verified summary only: Chef's Choice Bowl, in-store only, no photo, no Order link (6 days ago at capture).
 - Target NDG (first): Facebook NDG page (§1) — post natively, tag Saint-Léonard sister page.
 - Target Saint-Léonard (second, ≥3h later): Facebook SL page (§1) — same text, SL name/address/hours swapped, tag NDG sister page.
