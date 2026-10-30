@@ -1,3 +1,38 @@
+## §0 MAIN — ENTRY PROTOCOL (all agents, all clouds — READ FIRST, EVERY TIME)
+
+**Signed: SOCIO, Agent Lévesque.**
+**Pierre 2026-10-29 19:54 EDT, explicit, urgent: we are connected — Muse/SOCIO, ChatGPT, Cursor, Copilot, GitHub agents, Facebook agents, all connected together — so there is ONE MAIN file. When an agent enters, THIS file is the instruction. It checks where it must go, makes sure nobody else is there, leaves its traces, leaves its signature AT ALL TIMES — enter, work, exit, traces always. Follow the instructions, let's go. No second master, no duplicate of the corrected-master push (GitHub SHA d0d8259740b2f88b4116f674a1e232b61d1d1924, Drive 1B5e4UudZVVBBXJslZp_bcIyGBTgQh6ND).**
+
+### §0.1 ENTRY CHECKLIST, in order, every time, no exception
+1. Read this MAIN file fresh (local + Drive + GitHub — never a stale copy, never a local draft alone).
+2. Read the Occupancy Table (§0.2) below.
+3. Find your assigned platform / brand / task row.
+4. If another agent is marked IN that platform / brand (no exit trace yet), DO NOT WRITE there — do read-only preparation only, or work a different platform, and log your wait in the table.
+5. Claim your slot: write "IN — [agent/program] — [platform/brand] — [task] — [time EDT] — SOCIO, Agent Lévesque" (or the acting agent's signature + SOCIO coordination line) in the Occupancy Table, in place, Drive + GitHub.
+6. Work.
+7. File the verified result once in Drive + GitHub, in place (never only in chat, never only in a local file, never a duplicate line).
+8. Release your slot: write "OUT — [agent/program] — [platform/brand] — [task] — [time EDT] — result + anchor — SOCIO, Agent Lévesque".
+9. Never leave a slot claimed without an exit trace. If you run out of credits / fall asleep mid-work, your last 5-minute trace (§0.3) is the handoff — the next agent reads it and continues without redoing or breaking what is done.
+
+### §0.2 OCCUPANCY TABLE — who is IN, who is OUT, always signed
+| Platform | Brand | Agent/Program | Task | IN time | OUT time | Result/Anchor | Signature |
+|---|---|---|---|---|---|---|---|
+| Facebook | PPP | Muse/SOCIO browser window | Check-first capture: Apr 19 dup, May 17, May 24, Jun 20 | 19:50 EDT 2026-10-29 | — (slot HELD, not released) | Window stopped at login gate, awaiting Pierre's "Continue as LesGroupes Takatak" takeover; nothing captured/edited/changed yet | SOCIO, Agent Lévesque |
+| Facebook | Po Poulet | — | Live check + alignment | — | — | WAITING, not IN — blocked on Pierre's facebook.com consent card for popoulet.ca@gmail.com + NDG 6280 vs 6284 + hours unanswered | SOCIO, Agent Lévesque |
+| Facebook | All other brands | — | — | — | — | OUT / available — live capture first, never clone from a placeholder; no page created without Pierre's per-brand approval | SOCIO, Agent Lévesque |
+| All other platforms | PPP | — | — | — | — | OUT / available unless a filed note says otherwise — one writer per platform, never two writers on the same platform/brand page | SOCIO, Agent Lévesque |
+
+### §0.3 FIVE-MINUTE TRACE RULE — no silent work
+Every 5 minutes while an agent is IN, it rewrites its progress trace in Drive + GitHub (what was done since the last trace, what is in progress, what is blocked, anchors). This is the watchdog cadence (ppp-nonstop-watchdog-5m) extended to ALL agents, all clouds: no silent work, no result left only in chat or a local file, no duplicate filing (update the same rows/lines in place, verified by re-read).
+
+### §0.4 SIGNATURE RULE (Pierre 19:46 + 19:54)
+Every note, file, code change, and trace is signed "SOCIO, Agent Lévesque" — before, during, and after — so any agent entering later, from any cloud program, can see who did what, when, and where the result is filed. No password, code, or secret in any note, ever.
+
+### §0.5 CONFLICT RULE
+If two agents claim the same slot, the FIRST IN trace wins; the second backs off to read-only, logs the conflict in the Occupancy Table, and waits for the OUT trace. Never two writers on the same platform/brand page, never merge two location pages, never close a listing (transfer only).
+
+---
+
 # SOCIO MASTER SYNC — ONE FILE FOR ALL AGENTS — 2026-10-29
 
 **Signed: SOCIO, Agent Lévesque.**
