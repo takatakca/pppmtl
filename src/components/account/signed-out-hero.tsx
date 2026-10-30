@@ -7,8 +7,9 @@ import { pppBusiness } from "@/config/business";
 
 /**
  * Anonymous visitor state of /account. Loyalty-first, never guilt-trips the
- * guest path. When accounts are not open yet, sign-in actions are replaced by
- * a plain "coming soon" note instead of buttons that go nowhere.
+ * guest path. A verified mobile number is the account (no password, nothing to
+ * create). While Food Hub is not connected, the sign-in action is replaced by a
+ * plain "not open yet" note instead of a button that goes nowhere.
  */
 export function SignedOutHero({ accountsAvailable }: { accountsAvailable: boolean }) {
   const { t } = usePPP();
@@ -24,10 +25,10 @@ export function SignedOutHero({ accountsAvailable }: { accountsAvailable: boolea
     },
     {
       icon: Star,
-      title: t("Keep your points", "Conservez vos points"),
+      title: t("Your phone is the key", "Votre numéro est la clé"),
       body: t(
-        "Rewards follow your account, not your device.",
-        "Les points suivent votre compte, pas l'appareil.",
+        "Points and gift cards will attach to your verified number once they open.",
+        "Les points et les cartes-cadeaux se rattacheront à votre numéro vérifié dès leur ouverture.",
       ),
     },
     {
@@ -71,24 +72,24 @@ export function SignedOutHero({ accountsAvailable }: { accountsAvailable: boolea
               <>
                 {GOOGLE_SIGN_IN_ENABLED && <GoogleButton />}
                 <Link
-                  to="/account/sign-up"
-                  className="lift-btn press-tap bg-background py-3.5 text-center font-display text-xl uppercase leading-none focus-ppp"
-                >
-                  {t("Create my PPP account", "Créer mon compte PPP")}
-                </Link>
-                <Link
                   to="/account/sign-in"
                   search={{ returnTo: "/account" }}
-                  className="lift-btn press-tap border border-primary-foreground/40 py-3.5 text-center font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
+                  className="lift-btn press-tap bg-background py-3.5 text-center font-display text-xl uppercase leading-none focus-ppp"
                 >
-                  {t("Sign in", "Se connecter")}
+                  {t("Sign in with my mobile number", "Me connecter avec mon cellulaire")}
                 </Link>
+                <p className="text-center text-[0.7rem] text-primary-foreground/80">
+                  {t(
+                    "A text message code, no password. First visit? That's your account.",
+                    "Un code par texto, aucun mot de passe. Première visite ? C'est votre compte.",
+                  )}
+                </p>
               </>
             ) : (
               <p className="border border-primary-foreground/40 px-4 py-3 text-sm text-primary-foreground/90">
                 {t(
-                  "PPP accounts open soon. Ordering, pickup and delivery all work right now without one.",
-                  "Les comptes PPP arrivent bientôt. La commande, la cueillette et la livraison fonctionnent déjà sans compte.",
+                  "Phone sign-in is not switched on yet. Ordering, pickup and delivery all work right now without an account.",
+                  "La connexion par téléphone n'est pas encore activée. La commande, la cueillette et la livraison fonctionnent déjà sans compte.",
                 )}
               </p>
             )}
@@ -116,8 +117,8 @@ export function SignedOutHero({ accountsAvailable }: { accountsAvailable: boolea
         <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
         <p className="text-sm text-muted-foreground">
           {t(
-            "Guest orders are verified by text message so your order stays yours. We never create an account for you, and we never add you to marketing without asking.",
-            "Les commandes sans compte sont vérifiées par texto pour rester les vôtres. Nous ne créons jamais de compte à votre place et ne vous abonnons jamais au marketing sans votre accord.",
+            "Your number is verified by text message so your orders stay yours. PPP keeps no password and no customer database of its own, and never adds you to marketing without asking.",
+            "Votre numéro est vérifié par texto pour que vos commandes restent les vôtres. PPP ne garde aucun mot de passe ni base de données clients, et ne vous abonne jamais au marketing sans votre accord.",
           )}
         </p>
       </section>
@@ -126,8 +127,8 @@ export function SignedOutHero({ accountsAvailable }: { accountsAvailable: boolea
         <Gift className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
         <p className="text-sm text-muted-foreground">
           {t(
-            "Gift cards don't need an account either — buy and send one any time.",
-            "Les cartes-cadeaux ne nécessitent pas de compte — achetez-en une quand vous voulez.",
+            "Gift cards don't need an account either.",
+            "Les cartes-cadeaux ne nécessitent pas de compte non plus.",
           )}{" "}
           <Link to="/gift-cards" className="text-accent underline focus-ppp">
             {t("PPP gift cards", "Cartes-cadeaux PPP")}

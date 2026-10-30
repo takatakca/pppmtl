@@ -58,6 +58,31 @@ export function canTransition(from: OrderStatus, to: OrderStatus): boolean {
 export type OrderPaymentStatus =
   "UNPAID" | "AUTHORIZED" | "PAID" | "REFUNDED" | "FAILED" | "PAY_AT_RESTAURANT";
 
+/**
+ * How the customer chose to pay. `card` = Clover Hosted Checkout (pickup, NDG). `interac` = Interac e-Transfer:
+ * the order is held at Food Hub until the restaurant confirms the transfer.
+ */
+export type OrderPaymentMethod = "card" | "interac";
+
+/** A fee shown to the customer before commitment and sent with the order (cents). */
+export interface OrderFee {
+  code: string;
+  name: string;
+  amount: number;
+}
+
+/** Interac e-Transfer instructions returned by Food Hub for a held order (amount in dollars). */
+export interface OrderInteracInstructions {
+  recipient: string;
+  amount: number;
+  reference: string;
+  question: string | null;
+  autoDeposit: boolean;
+  expiresAt: string | null;
+  instructionsFr: string;
+  instructionsEn: string;
+}
+
 export interface OrderItemModifier {
   groupId: string;
   choiceId: string;
@@ -136,6 +161,12 @@ export interface InternalOrder {
   paymentUrl?: string | null;
   /** Clover payment id once Clover confirmed the payment. */
   providerPaymentId?: string | null;
+  /** Absent on orders created before payment choice existed: read as `card`. */
+  paymentMethod?: OrderPaymentMethod | null;
+  /** Fees the customer saw before confirming (Interac fee); empty or absent for card orders. */
+  fees?: OrderFee[];
+  /** Interac e-Transfer instructions while the order waits for the transfer (Food Hub holds it). */
+  interac?: OrderInteracInstructions | null;
   createdAt: string;
   updatedAt: string;
 }

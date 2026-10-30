@@ -16,6 +16,17 @@ export const INTEGRATION_ENV_KEYS = [
   "STRIPE_SECRET_KEY",
   "TWILIO_ACCOUNT_SID",
   "TWILIO_AUTH_TOKEN",
+  // TAKATAK Food Hub (first-party): customer identity + Interac e-Transfer website orders.
+  // The secret is sent as a Bearer header from this server only; the browser never sees it.
+  "FOODHUB_URL",
+  "FOODHUB_WEBSITE_ORDER_SECRET",
+  "FOODHUB_TENANT",
+  "FOODHUB_BRAND",
+  "FOODHUB_LOCATION_CODES",
+  "FOODHUB_INTERAC_ENABLED",
+  "FOODHUB_INTERAC_FEE",
+  "FOODHUB_INTERAC_FEE_TAXABLE",
+  "FOODHUB_DELIVERY_FEE",
 ] as const;
 
 export type IntegrationEnvKey = (typeof INTEGRATION_ENV_KEYS)[number];

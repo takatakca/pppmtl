@@ -13,7 +13,14 @@ import {
   isGuestOrderReadInput,
 } from "./guest-request-input";
 import type { OrderError } from "./errors";
-import type { InternalOrder, OrderStatus, OrderType } from "./types";
+import type {
+  InternalOrder,
+  OrderFee,
+  OrderInteracInstructions,
+  OrderPaymentMethod,
+  OrderStatus,
+  OrderType,
+} from "./types";
 
 export interface PlaceOrderInput {
   locationId: string;
@@ -34,6 +41,11 @@ export interface PlaceOrderInput {
   };
   deliveryAddress: string | null;
   notes: string;
+  /** "card" (Clover Hosted Checkout, default) or "interac" (e-Transfer held at Food Hub). */
+  payment?: OrderPaymentMethod;
+  /** Interac: the all-inclusive total shown to the customer (cents); the server refuses to send another. */
+  displayedTotalCents?: number | null;
+  lang?: "fr" | "en" | "es";
 }
 
 /** Customer-safe view of an order: no provider ids, no internal codes. */
@@ -45,13 +57,20 @@ export interface OrderView {
   orderType: OrderType;
   createdAt: string;
   subtotal: number;
+  /** Cents; null until a provider confirmed the taxes. */
+  tax: number | null;
   total: number | null;
   customerName: string | null;
   deliveryAddress: string | null;
   notes: string | null;
   paymentStatus: InternalOrder["paymentStatus"];
+  paymentMethod: OrderPaymentMethod;
   /** Clover's payment page while the order waits for payment; null otherwise. */
   paymentUrl: string | null;
+  /** Fees included in the total (cents), e.g. the Interac e-Transfer fee. */
+  fees: OrderFee[];
+  /** Interac e-Transfer instructions while Food Hub holds the order; null otherwise. */
+  interac: OrderInteracInstructions | null;
   items: Array<{
     productId: string;
     name: string;
@@ -77,12 +96,16 @@ function toView(order: InternalOrder): OrderView {
     orderType: order.orderType,
     createdAt: order.createdAt,
     subtotal: order.subtotal,
+    tax: order.tax,
     total: order.total,
     customerName: order.customer.name,
     deliveryAddress: order.deliveryAddress,
     notes: order.notes,
     paymentStatus: order.paymentStatus,
+    paymentMethod: order.paymentMethod ?? "card",
     paymentUrl: order.paymentStatus === "UNPAID" ? (order.paymentUrl ?? null) : null,
+    fees: order.fees ?? [],
+    interac: order.paymentStatus === "UNPAID" ? (order.interac ?? null) : null,
     items: order.items.map((i) => ({
       productId: i.productId,
       name: i.name,
@@ -98,6 +121,36 @@ function toView(order: InternalOrder): OrderView {
     })),
   };
 }
+
+/** What the checkout screen needs to show the Interac e-Transfer choice and its all-inclusive total BEFORE commitment. */
+export interface InteracOptions {
+  available: boolean;
+  /** Why not, when unavailable: the UI words it; never a secret. */
+  reason: "not_configured" | "not_enabled" | "location_not_mapped" | "delivery_fee_unknown" | null;
+  /** Cents. */
+  feeCents: number;
+  feeTaxable: boolean;
+  /** Cents; null when the owner set no delivery fee (Interac delivery stays closed). */
+  deliveryFeeCents: number | null;
+}
+
+export const getInteracOptions = createServerFn({ method: "POST" })
+  .inputValidator((input: { locationId: string; orderType: OrderType }) => input)
+  .handler(async ({ data }): Promise<InteracOptions> => {
+    const locationId = typeof data?.locationId === "string" ? data.locationId.slice(0, 128) : "";
+    const orderType = data?.orderType === "DELIVERY" ? "DELIVERY" : "PICKUP";
+    const { interacAvailability } = await import(
+      "@/lib/integration/providers/foodhub/config.server"
+    );
+    const availability = interacAvailability(locationId, orderType);
+    return {
+      available: availability.available,
+      reason: availability.reason,
+      feeCents: availability.feeCents,
+      feeTaxable: availability.feeTaxable,
+      deliveryFeeCents: availability.deliveryFeeCents,
+    };
+  });
 
 /** Validate only — used to show problems before the customer commits. */
 export const checkOrder = createServerFn({ method: "POST" })
@@ -136,7 +189,17 @@ export const placeOrder = createServerFn({ method: "POST" })
 
     // The cookie is issued before redirecting off-domain to Clover, even if the provider errors.
     grantOrderAccess(created.data.id);
-    const submitted = await submitOrder(created.data.id);
+    // A signed-in customer's Food Hub token (HttpOnly cookie) links an Interac order to their account at Food Hub.
+    // The site never stores it on the order and never accepts it from the request body.
+    const { readCustomerToken } = await import("@/lib/customer/customer-cookie.server");
+    const submitted = await submitOrder(created.data.id, {
+      customerToken: data.payment === "interac" ? readCustomerToken() : null,
+      ...(data.lang === "fr" || data.lang === "en" || data.lang === "es" ? { lang: data.lang } : {}),
+      displayedTotalCents:
+        typeof data.displayedTotalCents === "number" && Number.isSafeInteger(data.displayedTotalCents)
+          ? data.displayedTotalCents
+          : null,
+    });
     if (!submitted.ok) {
       return { ok: false, order: toView(created.data), error: submitted.error };
     }

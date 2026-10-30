@@ -2,16 +2,19 @@ import { useEffect, useRef, useState } from "react";
 import type { ClipboardEvent, KeyboardEvent } from "react";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { usePPP } from "@/context/ppp-store";
+import { authRepository } from "@/lib/customer/repositories";
+import { useCustomerSession } from "@/lib/customer/session";
+import type { AuthResultCode } from "@/lib/customer/types";
 
 /**
- * Guest phone verification UI. Not wired up to a live SMS service yet, so
- * no code is ever actually sent or checked — this always tells the
- * customer honestly that verification isn't ready, never a fake success.
- * Currently unused; keep hidden from customer flows until phone
- * verification is live.
+ * Phone verification = sign-in = account. Food Hub (TAKATAK identity) texts the code and creates the customer
+ * on the first verified code; this sheet only drives that flow through the site's server functions. When
+ * Food Hub is not connected, or its customer routes are not deployed yet, the sheet says so — never a fake
+ * success, never a fake "code sent".
  */
 
 const RESEND_COOLDOWN_S = 30;
+/** Food Hub voids the code after 5 wrong tries. */
 const MAX_ATTEMPTS = 5;
 const CODE_LENGTH = 6;
 
@@ -36,14 +39,19 @@ export function GuestVerifySheet({
   onVerified,
   onCancel,
   className = "",
+  initialPhone = "",
 }: {
+  /** Called once with the verified number (E.164); the session is already refreshed. */
   onVerified?: (phone: string) => void;
   onCancel?: () => void;
   className?: string;
+  /** Pre-fill from the checkout phone field. */
+  initialPhone?: string;
 }) {
-  const { t } = usePPP();
+  const { t, lang } = usePPP();
+  const { refresh } = useCustomerSession();
   const [step, setStep] = useState<Step>("phone");
-  const [phoneDisplay, setPhoneDisplay] = useState("");
+  const [phoneDisplay, setPhoneDisplay] = useState(() => formatCanadianPhone(initialPhone));
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
 
@@ -51,12 +59,14 @@ export function GuestVerifySheet({
   const [otpError, setOtpError] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
   const [attempts, setAttempts] = useState(0);
+  const [voided, setVoided] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [verifiedPhone, setVerifiedPhone] = useState<string | null>(null);
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
 
   const phoneDigits = digitsOnly(phoneDisplay);
   const phoneValid = phoneDigits.length === 10;
-  const locked = attempts >= MAX_ATTEMPTS;
+  const locked = voided || attempts >= MAX_ATTEMPTS;
 
   useEffect(() => {
     if (step !== "otp" || cooldown <= 0) return undefined;
@@ -64,8 +74,59 @@ export function GuestVerifySheet({
     return () => window.clearInterval(id);
   }, [step, cooldown]);
 
-  async function sendCode() {
-    setPhoneError(null);
+  /** Honest wording per outcome; Food Hub's own text is never shown raw. */
+  function messageFor(code: AuthResultCode, fallback: string, retryAfterS?: number): string {
+    switch (code) {
+      case "rate_limited":
+        return retryAfterS
+          ? t(
+              `Too many requests for this number. Try again in ${retryAfterS}s.`,
+              `Trop de demandes pour ce numéro. Réessayez dans ${retryAfterS}s.`,
+            )
+          : t("Too many requests. Please wait a moment.", "Trop de demandes. Patientez un instant.");
+      case "wrong_code":
+        return t(
+          "That code is not right. Check the text message and try again.",
+          "Ce code n'est pas bon. Vérifiez le texto et réessayez.",
+        );
+      case "code_void":
+        return t(
+          "That code is no longer valid. Request a new one.",
+          "Ce code n'est plus valide. Demandez-en un nouveau.",
+        );
+      case "invalid":
+        return t(
+          "Enter a 10-digit Canadian mobile number.",
+          "Entrez un numéro de cellulaire canadien à 10 chiffres.",
+        );
+      case "signed_out":
+        return t("Please verify your number again.", "Veuillez vérifier votre numéro à nouveau.");
+      default:
+        return fallback;
+    }
+  }
+
+  const unavailableFor = (message: string) =>
+    /not open yet|not available yet|not connected/i.test(message)
+      ? t(
+          "Phone sign-in is not available yet. You can still order as a guest.",
+          "La connexion par téléphone n'est pas encore disponible. Vous pouvez quand même commander sans compte.",
+        )
+      : /unavailable|could not reach/i.test(message)
+        ? t(
+            "We could not reach the verification service. Please try again in a moment.",
+            "Impossible de joindre le service de vérification. Réessayez dans un instant.",
+          )
+        : message;
+
+  function resetOtp() {
+    setDigits(Array(CODE_LENGTH).fill(""));
+    setOtpError(null);
+    setAttempts(0);
+    setVoided(false);
+  }
+
+  async function requestCode(resending: boolean) {
     if (!phoneValid) {
       setPhoneError(
         t("Enter a 10-digit phone number.", "Entrez un numéro de téléphone à 10 chiffres."),
@@ -73,26 +134,36 @@ export function GuestVerifySheet({
       return;
     }
     setSending(true);
-    // No SMS is sent yet — this delay only mirrors what the real flow will feel like.
-    await new Promise((r) => setTimeout(r, 600));
+    setPhoneError(null);
+    const result = await authRepository
+      .startVerification(phoneDigits, lang === "fr" ? "fr" : "en")
+      .catch(() => ({
+        ok: false as const,
+        code: "unavailable" as const,
+        message: "We could not reach Food Hub. Check your connection and try again.",
+      }));
     setSending(false);
+    if (!result.ok) {
+      const message = unavailableFor(messageFor(result.code, result.message, result.retryAfterS));
+      if (resending) {
+        setOtpError(message);
+        if (result.code === "rate_limited" && result.retryAfterS) setCooldown(result.retryAfterS);
+      } else {
+        setPhoneError(message);
+      }
+      return;
+    }
     setStep("otp");
-    setDigits(Array(CODE_LENGTH).fill(""));
-    setOtpError(null);
-    setAttempts(0);
+    resetOtp();
     setCooldown(RESEND_COOLDOWN_S);
     window.requestAnimationFrame(() => inputsRef.current[0]?.focus());
   }
 
+  const sendCode = () => requestCode(false);
+
   async function resend() {
-    if (cooldown > 0) return;
-    setSending(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setSending(false);
-    setCooldown(RESEND_COOLDOWN_S);
-    setDigits(Array(CODE_LENGTH).fill(""));
-    setOtpError(null);
-    window.requestAnimationFrame(() => inputsRef.current[0]?.focus());
+    if (cooldown > 0 || sending) return;
+    await requestCode(true);
   }
 
   function setDigitAt(index: number, value: string) {
@@ -109,6 +180,7 @@ export function GuestVerifySheet({
     if (e.key === "Backspace" && !digits[index] && index > 0) {
       inputsRef.current[index - 1]?.focus();
     }
+    if (e.key === "Enter") void verify();
   }
 
   function onPaste(e: ClipboardEvent<HTMLInputElement>) {
@@ -122,7 +194,7 @@ export function GuestVerifySheet({
   }
 
   async function verify() {
-    if (locked) return;
+    if (locked || verifying) return;
     const code = digits.join("");
     if (code.length < CODE_LENGTH) {
       setOtpError(t("Enter the 6-digit code.", "Entrez le code à 6 chiffres."));
@@ -130,19 +202,30 @@ export function GuestVerifySheet({
     }
     setVerifying(true);
     setOtpError(null);
-    await new Promise((r) => setTimeout(r, 500));
+    const result = await authRepository.checkVerification(phoneDigits, code).catch(() => ({
+      ok: false as const,
+      code: "unavailable" as const,
+      message: "We could not reach Food Hub. Check your connection and try again.",
+    }));
     setVerifying(false);
-    // Phone verification isn't live yet — never claim success here.
-    setAttempts((a) => a + 1);
-    setOtpError(
-      t(
-        "Phone verification is coming soon — we can't check codes yet.",
-        "La vérification par téléphone arrive bientôt — nous ne pouvons pas encore vérifier les codes.",
-      ),
-    );
-    setDigits(Array(CODE_LENGTH).fill(""));
-    inputsRef.current[0]?.focus();
-    void onVerified;
+    if (!result.ok) {
+      if (result.code === "wrong_code") {
+        setAttempts((a) =>
+          result.attemptsLeft !== undefined ? MAX_ATTEMPTS - result.attemptsLeft : a + 1,
+        );
+      } else if (result.code === "code_void") {
+        setVoided(true);
+      }
+      setOtpError(unavailableFor(messageFor(result.code, result.message, result.retryAfterS)));
+      setDigits(Array(CODE_LENGTH).fill(""));
+      inputsRef.current[0]?.focus();
+      return;
+    }
+    setVerifiedPhone(result.data.phone);
+    setStep("verified");
+    // The HttpOnly session cookie is already set by the server: load the account projection.
+    await refresh();
+    onVerified?.(result.data.phone);
   }
 
   return (
@@ -150,15 +233,15 @@ export function GuestVerifySheet({
       {step === "phone" && (
         <>
           <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
-            {t("Guest checkout", "Commande sans compte")}
+            {t("Your PPP account", "Votre compte PPP")}
           </p>
           <h2 className="mt-1 font-display text-3xl uppercase leading-[0.9]">
             {t("Verify your number", "Vérifiez votre numéro")}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             {t(
-              "We'll text you a code to confirm your order contact.",
-              "Nous vous enverrons un code par texto pour confirmer votre contact de commande.",
+              "We'll text you a code. Your verified number is your account — no password, nothing to create.",
+              "Nous vous enverrons un code par texto. Votre numéro vérifié est votre compte — aucun mot de passe, rien à créer.",
             )}
           </p>
           <label className="mt-4 block">
@@ -176,17 +259,22 @@ export function GuestVerifySheet({
                 placeholder="(514) 555-0123"
                 value={phoneDisplay}
                 onChange={(e) => setPhoneDisplay(formatCanadianPhone(e.target.value))}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void sendCode();
+                }}
                 className="w-full bg-transparent py-3 pr-3 text-lg outline-none focus-ppp"
               />
             </span>
             {phoneError && (
-              <span className="mt-1 block text-[0.7rem] text-primary">{phoneError}</span>
+              <span role="alert" className="mt-1 block text-[0.7rem] text-primary">
+                {phoneError}
+              </span>
             )}
           </label>
           <p className="mt-2 text-[0.7rem] text-muted-foreground">
             {t(
-              "Used only to confirm this order. Standard message rates may apply.",
-              "Utilisé uniquement pour confirmer cette commande. Des frais de messagerie standards peuvent s'appliquer.",
+              "Used to confirm your orders and sign you in. Standard message rates may apply.",
+              "Utilisé pour confirmer vos commandes et vous connecter. Des frais de messagerie standards peuvent s'appliquer.",
             )}
           </p>
           <div className="mt-4 grid gap-2">
@@ -224,7 +312,10 @@ export function GuestVerifySheet({
             {t("Code sent to", "Code envoyé au")} +1 {phoneDisplay}.{" "}
             <button
               type="button"
-              onClick={() => setStep("phone")}
+              onClick={() => {
+                setStep("phone");
+                resetOtp();
+              }}
               className="text-accent underline focus-ppp"
             >
               {t("Edit number", "Modifier le numéro")}
@@ -240,6 +331,7 @@ export function GuestVerifySheet({
                 }}
                 type="text"
                 inputMode="numeric"
+                autoComplete={i === 0 ? "one-time-code" : "off"}
                 maxLength={1}
                 value={d}
                 disabled={locked || verifying}
@@ -252,7 +344,10 @@ export function GuestVerifySheet({
           </div>
 
           {otpError && (
-            <p className="mt-3 border border-border bg-background p-3 text-[0.75rem] text-primary">
+            <p
+              role="alert"
+              className="mt-3 border border-border bg-background p-3 text-[0.75rem] text-primary"
+            >
               {otpError}
             </p>
           )}
@@ -269,7 +364,7 @@ export function GuestVerifySheet({
           <div className="mt-4 grid gap-2">
             <button
               type="button"
-              onClick={verify}
+              onClick={() => void verify()}
               disabled={verifying || locked}
               className="press-tap inline-flex items-center justify-center gap-2 bg-primary py-3.5 font-display text-lg uppercase leading-none text-primary-foreground disabled:opacity-60 focus-ppp"
             >
@@ -282,21 +377,41 @@ export function GuestVerifySheet({
             </button>
             <button
               type="button"
-              onClick={resend}
-              disabled={cooldown > 0 || sending || locked}
+              onClick={() => void resend()}
+              disabled={cooldown > 0 || sending}
               className="press-tap py-2 text-center text-[0.7rem] uppercase tracking-widest text-muted-foreground underline focus-ppp disabled:opacity-50 disabled:no-underline"
             >
-              {cooldown > 0
-                ? t(`Resend code in ${cooldown}s`, `Renvoyer le code dans ${cooldown}s`)
-                : t("Resend code", "Renvoyer le code")}
+              {sending ? (
+                <Loader2 className="inline h-3 w-3 animate-spin" />
+              ) : cooldown > 0 ? (
+                t(`Resend code in ${cooldown}s`, `Renvoyer le code dans ${cooldown}s`)
+              ) : (
+                t("Resend code", "Renvoyer le code")
+              )}
             </button>
           </div>
 
           <p className="mt-3 text-[0.65rem] uppercase tracking-widest text-muted-foreground/70">
             {t(
-              "Phone verification is coming soon.",
-              "La vérification par téléphone arrive bientôt.",
+              "Codes expire after 10 minutes · 5 tries per code",
+              "Les codes expirent après 10 minutes · 5 essais par code",
             )}
+          </p>
+        </>
+      )}
+
+      {step === "verified" && (
+        <>
+          <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
+            {t("Your PPP account", "Votre compte PPP")}
+          </p>
+          <h2 className="mt-1 flex items-center gap-2 font-display text-3xl uppercase leading-[0.9]">
+            <ShieldCheck className="h-6 w-6 text-primary" />
+            {t("Number verified", "Numéro vérifié")}
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("You're signed in to PPP with", "Vous êtes connecté à PPP avec")} +1 {phoneDisplay}.
+            {verifiedPhone ? "" : ""}
           </p>
         </>
       )}

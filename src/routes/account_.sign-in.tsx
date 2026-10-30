@@ -1,12 +1,11 @@
-import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AuthShell } from "@/components/account/auth-shell";
+import { GuestVerifySheet } from "@/components/auth/guest-verify-sheet";
 import { GoogleButton } from "@/components/auth/google-button";
 import { GOOGLE_SIGN_IN_ENABLED } from "@/config/auth-flags";
-import { Field, PasswordField } from "@/components/account/field";
 import { usePPP } from "@/context/ppp-store";
-import { authRepository } from "@/lib/customer/repositories";
-import { emailError, safeReturnTo } from "@/lib/customer/validation";
+import { useCustomerSession } from "@/lib/customer/session";
+import { safeReturnTo } from "@/lib/customer/validation";
 import { canonicalUrl } from "@/config/site";
 
 export const Route = createFileRoute("/account_/sign-in")({
@@ -18,7 +17,8 @@ export const Route = createFileRoute("/account_/sign-in")({
       { title: "Sign in to PPP | PPP Pizzeria NDG" },
       {
         name: "description",
-        content: "Sign in to your PPP account to reorder faster from PPP Pizzeria Montreal in NDG.",
+        content:
+          "Sign in to PPP with your mobile number to reorder faster from PPP Pizzeria Montreal in NDG.",
       },
       { property: "og:title", content: "Sign in to PPP" },
       { property: "og:description", content: "Reorder faster with your PPP account." },
@@ -31,27 +31,17 @@ export const Route = createFileRoute("/account_/sign-in")({
   component: SignInPage,
 });
 
+/**
+ * Sign-in = phone verification. There is no password, no e-mail credential and no "create account" step:
+ * Food Hub (TAKATAK identity) creates the customer on the first verified code.
+ */
 function SignInPage() {
   const { t } = usePPP();
+  const navigate = useNavigate();
   const search = Route.useSearch();
   const returnTo = safeReturnTo(search.returnTo);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [touched, setTouched] = useState(false);
-  const [pending, setPending] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setTouched(true);
-    if (emailError(email) || password.length === 0) return;
-    setPending(true);
-    setNotice(null);
-    const result = await authRepository.signIn({ email: email.trim(), password });
-    setPending(false);
-    setPassword("");
-    if (!result.ok) setNotice(result.message);
-  }
+  const { status, accountsAvailable } = useCustomerSession();
+  const closed = status !== "loading" && !accountsAvailable;
 
   return (
     <AuthShell
@@ -64,8 +54,8 @@ function SignInPage() {
         </>
       }
       intro={t(
-        `After signing in you'll return to ${returnTo}.`,
-        `Après la connexion, vous reviendrez à ${returnTo}.`,
+        `Your mobile number is your account. After verifying it you'll return to ${returnTo}.`,
+        `Votre numéro de cellulaire est votre compte. Après la vérification, vous reviendrez à ${returnTo}.`,
       )}
     >
       {GOOGLE_SIGN_IN_ENABLED && (
@@ -78,43 +68,29 @@ function SignInPage() {
           </div>
         </>
       )}
-      <form onSubmit={submit} className="grid gap-3" noValidate>
-        <Field
-          label={t("Email", "Courriel")}
-          type="email"
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          {...(touched && emailError(email) ? { error: emailError(email) } : {})}
-        />
-        <PasswordField
-          label={t("Password", "Mot de passe")}
-          value={password}
-          onValueChange={setPassword}
-          autoComplete="current-password"
-          capsHint
-        />
-        {notice && (
-          <p className="rise-in border border-border bg-card p-3 text-[0.75rem] text-muted-foreground">
-            {notice}
+      {status === "member" || status === "onboarding" ? (
+        <div className="border border-border bg-card p-5">
+          <p className="text-sm text-muted-foreground">
+            {t("You are already signed in.", "Vous êtes déjà connecté.")}
           </p>
-        )}
-        <button
-          type="submit"
-          disabled={pending}
-          className="press-tap mt-1 bg-primary py-3.5 font-display text-xl uppercase leading-none text-primary-foreground disabled:opacity-60 focus-ppp"
-        >
-          {t("Sign in", "Se connecter")}
-        </button>
-        <div className="flex flex-wrap items-center justify-between gap-2 text-[0.65rem] uppercase tracking-widest text-muted-foreground">
-          <Link to="/account/forgot-password" className="text-accent underline focus-ppp">
-            {t("Forgot password?", "Mot de passe oublié ?")}
-          </Link>
-          <Link to="/account/sign-up" className="text-accent underline focus-ppp">
-            {t("Create an account", "Créer un compte")}
-          </Link>
+          <button
+            type="button"
+            onClick={() => void navigate({ to: returnTo })}
+            className="press-tap mt-3 w-full bg-primary py-3.5 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp"
+          >
+            {t("Continue", "Continuer")}
+          </button>
         </div>
-      </form>
+      ) : closed ? (
+        <p className="border border-border bg-card p-4 text-sm text-muted-foreground">
+          {t(
+            "Phone sign-in is not switched on yet. Ordering, pickup and delivery all work without an account.",
+            "La connexion par téléphone n'est pas encore activée. La commande, la cueillette et la livraison fonctionnent sans compte.",
+          )}
+        </p>
+      ) : (
+        <GuestVerifySheet onVerified={() => void navigate({ to: returnTo })} />
+      )}
     </AuthShell>
   );
 }
