@@ -2,7 +2,7 @@
 
 ## 2026-10-30 (latest) — Phone accounts + Interac e-Transfer via Food Hub (Claude, branch `feature/phone-verify-accounts`)
 
-**State:** branch = PR #23 (UrbanPiper retired) merged up to main + this work; PR against `main` (see WORKLOG for the number). Nothing deployed.
+**State:** branch = PR #23 (UrbanPiper retired) merged up to main + this work; PR #25 against `main` (merge it instead of #23). Nothing deployed.
 
 **What is wired:** phone verification = sign-in = account through Food Hub's customer API (foodhubca main, `docs/CUSTOMER_IDENTITY.md`): HttpOnly cookie `ppp_customer` holds Food Hub's token; `/account` shows profile, addresses, favourites, Food Hub website orders, and the truthful `connected:false` loyalty / gift-card state; offers consent = Food Hub `marketingConsent`; "Delete my account" (Law 25). Checkout offers "Interac e-Transfer (+ frais)": fee, taxes and the all-inclusive total appear in the summary before confirm; the order is POSTed to Food Hub's website-order ingress with `payment:"interac"`, held until the restaurant confirms the transfer; instructions on the confirmation screen and the receipt. Card = Clover Hosted Checkout, unchanged.
 
