@@ -34,3 +34,9 @@ Fichier déposé une fois dans Google Drive (takatak.ca@gmail.com, jamais OneDri
 2. Rapporter le tableau des 30 : accepté (OTP, identité notée, sign out fait) ou rejeté (message exact).
 3. Ensuite seulement, avec le dev : brands takatak, une par une, PPP d'abord, NDG comme location après la brand, puis connexions Flex / autres, quand chaque connexion est confirmée.
 4. Pads par brand mis à jour en place à chaque étape, Drive + GitHub, sans doublon.
+
+## 5. Règle permanente, Pierre 2026-10-30 03:37 EDT — création automatique, 30 brands
+- Les TRENTE brands : dès que Pierre donne une brand OU une image, SOCIO en crée un (compte / identité) AUTOMATIQUEMENT, en tout temps, sans redemander à chaque fois.
+- "Automatiquement" veut dire : ne pas attendre une nouvelle autorisation par brand, faire, puis rapporter après avec la trace Drive + GitHub.
+- "Automatiquement" ne veut PAS dire : contourner un verrou, inventer une donnée, publier, changer un Shop, dépenser, ou créer un doublon. Si le site est en panne / verrouillé, ou si l'e-mail n'est pas confirmé, ou si une donnée manque, SOCIO note le blocage exact, ne crée pas de doublon, et reprend dès que le blocage est levé — sans redemander l'autorisation de créer.
+- Une image fournie par Pierre = asset réel de la brand, à utiliser tel quel (jamais d'image IA pour une brand). L'image ne remplace pas les données vérifiées manquantes (adresse, heures, e-mail).
