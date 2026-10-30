@@ -9,7 +9,8 @@ Ces consignes s'appliquent à SOCIO et à tout agent qui travaille pour Pierre. 
 - Matt (matt@takatak.ca) est LE BOSS pour les budgets pub : aucune pub payée tant que Matt n'a pas fixé les budgets.
 
 ## 2. Logins — ordre fixe, sans question répétée
-- Google login d'abord, là où le site l'offre, avec le courriel de LA MARQUE travaillée.
+- Google login d'abord, là où le site l'offre, avec le courriel de LA MARQUE travaillée. Chaque marque a ses propres comptes — toujours le compte Google de CETTE marque-là, jamais celui d'une autre marque. Si on voit une page de connexion Google, on clique sur Google / Continue with Google, toujours, et on se connecte comme ça.
+- VISIBILITÉ EXTRÊME, ordre Pierre 2026-10-28 23:45 EDT : le but, c'est que les plateformes soient publiques et visibles au maximum. On active la visibilité / le partage partout, on ne désactive JAMAIS un paramètre de visibilité, on ne dit jamais non à un partage public — ce que les gens voient, c'est du contenu restaurant / business de client, c'est le but même. Correction Twitch : le paramètre « Empower Viewers to Share Your Clips » désactivé par erreur doit être REMIS À ON. On va jusqu'au bout comme Pierre dit, sans s'arrêter et sans redemander, sauf une carte d'approbation système ou une étape propriétaire seulement, qui arrête juste cette étape-là.
 - Sinon, le login universel enregistré, qui se connecte avec tous les courriels.
 - On ne crée JAMAIS un compte avec un autre courriel pour une marque qui a déjà le sien.
 - Le courriel reste l'identité de chaque franchise : un courriel de marque couvre ses restaurants / locaux, on ajoute des franchises et des restaurants sous ce courriel-là, tout le temps.
@@ -22,6 +23,7 @@ Ces consignes s'appliquent à SOCIO et à tout agent qui travaille pour Pierre. 
 - C'est normal qu'il n'y ait pas deux fiches au départ : on travaille au niveau local.
 - On fait UNE fiche complète et correcte, puis on clone la même affaire et on change SEULEMENT l'identité du local : nom, adresse, heures.
 - Saint-Léonard, c'est Saint-Léonard ; NDG, c'est NDG ; le contenu est le même partout, seules les heures de service et l'adresse changent.
+- ORDRE, correction Pierre 2026-10-28 19:17 EDT : NDG D'ABORD, Saint-Léonard ensuite. NDG est le local opérationnel, Saint-Léonard vient juste d'ouvrir, c'est l'inverse de l'ordre précédent. On part du côté NDG / du compte déjà actif, parce qu'on y trouve plus de contenu que du côté d'un compte nouveau, puis on clone vers le nouveau local.
 - PPP Saint-Léonard : 5839 rue Jean-Talon E, Montréal, QC H1S 1M4, tous les jours 11 h–23 h.
 - PPP NDG : 6280 av. Somerled, Montréal, QC H3X 2B6, tous les jours 16 h–3 h.
 - Téléphone public des marques : 450-999-4999. Site PPP : https://www.pppmtl.com. Commande : https://www.clover.com/online-ordering/6280 et ON2GO.ca.
@@ -48,3 +50,11 @@ Ces consignes s'appliquent à SOCIO et à tout agent qui travaille pour Pierre. 
 - Pas de deuxième fichier, pas de deuxième ligne, pas de doublon. Si un fichier existe déjà, on met à jour en place.
 - On ne présente jamais une note comme un fait vérifié en direct, et jamais un résultat partiel comme complet. On dit ce qui est fait, ce qui est en cours, et ce qui est bloqué et pourquoi.
 - On ne répète pas au boss la même question, la même explication, la même erreur à chaque fois. Si une consigne est ici, on l'applique, point.
+
+## 7. Addendum — FICHIER MAIN, protocole d'entrée (Pierre 2026-10-29 19:54 EDT, local seulement dans cette passe — dépôt Drive/GitHub en attente à la prochaine passe de dépôt)
+- UN SEUL fichier MAIN : SOCIO-MASTER-SYNC-2026-10-29.md (Drive + GitHub). Quand un agent entre — Muse/SOCIO, ChatGPT, Cursor, Copilot, agents GitHub, agents Facebook, tous connectés ensemble — ce fichier est l'instruction : on le lit frais, on vérifie la table d'occupation, on s'assure que personne d'autre n'est là sur la même plateforme/marque, on laisse ses traces, on laisse sa signature EN TOUT TEMPS.
+- Entrée, dans l'ordre, sans exception : (1) lire le MAIN frais ; (2) lire la table d'occupation ; (3) trouver sa ligne plateforme/marque/tâche ; (4) si un autre agent est IN sans trace de sortie, NE PAS ÉCRIRE là — préparation en lecture seule seulement, ou autre plateforme, et consigner l'attente ; (5) revendiquer son créneau IN (agent/programme, plateforme/marque, tâche, heure EDT, signature) ; (6) travailler ; (7) déposer le résultat vérifié une fois Drive + GitHub en place ; (8) libérer son créneau OUT (résultat + ancre, signature) ; (9) ne jamais laisser un créneau revendiqué sans trace de sortie.
+- Traces toutes les 5 minutes tant qu'un agent est IN (fait depuis la dernière trace, en cours, bloqué, ancres) — cadence watchdog étendue à TOUS les agents, aucun travail silencieux, aucun résultat laissé seulement en chat ou en local, aucun doublon (mise à jour des mêmes lignes en place, vérifiée par relecture).
+- Signature : chaque note, fichier, changement de code et trace est signé « SOCIO, Agent Lévesque » — avant, pendant, après.
+- Conflit : si deux agents revendiquent le même créneau, le PREMIER IN gagne ; le second recule en lecture seule, consigne le conflit, et attend la trace OUT. Jamais deux écrivains sur la même plateforme/page de marque, jamais de fusion de deux pages de local, jamais de fermeture de fiche (transfert seulement).
+- Règle ALWAYS-NOTES 2026-10-29 19:46 EDT : tout dans Google Drive + GitHub, toujours, avant/pendant/après, signé « SOCIO, Agent Lévesque », un seul fichier maître en place, aucun doublon, pour qu'un autre agent reprenne sans erreur, omission ou perte si SOCIO manque de crédits / s'endort.
