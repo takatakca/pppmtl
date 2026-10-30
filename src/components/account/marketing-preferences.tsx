@@ -1,63 +1,35 @@
 import { useState } from "react";
-import { Bell, Mail, MessageSquare } from "lucide-react";
+import { Bell, Loader2, MessageSquare } from "lucide-react";
 import { usePPP } from "@/context/ppp-store";
-import {
-  defaultMarketingPreferences,
-  marketingPersistenceEnabled,
-  type MarketingChannel,
-  type MarketingPreferences,
-} from "@/lib/marketing-consent";
+import { useCustomerSession } from "@/lib/customer/session";
+import { marketingChannelPersisted } from "@/lib/marketing-consent";
 
 /**
- * Email / SMS / push consent toggles. Local-only state: never pre-checked,
- * never claimed as saved unless a real backend is connected.
+ * Consent toggles. "Offers & news" (text message / e-mail) is the one real flag: Food Hub keeps
+ * `marketingConsent` on the customer record (Québec Law 25) and this panel reads and writes it through the
+ * customer session — never pre-checked. Push notifications have no backend yet and stay a disabled preview.
  */
 export function MarketingPreferencesPanel({ className = "" }: { className?: string }) {
   const { t } = usePPP();
-  const [prefs, setPrefs] = useState<MarketingPreferences>(defaultMarketingPreferences);
+  const { customer, updateProfile } = useCustomerSession();
+  const [pending, setPending] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
-  function toggle(channel: MarketingChannel) {
-    setPrefs((p) => {
-      const key =
-        channel === "email"
-          ? "emailMarketingConsent"
-          : channel === "sms"
-            ? "smsMarketingConsent"
-            : "pushMarketingConsent";
-      const current = p[key];
-      const now = new Date().toISOString();
-      return {
-        ...p,
-        [key]: current.granted
-          ? { granted: false, consentedAt: current.consentedAt, revokedAt: now }
-          : { granted: true, consentedAt: now, revokedAt: null },
-      };
-    });
+  const granted = customer?.marketingConsent === true;
+
+  async function toggleOffers() {
+    if (pending) return;
+    setPending(true);
+    setNotice(null);
+    const result = await updateProfile({ marketingConsent: !granted });
+    setPending(false);
+    if (!result.ok) {
+      setNotice(
+        result.message ??
+          t("Your choice was not saved. Try again.", "Votre choix n'a pas été enregistré. Réessayez."),
+      );
+    }
   }
-
-  const rows: { id: MarketingChannel; icon: typeof Mail; label: string; body: string }[] = [
-    {
-      id: "email",
-      icon: Mail,
-      label: t("Email offers", "Offres par courriel"),
-      body: t("Menu drops, deals and member news.", "Nouveautés, promos et nouvelles membres."),
-    },
-    {
-      id: "sms",
-      icon: MessageSquare,
-      label: t("SMS offers", "Offres par SMS"),
-      body: t("Occasional text deals — no spam.", "Textos promotionnels occasionnels — sans abus."),
-    },
-    {
-      id: "push",
-      icon: Bell,
-      label: t("Push notifications", "Notifications push"),
-      body: t(
-        "Order status and reorder reminders in the app.",
-        "Statut de commande et rappels pour recommander dans l'app.",
-      ),
-    },
-  ];
 
   return (
     <section className={`border border-border bg-card p-5 ${className}`}>
@@ -68,51 +40,72 @@ export function MarketingPreferencesPanel({ className = "" }: { className?: stri
         {t("Communication preferences", "Préférences de communication")}
       </h2>
       <ul className="mt-3 space-y-2">
-        {rows.map((r) => {
-          const key =
-            r.id === "email"
-              ? "emailMarketingConsent"
-              : r.id === "sms"
-                ? "smsMarketingConsent"
-                : "pushMarketingConsent";
-          const granted = prefs[key].granted;
-          return (
-            <li
-              key={r.id}
-              className="flex items-start justify-between gap-3 border border-border px-4 py-3"
-            >
-              <div className="flex items-start gap-3">
-                <r.icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <div>
-                  <label
-                    htmlFor={`marketing-${r.id}`}
-                    className="block text-sm font-bold uppercase tracking-wide"
-                  >
-                    {r.label}
-                  </label>
-                  <p className="mt-0.5 text-[0.75rem] text-muted-foreground">{r.body}</p>
-                </div>
-              </div>
-              <input
-                id={`marketing-${r.id}`}
-                type="checkbox"
-                role="switch"
-                aria-checked={granted}
-                checked={granted}
-                onChange={() => toggle(r.id)}
-                disabled={!marketingPersistenceEnabled}
-                className="mt-1 h-5 w-5 shrink-0 accent-[var(--primary)] focus-ppp"
-              />
-            </li>
-          );
-        })}
-      </ul>
-      {!marketingPersistenceEnabled && (
-        <p className="mt-3 text-[0.6rem] uppercase tracking-widest text-muted-foreground/70">
-          {t(
-            "Preview — preferences are not saved yet.",
-            "Aperçu — les préférences ne sont pas encore enregistrées.",
+        <li className="flex items-start justify-between gap-3 border border-border px-4 py-3">
+          <div className="flex items-start gap-3">
+            <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <div>
+              <label
+                htmlFor="marketing-offers"
+                className="block text-sm font-bold uppercase tracking-wide"
+              >
+                {t("Offers & news by text or e-mail", "Offres et nouvelles par texto ou courriel")}
+              </label>
+              <p className="mt-0.5 text-[0.75rem] text-muted-foreground">
+                {t(
+                  "Occasional menu drops and deals — no spam. Saved with your PPP account; order texts are always sent.",
+                  "Nouveautés et promos occasionnelles — sans abus. Enregistré avec votre compte PPP; les textos de commande sont toujours envoyés.",
+                )}
+              </p>
+            </div>
+          </div>
+          {pending ? (
+            <Loader2 className="mt-1 h-5 w-5 shrink-0 animate-spin text-muted-foreground" />
+          ) : (
+            <input
+              id="marketing-offers"
+              type="checkbox"
+              role="switch"
+              aria-checked={granted}
+              checked={granted}
+              onChange={() => void toggleOffers()}
+              disabled={!customer || !marketingChannelPersisted.sms}
+              className="mt-1 h-5 w-5 shrink-0 accent-[var(--primary)] focus-ppp"
+            />
           )}
+        </li>
+        <li className="flex items-start justify-between gap-3 border border-border px-4 py-3 opacity-70">
+          <div className="flex items-start gap-3">
+            <Bell className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <div>
+              <label
+                htmlFor="marketing-push"
+                className="block text-sm font-bold uppercase tracking-wide"
+              >
+                {t("Push notifications", "Notifications push")}
+              </label>
+              <p className="mt-0.5 text-[0.75rem] text-muted-foreground">
+                {t(
+                  "Not available yet — there is no PPP app to send them from.",
+                  "Pas encore disponible — aucune application PPP ne peut les envoyer.",
+                )}
+              </p>
+            </div>
+          </div>
+          <input
+            id="marketing-push"
+            type="checkbox"
+            role="switch"
+            aria-checked={false}
+            checked={false}
+            readOnly
+            disabled
+            className="mt-1 h-5 w-5 shrink-0 accent-[var(--primary)] focus-ppp"
+          />
+        </li>
+      </ul>
+      {notice && (
+        <p role="alert" className="mt-3 border border-border p-3 text-[0.75rem] text-muted-foreground">
+          {notice}
         </p>
       )}
     </section>

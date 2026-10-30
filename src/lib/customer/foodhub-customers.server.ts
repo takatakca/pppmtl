@@ -47,6 +47,8 @@ export interface FoodhubCustomer {
   name: string | null;
   email: string | null;
   lang: "fr" | "en";
+  /** Newsletter / offers consent kept by Food Hub (Law 25); null when Food Hub did not send it. */
+  marketingConsent: boolean | null;
   createdAt: string | null;
   verifiedAt: string | null;
 }
@@ -108,6 +110,8 @@ export function parseCustomer(value: unknown): FoodhubCustomer | null {
     name: str(value["name"], 80),
     email: str(value["email"], 120),
     lang: value["lang"] === "en" ? "en" : "fr",
+    marketingConsent:
+      typeof value["marketingConsent"] === "boolean" ? value["marketingConsent"] : null,
     createdAt: str(value["createdAt"], 40),
     verifiedAt: str(value["verifiedAt"], 40),
   };
@@ -258,6 +262,8 @@ export async function startVerification(input: {
     `${BASE}/verify/start`,
     { method: "POST", body: { tenant: foodhubTenant(), phone, lang: input.lang } },
   );
+  // 403 here = this website is not an allowed tenant at Food Hub yet: honest "not available", not "signed out".
+  if (!response.ok && response.kind === "forbidden") return failure("not_available");
   if (!response.ok) return fromTransport(response, "invalid_phone");
   const expiresInS = Number(response.body?.expiresInS);
   return { ok: true, data: { expiresInS: Number.isFinite(expiresInS) ? expiresInS : 600 } };
@@ -283,6 +289,9 @@ export async function checkVerification(
         ? failure("code_void", { attemptsLeft: 0 })
         : failure("wrong_code", attemptsLeft === undefined ? {} : { attemptsLeft });
     }
+    // 410: the 5th wrong code, or an expired one — the customer must ask for a new code.
+    if (response.kind === "gone") return failure("code_void", { attemptsLeft: 0 });
+    if (response.kind === "forbidden") return failure("not_available");
     return fromTransport(response, "invalid_phone");
   }
   const customer = parseCustomer(response.body?.customer);
@@ -395,6 +404,26 @@ export async function saveFavourites(
     ? response.body.favourites.filter((f): f is string => typeof f === "string")
     : clean;
   return { ok: true, data: saved };
+}
+
+/**
+ * Law 25: the customer deletes their own account. Food Hub anonymises the record (phone, name, e-mail, addresses,
+ * favourites, consent removed; id and dates kept for order history) and voids every token. The cookie is cleared
+ * only when Food Hub confirmed, so a failed deletion is never shown as done.
+ */
+export async function deleteAccount(cookies: CustomerCookies): Promise<CustomerResult<null>> {
+  const token = cookies.read();
+  if (!token) return failure("signed_out");
+  const response = await foodhubRequest<{ ok?: boolean; deleted?: boolean }>(`${BASE}/me`, {
+    method: "DELETE",
+    customerToken: token,
+  });
+  if (!response.ok) {
+    if (response.kind === "unauthorized" || response.kind === "forbidden") cookies.clear();
+    return fromTransport(response);
+  }
+  cookies.clear();
+  return { ok: true, data: null };
 }
 
 /** The cookie is cleared whatever Food Hub answers; Food Hub voids every token of the customer when reachable. */

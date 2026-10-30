@@ -91,21 +91,58 @@ function IntegrationsAdmin() {
             aria-label="Food Hub readiness"
           >
             <div className="flex items-start gap-3">
-              <StatusIcon available={snapshot.foodhub.connected} />
+              <StatusIcon
+                available={snapshot.foodhub.configured && snapshot.foodhub.reachable === true}
+              />
               <div>
                 <h2 className="font-display text-2xl uppercase leading-none">
-                  TAKATAK Food Hub — integration pending
+                  TAKATAK Food Hub —{" "}
+                  {!snapshot.foodhub.configured
+                    ? "not configured"
+                    : snapshot.foodhub.reachable
+                      ? "connected"
+                      : "configured, not reachable"}
                 </h2>
                 <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
                   {snapshot.foodhub.message}
                 </p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  First pilot: {snapshot.foodhub.pilotLocationId ?? "not selected"} · own website
-                  ingress: <code>{snapshot.foodhub.ingressPath}</code>
-                </p>
-                <p className="mt-2 text-xs font-semibold text-destructive">
-                  No active Food Hub order transport; no production checkout approval.
-                </p>
+                <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                  <li>
+                    Host: <code>{snapshot.foodhub.host ?? "—"}</code> · health:{" "}
+                    <code>
+                      {snapshot.foodhub.reachable === null
+                        ? "not pinged"
+                        : snapshot.foodhub.reachable
+                          ? (snapshot.foodhub.health ?? "answered")
+                          : "no answer"}
+                    </code>{" "}
+                    (public <code>GET /api/health</code>; no customer route is called)
+                  </li>
+                  <li>
+                    Customer identity (phone sign-in):{" "}
+                    {snapshot.foodhub.configured ? "served by Food Hub" : "closed"} · Interac
+                    e-Transfer orders:{" "}
+                    {snapshot.foodhub.interacEnabled
+                      ? `on — fee $${snapshot.foodhub.interacFee.toFixed(2)}${snapshot.foodhub.interacFeeTaxable ? " + taxes" : ""}`
+                      : "off (FOODHUB_INTERAC_ENABLED not set)"}
+                  </li>
+                  <li>
+                    Website-order ingress: <code>{snapshot.foodhub.ingressPath}</code> · store
+                    codes:{" "}
+                    {Object.entries(snapshot.foodhub.locationCodes).map(([slug, code]) => (
+                      <code key={slug} className="mr-2">
+                        {slug}→{code}
+                      </code>
+                    ))}
+                  </li>
+                </ul>
+                {!snapshot.foodhub.interacEnabled && (
+                  <p className="mt-2 text-xs font-semibold text-destructive">
+                    No Interac order is sent until the owner sets FOODHUB_INTERAC_ENABLED=true
+                    (after Food Hub's Interac branch is deployed). Card orders go through Clover as
+                    before.
+                  </p>
+                )}
               </div>
             </div>
           </section>

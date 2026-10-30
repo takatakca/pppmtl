@@ -119,3 +119,12 @@ export const signOutCustomer = createServerFn({ method: "POST" }).handler(
     return logout(requestCustomerCookies);
   },
 );
+
+/** Law 25: the signed-in customer deletes their own account at Food Hub (record anonymised, tokens void). */
+export const deleteCustomerAccount = createServerFn({ method: "POST" }).handler(
+  async (): Promise<CustomerCall<null>> => {
+    const { deleteAccount } = await import("./foodhub-customers.server");
+    const { requestCustomerCookies } = await import("./customer-cookie.server");
+    return deleteAccount(requestCustomerCookies);
+  },
+);

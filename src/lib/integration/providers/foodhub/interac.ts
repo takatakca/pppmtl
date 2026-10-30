@@ -15,9 +15,9 @@ export const INTERAC_FEE_NAME = "Frais Interac e-Transfer";
 /** Québec sales taxes on prepared food: GST 5 % + QST 9.975 % (same constant as Food Hub). */
 export const QC_TAX_RATE = 0.14975;
 
-/** Food Hub's `round2`: dollars to the cent. */
+/** Food Hub's `round2` (lib/foodhub/config.ts), character for character: dollars to the cent. */
 export function round2(value: number): number {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
+  return Math.round((Number(value) || 0) * 100) / 100;
 }
 
 export const centsToDollars = (cents: number): number => round2(cents / 100);

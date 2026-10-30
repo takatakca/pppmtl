@@ -34,7 +34,16 @@ interface CustomerSession {
   notice: string | null;
   refresh: () => Promise<void>;
   lockPreferredName: (name: string) => Promise<{ ok: boolean; message?: string }>;
+  /** Profile fields Food Hub lets the customer edit (name, e-mail, language, offers consent). */
+  updateProfile: (patch: {
+    name?: string;
+    email?: string;
+    lang?: "fr" | "en";
+    marketingConsent?: boolean;
+  }) => Promise<{ ok: boolean; message?: string }>;
   signOut: () => Promise<void>;
+  /** Law 25: delete the account at Food Hub; false with a message when Food Hub did not confirm. */
+  deleteAccount: () => Promise<{ ok: boolean; message?: string }>;
 }
 
 const Ctx = createContext<CustomerSession | null>(null);
@@ -85,10 +94,24 @@ export function CustomerSessionProvider({ children }: { children: ReactNode }) {
         setStatus(statusFor(result.data));
         return { ok: true };
       },
+      updateProfile: async (patch) => {
+        const result = await customerRepository.update(patch);
+        if (!result.ok) return { ok: false, message: result.message };
+        setProfile((current) => (current ? { ...current, customer: result.data } : current));
+        setStatus(statusFor(result.data));
+        return { ok: true };
+      },
       signOut: async () => {
         await authRepository.signOut().catch(() => undefined);
         setProfile(null);
         setStatus("signed_out");
+      },
+      deleteAccount: async () => {
+        const result = await authRepository.deleteAccount();
+        if (!result.ok) return { ok: false, message: result.message };
+        setProfile(null);
+        setStatus("signed_out");
+        return { ok: true };
       },
     }),
     [status, profile, accountsAvailable, notice, refresh],

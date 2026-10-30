@@ -1,5 +1,6 @@
 import {
   checkPhoneVerification,
+  deleteCustomerAccount,
   getCustomerMe,
   saveCustomerAddresses,
   saveCustomerFavourites,
@@ -13,6 +14,7 @@ import {
 import type {
   AddressRepository,
   AuthResult,
+  AuthResultCode,
   CustomerAddress,
   CustomerProfile,
   CustomerRepository,
@@ -49,7 +51,7 @@ const MESSAGES: Record<CustomerFailure["code"], string> = {
 
 function toAuthResult<T, U>(call: CustomerCall<T>, map: (data: T) => U): AuthResult<U> {
   if (call.ok) return { ok: true, data: map(call.data) };
-  const code: AuthResult<U> extends { ok: false; code: infer C } ? C : never =
+  const code: AuthResultCode =
     call.code === "rate_limited"
       ? "rate_limited"
       : call.code === "wrong_code"
@@ -85,6 +87,7 @@ export function toRestaurantCustomer(customer: FoodhubCustomer): RestaurantCusto
     preferredLanguage: customer.lang,
     preferredLocationId: null,
     preferredOrderMode: null,
+    marketingConsent: customer.marketingConsent,
     verifiedAt: customer.verifiedAt,
     createdAt: customer.createdAt,
   };
@@ -126,6 +129,7 @@ export const authRepository: PhoneAuthRepository = {
   checkVerification: async (phone, code) =>
     toAuthResult(await checkPhoneVerification({ data: { phone, code } }), toRestaurantCustomer),
   signOut: async () => toAuthResult(await signOutCustomer(), () => null),
+  deleteAccount: async () => toAuthResult(await deleteCustomerAccount(), () => null),
 };
 
 export const customerRepository: CustomerRepository = {

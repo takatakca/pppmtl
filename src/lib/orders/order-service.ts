@@ -20,6 +20,7 @@ import { checkSelections, chosenOptions } from "@/lib/modifiers";
 import type { IntegrationProviderId } from "@/lib/integration/core/contracts";
 import { logIntegrationEvent } from "@/lib/integration/core/logging";
 import { cloverCheckoutConfigured } from "@/lib/integration/providers/clover/config.server";
+import { interacAvailability } from "@/lib/integration/providers/foodhub/config.server";
 import { durableOrderStoreConfigured } from "./database.server";
 import type { ProviderOrderAdapter } from "./provider-order-adapter";
 import { orderError, orderFailure, type OrderErrorCode, type OrderResult } from "./errors";
@@ -41,11 +42,12 @@ import {
   type OrderCustomer,
   type OrderDraft,
   type OrderItem,
+  type OrderPaymentMethod,
   type OrderStatus,
   type OrderType,
 } from "./types";
 
-/** What checkout submits — ids and quantities only, never money. */
+/** What checkout submits — ids and quantities only, never money (the Interac displayed total is checked, not trusted). */
 export interface CheckoutRequest {
   locationId: string;
   orderType: OrderType;
@@ -59,6 +61,11 @@ export interface CheckoutRequest {
   customer: OrderCustomer;
   deliveryAddress: string | null;
   notes: string;
+  /** "card" (Clover Hosted Checkout, default) or "interac" (e-Transfer held at Food Hub). */
+  payment?: OrderPaymentMethod;
+  /** Interac: the all-inclusive total the customer saw (cents); the server refuses to send another. */
+  displayedTotalCents?: number | null;
+  lang?: "fr" | "en" | "es";
 }
 
 const toCents = (dollars: number | null): number | null =>
@@ -87,6 +94,16 @@ function hasCheckoutPayloadShape(value: unknown): value is CheckoutRequest {
     !limitedText(input.customer.email, 254) ||
     !limitedText(input.deliveryAddress, 500) ||
     !limitedText(input.notes, 480)
+  ) {
+    return false;
+  }
+  if (
+    (input.payment !== undefined && input.payment !== "card" && input.payment !== "interac") ||
+    (input.lang !== undefined && input.lang !== "fr" && input.lang !== "en" && input.lang !== "es") ||
+    (input.displayedTotalCents != null &&
+      (typeof input.displayedTotalCents !== "number" ||
+        !Number.isSafeInteger(input.displayedTotalCents) ||
+        input.displayedTotalCents < 0))
   ) {
     return false;
   }

@@ -20,7 +20,13 @@ Food Hub already has direct Uber Eats, DoorDash, Skip/JET, Clover, kitchen, stor
 
 Food Hub code already recognizes PPP website-titled Clover orders from webhook or polling, and intends **not to reprint** these orders. Neither this repo review nor green CI proves that both applications are correctly configured or running this flow in production. Preserve one source of payment authority and one print path.
 
-Food Hub also has `POST /api/foodhub/webhooks/website-order` as an optional **future** first-party ingress (files `app/api/foodhub/webhooks/website-order/route.ts` and `lib/foodhub/delivery/website.ts`). It presently trusts body fields such as `paid`, line `price`, `location` and `brand` from an authenticated bearer request. **Do not post real PPP orders there yet.** A shared token alone is insufficient evidence of verified merchant payment, server-side catalog pricing, identity and transactional durability. Current PR #23 intentionally includes **NO outbound Food Hub HTTP client**.
+Food Hub also has `POST /api/foodhub/webhooks/website-order` as an optional **future** first-party ingress (files `app/api/foodhub/webhooks/website-order/route.ts` and `lib/foodhub/delivery/website.ts`). It presently trusts body fields such as `paid`, line `price`, `location` and `brand` from an authenticated bearer request. **Do not post real PPP orders there yet.** A shared token alone is insufficient evidence of verified merchant payment, server-side catalog pricing, identity and transactional durability. PR #23 included no outbound Food Hub HTTP client; the 2026-10-30 branch adds one, fail-closed (see the section below).
+
+## 2026-10-30 — what is wired now (branch feature/phone-verify-accounts)
+
+- **Customer identity** comes from Food Hub (contract § A, merged on foodhubca main, PR #123): phone verification = sign-in = account; the site keeps the Food Hub token in an HttpOnly cookie and no customer table. Loyalty / gift cards show Food Hub's truthful `connected:false` state.
+- **Interac e-Transfer website orders** (contract § B) are POSTed to `/api/foodhub/webhooks/website-order` with `payment:"interac"`, the fee line and the displayed all-inclusive total — only when the owner sets `FOODHUB_INTERAC_ENABLED=true` after Food Hub's Interac branch is deployed. Food Hub re-prices and holds the order until the restaurant confirms the transfer. A 200 without Interac instructions is treated as a failure.
+- Card payment is unchanged (Clover Hosted Checkout, pickup). Guide: `foodhub-customers-and-interac.md`.
 
 ## Mandatory server and contract gates before enabling any PPP → Food Hub direct order
 

@@ -26,6 +26,8 @@ export interface RestaurantCustomer {
   preferredLanguage: "en" | "fr" | null;
   preferredLocationId: string | null;
   preferredOrderMode: "pickup" | "delivery" | null;
+  /** Offers / news consent kept by Food Hub (Law 25); null when unknown. */
+  marketingConsent: boolean | null;
   verifiedAt: string | null;
   createdAt: string | null;
 }
@@ -98,6 +100,8 @@ export interface PhoneAuthRepository {
   startVerification(phone: string, lang: "fr" | "en" | "es"): Promise<AuthResult<{ expiresInS: number }>>;
   checkVerification(phone: string, code: string): Promise<AuthResult<RestaurantCustomer>>;
   signOut(): Promise<AuthResult<null>>;
+  /** Law 25: anonymise the account at Food Hub and end every session. */
+  deleteAccount(): Promise<AuthResult<null>>;
 }
 
 export interface CustomerRepository {

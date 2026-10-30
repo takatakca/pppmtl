@@ -71,3 +71,9 @@ Owner: section 5 of docs/integrations/clover.md (Ecommerce key, Hosted Checkout 
 (section 4), set the variables, then one real test order + refund. Code: open the PR
 https://github.com/takatakca/pppmtl/compare/main...clover-direct?expand=1 (Lovable syncs main on merge).
 Files to read first: docs/integrations/clover.md, `src/lib/integration/providers/clover/webhook.ts`.
+
+## 2026-10-30 — Phone accounts + Interac e-Transfer (branch `feature/phone-verify-accounts`)
+Clover Hosted Checkout stays the **card** path exactly as above (pickup, NDG). A second path exists now: **Interac
+e-Transfer** through TAKATAK Food Hub (`src/lib/integration/providers/foodhub/`), gated by `FOODHUB_INTERAC_ENABLED`
+and shown with its fee in the total before the customer confirms. Customer identity (phone verification = account)
+also comes from Food Hub; the site keeps no customer database. Guide: `docs/integrations/foodhub-customers-and-interac.md`.

@@ -6,7 +6,7 @@
  * "not available yet" (404: the route is not deployed), "unavailable" (503), "unreachable" (network), …
  * The secret and the customer token are never logged.
  */
-import { foodhubBaseUrl, foodhubSecret } from "./config.server";
+import { foodhubBaseUrl, foodhubSecret, foodhubTenant } from "./config.server";
 
 export type FoodhubFailureKind =
   | "not_configured"
@@ -16,6 +16,8 @@ export type FoodhubFailureKind =
   | "rate_limited"
   | "unauthorized"
   | "forbidden"
+  /** 410: the thing is gone for good (a voided or expired verification code). */
+  | "gone"
   | "invalid"
   | "error";
 
@@ -38,7 +40,7 @@ export interface FoodhubSuccess<T> {
 export type FoodhubResponse<T> = FoodhubSuccess<T> | FoodhubFailure;
 
 export interface FoodhubRequestOptions {
-  method?: "GET" | "POST" | "PUT" | "PATCH";
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
   customerToken?: string | null;
   timeoutMs?: number;
@@ -71,6 +73,7 @@ export function classifyStatus(status: number): FoodhubFailureKind {
   if (status === 429) return "rate_limited";
   if (status === 401) return "unauthorized";
   if (status === 403) return "forbidden";
+  if (status === 410) return "gone";
   if (status === 400 || status === 422) return "invalid";
   return "error";
 }
@@ -100,7 +103,11 @@ export async function foodhubRequest<T = unknown>(
     accept: "application/json",
   };
   if (options.body !== undefined) headers["content-type"] = "application/json";
-  if (options.customerToken) headers["x-customer-token"] = options.customerToken;
+  if (options.customerToken) {
+    headers["x-customer-token"] = options.customerToken;
+    // Food Hub then refuses (403) a token minted for another brand website.
+    headers["x-customer-tenant"] = foodhubTenant();
+  }
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), options.timeoutMs ?? DEFAULT_TIMEOUT_MS);

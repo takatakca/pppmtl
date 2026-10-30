@@ -4,7 +4,16 @@ import { Loader2, ShieldCheck } from "lucide-react";
 import { usePPP } from "@/context/ppp-store";
 import { authRepository } from "@/lib/customer/repositories";
 import { useCustomerSession } from "@/lib/customer/session";
-import type { AuthResultCode } from "@/lib/customer/types";
+import type { AuthResult, AuthResultCode, RestaurantCustomer } from "@/lib/customer/types";
+
+/** When the server function itself cannot be reached, say so — never a fake "code sent" or "verified". */
+function unreachable<T>(): AuthResult<T> {
+  return {
+    ok: false,
+    code: "unavailable",
+    message: "We could not reach Food Hub. Check your connection and try again.",
+  };
+}
 
 /**
  * Phone verification = sign-in = account. Food Hub (TAKATAK identity) texts the code and creates the customer
@@ -137,11 +146,7 @@ export function GuestVerifySheet({
     setPhoneError(null);
     const result = await authRepository
       .startVerification(phoneDigits, lang === "fr" ? "fr" : "en")
-      .catch(() => ({
-        ok: false as const,
-        code: "unavailable" as const,
-        message: "We could not reach Food Hub. Check your connection and try again.",
-      }));
+      .catch(() => unreachable<{ expiresInS: number }>());
     setSending(false);
     if (!result.ok) {
       const message = unavailableFor(messageFor(result.code, result.message, result.retryAfterS));
@@ -202,11 +207,9 @@ export function GuestVerifySheet({
     }
     setVerifying(true);
     setOtpError(null);
-    const result = await authRepository.checkVerification(phoneDigits, code).catch(() => ({
-      ok: false as const,
-      code: "unavailable" as const,
-      message: "We could not reach Food Hub. Check your connection and try again.",
-    }));
+    const result = await authRepository
+      .checkVerification(phoneDigits, code)
+      .catch(() => unreachable<RestaurantCustomer>());
     setVerifying(false);
     if (!result.ok) {
       if (result.code === "wrong_code") {
