@@ -20,13 +20,18 @@
 | Facebook | PPP | Muse/SOCIO browser window | Check-first capture: Apr 19 dup, May 17, May 24, Jun 20 | 19:50 EDT 2026-10-29 | 19:56 EDT 2026-10-29 | COMPLETED — check-first capture: Apr 19 A (3 photo duplicates of each other, not pinned) / B (6 video text-duplicates of pinned), May 17 Foire Alimentaire, May 24 pizza 18" $27.30, Jun 20 thank-you share of pinned; P-1/P-2 dup=16/20 and 20/20 explicitly UNRESOLVED; nothing edited/published/deleted/pinned/unpinned; NDG untouched | SOCIO, Agent Lévesque |
 | Filing | All | Muse/SOCIO filing pass | Filing pass 2026-10-29 20:04 EDT: master OUT trace (a), clone-bank correction (b), base §7 filing (c), clone-set + gates filing (d), Drive=GitHub verification (e) | 20:06 EDT 2026-10-29 | 20:07 EDT 2026-10-29 | OUT — all five files filed to Drive in this pass; GitHub push_files submitted in the same pass (commit/blobs verified by re-read, see filing-pass report); no live Facebook edits, posts, or page creation in this pass | SOCIO, Agent Lévesque |
 | YouTube + LinkedIn | PPP | Agent 4 — YouTube + LinkedIn packs (generic subagent, NO live browser) | Pierre restart 2026-10-29 20:04 EDT: YouTube Publish pack + LinkedIn company-page pack ready, NO creation, NO sign-in, NO Publish by agent | 20:10 EDT 2026-10-29 | 20:11 EDT 2026-10-29 | OUT — packs ready only: YouTube Publish pack (staged D-YT description + Website link, owner Verify+Publish gate) + LinkedIn company-page pack (prepared details, gates un-cleared, count 0); anchor ~/workspace/ppp-youtube-linkedin-packs-2026-10-29.md (213 lines); no page created, no video reshared, no invitation sent, no live browser step | SOCIO, Agent Lévesque |
+| YouTube + LinkedIn | PPP | BOOST Agent 4 (generic, PACKS ONLY, no live browser) | Pierre boost 2026-10-29 21:22 EDT: verify filed packs vs master + gate-ready execution brief, NO sign-in, NO Publish, NO page creation, NO invitations | 21:26 EDT 2026-10-29 | 21:30 EDT 2026-10-29 | OUT — brief ready, 0 created, 0 published, 0 invited: D-YT verbatim vs audit D-YT, LinkedIn gate-order flag UNRESOLVED (all 3 gates still required), anchor ~/workspace/ppp-youtube-linkedin-gates-brief-2026-10-29.md (local only, Drive/GitHub push left to parent/coordinator) | SOCIO, Agent Lévesque |
 | Facebook | PPP | SOCIO subagent AGENT 1 (generic, prep only, no live browser) | Paced-clone LAUNCH PACK from filed clone set (prep only, 0 posted) | 20:10 EDT 2026-10-29 | 20:10 EDT 2026-10-29 | OUT — launch pack built, 0 posted: Day 1 A6 + Day 2 A7 text-only ready pending browser window + live-text re-check; Days 3–7 A1–A5 photo-BLOCKED; Set B + Set C scoped; pinned untouched; NDG sister-link public NOT claimed; anchor ~/workspace/ppp-facebook-launch-pack-2026-10-29.md (130 lines, local; Drive/GitHub push left to parent browser/filing agent — generic subagent, no live browser) | SOCIO, Agent Lévesque |
+| Facebook | PPP | BOOST AGENT 1 (generic, READ-ONLY PREP ONLY, no live browser) | Pierre boost 2026-10-29 21:22 EDT: verify launch pack vs master + one-page live-posting brief for parent browser window | 21:24 EDT 2026-10-29 | 21:27 EDT 2026-10-29 | OUT — launch pack verified (130 lines, matches master §3), brief built, 0 posted: anchor ~/workspace/ppp-facebook-day1-posting-brief-2026-10-29.md (51 lines); Day 1 A6 + Day 2 A7 text-only ready pending browser verbatim-copy gate; Days 3–7 + Set B photo-BLOCKED; pinned untouched; no live browser step, no Drive/GitHub push (coordinator filing pass) | SOCIO, Agent Lévesque |
 | Listings + Po Poulet prep | PPP / Po Poulet | Agent 5 (generic subagent, NO live browser) | READ-ONLY re-check of 12 PPP listings vs ~14:07 EDT baseline + Po Poulet live-check checklist kept ready (NOT a live Facebook writer) | 20:10 EDT 2026-10-29 | 20:10 EDT 2026-10-29 | OUT — NO CHANGE on all 12 listings in filed sources re-read; Po Poulet checklist READY, still BLOCKED on Pierre's facebook.com consent card + NDG 6280 vs 6284 + hours unanswered; no live browser work, no edits, no posts, no page creation — see §8.1 | SOCIO, Agent Lévesque |
+| Listings + Po Poulet prep + Pi Pita FB inventory | PPP / Po Poulet / Pi Pita | BOOST Agent 5 (generic subagent, NO live browser) | Pierre boost 2026-10-29 21:22 EDT: read-only re-check 12 PPP listings vs ~14:07 EDT baseline + Po Poulet checklist refreshed + Pi Pita Facebook inventory prep from notes only | 21:24 EDT 2026-10-29 | 21:27 EDT 2026-10-29 | OUT — NO CHANGE on all 12 PPP listings vs baseline; Po Poulet checklist REFRESHED, still WAITING on Pierre's consent card + NDG answer; Pi Pita Facebook inventory prep done from notes only, NO page on file, NO creation, NO claim — see §8.2 | SOCIO, Agent Lévesque |
 | Facebook | Po Poulet | — | Live check + alignment | — | — | WAITING, not IN — blocked on Pierre's facebook.com consent card for popoulet.ca@gmail.com + NDG 6280 vs 6284 + hours unanswered | SOCIO, Agent Lévesque |
 | Facebook | All other brands | — | — | — | — | OUT / available — live capture first, never clone from a placeholder; no page created without Pierre's per-brand approval | SOCIO, Agent Lévesque |
 | All other platforms | PPP | — | — | — | — | OUT / available unless a filed note says otherwise — one writer per platform, never two writers on the same platform/brand page | SOCIO, Agent Lévesque |
 | Pinterest + Twitch + Snapchat | PPP | Muse/SOCIO subagent (Agent 3) | Filed-state verification only (no live browser): bios/links/visibility + exact one-photo-set shopping list | 20:10 EDT 2026-10-29 | 20:10 EDT 2026-10-29 | OUT — VERIFIED, NO CHANGE vs MAIN §3/§8(b): Pinterest bio NDG-first + SL line (added 2026-10-29), 2 boards × 8 real combo pins, no price filed; Twitch bio NDG-first, Website pppmtl.com, clip sharing ON, 0 followers, offline; Snapchat pppmtl.com / PPP PIZZERIA, bio NDG-first, Website pppmtl.com, 0/0/0, nothing posted. Photo-set list: 5 slots (Pinterest old rooster logo → 1 real current logo; Twitch default avatar → 1 real logo/avatar; Twitch purple text banner → 1 real banner; Snapchat ghost Snapcode → 1 real logo/avatar; Snapchat missing hero → 1 real hero file). No upload without a granted real file, no AI/stock. Pinterest owner-only steps unchanged (domain claim + account-type + NDG postal blank). No live edit, no post, no sign-in. Anchor: this row + Agent 3 report to parent 2026-10-29 20:10 EDT | SOCIO, Agent Lévesque |
 | Instagram + Threads | PPP | Agent 2 (filed-state verification only, no live browser) | Re-verify filed state @ppp_pizzeria IG + Threads; post-recovery mobile checklist | 20:10 EDT 2026-10-29 | 20:10 EDT 2026-10-29 | OUT — NO CHANGE to filed state vs MAIN §3/§8(a); IG lock still owner-only, Threads lock NOT assumed; post-recovery mobile checklist prepared in report; anchor: local MAIN occupancy row + §3 IG/Threads rows, owner-gates Gate 4 | SOCIO, Agent Lévesque |
+| Pinterest + Twitch + Snapchat | PPP | BOOST Agent 3 (generic subagent, READ-ONLY PREP ONLY, no live browser) | Pierre boost 2026-10-29 21:22 EDT: filed-state re-verification + photo-drop upload checklist, NO sign-in, NO post, NO upload, NO edit | 21:24 EDT 2026-10-29 | 21:24 EDT 2026-10-29 | OUT — VERIFIED, NO CHANGE vs MAIN §3/§8(b): Pinterest 2 boards × 8 real combo pins, no price filed, old rooster logo; Twitch bio NDG-first verbatim, Website pppmtl.com, clip sharing ON, default avatar + text banner; Snapchat pppmtl.com bio NDG-first verbatim, default ghost + missing hero. Photo-drop checklist built, 100 lines, 5 slots exactly, NO upload until Pierre supplies real files, never AI/stock. Pinterest owner-only items unchanged (domain claim, account-type, NDG postal blank). Anchor: ~/workspace/ppp-photo-slots-upload-checklist-2026-10-29.md (100 lines, local only — Drive/GitHub push left to parent filing agent) | SOCIO, Agent Lévesque |
+| Instagram + Threads | PPP | BOOST Agent 2 (generic subagent, READ-ONLY PREP ONLY, no live browser) | Pierre boost 2026-10-29 21:22 EDT: verify IG lock state from filed notes only + produce standalone post-recovery mobile checklist | 21:25 EDT 2026-10-29 | 21:27 EDT 2026-10-29 | OUT — NO CHANGE to filed IG/Threads state; IG lock owner-only re-verified from filed notes (02:43 locked + 02:44 verify emails), Threads lock NOT assumed; standalone checklist produced, local only; anchor ~/workspace/ppp-instagram-threads-recovery-checklist-2026-10-29.md; no live work, no sign-in, no recovery attempt, no substitute account, no Drive/GitHub push by this agent | SOCIO, Agent Lévesque |
 
 ### §0.3 FIVE-MINUTE TRACE RULE — no silent work
 Every 5 minutes while an agent is IN, it rewrites its progress trace in Drive + GitHub (what was done since the last trace, what is in progress, what is blocked, anchors). This is the watchdog cadence (ppp-nonstop-watchdog-5m) extended to ALL agents, all clouds: no silent work, no result left only in chat or a local file, no duplicate filing (update the same rows/lines in place, verified by re-read).
@@ -499,3 +504,150 @@ pack and YouTube/LinkedIn packs NOT yet in GitHub — this pass adds them).
   Pierre authorises each) AND Pierre's explicit creation authorisation are all
   still required, in either order, before any company page is created.
 - No password, code, or secret in this section or in either pack file.
+
+## §8.2 — BOOST Agent 5 re-check, 2026-10-29 21:24–21:27 EDT (filed sources only, NO live browser)
+
+Signed: SOCIO, Agent Lévesque. Pierre boost order 2026-10-29 21:22 EDT: five agents,
+boost everything. This agent: Listings PPP + Po Poulet prep + Pi Pita Facebook
+inventory, READ-ONLY ONLY. No live browser work, no sign-in, no listing edit, no
+page creation, no Facebook live work. Facebook/Po Poulet stays WAITING, not IN;
+the parent browser window is the single Facebook writer. Filed locally in place
+only — Drive/GitHub push left to the parent/coordinator, no duplicate master.
+Occupancy checked fresh before claiming: Listings/PPP + Po Poulet prep OUT 20:10
+EDT (Agent 5), Facebook/Po Poulet WAITING (not IN), no other agent IN on
+Listings/PPP, Po Poulet prep, or Pi Pita Facebook inventory — slot claimed IN
+21:24 EDT, released OUT 21:27 EDT.
+
+(1) PPP listings — NO CHANGE on all 12 vs the ~14:07 EDT 2026-10-29 baseline
+(§3 + §8(d) + §8.1), in filed sources re-read (master §3/§5/§6/§8, local audit
+129 lines, owner-gates checklists): (1) Setmore https://pppmtl.setmore.com —
+transferred Saint-Léonard, social links @pppmtlnord / @ppp_pizzeria /
+@pppmtl.com; (2) Yelp SL 91%; (3) Yelp NDG 55%, moderator approval pending,
+ordering-toggle non-persistence unchanged, PARKED read-only only; (4) Bing SL
+PIN emailed, editors locked; (5) Bing NDG needs verification, locked;
+(6) TripAdvisor NDG locationId 34761146, claim submitted, Verify pending,
+phone still old +1 514-458-4587; (7) TripAdvisor SL under review, no public
+URL; (8) Foursquare NDG 6ae283a9093cc65e3aaaff81, unclaimed, $20/claim paused;
+(9) Foursquare SL 6ae285370dd00c556d88871a, unclaimed, paused;
+(10) Yellow Pages/411 — no public listing, owner Self-Serve registration
+pending; (11) RestoEnLigne Hochelaga HTTP 403, intact; (12) MainMenus
+Montréal-Nord intact, account creation owner-only. No new blocker, no new
+owner step, no filed source newer than the baseline was found for any listing.
+Parked items NOT retouched: Yelp Business, X @pppmtlnord recovery, TikTok
+browser route, password/forgot-password work — none relaunched, none worked
+around. Stale-text flag carried forward (NOT a change): the local audit still
+carries pre-baseline Setmore legacy-handle wording — file-text lag only, §3
+baseline governs, no Setmore fix re-done on audit text alone.
+
+(2) Po Poulet checklist — REFRESHED, still WAITING, no live work done.
+Sources re-read: master §5 row 2 + §8(e), Po Poulet inventory + social
+requirements files 2026-10-28 (unchanged). NDG first, Page ID 110497128431808;
+SL second, @popoulet.ca. Brand email popoulet.ca@gmail.com only, Google login
+only; popouletmtl@gmail.com mapping UNCONFIRMED — do NOT use. Site
+https://popoulet.ca. SL 5839, fiche hours 11h–23h (re-verify live only). NDG
+address 6280 per fiche, hours BLANK until Pierre answers 6280 vs 6284 + NDG
+hours (asked ~09:23 EDT 2026-10-29, still unanswered in filed sources) — never
+PPP hours, never DoorDash store 28719392 hours, never change NDG to 6284 until
+answered. Live-check verbatim when the window opens: name, address, hours,
+phone, email, website, bio, links, visibility, pinned post, posts; align in
+place, verified info only; sister link NDG ↔ SL via About → Links (Public),
+verified by reload, NEVER merge; purge in place only verified wrong-current
+info; if a page does not exist live, do NOT create it — report for Pierre's
+per-brand approval. Out of scope on this checklist: no posts/clones, no
+Shop/catalogue change, no DoorDash touch, no Meta Post 2, Merchant Center
+5882470697 unverified/unclaimed, TripAdvisor in review with no URL.
+BLOCKED on Pierre's facebook.com consent card for popoulet.ca@gmail.com
+(PPP session logged out, must NOT be reused) + the NDG answer above.
+
+(3) Pi Pita Facebook inventory prep — READ-ONLY, from notes only, NO creation,
+NO claim, NO invented data. Brand 3 in inventory order, next after PPP/Po
+Poulet. Sources re-read: master §5 row 3, 18-brand inventory §3 (Pi Pita),
+Pi Pita social-requirements file 2026-10-28 (unchanged). Page on file: NONE
+VERIFIED — no Pi Pita Facebook Page ID, URL, or post list in any note
+consulted; status MISSING until a live check proves otherwise. VERIFIED on
+file: brand email www.pipita.ca@gmail.com (Google login only); site
+https://pipita.ca; public phone 450-999-4999 (general brand rule, no Pi
+Pita-specific verified phone on file); NDG 6280 av. Somerled, H3X 2B6 (GBP
+NDG verified/online per Drive inventory 2026-10-27); SL 5839 rue Jean-Talon E
+(DoorDash SL store 33598679 in census; GBP SL verification pending).
+UNVERIFIED / do NOT publish: Pi Pita-specific live hours (none in notes);
+any Facebook Page, handle, post, or clone source (none on file — live capture
+required first, never clone from a placeholder); Instagram handle
+@pipita.caa (spelling to confirm, ownership not live-verified); TikTok / X /
+YouTube / Pinterest / Bluesky / Threads handles (none verified); Linktree /
+Setmore (none verified). Do NOT use as brand email: pipitamtl@gmail.com
+(mapping/location UNVERIFIED) or dejeunerpita@gmail.com (mapping UNVERIFIED,
+do NOT merge with Pi Pita or Pita Libanais). Needed before ANY live step:
+(1) live check for existing NDG + SL Pages (search brand name + both
+addresses), signed in as www.pipita.ca@gmail.com, one Facebook writer only;
+(2) if a Page exists, verify ownership and align in place (transfer, never
+close); (3) if NONE exists, create ONE Page per location ONLY with Pierre's
+specific per-brand approval, from verified info + real Canva photos only;
+(4) real Pi Pita photo set (current logo + cover/banner + real combo/menu
+photos) — Canva folder to be confirmed, no AI/stock, no invented price/menu/
+hours; (5) NDG-first master clone text once a verified post/bio source is
+captured, sister-tagged NDG ↔ SL. Gates owned by Matt (do NOT proceed without
+him): GBP SL verification (photo ID or video); Merchant Center 5881714542
+claim after DNS session + phone-pairing prompt; DoorDash 27986352 (6284)
+Inactive decision (reactivate + clone menu from 41893249, or leave inactive);
+Uber Eats nº 12 NDG / nº 13 SL passes and the Menu Build note overlaps
+decision (note authorship NOT SOCIO/Lévesque). Adjacent listing action on
+file (transfer only, never close, only when a live listing is claimed):
+Yellow Pages Pi Pita Montréal-Nord 104502788 shows inverted phone
+450-999-3999 — EDIT/TRANSFER to 450-999-4999 and to the verified current
+location; the 6241 "PI-PITA Libanais Montréal" search result marked
+"Permanently Closed" is NOT an instruction to close or edit anything, and
+Pi Pita must NOT be merged with Pita Libanais without verification.
+No password/code/secret in this entry.
+
+## §11 — Coordinator filing pass BOOST, 2026-10-29 21:22–21:30 EDT (boost agents, local → Drive + GitHub)
+
+Signed: SOCIO, Agent Lévesque. This pass propagates work already filed locally by
+the five boost agents; it does NOT re-do their work, does NOT post, does NOT
+create a page, does NOT create a second master, and does NOT push a stale
+version. Base for this pass, re-read fresh: local master 601 lines (merged, all
+five boost OUT rows present in the Occupancy Table); Drive master 501 lines,
+modified 2026-10-29 20:13:40 EDT (behind local — this pass brings Drive up to the
+merged version); GitHub master blob e023ed9466047a77031cfbda6ef49d19cecfe6bd
+(the four boost briefs/checklists NOT yet in Drive or GitHub — this pass adds
+them). The launch pack was NOT re-pushed (already filed 20:12–20:13 EDT).
+
+- Agent 1 brief, filed once: ~/workspace/ppp-facebook-day1-posting-brief-2026-10-29.md
+  (51 lines, 0 posted). NDG first, then Saint-Léonard ≥3h later, live verbatim
+  condition: copy the live Google source text verbatim first or the item stays
+  queued; Day 1 A6 + Day 2 A7 text-only ready pending that gate; Days 3–7 +
+  Set B photo-BLOCKED; pinned post untouched. Occupancy row: Facebook PPP OUT
+  21:27 EDT (IN 21:24 EDT), brief ready, 0 posted.
+- Agent 2 checklist, filed once:
+  ~/workspace/ppp-instagram-threads-recovery-checklist-2026-10-29.md (114 lines).
+  Instagram lock owner-only, Threads lock NOT assumed. Occupancy row: Instagram +
+  Threads PPP OUT 21:27 EDT (IN 21:25 EDT), no change to filed state, no live
+  work, no recovery attempt, no substitute account.
+- Agent 3 checklist, filed once:
+  ~/workspace/ppp-photo-slots-upload-checklist-2026-10-29.md (100 lines).
+  Exactly 5 photo slots, NO upload until Pierre supplies real files, never
+  AI/stock. Occupancy row: Pinterest + Twitch + Snapchat PPP OUT 21:24 EDT
+  (IN 21:24 EDT), verified no change vs MAIN §3/§8(b).
+- Agent 4 brief, filed once:
+  ~/workspace/ppp-youtube-linkedin-gates-brief-2026-10-29.md (257 lines).
+  YouTube Publish owner-gated, LinkedIn company page does NOT exist, gate-order
+  flag UNRESOLVED. Occupancy row: YouTube + LinkedIn PPP OUT 21:30 EDT
+  (IN 21:26 EDT), brief ready, 0 created, 0 published, 0 invited.
+- Agent 5, no new file: OUT row + §8.2 filed in this master pass. Occupancy row:
+  Listings + Po Poulet prep + Pi Pita FB inventory OUT 21:27 EDT (IN 21:24 EDT),
+  no change on all 12 PPP listings vs baseline, Po Poulet checklist refreshed
+  still WAITING on Pierre's consent card + NDG 6280 vs 6284 + hours answer,
+  Pi Pita Facebook inventory prep from notes only, NO page verified on file,
+  NO creation, NO claim.
+
+Flags recorded here, NOT cleared: LinkedIn gate-order flag remains UNRESOLVED
+(checkpoint first vs connections first, both end at the same creation gate; all
+three gates — checkpoint, >1 accepted connection, Pierre's explicit creation
+authorisation — still required). Master §4 cites the clone bank at 427 lines
+while §7 cites it at 434 lines after the 20:04 EDT filing-pass correction —
+inconsistency noted, line count to be reconciled at the next clone-bank filing,
+no content overwritten here. The launch-pack header citing the master at 404
+lines is a stale header only, not a content error (the pack was verified
+against master §3 in the boost pass). Audit rows S3/S4 are stale (pre-finish
+SL-first bios, superseded by the NDG-first finish pass) — do NOT use them as
+current. No password, code, or secret in this section or in any filed file.
