@@ -20,6 +20,8 @@ import { checkSelections, chosenOptions } from "@/lib/modifiers";
 import type { IntegrationProviderId } from "@/lib/integration/core/contracts";
 import { logIntegrationEvent } from "@/lib/integration/core/logging";
 import { cloverCheckoutConfigured } from "@/lib/integration/providers/clover/config.server";
+import { DELIVERY_FEE_CENTS, deliversTo, postalCodeOf, websiteDeliveryAt } from "@/config/delivery";
+import { isValidTip } from "@/lib/pricing";
 import { durableOrderStoreConfigured } from "./database.server";
 import type { ProviderOrderAdapter } from "./provider-order-adapter";
 import { orderError, orderFailure, type OrderErrorCode, type OrderResult } from "./errors";
@@ -59,6 +61,8 @@ export interface CheckoutRequest {
   customer: OrderCustomer;
   deliveryAddress: string | null;
   notes: string;
+  /** Cents. The server checks it; it is never taxed. */
+  tip?: number;
 }
 
 const toCents = (dollars: number | null): number | null =>
@@ -86,7 +90,8 @@ function hasCheckoutPayloadShape(value: unknown): value is CheckoutRequest {
     !limitedText(input.customer.phone, 40) ||
     !limitedText(input.customer.email, 254) ||
     !limitedText(input.deliveryAddress, 500) ||
-    !limitedText(input.notes, 480)
+    !limitedText(input.notes, 480) ||
+    (input.tip != null && !isValidTip(input.tip))
   ) {
     return false;
   }
@@ -192,9 +197,18 @@ function toDraft(request: CheckoutRequest, items: OrderItem[]): OrderDraft {
     orderType: request.orderType,
     items,
     customer: request.customer,
-    deliveryAddress: request.deliveryAddress,
+    deliveryAddress: request.orderType === "DELIVERY" ? request.deliveryAddress : null,
     notes: (request.notes ?? "").slice(0, 480),
+    tip: request.tip ?? 0,
   };
+}
+
+/** Website delivery: from a delivering store, to a served postal-code area (config/delivery.ts). */
+function deliveryCheck(request: CheckoutRequest): OrderErrorCode | null {
+  if (request.orderType !== "DELIVERY") return null;
+  if (!websiteDeliveryAt(request.locationId)) return "unsupported_order_type";
+  if (!request.deliveryAddress?.trim()) return "missing_address";
+  return deliversTo(postalCodeOf(request.deliveryAddress)) ? null : "outside_delivery_area";
 }
 
 /** 1 — VALIDATE. Pure inputs in, human errors out. */
@@ -218,15 +232,17 @@ export function validateOrder(request: CheckoutRequest): ValidationReport {
   if (dropped > 0 && !errors.some((e) => e.code === "menu_changed")) {
     errors.push(orderError("menu_changed"));
   }
-  // This merchant's Clover Hosted Checkout is pickup-only; reject unsupported
-  // fulfilment before an order id, payment session, or guest grant is created.
-  if (
+  // Clover takes pickup, and delivery only where the website delivers; reject anything else
+  // before an order id, payment session, or guest grant is created.
+  const delivery =
     route.provider === "clover" &&
     request.orderType !== "PICKUP" &&
-    !errors.some((e) => e.code === "unsupported_order_type")
-  ) {
-    errors.push(orderError("unsupported_order_type"));
-  }
+    request.orderType !== "DELIVERY"
+      ? "unsupported_order_type"
+      : route.provider === "clover"
+        ? deliveryCheck(request)
+        : null;
+  if (delivery && !errors.some((e) => e.code === delivery)) errors.push(orderError(delivery));
   return { valid: errors.length === 0, errors };
 }
 
@@ -272,12 +288,14 @@ export function createOrder(
     total: null,
     // Clover orders are paid online on Clover's page before the kitchen gets them.
     paymentStatus: route.provider === "clover" ? "UNPAID" : "PAY_AT_RESTAURANT",
+    tip: draft.tip ?? 0,
+    deliveryFee: request.orderType === "DELIVERY" ? DELIVERY_FEE_CENTS : 0,
     status: "CREATED",
     providerStatus: null,
     providerOrderId: null,
     idempotencyKey,
     customer: request.customer,
-    deliveryAddress: request.deliveryAddress,
+    deliveryAddress: draft.deliveryAddress,
     notes: draft.notes,
     failureCode: null,
     createdAt: now,

@@ -13,6 +13,7 @@ export type OrderErrorCode =
   | "missing_name"
   | "missing_phone"
   | "missing_address"
+  | "outside_delivery_area"
   | "unsupported_order_type"
   | "item_unavailable"
   | "menu_changed"
@@ -65,6 +66,11 @@ const MESSAGES: Record<OrderErrorCode, Message> = {
     en: "Add a delivery address.",
     fr: "Ajoutez une adresse de livraison.",
     es: "Agrega una dirección de entrega.",
+  },
+  outside_delivery_area: {
+    en: "We don't deliver to this address yet. Choose pickup, or order delivery on Uber Eats, DoorDash or Skip.",
+    fr: "Nous ne livrons pas encore à cette adresse. Choisissez la cueillette, ou commandez la livraison sur Uber Eats, DoorDash ou Skip.",
+    es: "Aún no entregamos en esta dirección. Elige recoger, o pide entrega en Uber Eats, DoorDash o Skip.",
   },
   unsupported_order_type: {
     en: "That way of ordering is not open yet. Choose pickup or delivery.",

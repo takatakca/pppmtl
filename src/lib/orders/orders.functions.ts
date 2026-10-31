@@ -34,6 +34,8 @@ export interface PlaceOrderInput {
   };
   deliveryAddress: string | null;
   notes: string;
+  /** Cents; checked on the server (lib/pricing.ts). */
+  tip?: number;
 }
 
 /** Customer-safe view of an order: no provider ids, no internal codes. */
@@ -45,6 +47,10 @@ export interface OrderView {
   orderType: OrderType;
   createdAt: string;
   subtotal: number;
+  /** Cents; null until Clover priced the order. */
+  tax: number | null;
+  tip: number;
+  deliveryFee: number;
   total: number | null;
   customerName: string | null;
   deliveryAddress: string | null;
@@ -77,6 +83,9 @@ function toView(order: InternalOrder): OrderView {
     orderType: order.orderType,
     createdAt: order.createdAt,
     subtotal: order.subtotal,
+    tax: order.tax,
+    tip: order.tip ?? 0,
+    deliveryFee: order.deliveryFee ?? 0,
     total: order.total,
     customerName: order.customer.name,
     deliveryAddress: order.deliveryAddress,

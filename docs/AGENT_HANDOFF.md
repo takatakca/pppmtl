@@ -1,5 +1,9 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-10-31 — Checkout revamp with tip and website delivery (Claude)
+
+New checkout (`src/routes/checkout.tsx` + `src/components/checkout/*`): pickup (Google embed map, directions, Locate me distance) or delivery (OpenStreetMap address search, Locate me, served-area check from `src/config/delivery.ts`, map preview), contact with email (passed to Clover), tip chips, exact totals (`src/lib/pricing.ts`), pinned mobile pay bar. Server: `CheckoutRequest.tip` (validated), `deliveryFee` set by the server ($5, taxed), Clover lines "Livraison / Delivery" (note = address) and "Pourboire / Tip" (untaxed), title "… · LIVRAISON" and note "LIVRAISON / DELIVERY: <address>". Idempotency key includes the tip. Delivery postal codes are a default list — owner to confirm. A second agent builds courier dispatch (DoorDash / Uber / Skip / own driver) on branch `claude/courier-dispatch` — review before merging. Next: Google via takatak.ca, Interac (Québec).
+
 ## 2026-10-29 (latest) — Clover payment page opens on pppmtl.com (Claude)
 
 "We could not send your order to the kitchen" = Clover refused every Hosted Checkout session with HTTP 400 "Please provide either itemRefUuid or name, price." Lines now send name + price (+ note, taxes), no `itemRefUuid`; `User-Agent` sent on all Clover calls; refusals are logged as `checkout.session_refused` with Clover's masked reason (`cloverRefusalDetail`). Verified with Playwright on the live site: Clover's page opens with the right item, $14.99 + $2.25 tax = CA$17.24. NOT verified: a real payment, webhook, title + print, refund. Clover's page is branded "On2GO.CA" (merchant setting in Clover).

@@ -132,3 +132,12 @@ See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.m
 - Reject malformed customer order list/read/cancel runtime inputs before dereferencing fields or calling cancellation. TanStack generic inputValidator type alone is not a runtime parser. Return safe empty/null/not-found results and keep signed HttpOnly guest grant as the only authorization; phone filters are never credentials.
 - Reject oversized untrusted signed cookie values before cryptographic verification: order receipt 4096 chars max, admin session 256 chars max; signed fixtures continue to work. Source CI 40740449073 and 40740927778 SUCCESS.
 - A green CI and readable /menu page do not prove native Coolify running SHA or safe real payment. Keep production checkout NO-GO until durable orders/TAKATAK tenant/Clover signed webhook/outbox and charge/refund verified.
+
+## 2026-10-31 — Owner decisions: checkout revamp, tip, website delivery
+
+- **Tip on our checkout** (No tip / 10 / 15 / 18 / 20 % / Other, default 15 %, on the food before taxes). Sent to Clover as an untaxed line "Pourboire / Tip" (Hosted Checkout cannot pre-fill Clover's own tip). In Clover reports it is a line, not a Clover tip.
+- **Website delivery**, flat **$5.00** fee (taxable, line "Livraison / Delivery" whose note is the address). After payment the restaurant books a courier (DoorDash, Uber or its own driver — dispatch screen on the courier branch). Kitchen ticket title ends with "LIVRAISON" and the note carries the address.
+- **Served area** = postal-code areas in `src/config/delivery.ts` (`DELIVERY_FSAS`, ~6 km around NDG) — **to confirm with the owner**; the server refuses other postal codes (`outside_delivery_area`) and sends customers to Uber Eats / DoorDash / Skip.
+- **Address search** uses free OpenStreetMap services from the browser (Photon suggestions, one Nominatim reverse lookup per "Locate me" tap); maps are Google's key-less embed. No paid key needed.
+- **Google sign-in** must go through takatak.ca (TAKATAK auth) first, then the PPP account, then Clover checkout. Not built in this pass.
+- **Interac e-Transfer**: owner wants it (Québec); provider vs manual flow still to be decided.

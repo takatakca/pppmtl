@@ -157,6 +157,9 @@ export interface UniversalOrderDraft {
   customer: UniversalCustomerRef;
   deliveryAddress: string | null;
   notes: string;
+  /** Cents: the customer's tip and the website delivery fee, when the order has them. */
+  tip?: number;
+  deliveryFee?: number;
 }
 
 export interface UniversalOrder {

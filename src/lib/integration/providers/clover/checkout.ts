@@ -13,6 +13,7 @@
  */
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { checkSelections, chosenOptions, type LineSelections } from "@/lib/modifiers";
+import type { CloverTaxRate } from "@/lib/pricing";
 import type { CloverInventory } from "./catalog";
 import { siteGroupsFor } from "./site-groups";
 
@@ -108,22 +109,8 @@ export function priceCloverCart(
 
 /* ------------------------------------------------------------- taxes */
 
-/** A Clover tax rate: `rate` 10 % = 1 000 000 (Clover's unit). The name must exist on the merchant. */
-export interface CloverTaxRate {
-  name: string;
-  rate: number;
-  id?: string;
-}
-
-/** Québec, prepared food: GST 5 % + QST 9.975 %. Used only when the merchant's own rates cannot be read. */
-export const QUEBEC_TAX_RATES: CloverTaxRate[] = [
-  { name: "TPS", rate: 500_000 },
-  { name: "TVQ", rate: 997_500 },
-];
-
-export function taxesFor(subtotalCents: number, rates: CloverTaxRate[]): number {
-  return rates.reduce((sum, r) => sum + Math.round((subtotalCents * r.rate) / 10_000_000), 0);
-}
+// Shared with the checkout page (src/lib/pricing.ts is browser-safe; this file imports node:crypto).
+export { QUEBEC_TAX_RATES, taxesFor, type CloverTaxRate } from "@/lib/pricing";
 
 /* --------------------------------------------------- checkout request */
 
@@ -159,11 +146,18 @@ export function splitName(full: string | null): { firstName?: string; lastName?:
   };
 }
 
+/** Line names on Clover's page, the receipt and the register (French first: Québec). */
+export const DELIVERY_LINE_NAME = "Livraison / Delivery";
+export const TIP_LINE_NAME = "Pourboire / Tip";
+
 export function buildHostedCheckoutRequest(input: {
   lines: PricedCloverLine[];
   customer: { name: string | null; phone: string | null; email: string | null };
   taxRates: CloverTaxRate[];
   urls: { success: string; failure: string; cancel: string };
+  /** Cents. The delivery fee is taxed like the food and carries the address; the tip is never taxed. */
+  delivery?: { fee: number; address: string } | null;
+  tip?: number;
 }): HostedCheckoutRequest {
   const phone = (input.customer.phone ?? "").replace(/\D/g, "").replace(/^1(?=\d{10}$)/, "");
   const taxRates = input.taxRates.map((r) => ({
@@ -179,16 +173,32 @@ export function buildHostedCheckoutRequest(input: {
     },
     redirectUrls: input.urls,
     shoppingCart: {
-      lineItems: input.lines.map((l) => {
-        const note = lineNote(l);
-        return {
-          name: cut(l.name, 127),
-          price: l.unitPrice,
-          unitQty: l.quantity,
-          ...(note ? { note } : {}),
-          ...(taxRates.length ? { taxRates } : {}),
-        };
-      }),
+      lineItems: [
+        ...input.lines.map((l) => {
+          const note = lineNote(l);
+          return {
+            name: cut(l.name, 127),
+            price: l.unitPrice,
+            unitQty: l.quantity,
+            ...(note ? { note } : {}),
+            ...(taxRates.length ? { taxRates } : {}),
+          };
+        }),
+        ...(input.delivery && input.delivery.fee > 0
+          ? [
+              {
+                name: DELIVERY_LINE_NAME,
+                price: input.delivery.fee,
+                unitQty: 1,
+                note: cut(input.delivery.address, 255),
+                ...(taxRates.length ? { taxRates } : {}),
+              },
+            ]
+          : []),
+        ...(input.tip && input.tip > 0
+          ? [{ name: TIP_LINE_NAME, price: input.tip, unitQty: 1 }]
+          : []),
+      ],
     },
   };
 }
@@ -201,8 +211,17 @@ export function buildHostedCheckoutRequest(input: {
  */
 export const WEBSITE_TITLE_PREFIX = "🌐 Site web";
 
-export function websiteOrderTitle(orderNumber: string | null, firstName: string | null): string {
-  return cut([WEBSITE_TITLE_PREFIX, orderNumber, firstName].filter(Boolean).join(" · "), 127);
+export function websiteOrderTitle(
+  orderNumber: string | null,
+  firstName: string | null,
+  delivery = false,
+): string {
+  return cut(
+    [WEBSITE_TITLE_PREFIX, orderNumber, firstName, delivery ? "LIVRAISON" : null]
+      .filter(Boolean)
+      .join(" · "),
+    127,
+  );
 }
 
 export function isWebsiteTitled(title: unknown): boolean {
@@ -214,11 +233,15 @@ export function websiteOrderNote(input: {
   customerName: string | null;
   phone: string | null;
   notes: string | null;
+  /** The delivery address, or null for a pickup. */
+  deliveryAddress?: string | null;
 }): string {
   return cut(
     [
       `SITE WEB ${input.site}`,
-      "POUR EMPORTER / PICKUP",
+      input.deliveryAddress
+        ? `LIVRAISON / DELIVERY: ${input.deliveryAddress}`
+        : "POUR EMPORTER / PICKUP",
       "PAYÉ EN LIGNE / PAID ONLINE (Clover)",
       input.customerName,
       input.phone,

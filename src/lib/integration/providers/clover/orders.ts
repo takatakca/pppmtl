@@ -5,7 +5,7 @@
  * inventory with a REST token, else the committed snapshot), sends one Clover line per cart line (options in the
  * note) and redirects the customer to Clover's payment page. Card data never touches PPP. The order is confirmed
  * by Clover's webhook (webhook.ts), which also titles and prints it in Clover.
- * Pickup only: no courier is wired for website orders.
+ * Pickup, or delivery (flat fee, config/delivery.ts): the restaurant books the courier after payment.
  */
 import type { OrderAdapter, OrderQuote } from "@/lib/integration/core/adapter";
 import type {
@@ -101,10 +101,24 @@ async function quote(draft: UniversalOrderDraft): Promise<IntegrationResult<Orde
   }
   const priced = priceCloverCart(draftLines(draft), inventory, cloverSlotFor);
   if (!priced.ok) return { ok: false, code: "invalid_request", message: priced.code };
-  const taxes = taxesFor(priced.subtotal, await taxRatesForCheckout());
+  const { deliveryFee, tip } = extrasFor(draft);
+  const taxes = taxesFor(priced.subtotal + deliveryFee, await taxRatesForCheckout());
   return {
     ok: true,
-    data: { subtotal: priced.subtotal, taxes, fees: 0, total: priced.subtotal + taxes },
+    data: {
+      subtotal: priced.subtotal,
+      taxes,
+      fees: deliveryFee + tip,
+      total: priced.subtotal + deliveryFee + taxes + tip,
+    },
+  };
+}
+
+/** Delivery fee and tip as the server set them on the order (cents); no fee on a pickup. */
+function extrasFor(draft: UniversalOrderDraft): { deliveryFee: number; tip: number } {
+  return {
+    deliveryFee: draft.orderType === "DELIVERY" ? (draft.deliveryFee ?? 0) : 0,
+    tip: draft.tip ?? 0,
   };
 }
 
@@ -141,7 +155,9 @@ export const cloverOrderSubmitAdapter: ProviderOrderAdapter = {
 
   async createOrder(draft, _providerLocationId, _idempotencyKey, context) {
     if (!cloverCheckoutConfigured(draft.locationId)) return orderFailure("provider_unavailable");
-    if (draft.orderType !== "PICKUP") return orderFailure("unsupported_order_type");
+    if (draft.orderType === "DELIVERY" && !draft.deliveryAddress?.trim()) {
+      return orderFailure("missing_address");
+    }
     const orderId = context?.orderId ?? `ord_${Date.now().toString(36)}`;
     const { inventory, source } = await inventoryForCheckout();
     // A committed catalog snapshot is only suitable for development/sandbox.
@@ -162,6 +178,7 @@ export const cloverOrderSubmitAdapter: ProviderOrderAdapter = {
       return orderFailure(priced.code === "item_unavailable" ? "item_unavailable" : "menu_changed");
     }
     const taxRates = await taxRatesForCheckout();
+    const { deliveryFee, tip } = extrasFor(draft);
     const site = siteBaseUrl();
     const session = await createHostedCheckout(
       buildHostedCheckoutRequest({
@@ -177,6 +194,9 @@ export const cloverOrderSubmitAdapter: ProviderOrderAdapter = {
           failure: `${site}/checkout?payment=failed`,
           cancel: `${site}/checkout?payment=cancelled`,
         },
+        delivery:
+          deliveryFee > 0 ? { fee: deliveryFee, address: draft.deliveryAddress ?? "" } : null,
+        tip,
       }),
     );
     if (!session.ok) {
@@ -190,7 +210,7 @@ export const cloverOrderSubmitAdapter: ProviderOrderAdapter = {
       });
       return failureFor(session.reason);
     }
-    const tax = taxesFor(priced.subtotal, taxRates);
+    const tax = taxesFor(priced.subtotal + deliveryFee, taxRates);
     const ref: ProviderOrderRef = {
       providerOrderId: session.checkoutSessionId,
       orderNumber: websiteOrderNumber(orderId),
@@ -198,7 +218,7 @@ export const cloverOrderSubmitAdapter: ProviderOrderAdapter = {
       status: "SUBMITTED",
       subtotal: priced.subtotal,
       tax,
-      total: priced.subtotal + tax,
+      total: priced.subtotal + deliveryFee + tax + tip,
       paymentUrl: session.href,
     };
     return { ok: true, data: ref } satisfies OrderResult<ProviderOrderRef>;

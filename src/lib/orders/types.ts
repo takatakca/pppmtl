@@ -102,6 +102,8 @@ export interface OrderDraft {
   customer: OrderCustomer;
   deliveryAddress: string | null;
   notes: string;
+  /** Cents, chosen by the customer at checkout. Never taxed. */
+  tip?: number;
 }
 
 export interface InternalOrder {
@@ -136,6 +138,10 @@ export interface InternalOrder {
   paymentUrl?: string | null;
   /** Clover payment id once Clover confirmed the payment. */
   providerPaymentId?: string | null;
+  /** Cents. The customer's tip (not taxed). */
+  tip?: number;
+  /** Cents. Website delivery fee, set by the server (config/delivery.ts), taxed like the food. */
+  deliveryFee?: number;
   createdAt: string;
   updatedAt: string;
 }

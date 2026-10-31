@@ -1,21 +1,46 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CreditCard, Lock, Phone, ShieldCheck, ShoppingBag, Bike, UserRound } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { ArrowLeft, Bike, CreditCard, Lock, Phone, ShoppingBag } from "lucide-react";
 import { PPPHeader } from "@/components/layout/ppp-header";
 import { PPPFooter } from "@/components/layout/ppp-footer";
 import { LocationSheet } from "@/components/layout/location-sheet";
-import { DeliveryAddressForm } from "@/components/order/delivery-address-form";
 import { GoogleButton } from "@/components/auth/google-button";
-import { useServerFn } from "@tanstack/react-start";
+import { DeliveryDetails } from "@/components/checkout/delivery-details";
+import {
+  EMPTY_DELIVERY_ADDRESS,
+  deliveryAreaStatus,
+  tipCents,
+  type DeliveryAddressValue,
+  type TipChoice,
+} from "@/components/checkout/checkout-values";
+import { OrderSummary } from "@/components/checkout/order-summary";
+import { PickupDetails } from "@/components/checkout/pickup-details";
+import {
+  cardClass,
+  cardTitleClass,
+  fieldClass,
+  hintClass,
+  labelClass,
+  missingClass,
+} from "@/components/checkout/styles";
+import { TipPicker } from "@/components/checkout/tip-picker";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { placeOrder } from "@/lib/orders/orders.functions";
 import { useCustomerSession } from "@/lib/customer/session";
 import { cartTotals, selectionLabels } from "@/lib/cart";
 import { menuRepository } from "@/lib/menu-repository";
 import { GOOGLE_SIGN_IN_ENABLED } from "@/config/auth-flags";
+import {
+  DELIVERY_FEE_CENTS,
+  deliveryAddressLine,
+  postalCodeOf,
+  websiteDeliveryAt,
+} from "@/config/delivery";
 import { canonicalUrl } from "@/config/site";
 import { track } from "@/lib/analytics";
 import { orderError, type OrderError } from "@/lib/orders/errors";
+import { DEFAULT_TIP_PERCENT, checkoutTotals } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/checkout")({
@@ -42,55 +67,100 @@ export const Route = createFileRoute("/checkout")({
   component: CheckoutPage,
 });
 
-const SectionTitle = ({ n, children }: { n: number; children: React.ReactNode }) => (
-  <h2 className="flex items-baseline gap-3 font-display text-2xl uppercase leading-none">
-    <span className="text-flame">{String(n).padStart(2, "0")}</span>
-    {children}
-  </h2>
-);
+const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+/** Digits of a North American number, without the leading 1. */
+const phoneDigits = (v: string) => v.replace(/\D/g, "").replace(/^1(?=\d{10}$)/, "");
+const formatPhone = (v: string) => {
+  const d = phoneDigits(v);
+  return d.length === 10 ? `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}` : v;
+};
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+type Problem = "delivery_closed" | "address" | "outside" | "name" | "phone" | "email";
 
 function CheckoutPage() {
-  const { cart, mode, setMode, lang, t, openLocationSheet, addSavedAddress } = usePPP();
+  const { cart, mode, setMode, lang, t, openLocationSheet, savedAddresses, addSavedAddress } =
+    usePPP();
   const location = useSelectedLocation();
   const { accountsAvailable, customer } = useCustomerSession();
-  const totals = cartTotals(cart);
-  /** Card payment happens on Clover's own secure page (Clover Hosted Checkout); PPP never sees the card. */
-  const paymentCopy = t(
-    "You pay on Clover's secure page, then come back here. Your order goes straight to the restaurant's Clover register.",
-    "Vous payez sur la page sécurisée de Clover, puis vous revenez ici. Votre commande va directement à la caisse Clover du restaurant.",
-    "Pagas en la página segura de Clover y vuelves aquí. Tu pedido va directo a la caja Clover del restaurante.",
-  );
+  const submitOrderFn = useServerFn(placeOrder);
 
-  const [identity, setIdentity] = useState<"guest" | "account">("guest");
   const [name, setName] = useState(customer?.preferredName ?? "");
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState<string | null>(null);
-  const [verifyState, setVerifyState] = useState<"idle" | "unavailable">("idle");
+  const [email, setEmail] = useState(customer?.email ?? "");
+  const [address, setAddress] = useState<DeliveryAddressValue>(EMPTY_DELIVERY_ADDRESS);
+  const [tip, setTip] = useState<TipChoice>({ kind: "percent", percent: DEFAULT_TIP_PERCENT });
+  // After "Place order" with something missing, those fields stay outlined in red until fixed.
+  const [showMissing, setShowMissing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [orderMessage, setOrderMessage] = useState<string | null>(null);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
-  // After a "Pay" with a blank name or phone, those fields stay outlined in red until filled.
-  const [showMissing, setShowMissing] = useState(false);
+  const deliveryRef = useRef<HTMLElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
-  const nameMissing = showMissing && !(name.trim() || customer?.preferredName);
-  const phoneMissing = showMissing && !phone.trim();
+  const emailRef = useRef<HTMLInputElement>(null);
+
+  const delivery = mode === "delivery";
+  const deliveryOpen = websiteDeliveryAt(location?.id);
+  const area = deliveryAreaStatus(address);
+  const subtotalCents = Math.round(cartTotals(cart).knownSubtotal * 100);
+  const totals = checkoutTotals({
+    subtotal: subtotalCents,
+    deliveryFee: delivery ? DELIVERY_FEE_CENTS : 0,
+    tip: tipCents(tip, subtotalCents),
+  });
   const errorText = (error: OrderError) =>
     lang === "fr" ? error.messageFr : lang === "es" ? error.messageEs : error.messageEn;
-  // Follows the fields as they are filled in, so it never asks for something already entered.
-  const missingMessage =
-    nameMissing && phoneMissing
-      ? t(
-          "Add your name and phone number so the kitchen knows who the order is for.",
-          "Ajoutez votre nom et votre numéro de téléphone pour que la cuisine sache à qui est la commande.",
-          "Agrega tu nombre y tu teléfono para que la cocina sepa de quién es el pedido.",
-        )
-      : nameMissing || phoneMissing
-        ? errorText(orderError(nameMissing ? "missing_name" : "missing_phone"))
-        : null;
-  const statusMessage = missingMessage ?? orderMessage;
 
-  const submitOrderFn = useServerFn(placeOrder);
+  // In page order, so the first one is the field to show.
+  const problems: Problem[] = [
+    ...(delivery && !deliveryOpen ? (["delivery_closed"] as const) : []),
+    ...(delivery && deliveryOpen && area === "incomplete" ? (["address"] as const) : []),
+    ...(delivery && deliveryOpen && area === "outside" ? (["outside"] as const) : []),
+    ...(!(name.trim() || customer?.preferredName) ? (["name"] as const) : []),
+    ...(phoneDigits(phone).length !== 10 ? (["phone"] as const) : []),
+    ...(email.trim() && !EMAIL.test(email.trim()) ? (["email"] as const) : []),
+  ];
+  const flagged = (p: Problem) => showMissing && problems.includes(p);
+  const problemText = (p: Problem) => {
+    switch (p) {
+      case "delivery_closed":
+        return t(
+          "This restaurant delivers through Uber Eats, DoorDash and Skip. Choose pickup to order here.",
+          "Ce restaurant livre par Uber Eats, DoorDash et Skip. Choisissez la cueillette pour commander ici.",
+          "Este restaurante entrega por Uber Eats, DoorDash y Skip. Elige recoger para pedir aquí.",
+        );
+      case "address":
+        return errorText(orderError("missing_address"));
+      case "outside":
+        return errorText(orderError("outside_delivery_area"));
+      case "name":
+        return problems.includes("phone") && !phone.trim()
+          ? t(
+              "Add your name and phone number so the kitchen knows who the order is for.",
+              "Ajoutez votre nom et votre numéro de téléphone pour que la cuisine sache à qui est la commande.",
+              "Agrega tu nombre y tu teléfono para que la cocina sepa de quién es el pedido.",
+            )
+          : errorText(orderError("missing_name"));
+      case "phone":
+        return phone.trim()
+          ? t(
+              "Enter a 10-digit phone number, e.g. (514) 555-0100.",
+              "Entrez un numéro à 10 chiffres, ex. (514) 555-0100.",
+              "Escribe un teléfono de 10 dígitos, p. ej. (514) 555-0100.",
+            )
+          : errorText(orderError("missing_phone"));
+      case "email":
+        return t(
+          "Check your email address.",
+          "Vérifiez votre adresse courriel.",
+          "Revisa tu correo electrónico.",
+        );
+    }
+  };
+  // Follows the fields as they are fixed, so it never asks for something already entered.
+  const statusMessage =
+    (showMissing && problems[0] ? problemText(problems[0]) : null) ?? orderMessage;
 
   // Back from Clover's payment page without paying: the cart is still here.
   useEffect(() => {
@@ -117,26 +187,34 @@ function CheckoutPage() {
   }, []);
 
   /**
-   * Cart -> validate -> internal order -> provider. The browser sends ids and
-   * quantities only; every price and every decision happens on the server.
+   * Cart -> validate -> internal order -> Clover. The browser sends ids, quantities and the tip; every price, the
+   * delivery fee and the delivery area are decided again on the server.
    */
   const finishOrder = async () => {
-    if (!(name.trim() || customer?.preferredName) || !phone.trim()) {
+    const first = problems[0];
+    if (first) {
       setShowMissing(true);
       setOrderMessage(null);
-      const first = (name.trim() || customer?.preferredName ? phoneRef : nameRef).current;
-      first?.scrollIntoView({ block: "center", behavior: "smooth" });
-      first?.focus({ preventScroll: true });
+      const target =
+        first === "name"
+          ? nameRef.current
+          : first === "phone"
+            ? phoneRef.current
+            : first === "email"
+              ? emailRef.current
+              : deliveryRef.current;
+      target?.scrollIntoView({ block: "center", behavior: "smooth" });
+      if (target instanceof HTMLInputElement) target.focus({ preventScroll: true });
       return;
     }
     setSubmitting(true);
     setOrderMessage(null);
-    track("checkout_finish_attempted", { mode, lines: cart.length });
+    track("checkout_finish_attempted", { mode, lines: cart.length, tip: totals.tip > 0 });
     try {
       const response = await submitOrderFn({
         data: {
           locationId: location?.id ?? "",
-          orderType: mode === "delivery" ? ("DELIVERY" as const) : ("PICKUP" as const),
+          orderType: delivery ? ("DELIVERY" as const) : ("PICKUP" as const),
           lines: cart.map((line) => ({
             itemId: line.itemId,
             quantity: line.quantity,
@@ -147,26 +225,47 @@ function CheckoutPage() {
             customerId: customer?.id ?? null,
             takatakCustomerId: null,
             name: name.trim() || (customer?.preferredName ?? null),
-            phone: phone.trim() || null,
-            email: customer?.email ?? null,
-            isGuest: identity === "guest",
+            phone: formatPhone(phone.trim()),
+            email: email.trim() || null,
+            isGuest: true,
           },
-          deliveryAddress: mode === "delivery" ? address : null,
+          deliveryAddress: delivery ? deliveryAddressLine(address) : null,
           notes: "",
+          tip: totals.tip,
         },
       });
 
       if (response.ok && response.order?.paymentUrl) {
+        if (
+          delivery &&
+          !savedAddresses.some(
+            (a) =>
+              a.street === address.street &&
+              postalCodeOf(a.postalCode) === postalCodeOf(address.postalCode),
+          )
+        ) {
+          addSavedAddress({
+            street: address.street,
+            unit: address.unit,
+            city: address.city || "Montréal",
+            province: "QC",
+            postalCode: postalCodeOf(address.postalCode) ?? address.postalCode,
+            instructions: address.instructions,
+          });
+        }
         // Clover Hosted Checkout: the customer pays on Clover's page, then comes back to the order page.
-        track("checkout_payment_redirect", { lines: cart.length });
+        track("checkout_payment_redirect", { lines: cart.length, mode });
         window.location.assign(response.order.paymentUrl);
         return;
       }
       if (response.ok && response.order) {
         setOrderNumber(response.order.orderNumber ?? response.order.id);
-        setOrderMessage(null);
       } else if (response.error) {
-        if (response.error.code === "missing_name" || response.error.code === "missing_phone") {
+        if (
+          ["missing_name", "missing_phone", "missing_address", "outside_delivery_area"].includes(
+            response.error.code,
+          )
+        ) {
           setShowMissing(true);
         }
         setOrderMessage(errorText(response.error));
@@ -189,26 +288,52 @@ function CheckoutPage() {
       cart.map((line) => {
         const item = menuRepository.getItem(line.itemId);
         return {
-          line,
+          id: line.lineId,
+          quantity: line.quantity,
           name: item ? (lang === "fr" ? item.nameFr : item.nameEn) : line.itemId,
           options: selectionLabels(item, line.selections ?? {}, lang === "fr"),
+          instructions: line.instructions ?? "",
+          price: line.unitPrice === null ? null : line.unitPrice * line.quantity,
         };
       }),
     [cart, lang],
   );
 
-  const inputClass =
-    "mt-1.5 h-12 w-full border border-border bg-background px-3 text-sm outline-none focus-ppp";
-  const labelClass =
-    "block text-[0.6rem] font-bold uppercase tracking-[0.3em] text-muted-foreground";
-  const missingClass = "border-2 border-destructive";
-  const missingHintClass = "mt-1 block text-xs font-semibold text-destructive";
+  const placeLabel = submitting
+    ? t("Sending…", "Envoi…", "Enviando…")
+    : `${t("Place order", "Commander", "Hacer pedido")} · ${money(totals.total)}`;
+  const placeButton = (extra = "") => (
+    <button
+      type="button"
+      onClick={() => void finishOrder()}
+      disabled={submitting}
+      className={cn(
+        "cta-motion w-full bg-primary px-5 py-4 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp disabled:opacity-60",
+        extra,
+      )}
+      style={{ boxShadow: "var(--shadow-glow)" }}
+    >
+      {placeLabel}
+    </button>
+  );
+  const marketplaces = [
+    { label: "Uber Eats", href: location?.links.uberEatsUrl },
+    { label: "DoorDash", href: location?.links.doorDashUrl },
+    { label: "SkipTheDishes", href: location?.links.skipUrl },
+  ].filter((m): m is { label: string; href: string } => Boolean(m.href));
 
   return (
     <div className="min-h-dvh bg-background">
       <PPPHeader />
-      <main className="mx-auto max-w-6xl px-4 pt-20 pb-24 sm:px-6 lg:pt-28">
-        <h1 className="font-display text-3xl uppercase leading-none sm:text-5xl">
+      <main className="mx-auto max-w-6xl px-4 pt-20 pb-36 sm:px-6 lg:pt-28 lg:pb-24">
+        <Link
+          to="/order"
+          className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          {t("Back to menu", "Retour au menu", "Volver al menú")}
+        </Link>
+        <h1 className="mt-3 font-display text-4xl uppercase leading-none sm:text-5xl">
           {t("Checkout", "Paiement", "Pago")}
         </h1>
 
@@ -226,24 +351,28 @@ function CheckoutPage() {
             </Link>
           </div>
         ) : (
-          <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-            <div className="space-y-8">
-              {/* 1 — order type */}
-              <section className="panel-in border border-border p-5">
-                <SectionTitle n={1}>
-                  {t("Order type", "Type de commande", "Tipo de pedido")}
-                </SectionTitle>
-                <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
+            <div className="space-y-6">
+              {/* How the order gets to the customer */}
+              <section ref={deliveryRef} className={cardClass}>
+                <div
+                  role="radiogroup"
+                  aria-label={t("Order type", "Type de commande", "Tipo de pedido")}
+                  className="grid grid-cols-2 border border-border p-1"
+                >
                   {(["pickup", "delivery"] as const).map((m) => (
                     <button
                       key={m}
+                      type="button"
+                      role="radio"
+                      aria-checked={mode === m}
                       onClick={() => setMode(m)}
-                      aria-pressed={mode === m}
-                      className={`lift-btn flex items-center justify-center gap-2 border py-3.5 text-xs font-bold uppercase tracking-widest focus-ppp ${
+                      className={cn(
+                        "flex items-center justify-center gap-2 py-3 text-xs font-bold uppercase tracking-widest focus-ppp",
                         mode === m
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border text-muted-foreground"
-                      }`}
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
                     >
                       {m === "pickup" ? (
                         <ShoppingBag className="h-4 w-4" />
@@ -251,131 +380,74 @@ function CheckoutPage() {
                         <Bike className="h-4 w-4" />
                       )}
                       {m === "pickup"
-                        ? t("Pickup", "Cueillette", "Para recoger")
+                        ? t("Pickup", "Cueillette", "Recoger")
                         : t("Delivery", "Livraison", "Entrega")}
                     </button>
                   ))}
                 </div>
-                {mode === "pickup" ? (
-                  <button
-                    onClick={openLocationSheet}
-                    className="mt-3 w-full border border-dashed border-border px-4 py-3 text-left text-xs uppercase tracking-widest text-muted-foreground focus-ppp"
-                  >
-                    {location
-                      ? `${t("Pickup at", "Cueillette à", "Recoger en")} · ${location.name}, ${location.address}`
-                      : t("Choose a location", "Choisir un emplacement", "Elegir un local")}
-                  </button>
-                ) : (
-                  <div className="mt-4">
-                    {address ? (
-                      <p className="border border-border px-4 py-3 text-sm text-muted-foreground">
-                        {t("Delivering to", "Livraison à", "Entrega a")} · {address}
-                      </p>
-                    ) : (
-                      <DeliveryAddressForm
-                        authenticated={false}
-                        onSubmit={(d) => {
-                          setAddress(
-                            [d.street, d.unit, d.city, d.province, d.postalCode]
-                              .filter(Boolean)
-                              .join(", "),
-                          );
-                          addSavedAddress({
-                            street: d.street,
-                            unit: d.unit,
-                            city: d.city,
-                            province: d.province,
-                            postalCode: d.postalCode,
-                            instructions: d.instructions,
-                          });
-                        }}
-                      />
-                    )}
-                  </div>
-                )}
+                <div className="mt-5">
+                  {!delivery ? (
+                    <PickupDetails location={location} onChangeLocation={openLocationSheet} />
+                  ) : deliveryOpen ? (
+                    <DeliveryDetails
+                      value={address}
+                      onChange={setAddress}
+                      location={location}
+                      highlight={flagged("address")}
+                    />
+                  ) : (
+                    <div
+                      className={cn(
+                        "border px-4 py-4 text-sm",
+                        flagged("delivery_closed") ? missingClass : "border-border",
+                      )}
+                    >
+                      <p>{problemText("delivery_closed")}</p>
+                      {marketplaces.length > 0 && (
+                        <p className="mt-2 flex flex-wrap gap-3">
+                          {marketplaces.map((m) => (
+                            <a
+                              key={m.label}
+                              href={m.href}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="underline"
+                            >
+                              {m.label}
+                            </a>
+                          ))}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
               </section>
 
-              {/* 2 — who is ordering */}
-              <section className="panel-in border border-border p-5">
-                <SectionTitle n={2}>
-                  {t("Who is ordering", "Qui commande", "Quién pide")}
-                </SectionTitle>
-                <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                  <button
-                    onClick={() => setIdentity("guest")}
-                    aria-pressed={identity === "guest"}
-                    className={`lift-btn border p-4 text-left focus-ppp ${
-                      identity === "guest" ? "border-primary" : "border-border"
-                    }`}
-                  >
-                    <span className="flex items-center gap-2 font-display text-lg uppercase leading-none">
-                      <UserRound className="h-4 w-4 text-primary" />
-                      {t("Continue as guest", "Continuer sans compte", "Continuar como invitado")}
-                    </span>
-                    <span className="mt-1.5 block text-xs text-muted-foreground">
+              {/* Contact */}
+              <section className={cardClass}>
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h2 className={cardTitleClass}>
+                    {t("Your details", "Vos coordonnées", "Tus datos")}
+                  </h2>
+                  {accountsAvailable && !customer && (
+                    <Link
+                      to="/account/sign-in"
+                      className="text-xs uppercase tracking-widest text-muted-foreground underline-offset-4 hover:underline focus-ppp"
+                    >
                       {t(
-                        "No account needed. Guest ordering always stays open.",
-                        "Aucun compte requis. La commande sans compte reste toujours possible.",
-                        "Sin cuenta. El pedido como invitado siempre está disponible.",
+                        "Have an account? Sign in",
+                        "Un compte? Connectez-vous",
+                        "¿Tienes cuenta? Entra",
                       )}
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => setIdentity("account")}
-                    aria-pressed={identity === "account"}
-                    className={`lift-btn border p-4 text-left focus-ppp ${
-                      identity === "account" ? "border-primary" : "border-border"
-                    }`}
-                  >
-                    <span className="flex items-center gap-2 font-display text-lg uppercase leading-none">
-                      <ShieldCheck className="h-4 w-4 text-primary" />
-                      {t("Sign in to PPP", "Se connecter à PPP", "Entrar a PPP")}
-                    </span>
-                    <span className="mt-1.5 block text-xs text-muted-foreground">
-                      {t(
-                        "Save your orders, favourites and addresses for next time.",
-                        "Gardez vos commandes, favoris et adresses pour la prochaine fois.",
-                        "Guarda tus pedidos, favoritos y direcciones para la próxima.",
-                      )}
-                    </span>
-                  </button>
+                    </Link>
+                  )}
                 </div>
-
-                {identity === "account" && (
-                  <div className="step-in mt-4 border border-border p-4">
-                    {accountsAvailable ? (
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <Link
-                          to="/account/sign-in"
-                          className="border border-border px-4 py-3 text-center font-display text-lg uppercase leading-none focus-ppp"
-                        >
-                          {t("Sign in", "Se connecter", "Entrar")}
-                        </Link>
-                        <Link
-                          to="/account/sign-up"
-                          className="bg-primary px-4 py-3 text-center font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
-                        >
-                          {t("Create account", "Créer un compte", "Crear cuenta")}
-                        </Link>
-                        {GOOGLE_SIGN_IN_ENABLED && (
-                          <div className="sm:col-span-2">
-                            <GoogleButton />
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">
-                        {t(
-                          "PPP accounts are not open yet. Finish as a guest today — nothing is lost.",
-                          "Les comptes PPP ne sont pas encore ouverts. Terminez sans compte aujourd'hui.",
-                          "Las cuentas PPP aún no están abiertas. Continúa como invitado hoy.",
-                        )}
-                      </p>
-                    )}
+                {GOOGLE_SIGN_IN_ENABLED && !customer && (
+                  <div className="mt-4">
+                    <GoogleButton />
                   </div>
                 )}
-
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <label className="block">
                     <span className={labelClass}>{t("Name", "Nom", "Nombre")}</span>
                     <input
@@ -383,12 +455,11 @@ function CheckoutPage() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       autoComplete="name"
-                      aria-invalid={nameMissing || undefined}
-                      aria-describedby={nameMissing ? "checkout-name-missing" : undefined}
-                      className={cn(inputClass, nameMissing && missingClass)}
+                      aria-invalid={flagged("name") || undefined}
+                      className={cn(fieldClass, flagged("name") && missingClass)}
                     />
-                    {nameMissing && (
-                      <span id="checkout-name-missing" className={missingHintClass}>
+                    {flagged("name") && (
+                      <span className={hintClass}>
                         {t("Name required", "Nom obligatoire", "Nombre obligatorio")}
                       </span>
                     )}
@@ -401,171 +472,151 @@ function CheckoutPage() {
                       ref={phoneRef}
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
+                      onBlur={() => setPhone((p) => formatPhone(p))}
                       inputMode="tel"
                       autoComplete="tel"
-                      aria-invalid={phoneMissing || undefined}
-                      aria-describedby={phoneMissing ? "checkout-phone-missing" : undefined}
-                      className={cn(inputClass, phoneMissing && missingClass)}
+                      placeholder="(514) 555-0100"
+                      aria-invalid={flagged("phone") || undefined}
+                      className={cn(fieldClass, flagged("phone") && missingClass)}
                     />
-                    {phoneMissing && (
-                      <span id="checkout-phone-missing" className={missingHintClass}>
-                        {t("Phone number required", "Numéro obligatoire", "Teléfono obligatorio")}
+                    {flagged("phone") && (
+                      <span className={hintClass}>
+                        {phone.trim()
+                          ? t("10 digits", "10 chiffres", "10 dígitos")
+                          : t(
+                              "Phone number required",
+                              "Numéro obligatoire",
+                              "Teléfono obligatorio",
+                            )}
                       </span>
                     )}
                   </label>
+                  <label className="block sm:col-span-2">
+                    <span className={labelClass}>
+                      {t(
+                        "Email (for your receipt)",
+                        "Courriel (pour votre reçu)",
+                        "Correo (para tu recibo)",
+                      )}
+                    </span>
+                    <input
+                      ref={emailRef}
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      autoComplete="email"
+                      inputMode="email"
+                      placeholder={t("you@example.com", "nom@exemple.com", "tu@ejemplo.com")}
+                      aria-invalid={flagged("email") || undefined}
+                      className={cn(fieldClass, flagged("email") && missingClass)}
+                    />
+                  </label>
                 </div>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  {t(
+                    "The kitchen calls this number only if there is a question about your order.",
+                    "La cuisine appelle ce numéro seulement en cas de question sur votre commande.",
+                    "La cocina llama a este número solo si hay una duda sobre tu pedido.",
+                  )}
+                </p>
+              </section>
 
-                {/* SMS verification foundation — no code is sent until a provider exists */}
-                <div className="mt-3 flex flex-wrap items-center gap-3 border border-dashed border-border px-4 py-3">
-                  <button
-                    onClick={() => setVerifyState("unavailable")}
-                    className="border border-border px-4 py-2 text-[0.65rem] font-bold uppercase tracking-widest focus-ppp"
-                  >
-                    {t("Send verification code", "Envoyer un code", "Enviar código")}
-                  </button>
-                  <span className="text-xs text-muted-foreground">
-                    {verifyState === "unavailable"
-                      ? t(
-                          "Text verification is not switched on yet — the kitchen confirms by phone.",
-                          "La vérification par texto n'est pas activée — la cuisine confirme par téléphone.",
-                          "La verificación por SMS aún no está activa — la cocina confirma por teléfono.",
-                        )
-                      : t(
-                          "We use your number only to confirm the order.",
-                          "Nous utilisons votre numéro seulement pour confirmer la commande.",
-                          "Usamos tu número solo para confirmar el pedido.",
-                        )}
-                  </span>
+              {/* Tip */}
+              <section className={cardClass}>
+                <div className="flex items-baseline justify-between gap-3">
+                  <h2 className={cardTitleClass}>
+                    {t("Add a tip", "Ajouter un pourboire", "Añadir propina")}
+                  </h2>
+                  <span className="font-display text-xl leading-none">{money(totals.tip)}</span>
+                </div>
+                <div className="mt-4">
+                  <TipPicker value={tip} onChange={setTip} subtotalCents={subtotalCents} />
                 </div>
               </section>
 
-              {/* 3 — payment */}
-              <section className="panel-in border border-border p-5">
-                <SectionTitle n={3}>{t("Payment", "Paiement", "Pago")}</SectionTitle>
-                <p className="mt-3 flex items-start gap-2 text-sm text-muted-foreground">
-                  <Lock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  {paymentCopy}
-                </p>
-                <div className="mt-4 flex items-center gap-2 border border-dashed border-border px-4 py-3 text-xs uppercase tracking-widest text-muted-foreground">
-                  <CreditCard className="h-4 w-4" />
-                  {mode === "delivery"
-                    ? t(
-                        "Online payment is for pickup. For delivery, use Uber Eats, DoorDash or Skip.",
-                        "Le paiement en ligne est pour la cueillette. Pour la livraison : Uber Eats, DoorDash ou Skip.",
-                        "El pago en línea es para recoger. Para entrega: Uber Eats, DoorDash o Skip.",
-                      )
-                    : t(
-                        "Card payment opens on Clover's secure page",
-                        "Le paiement par carte s'ouvre sur la page sécurisée de Clover",
-                        "El pago con tarjeta se abre en la página segura de Clover",
+              {/* Payment */}
+              <section className={cardClass}>
+                <h2 className={cardTitleClass}>{t("Payment", "Paiement", "Pago")}</h2>
+                <div className="mt-4 flex items-start gap-3 border-2 border-primary px-4 py-4">
+                  <CreditCard className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                  <div>
+                    <p className="font-semibold">
+                      {t(
+                        "Credit or debit card, or a mobile wallet",
+                        "Carte de crédit ou de débit, ou portefeuille mobile",
+                        "Tarjeta de crédito o débito, o billetera móvil",
                       )}
+                    </p>
+                    <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Lock className="h-3.5 w-3.5" />
+                      {t(
+                        "On Clover's secure page, then you come back here. PPP never sees your card.",
+                        "Sur la page sécurisée de Clover, puis vous revenez ici. PPP ne voit jamais votre carte.",
+                        "En la página segura de Clover y vuelves aquí. PPP nunca ve tu tarjeta.",
+                      )}
+                    </p>
+                  </div>
                 </div>
               </section>
             </div>
 
-            {/* Summary */}
-            <aside className="panel-in sticky top-24 border border-border p-5">
-              <h2 className="font-display text-2xl uppercase leading-none">
-                {t("Your order", "Votre commande", "Tu pedido")}
-              </h2>
-              <ul className="mt-4 space-y-3">
-                {lines.map(({ line, name: itemName, options }) => (
-                  <li key={line.lineId} className="flex items-start justify-between gap-3">
-                    <span className="min-w-0">
-                      <span className="block font-display text-base uppercase leading-tight">
-                        {line.quantity}× {itemName}
-                      </span>
-                      {options.length > 0 && (
-                        <span className="block text-xs text-muted-foreground">
-                          {options.join(" · ")}
-                        </span>
-                      )}
-                      {line.instructions && (
-                        <span className="block text-xs text-muted-foreground">
-                          “{line.instructions}”
-                        </span>
-                      )}
-                    </span>
-                    <span className="shrink-0 font-display text-base leading-none text-accent">
-                      {line.unitPrice === null
-                        ? t("See price", "Voir le prix", "Ver precio")
-                        : `$${(line.unitPrice * line.quantity).toFixed(2)}`}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <dl className="mt-5 space-y-1.5 border-t border-border pt-4 text-sm">
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">
-                    {t("Subtotal", "Sous-total", "Subtotal")}
-                  </dt>
-                  <dd>${totals.knownSubtotal.toFixed(2)}</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">{t("Taxes", "Taxes", "Impuestos")}</dt>
-                  <dd className="text-muted-foreground">
-                    {t(
-                      "Added on Clover's payment page",
-                      "Ajoutées sur la page de paiement Clover",
-                      "Se suman en la página de pago de Clover",
-                    )}
-                  </dd>
-                </div>
-                <div className="flex items-baseline justify-between border-t border-border pt-3">
-                  <dt className="font-display text-lg uppercase leading-none">
-                    {t("Total", "Total", "Total")}
-                  </dt>
-                  <dd className="font-display text-2xl leading-none">
-                    ${totals.knownSubtotal.toFixed(2)}+
-                  </dd>
-                </div>
-              </dl>
-
-              <button
-                onClick={() => void finishOrder()}
-                disabled={submitting}
-                className="cta-motion mt-5 w-full bg-primary px-5 py-4 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp disabled:opacity-60"
-                style={{ boxShadow: "var(--shadow-glow)" }}
-              >
-                {submitting
-                  ? t("Sending…", "Envoi…", "Enviando…")
-                  : t("Pay with Clover", "Payer avec Clover", "Pagar con Clover")}
-              </button>
-              {orderNumber ? (
+            <OrderSummary
+              lines={lines}
+              totals={totals}
+              delivery={delivery}
+              hasUnpriced={cart.some((l) => l.unitPrice === null)}
+            >
+              {placeButton()}
+              {orderNumber && (
                 <p className="mt-3 border border-primary px-4 py-3 text-center text-sm">
                   {t("Order", "Commande", "Pedido")} #{orderNumber}
                 </p>
-              ) : null}
+              )}
               {statusMessage ? (
                 <p
                   role="status"
-                  className="mt-3 border border-border px-4 py-3 text-center text-sm text-muted-foreground"
+                  className="mt-3 border border-border px-4 py-3 text-center text-sm"
                 >
                   {statusMessage}
                 </p>
               ) : (
-                <p className="mt-2 text-center text-[0.6rem] uppercase tracking-widest text-muted-foreground">
+                <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-[0.6rem] uppercase tracking-widest text-muted-foreground">
+                  <Lock className="h-3 w-3" />
                   {t(
-                    "Secure payment by Clover · pickup",
-                    "Paiement sécurisé par Clover · cueillette",
-                    "Pago seguro con Clover · para recoger",
+                    "Secure payment by Clover",
+                    "Paiement sécurisé par Clover",
+                    "Pago seguro con Clover",
                   )}
                 </p>
               )}
               {location?.links.phoneOrderNumber && (
                 <a
                   href={`tel:${location.links.phoneOrderNumber}`}
-                  className="mt-3 flex items-center justify-center gap-2 border border-border px-4 py-3 font-display text-lg uppercase leading-none focus-ppp hover:border-primary"
+                  className="mt-3 flex items-center justify-center gap-2 px-4 py-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp"
                 >
-                  <Phone className="h-4 w-4 text-primary" />
-                  {t("Call to finish", "Appeler pour terminer", "Llamar para terminar")}
+                  <Phone className="h-3.5 w-3.5 text-primary" />
+                  {t(
+                    "Prefer to order by phone?",
+                    "Vous préférez commander par téléphone?",
+                    "¿Prefieres pedir por teléfono?",
+                  )}
                 </a>
               )}
-            </aside>
+            </OrderSummary>
           </div>
         )}
       </main>
+
+      {cart.length > 0 && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
+          {statusMessage && (
+            <p role="status" className="mb-2 text-center text-xs">
+              {statusMessage}
+            </p>
+          )}
+          {placeButton("py-3.5 text-lg")}
+        </div>
+      )}
       <PPPFooter />
       <LocationSheet />
     </div>
