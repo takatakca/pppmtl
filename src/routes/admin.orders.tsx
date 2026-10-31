@@ -66,12 +66,20 @@ function OrdersAdmin() {
           Internal order id, provider, store, status and failure reason. No provider is connected,
           so submissions end as FAILED with a reason instead of a fake order number.
         </p>
-        <Link
-          to="/admin/integrations"
-          className="mt-4 inline-block border border-border px-4 py-2 text-xs uppercase tracking-widest focus-ppp"
-        >
-          Integrations status
-        </Link>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link
+            to="/admin/dispatch"
+            className="inline-block bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-widest text-primary-foreground focus-ppp"
+          >
+            Courier dispatch
+          </Link>
+          <Link
+            to="/admin/integrations"
+            className="inline-block border border-border px-4 py-2 text-xs uppercase tracking-widest focus-ppp"
+          >
+            Integrations status
+          </Link>
+        </div>
       </header>
 
       {error && (

@@ -12,6 +12,13 @@ export const Route = createFileRoute("/admin/sign-in")({
   component: AdminSignIn,
 });
 
+/** Where to go after sign-in: only known internal pages (?next=/admin/dispatch for the kitchen tablet). */
+const ADMIN_PAGES = ["/admin/orders", "/admin/dispatch", "/admin/integrations"];
+function nextAdminPage(): string {
+  const next = new URLSearchParams(window.location.search).get("next") ?? "";
+  return ADMIN_PAGES.includes(next) ? next : "/admin/orders";
+}
+
 function AdminSignIn() {
   const [credential, setCredential] = useState("");
   const [busy, setBusy] = useState(false);
@@ -28,7 +35,7 @@ function AdminSignIn() {
         setError(true);
         return;
       }
-      window.location.assign("/admin/orders");
+      window.location.assign(nextAdminPage());
     } catch {
       setError(true);
     } finally {
