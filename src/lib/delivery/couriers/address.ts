@@ -1,12 +1,13 @@
 /**
  * Address, phone and distance helpers for courier dispatch. Pure, no I/O.
  *
- * The checkout stores the delivery address as one line:
+ * The checkout stores the delivery address as one line (deliveryAddressLine, src/config/delivery.ts):
  *   "<street>, App. <unit>, <city>, QC <postal code> — <instructions>"   (unit and instructions optional)
  * Couriers need it split: Uber Direct takes a structured address
  * (https://developer.uber.com/docs/deliveries/get-started), DoorDash Drive a comma-separated line
  * (https://developer.doordash.com/en-US/api/drive/). Both want phone numbers in E.164 (+1…).
  */
+import { distanceKm, postalCodeOf } from "@/config/delivery";
 import type { DispatchAddress } from "./types";
 
 const PROVINCES: Record<string, string> = {
@@ -20,7 +21,8 @@ const PROVINCES: Record<string, string> = {
 
 const UNIT_PREFIX =
   /^(?:app\.?|apt\.?|appartement|apartment|unit[ée]?|suite|bureau|logement|log\.?|#)\s*(.+)$/i;
-const POSTAL = /([A-Za-z]\d[A-Za-z])\s*(\d[A-Za-z]\d)$/;
+/** Where the postal code starts at the end of the last part; postalCodeOf (src/config/delivery.ts) validates it. */
+const TRAILING_POSTAL = /[A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d\s*$/;
 /** " — " (em dash) separates the instructions; an en dash is accepted too. */
 const INSTRUCTIONS_SEPARATOR = /\s+[—–]\s+/;
 
@@ -45,23 +47,19 @@ export function parseDeliveryAddress(raw: string | null | undefined): DispatchAd
   if (parts.length > 0 && /^canada$/i.test(parts[parts.length - 1] ?? "")) parts.pop();
   if (parts.length < 2) return null;
 
-  // Last part: "QC H3X 2B6", "Québec H3X2B6" or just "H3X 2B6".
+  // Last part: "QC H3X 2B6", "Québec H3X2B6" or just "H3X 2B6". The checkout's postalCodeOf validates it.
   const last = parts.pop() ?? "";
-  const postalMatch = POSTAL.exec(last);
+  const at = last.search(TRAILING_POSTAL);
+  const postalCode = at >= 0 ? postalCodeOf(last.slice(at)) : null;
+  if (!postalCode) return null;
   let province = "QC";
-  let postalCode: string;
   let city: string | undefined;
-  if (postalMatch) {
-    postalCode = `${postalMatch[1]} ${postalMatch[2]}`.toUpperCase();
-    const before = clean(last.slice(0, postalMatch.index));
-    if (before) {
-      const known = PROVINCES[before.toLowerCase()];
-      if (known) province = known;
-      else if (/^[A-Za-z]{2}$/.test(before)) province = before.toUpperCase();
-      else city = before; // "Montréal H3X 2B6"
-    }
-  } else {
-    return null;
+  const before = clean(last.slice(0, at));
+  if (before) {
+    const known = PROVINCES[before.toLowerCase()];
+    if (known) province = known;
+    else if (/^[A-Za-z]{2}$/.test(before)) province = before.toUpperCase();
+    else city = before; // "Montréal H3X 2B6"
   }
 
   if (!city) city = parts.pop();
@@ -112,17 +110,12 @@ export function splitName(name: string): { given: string; family: string } {
   return { given, family: parts.join(" ") };
 }
 
-/** Great-circle distance in metres (haversine). */
+/** Straight-line distance in whole metres (the checkout's haversine, src/config/delivery.ts). */
 export function distanceMeters(
   a: { lat: number; lng: number },
   b: { lat: number; lng: number },
 ): number {
-  const rad = (d: number) => (d * Math.PI) / 180;
-  const dLat = rad(b.lat - a.lat);
-  const dLng = rad(b.lng - a.lng);
-  const h =
-    Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
-  return Math.round(2 * 6_371_000 * Math.asin(Math.min(1, Math.sqrt(h))));
+  return Math.round(distanceKm(a, b) * 1000);
 }
 
 /** Short text for the courier apps; providers cap notes (Uber: 280 characters). */

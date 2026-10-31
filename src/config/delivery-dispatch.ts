@@ -6,6 +6,7 @@
  * Credentials are server env vars only (docs/integrations/couriers.md).
  */
 import { pppBusiness } from "@/config/business";
+import { RESTAURANT_COORDS } from "@/config/delivery";
 
 export const dispatchPickup = {
   businessName: "PPP Pizzeria — NDG",
@@ -16,13 +17,12 @@ export const dispatchPickup = {
   country: "CA" as const,
   phoneE164: pppBusiness.phone.e164,
   /**
-   * 6280 Avenue Somerled, Montréal, QC H3X 2B6 — OpenStreetMap node 4368685572
-   * (https://www.openstreetmap.org/node/4368685572), read through Nominatim on 2026-10-31:
-   * lat 45.4705921, lon -73.6353129. Sent to Uber Direct, which recommends coordinates in some regions
-   * (https://developer.uber.com/docs/deliveries/get-started), and used to show how far a courier is.
+   * The checkout's RESTAURANT_COORDS (OpenStreetMap node 4368685572, 6280 Av. Somerled). Sent to Uber Direct,
+   * which recommends coordinates in some regions (https://developer.uber.com/docs/deliveries/get-started), and
+   * used to show how far a courier is from the restaurant.
    */
-  latitude: 45.4705921,
-  longitude: -73.6353129,
+  latitude: RESTAURANT_COORDS.lat,
+  longitude: RESTAURANT_COORDS.lng,
   instructions: "Commande du site web — demandez au comptoir / Website order — ask at the counter.",
 };
 

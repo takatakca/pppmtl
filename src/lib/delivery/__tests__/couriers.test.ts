@@ -1,5 +1,6 @@
 import { createHmac } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { deliveryAddressLine, RESTAURANT_COORDS } from "@/config/delivery";
 import {
   addressOneLine,
   distanceMeters,
@@ -65,6 +66,36 @@ describe("delivery address and phone", () => {
       postalCode: "H4A 1C9",
       country: "CA",
       instructions: "Sonnez au 4",
+    });
+  });
+
+  it("reads exactly what the checkout writes (deliveryAddressLine)", () => {
+    const line = deliveryAddressLine({
+      street: "5800 Avenue de Monkland",
+      unit: "3",
+      city: "Montréal",
+      postalCode: "h4a1g1",
+      instructions: "Sonnez 302",
+    });
+    expect(line).toBe("5800 Avenue de Monkland, App. 3, Montréal, QC H4A 1G1 — Sonnez 302");
+    expect(parseDeliveryAddress(line)).toEqual({
+      street: "5800 Avenue de Monkland",
+      unit: "3",
+      city: "Montréal",
+      province: "QC",
+      postalCode: "H4A 1G1",
+      country: "CA",
+      instructions: "Sonnez 302",
+    });
+    expect(
+      parseDeliveryAddress(
+        deliveryAddressLine({ street: "6280 Av. Somerled", postalCode: "H3X 2B6" }),
+      ),
+    ).toMatchObject({
+      street: "6280 Av. Somerled",
+      unit: null,
+      city: "Montréal",
+      instructions: null,
     });
   });
 
@@ -457,8 +488,8 @@ describe("Uber Direct", () => {
       country: "CA",
     });
     expect(body).toMatchObject({
-      pickup_latitude: 45.4705921,
-      pickup_longitude: -73.6353129,
+      pickup_latitude: RESTAURANT_COORDS.lat,
+      pickup_longitude: RESTAURANT_COORDS.lng,
       pickup_phone_number: "+14509994999",
       dropoff_phone_number: "+15145550199",
       manifest_total_value: 3448,

@@ -81,8 +81,11 @@ export function paidDeliveryOrder(overrides: Partial<InternalOrder> = {}): Inter
       },
     ],
     subtotal: 3448,
-    tax: 517,
-    total: 3965,
+    // As the checkout charges it: food + $5 delivery fee, taxed, + tip (src/config/delivery.ts).
+    deliveryFee: 500,
+    tip: 400,
+    tax: 592,
+    total: 4940,
     paymentStatus: "PAID",
     status: "SUBMITTED",
     providerStatus: "paid",

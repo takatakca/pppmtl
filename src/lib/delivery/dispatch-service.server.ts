@@ -137,9 +137,8 @@ export function courierRequestFor(
   };
 }
 
-/** Optional order fields the checkout may add (delivery fee, tip, cents). Never required here. */
-function optionalCents(order: InternalOrder, key: "deliveryFee" | "tip"): number | null {
-  const value = (order as unknown as Record<string, unknown>)[key];
+/** The checkout's optional cents fields (tip, delivery fee); stored documents are read defensively. */
+function cents(value: number | undefined): number | null {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : null;
 }
 
@@ -218,8 +217,8 @@ function boardRow(order: DispatchOrder): DispatchBoardRow {
     deliveryAddress: order.deliveryAddress,
     subtotal: order.subtotal,
     total: order.total,
-    deliveryFeeCents: optionalCents(order, "deliveryFee"),
-    tipCents: optionalCents(order, "tip"),
+    deliveryFeeCents: cents(order.deliveryFee),
+    tipCents: cents(order.tip),
     items: order.items.map((i) => ({ name: i.name, quantity: i.quantity })),
     eligible: eligibility.ok,
     eligibilityReason: eligibility.ok ? null : eligibility.reason,

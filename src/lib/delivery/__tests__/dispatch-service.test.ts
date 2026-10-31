@@ -477,10 +477,13 @@ describe("own driver and Skip", () => {
     expect(sms.get("Body")).toContain("PPP-AB12C");
     expect(sms.get("Body")).toContain("5555 Av. de Monkland");
     // The driver is now offered on the next order.
-    expect((await dispatchBoard()).savedDrivers).toContainEqual({
+    const board = await dispatchBoard();
+    expect(board.savedDrivers).toContainEqual({
       name: "Ali",
       phone: "+15145550100",
     });
+    // The checkout's delivery fee and tip are shown to staff.
+    expect(board.orders[0]).toMatchObject({ deliveryFeeCents: 500, tipCents: 400 });
   });
 
   it("without Twilio, assigns the driver and says no text was sent", async () => {
