@@ -40,17 +40,17 @@ Only one live courier per order: a second tablet pressing Book at the same momen
 
 ## 2. How it works (files)
 
-| Piece | File |
-|---|---|
-| Tablet screen | `src/routes/admin.dispatch.tsx` |
-| Server functions (each checks the admin session first) | `src/lib/delivery/dispatch.functions.ts` → `dispatch-handlers.server.ts` |
-| Quote / book / cancel / refresh / webhooks logic | `src/lib/delivery/dispatch-service.server.ts` |
-| Dispatch record (pure state machine) | `src/lib/delivery/dispatch-state.ts` |
-| Storage: `ppp.orders.order_document.dispatch`, row-locked | `src/lib/delivery/dispatch-store.server.ts` |
-| DoorDash Drive v2 / Uber Direct / Skip / own driver + Twilio | `src/lib/delivery/couriers/*` |
-| Webhooks | `src/routes/api/public/webhooks/{doordash,uber}.ts` → `src/lib/delivery/webhooks.server.ts` |
-| Pickup point, Skip portal link, DoorDash locale | `src/config/delivery-dispatch.ts` (coordinates: `src/config/delivery.ts`) |
-| Tests | `src/lib/delivery/__tests__/` (`dispatch.pg.test.ts` = real PostgreSQL, run by CI's database job) |
+| Piece                                                        | File                                                                                              |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| Tablet screen                                                | `src/routes/admin.dispatch.tsx`                                                                   |
+| Server functions (each checks the admin session first)       | `src/lib/delivery/dispatch.functions.ts` → `dispatch-handlers.server.ts`                          |
+| Quote / book / cancel / refresh / webhooks logic             | `src/lib/delivery/dispatch-service.server.ts`                                                     |
+| Dispatch record (pure state machine)                         | `src/lib/delivery/dispatch-state.ts`                                                              |
+| Storage: `ppp.orders.order_document.dispatch`, row-locked    | `src/lib/delivery/dispatch-store.server.ts`                                                       |
+| DoorDash Drive v2 / Uber Direct / Skip / own driver + Twilio | `src/lib/delivery/couriers/*`                                                                     |
+| Webhooks                                                     | `src/routes/api/public/webhooks/{doordash,uber}.ts` → `src/lib/delivery/webhooks.server.ts`       |
+| Pickup point, Skip portal link, DoorDash locale              | `src/config/delivery-dispatch.ts` (coordinates: `src/config/delivery.ts`)                         |
+| Tests                                                        | `src/lib/delivery/__tests__/` (`dispatch.pg.test.ts` = real PostgreSQL, run by CI's database job) |
 
 **No SQL to run.** The dispatch record lives inside the existing order document; the runtime role `ppp_app` already
 has SELECT/UPDATE on `ppp.orders`, and tenant row-level security applies as for every order query.
@@ -128,17 +128,17 @@ support for SkipGo; that would be a separate integration.
 
 ## 7. Coolify variables (server only, never in git, never `VITE_*`)
 
-| Variable | Value |
-|---|---|
-| `DOORDASH_DEVELOPER_ID`, `DOORDASH_KEY_ID`, `DOORDASH_SIGNING_SECRET` | DoorDash access key |
-| `DOORDASH_ENV` | `sandbox` with a sandbox key; empty in production |
-| `DOORDASH_WEBHOOK_SECRET` | the Authorization value set on the DoorDash webhook |
-| `UBER_DIRECT_CUSTOMER_ID`, `UBER_DIRECT_CLIENT_ID`, `UBER_DIRECT_CLIENT_SECRET` | Uber Direct Developer tab |
-| `UBER_DIRECT_ENV` | `test` with test credentials; empty in production |
-| `UBER_DIRECT_WEBHOOK_SECRET` | the Uber webhook's signing key |
-| `PPP_OWN_DRIVERS` | optional saved drivers |
-| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` | optional driver texts |
-| `SKIP_PORTAL_URL` | optional, overrides the Skip portal link |
+| Variable                                                                        | Value                                               |
+| ------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `DOORDASH_DEVELOPER_ID`, `DOORDASH_KEY_ID`, `DOORDASH_SIGNING_SECRET`           | DoorDash access key                                 |
+| `DOORDASH_ENV`                                                                  | `sandbox` with a sandbox key; empty in production   |
+| `DOORDASH_WEBHOOK_SECRET`                                                       | the Authorization value set on the DoorDash webhook |
+| `UBER_DIRECT_CUSTOMER_ID`, `UBER_DIRECT_CLIENT_ID`, `UBER_DIRECT_CLIENT_SECRET` | Uber Direct Developer tab                           |
+| `UBER_DIRECT_ENV`                                                               | `test` with test credentials; empty in production   |
+| `UBER_DIRECT_WEBHOOK_SECRET`                                                    | the Uber webhook's signing key                      |
+| `PPP_OWN_DRIVERS`                                                               | optional saved drivers                              |
+| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`                 | optional driver texts                               |
+| `SKIP_PORTAL_URL`                                                               | optional, overrides the Skip portal link            |
 
 Redeploy after changing them. The chips at the top of `/admin/dispatch` show "connected", "test mode" or "not
 connected" for DoorDash and Uber, and whether driver texts are on.
