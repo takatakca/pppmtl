@@ -26,6 +26,7 @@ export type PPPEvent =
   | "checkout_started"
   | "checkout_finish_attempted"
   | "checkout_payment_redirect"
+  | "checkout_interac_held"
   | "external_order_clicked"
   | "social_link_clicked"
   | "external_presence_clicked"

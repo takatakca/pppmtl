@@ -7,13 +7,21 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
+import { interacHoldExpired } from "@/lib/integration/providers/foodhub/interac";
 import {
   isGuestOrderCancelInput,
   isGuestOrderListInput,
   isGuestOrderReadInput,
 } from "./guest-request-input";
 import type { OrderError } from "./errors";
-import type { InternalOrder, OrderStatus, OrderType } from "./types";
+import type {
+  InternalOrder,
+  OrderFee,
+  OrderInteracInstructions,
+  OrderPaymentMethod,
+  OrderStatus,
+  OrderType,
+} from "./types";
 
 export interface PlaceOrderInput {
   locationId: string;
@@ -34,6 +42,11 @@ export interface PlaceOrderInput {
   };
   deliveryAddress: string | null;
   notes: string;
+  /** "card" (Clover Hosted Checkout, default) or "interac" (e-Transfer held at Food Hub). */
+  payment?: OrderPaymentMethod;
+  /** Interac: the all-inclusive total shown to the customer (cents); the server refuses to send another. */
+  displayedTotalCents?: number | null;
+  lang?: "fr" | "en" | "es";
 }
 
 /** Customer-safe view of an order: no provider ids, no internal codes. */
@@ -45,13 +58,27 @@ export interface OrderView {
   orderType: OrderType;
   createdAt: string;
   subtotal: number;
+  /** Cents; null until a provider confirmed the taxes. */
+  tax: number | null;
   total: number | null;
   customerName: string | null;
   deliveryAddress: string | null;
   notes: string | null;
   paymentStatus: InternalOrder["paymentStatus"];
+  paymentMethod: OrderPaymentMethod;
   /** Clover's payment page while the order waits for payment; null otherwise. */
   paymentUrl: string | null;
+  /** Fees included in the total (cents), e.g. the Interac e-Transfer fee. */
+  fees: OrderFee[];
+  /** Interac e-Transfer instructions while Food Hub holds the order; null otherwise (also once the hold expired). */
+  interac: OrderInteracInstructions | null;
+  /**
+   * True once Food Hub's hold deadline passed on an unpaid Interac order: Food Hub has cancelled it (or a person
+   * confirmed the transfer). The site has no status feed for held orders, so it never shows the instructions again.
+   */
+  interacExpired: boolean;
+  /** Food Hub's live tracking page for an Interac order (https), when the brand has one. */
+  trackUrl: string | null;
   items: Array<{
     productId: string;
     name: string;
@@ -68,7 +95,9 @@ export interface PlaceOrderResponse {
   error: OrderError | null;
 }
 
-function toView(order: InternalOrder): OrderView {
+function toView(order: InternalOrder, now = Date.now()): OrderView {
+  const heldInterac = order.paymentStatus === "UNPAID" ? (order.interac ?? null) : null;
+  const interacExpired = heldInterac ? interacHoldExpired(heldInterac.expiresAt, now) : false;
   return {
     id: order.id,
     orderNumber: order.orderNumber,
@@ -77,12 +106,19 @@ function toView(order: InternalOrder): OrderView {
     orderType: order.orderType,
     createdAt: order.createdAt,
     subtotal: order.subtotal,
+    tax: order.tax,
     total: order.total,
     customerName: order.customer.name,
     deliveryAddress: order.deliveryAddress,
     notes: order.notes,
     paymentStatus: order.paymentStatus,
+    paymentMethod: order.paymentMethod ?? "card",
     paymentUrl: order.paymentStatus === "UNPAID" ? (order.paymentUrl ?? null) : null,
+    fees: order.fees ?? [],
+    // Never show "send your transfer" for an order Food Hub has already cancelled or released.
+    interac: heldInterac && !interacExpired ? heldInterac : null,
+    interacExpired,
+    trackUrl: order.interac?.trackUrl?.startsWith("https://") ? order.interac.trackUrl : null,
     items: order.items.map((i) => ({
       productId: i.productId,
       name: i.name,
@@ -98,6 +134,33 @@ function toView(order: InternalOrder): OrderView {
     })),
   };
 }
+
+/** What the checkout screen needs to show the Interac e-Transfer choice and its all-inclusive total BEFORE commitment. */
+export interface InteracOptions {
+  available: boolean;
+  /** Why not, when unavailable: the UI words it; never a secret. */
+  reason: "not_configured" | "not_enabled" | "location_not_mapped" | "delivery_fee_unknown" | null;
+  /** Cents. */
+  feeCents: number;
+  /** Cents; null when the owner set no delivery fee (Interac delivery stays closed). */
+  deliveryFeeCents: number | null;
+}
+
+export const getInteracOptions = createServerFn({ method: "POST" })
+  .inputValidator((input: { locationId: string; orderType: OrderType }) => input)
+  .handler(async ({ data }): Promise<InteracOptions> => {
+    const locationId = typeof data?.locationId === "string" ? data.locationId.slice(0, 128) : "";
+    const orderType = data?.orderType === "DELIVERY" ? "DELIVERY" : "PICKUP";
+    const { interacAvailability } =
+      await import("@/lib/integration/providers/foodhub/config.server");
+    const availability = interacAvailability(locationId, orderType);
+    return {
+      available: availability.available,
+      reason: availability.reason,
+      feeCents: availability.feeCents,
+      deliveryFeeCents: availability.deliveryFeeCents,
+    };
+  });
 
 /** Validate only — used to show problems before the customer commits. */
 export const checkOrder = createServerFn({ method: "POST" })
@@ -136,7 +199,30 @@ export const placeOrder = createServerFn({ method: "POST" })
 
     // The cookie is issued before redirecting off-domain to Clover, even if the provider errors.
     grantOrderAccess(created.data.id);
-    const submitted = await submitOrder(created.data.id);
+    // A signed-in customer's Food Hub token (HttpOnly cookie) links an Interac order to their account at Food Hub,
+    // only when the checkout is a signed-in one AND Food Hub confirms the order's phone is that account's verified
+    // phone (a leftover cookie on a shared device must not attach a guest's order to someone else's account).
+    // The site never stores the token on the order and never accepts it from the request body.
+    let customerToken: string | null = null;
+    if (data.payment === "interac" && data.customer?.isGuest === false) {
+      const { customerTokenForOrder } = await import("@/lib/customer/foodhub-customers.server");
+      const { requestCustomerCookies } = await import("@/lib/customer/customer-cookie.server");
+      customerToken = await customerTokenForOrder(
+        created.data.customer.phone,
+        requestCustomerCookies,
+      ).catch(() => null);
+    }
+    const submitted = await submitOrder(created.data.id, {
+      customerToken,
+      ...(data.lang === "fr" || data.lang === "en" || data.lang === "es"
+        ? { lang: data.lang }
+        : {}),
+      displayedTotalCents:
+        typeof data.displayedTotalCents === "number" &&
+        Number.isSafeInteger(data.displayedTotalCents)
+          ? data.displayedTotalCents
+          : null,
+    });
     if (!submitted.ok) {
       return { ok: false, order: toView(created.data), error: submitted.error };
     }

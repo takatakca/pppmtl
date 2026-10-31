@@ -95,6 +95,56 @@ export function findClaim(key: string): string | null {
   return claims.get(key)?.orderId ?? null;
 }
 
+/**
+ * The full order key: content (time-bucketed), then the payment method, then the browser scope. The payment method
+ * is part of it, so a cancelled card checkout never answers an Interac request for the same cart (and the reverse).
+ */
+export function orderKeyFor(
+  draft: OrderDraft,
+  payment: string,
+  scope = "",
+  now: number = Date.now(),
+): string {
+  return `${deriveIdempotencyKey(draft, now)}:${payment}${scope ? `:${scope}` : ""}`;
+}
+
+/** The same key without its 5-minute bucket: a retry that crosses a bucket boundary still finds its order. */
+export function stableKeyOf(key: string): string {
+  return key.replace(/^(ppp_[0-9a-f]{8})_[0-9a-f]{8}/, "$1");
+}
+
+/**
+ * Submits whose outcome is unknown (timeout, dropped connection, 5xx at Food Hub): the provider may hold the order
+ * already, so the retry must reuse the SAME order id. Kept for the longest Food Hub hold (45 min) plus margin.
+ * In memory, per server process, like the claims above.
+ */
+const UNRESOLVED_TTL_MS = 60 * 60 * 1000;
+const unresolved = new Map<string, Claim>();
+
+export function markSubmitUnresolved(key: string, orderId: string, now: number = Date.now()): void {
+  unresolved.set(stableKeyOf(key), { orderId, claimedAt: now });
+  if (unresolved.size > MAX_CLAIMS) {
+    const oldest = unresolved.keys().next().value;
+    if (oldest) unresolved.delete(oldest);
+  }
+}
+
+export function findUnresolvedSubmit(key: string, now: number = Date.now()): string | null {
+  const stable = stableKeyOf(key);
+  const entry = unresolved.get(stable);
+  if (!entry) return null;
+  if (now - entry.claimedAt > UNRESOLVED_TTL_MS) {
+    unresolved.delete(stable);
+    return null;
+  }
+  return entry.orderId;
+}
+
+export function clearUnresolvedSubmit(key: string): void {
+  unresolved.delete(stableKeyOf(key));
+}
+
 export function resetIdempotencyForTests(): void {
   claims.clear();
+  unresolved.clear();
 }

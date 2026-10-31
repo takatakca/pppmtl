@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Printer, RefreshCw } from "lucide-react";
+import { ArrowLeft, Banknote, Printer, RefreshCw } from "lucide-react";
 import { OrderTimeline } from "@/components/order/order-timeline";
 import { usePPP } from "@/context/ppp-store";
 import { getOrderById, type OrderView } from "@/lib/orders/orders.functions";
 import { statusLabel } from "@/lib/orders/status-mapping";
+import {
+  interacInstructionRows,
+  interacInstructionText,
+} from "@/lib/integration/providers/foodhub/interac";
 import { locationById } from "@/config/locations";
 import { canonicalUrl } from "@/config/site";
 
@@ -56,8 +60,13 @@ function OrderReceiptPage() {
           if (!alive) return;
           if (result.order) {
             setOrder(result.order);
-            // Clover confirms the payment by webhook a few seconds after the customer comes back.
-            if (result.order.paymentStatus === "UNPAID" && tries < 30) {
+            // Clover confirms the payment by webhook a few seconds after the customer comes back. An Interac order
+            // is confirmed by the restaurant in Food Hub (and by text message), not by polling here.
+            if (
+              result.order.paymentStatus === "UNPAID" &&
+              result.order.paymentMethod !== "interac" &&
+              tries < 30
+            ) {
               tries += 1;
               timer = setTimeout(load, 4000);
             }
@@ -176,14 +185,54 @@ function OrderReceiptPage() {
           </p>
           {order.paymentStatus === "PAID" && (
             <p className="mt-2 text-sm text-primary">
-              {t(
-                "Paid online with Clover",
-                "Payée en ligne avec Clover",
-                "Pagado en línea con Clover",
-              )}
+              {order.paymentMethod === "interac"
+                ? t(
+                    "Paid by Interac e-Transfer",
+                    "Payée par virement Interac",
+                    "Pagado por Interac e-Transfer",
+                  )
+                : t(
+                    "Paid online with Clover",
+                    "Payée en ligne avec Clover",
+                    "Pagado en línea con Clover",
+                  )}
             </p>
           )}
-          {order.paymentStatus === "UNPAID" && (
+          {order.paymentStatus === "UNPAID" &&
+            order.paymentMethod === "interac" &&
+            !order.interacExpired && (
+              <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+                <Banknote className="h-4 w-4 text-primary" />
+                {t(
+                  "Waiting for your transfer — the restaurant confirms it by text message.",
+                  "En attente du virement — le restaurant le confirme par texto.",
+                  "Esperando tu transferencia — el restaurante la confirma por SMS.",
+                )}
+              </p>
+            )}
+          {order.interacExpired && (
+            <p
+              role="status"
+              className="mt-2 border border-border p-3 text-sm text-muted-foreground"
+            >
+              {t(
+                "The time to send the transfer is over. Do not send a transfer for this order now: the restaurant's text message tells you whether it was confirmed or cancelled. Questions? Call us.",
+                "Le délai pour envoyer le virement est passé. N'envoyez plus de virement pour cette commande : le texto du restaurant vous dit si elle est confirmée ou annulée. Une question ? Appelez-nous.",
+                "El plazo para enviar la transferencia terminó. No envíes una transferencia para este pedido: el SMS del restaurante te dice si se confirmó o se canceló. ¿Preguntas? Llámanos.",
+              )}
+              {order.trackUrl ? (
+                <a
+                  href={order.trackUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-2 font-bold underline focus-ppp"
+                >
+                  {t("Follow this order", "Suivre cette commande", "Seguir este pedido")}
+                </a>
+              ) : null}
+            </p>
+          )}
+          {order.paymentStatus === "UNPAID" && order.paymentMethod !== "interac" && (
             <p className="mt-2 text-sm text-muted-foreground">
               {paidReturn
                 ? t(
@@ -203,6 +252,54 @@ function OrderReceiptPage() {
 
         <div className="p-6">
           <OrderTimeline status={order.status} />
+
+          {order.interac && (
+            <section
+              aria-label={t(
+                "Interac e-Transfer instructions",
+                "Instructions du virement Interac",
+                "Instrucciones Interac",
+              )}
+              className="mt-6 border border-primary p-4"
+            >
+              <h2 className="font-display text-xl uppercase leading-none">
+                {t("Send your e-Transfer", "Envoyez votre virement", "Envía tu transferencia")}
+              </h2>
+              <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+                {interacInstructionRows(order.interac, lang).map((row) => (
+                  <div key={row.key} className="border border-border p-3">
+                    <dt className="text-[0.6rem] font-bold uppercase tracking-widest text-muted-foreground">
+                      {row.label}
+                    </dt>
+                    <dd
+                      className={
+                        row.key === "amount"
+                          ? "mt-1 font-display text-2xl leading-none"
+                          : "mt-1 break-words text-sm"
+                      }
+                    >
+                      {row.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              {interacInstructionText(order.interac, lang) ? (
+                <p className="mt-3 text-sm text-muted-foreground">
+                  {interacInstructionText(order.interac, lang)}
+                </p>
+              ) : null}
+              {order.interac.trackUrl?.startsWith("https://") ? (
+                <a
+                  href={order.interac.trackUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-block text-sm font-bold underline"
+                >
+                  {t("Follow this order", "Suivre cette commande", "Seguir este pedido")}
+                </a>
+              ) : null}
+            </section>
+          )}
 
           <dl className="mt-6 grid gap-4 border-b border-border pb-6 sm:grid-cols-2">
             <div>
@@ -245,14 +342,22 @@ function OrderReceiptPage() {
               <dt className="text-muted-foreground">{tr("orders.subtotal")}</dt>
               <dd>${(order.subtotal / 100).toFixed(2)}</dd>
             </div>
+            {order.fees.map((fee) => (
+              <div key={fee.code} className="flex justify-between text-sm">
+                <dt className="text-muted-foreground">{fee.name}</dt>
+                <dd>${(fee.amount / 100).toFixed(2)}</dd>
+              </div>
+            ))}
             <div className="flex justify-between text-sm">
               <dt className="text-muted-foreground">{tr("orders.tax")}</dt>
-              <dd className="text-muted-foreground">
-                {t(
-                  "Confirmed by the restaurant",
-                  "Confirmées par le restaurant",
-                  "Confirmados por el restaurante",
-                )}
+              <dd className={order.tax === null ? "text-muted-foreground" : ""}>
+                {order.tax === null
+                  ? t(
+                      "Confirmed by the restaurant",
+                      "Confirmées par le restaurant",
+                      "Confirmados por el restaurante",
+                    )
+                  : `$${(order.tax / 100).toFixed(2)}`}
               </dd>
             </div>
             <div className="flex items-baseline justify-between border-t border-border pt-3">

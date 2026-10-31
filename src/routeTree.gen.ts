@@ -47,7 +47,6 @@ import { Route as OrdersIndexRouteImport } from './routes/orders.index'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 import { Route as SupportIndexRouteImport } from './routes/support.index'
 import { Route as SupportOrderRouteImport } from './routes/support.order'
-import { Route as ApiPublicCloverCheckoutStatusRouteImport } from './routes/api/public/clover-checkout-status'
 import { Route as ApiPublicCloverMenuRouteImport } from './routes/api/public/clover-menu'
 import { Route as ApiPublicWebhooksCloverRouteImport } from './routes/api/public/webhooks/clover'
 import { Route as ApiPublicWebhooksProviderRouteImport } from './routes/api/public/webhooks/provider'
@@ -242,12 +241,6 @@ const SupportOrderRoute = SupportOrderRouteImport.update({
   path: '/order',
   getParentRoute: () => SupportRoute,
 } as any)
-const ApiPublicCloverCheckoutStatusRoute =
-  ApiPublicCloverCheckoutStatusRouteImport.update({
-    id: '/api/public/clover-checkout-status',
-    path: '/api/public/clover-checkout-status',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicCloverMenuRoute = ApiPublicCloverMenuRouteImport.update({
   id: '/api/public/clover-menu',
   path: '/api/public/clover-menu',
@@ -304,7 +297,6 @@ export interface FileRoutesByFullPath {
   '/marques/': typeof MarquesIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/support/': typeof SupportIndexRoute
-  '/api/public/clover-checkout-status': typeof ApiPublicCloverCheckoutStatusRoute
   '/api/public/clover-menu': typeof ApiPublicCloverMenuRoute
   '/api/public/webhooks/clover': typeof ApiPublicWebhooksCloverRoute
   '/api/public/webhooks/provider': typeof ApiPublicWebhooksProviderRoute
@@ -346,7 +338,6 @@ export interface FileRoutesByTo {
   '/marques': typeof MarquesIndexRoute
   '/orders': typeof OrdersIndexRoute
   '/support': typeof SupportIndexRoute
-  '/api/public/clover-checkout-status': typeof ApiPublicCloverCheckoutStatusRoute
   '/api/public/clover-menu': typeof ApiPublicCloverMenuRoute
   '/api/public/webhooks/clover': typeof ApiPublicWebhooksCloverRoute
   '/api/public/webhooks/provider': typeof ApiPublicWebhooksProviderRoute
@@ -391,7 +382,6 @@ export interface FileRoutesById {
   '/marques/': typeof MarquesIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/support/': typeof SupportIndexRoute
-  '/api/public/clover-checkout-status': typeof ApiPublicCloverCheckoutStatusRoute
   '/api/public/clover-menu': typeof ApiPublicCloverMenuRoute
   '/api/public/webhooks/clover': typeof ApiPublicWebhooksCloverRoute
   '/api/public/webhooks/provider': typeof ApiPublicWebhooksProviderRoute
@@ -437,7 +427,6 @@ export interface FileRouteTypes {
     | '/marques/'
     | '/orders/'
     | '/support/'
-    | '/api/public/clover-checkout-status'
     | '/api/public/clover-menu'
     | '/api/public/webhooks/clover'
     | '/api/public/webhooks/provider'
@@ -479,7 +468,6 @@ export interface FileRouteTypes {
     | '/marques'
     | '/orders'
     | '/support'
-    | '/api/public/clover-checkout-status'
     | '/api/public/clover-menu'
     | '/api/public/webhooks/clover'
     | '/api/public/webhooks/provider'
@@ -523,7 +511,6 @@ export interface FileRouteTypes {
     | '/marques/'
     | '/orders/'
     | '/support/'
-    | '/api/public/clover-checkout-status'
     | '/api/public/clover-menu'
     | '/api/public/webhooks/clover'
     | '/api/public/webhooks/provider'
@@ -564,7 +551,6 @@ export interface RootRouteChildren {
   MarquesBrandIdRoute: typeof MarquesBrandIdRoute
   LocationsIndexRoute: typeof LocationsIndexRoute
   MarquesIndexRoute: typeof MarquesIndexRoute
-  ApiPublicCloverCheckoutStatusRoute: typeof ApiPublicCloverCheckoutStatusRoute
   ApiPublicCloverMenuRoute: typeof ApiPublicCloverMenuRoute
   ApiPublicWebhooksCloverRoute: typeof ApiPublicWebhooksCloverRoute
   ApiPublicWebhooksProviderRoute: typeof ApiPublicWebhooksProviderRoute
@@ -838,13 +824,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SupportOrderRouteImport
       parentRoute: typeof SupportRoute
     }
-    '/api/public/clover-checkout-status': {
-      id: '/api/public/clover-checkout-status'
-      path: '/api/public/clover-checkout-status'
-      fullPath: '/api/public/clover-checkout-status'
-      preLoaderRoute: typeof ApiPublicCloverCheckoutStatusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/clover-menu': {
       id: '/api/public/clover-menu'
       path: '/api/public/clover-menu'
@@ -930,7 +909,6 @@ const rootRouteChildren: RootRouteChildren = {
   MarquesBrandIdRoute: MarquesBrandIdRoute,
   LocationsIndexRoute: LocationsIndexRoute,
   MarquesIndexRoute: MarquesIndexRoute,
-  ApiPublicCloverCheckoutStatusRoute: ApiPublicCloverCheckoutStatusRoute,
   ApiPublicCloverMenuRoute: ApiPublicCloverMenuRoute,
   ApiPublicWebhooksCloverRoute: ApiPublicWebhooksCloverRoute,
   ApiPublicWebhooksProviderRoute: ApiPublicWebhooksProviderRoute,

@@ -2,7 +2,7 @@
  * UNIVERSAL INTEGRATION CONTRACTS
  *
  * Provider-neutral models. Nothing in here knows about UrbanPiper, Clover,
- * Ordermark or any marketplace: every provider adapter maps its own payloads
+ * Food Hub or any marketplace: every provider adapter maps its own payloads
  * into these shapes, and the PPP frontend only ever sees these shapes.
  *
  * Nothing here performs I/O, so these models are safe to import anywhere and
@@ -10,7 +10,7 @@
  */
 
 export type IntegrationProviderId =
-  "local" | "urbanpiper" | "ordermark" | "clover" | "takatak" | "uber_eats" | "doordash" | "skip";
+  "local" | "foodhub" | "ordermark" | "clover" | "takatak" | "uber_eats" | "doordash" | "skip";
 
 export type IntegrationCapability =
   "menu" | "orders" | "customers" | "locations" | "payments" | "webhooks";
@@ -133,7 +133,7 @@ export interface UniversalOrderLine {
 export interface UniversalCustomerRef {
   /** TAKATAK master identity id — the authority. */
   takatakCustomerId: string | null;
-  /** Provider-side customer id (UrbanPiper/Clover), when one exists. */
+  /** Provider-side customer id (Food Hub/Clover), when one exists. */
   externalCustomerId: string | null;
   preferredName: string | null;
   email: string | null;

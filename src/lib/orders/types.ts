@@ -1,7 +1,7 @@
 /**
  * INTERNAL PPP ORDER MODEL
  *
- * PPP owns the order. Providers (UrbanPiper today, others later) are a
+ * PPP owns the order. The first-party Food Hub and POS providers are a
  * downstream destination, never the source of truth for the customer record.
  *
  * All money is stored in CENTS to avoid floating point drift. `null` means
@@ -58,11 +58,41 @@ export function canTransition(from: OrderStatus, to: OrderStatus): boolean {
 export type OrderPaymentStatus =
   "UNPAID" | "AUTHORIZED" | "PAID" | "REFUNDED" | "FAILED" | "PAY_AT_RESTAURANT";
 
+/**
+ * How the customer chose to pay. `card` = Clover Hosted Checkout (pickup, NDG). `interac` = Interac e-Transfer:
+ * the order is held at Food Hub until the restaurant confirms the transfer.
+ */
+export type OrderPaymentMethod = "card" | "interac";
+
+/** A fee shown to the customer before commitment and sent with the order (cents). */
+export interface OrderFee {
+  code: string;
+  name: string;
+  amount: number;
+}
+
+/** Interac e-Transfer instructions returned by Food Hub for a held order (amount in dollars). */
+export interface OrderInteracInstructions {
+  recipient: string;
+  amount: number;
+  reference: string;
+  question: string | null;
+  autoDeposit: boolean;
+  expiresAt: string | null;
+  instructionsFr: string;
+  instructionsEn: string;
+  /** Food Hub's tracking page for the held order (https), when the brand has one. */
+  trackUrl?: string | null;
+}
+
 export interface OrderItemModifier {
   groupId: string;
   choiceId: string;
-  /** Provider-side option id. Null until menu mapping supplies one. */
+  /** Provider-side option id (the Clover modifier id). Null until menu mapping supplies one. */
   providerModifierId: string | null;
+  /** The option's provider-side name (the Clover modifier name), what another engine matches it by. */
+  providerName?: string | null;
+  /** Display label for the receipt ("Group: Choice"). */
   label: string;
   /** Cents. Null when no price adjustment is published. */
   priceDelta: number | null;
@@ -136,6 +166,12 @@ export interface InternalOrder {
   paymentUrl?: string | null;
   /** Clover payment id once Clover confirmed the payment. */
   providerPaymentId?: string | null;
+  /** Absent on orders created before payment choice existed: read as `card`. */
+  paymentMethod?: OrderPaymentMethod | null;
+  /** Fees the customer saw before confirming (Interac fee); empty or absent for card orders. */
+  fees?: OrderFee[];
+  /** Interac e-Transfer instructions while the order waits for the transfer (Food Hub holds it). */
+  interac?: OrderInteracInstructions | null;
   createdAt: string;
   updatedAt: string;
 }

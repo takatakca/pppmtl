@@ -1,18 +1,33 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CreditCard, Lock, Phone, ShieldCheck, ShoppingBag, Bike, UserRound } from "lucide-react";
+import {
+  Banknote,
+  CreditCard,
+  Lock,
+  Phone,
+  ShieldCheck,
+  ShoppingBag,
+  Bike,
+  UserRound,
+} from "lucide-react";
 import { PPPHeader } from "@/components/layout/ppp-header";
 import { PPPFooter } from "@/components/layout/ppp-footer";
 import { LocationSheet } from "@/components/layout/location-sheet";
 import { DeliveryAddressForm } from "@/components/order/delivery-address-form";
-import { GoogleButton } from "@/components/auth/google-button";
+import { GuestVerifySheet } from "@/components/auth/guest-verify-sheet";
 import { useServerFn } from "@tanstack/react-start";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
-import { placeOrder } from "@/lib/orders/orders.functions";
+import { getInteracOptions, placeOrder, type InteracOptions } from "@/lib/orders/orders.functions";
+import type { OrderInteracInstructions, OrderPaymentMethod } from "@/lib/orders/types";
 import { useCustomerSession } from "@/lib/customer/session";
+import { formatPhoneDisplay } from "@/lib/customer/token";
 import { cartTotals, selectionLabels } from "@/lib/cart";
 import { menuRepository } from "@/lib/menu-repository";
-import { GOOGLE_SIGN_IN_ENABLED } from "@/config/auth-flags";
+import {
+  interacInstructionRows,
+  interacInstructionText,
+  interacQuote,
+} from "@/lib/integration/providers/foodhub/interac";
 import { canonicalUrl } from "@/config/site";
 import { track } from "@/lib/analytics";
 import { orderError, type OrderError } from "@/lib/orders/errors";
@@ -49,11 +64,23 @@ const SectionTitle = ({ n, children }: { n: number; children: React.ReactNode })
   </h2>
 );
 
+interface InteracConfirmation {
+  orderId: string;
+  orderNumber: string;
+  totalCents: number;
+  instructions: OrderInteracInstructions;
+}
+
 function CheckoutPage() {
-  const { cart, mode, setMode, lang, t, openLocationSheet, addSavedAddress } = usePPP();
+  const { cart, mode, setMode, lang, t, openLocationSheet, addSavedAddress, clearCart } = usePPP();
   const location = useSelectedLocation();
-  const { accountsAvailable, customer } = useCustomerSession();
+  const { accountsAvailable, customer, signOut } = useCustomerSession();
   const totals = cartTotals(cart);
+  const money = (cents: number) =>
+    lang === "fr"
+      ? `${(cents / 100).toFixed(2).replace(".", ",")} $`
+      : `$${(cents / 100).toFixed(2)}`;
+
   /** Card payment happens on Clover's own secure page (Clover Hosted Checkout); PPP never sees the card. */
   const paymentCopy = t(
     "You pay on Clover's secure page, then come back here. Your order goes straight to the restaurant's Clover register.",
@@ -63,12 +90,15 @@ function CheckoutPage() {
 
   const [identity, setIdentity] = useState<"guest" | "account">("guest");
   const [name, setName] = useState(customer?.preferredName ?? "");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(customer ? formatPhoneDisplay(customer.phone) : "");
+  const [showVerify, setShowVerify] = useState(false);
   const [address, setAddress] = useState<string | null>(null);
-  const [verifyState, setVerifyState] = useState<"idle" | "unavailable">("idle");
+  const [payment, setPayment] = useState<OrderPaymentMethod>("card");
+  const [interacOptions, setInteracOptions] = useState<InteracOptions | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [orderMessage, setOrderMessage] = useState<string | null>(null);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  const [interacConfirmation, setInteracConfirmation] = useState<InteracConfirmation | null>(null);
   // After a "Pay" with a blank name or phone, those fields stay outlined in red until filled.
   const [showMissing, setShowMissing] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -91,6 +121,14 @@ function CheckoutPage() {
   const statusMessage = missingMessage ?? orderMessage;
 
   const submitOrderFn = useServerFn(placeOrder);
+
+  // A signed-in customer's verified number is the order contact; the name is a suggestion they can change.
+  useEffect(() => {
+    if (!customer) return;
+    setPhone(formatPhoneDisplay(customer.phone));
+    setName((current) => current.trim() || customer.preferredName || "");
+    setShowVerify(false);
+  }, [customer]);
 
   // Back from Clover's payment page without paying: the cart is still here.
   useEffect(() => {
@@ -116,9 +154,78 @@ function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Interac e-Transfer: the server says whether it is offered here and what the fee is, before anything is committed.
+  const orderType = mode === "delivery" ? ("DELIVERY" as const) : ("PICKUP" as const);
+  const locationId = location?.id ?? null;
+  useEffect(() => {
+    if (!locationId) return;
+    let alive = true;
+    getInteracOptions({ data: { locationId, orderType } })
+      .then((options) => {
+        if (alive) setInteracOptions(options);
+      })
+      .catch(() => {
+        if (alive) setInteracOptions(null);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [locationId, orderType]);
+
+  const interacAvailable = Boolean(interacOptions?.available) && totals.unpricedLines === 0;
+  const cardAvailable = mode === "pickup";
+  useEffect(() => {
+    if (payment === "interac" && !interacAvailable) setPayment("card");
+  }, [payment, interacAvailable]);
+
+  const subtotalCents = Math.round(totals.knownSubtotal * 100);
+  const quote =
+    payment === "interac" && interacOptions
+      ? interacQuote({
+          subtotalCents,
+          interacFeeCents: interacOptions.feeCents,
+          deliveryFeeCents: mode === "delivery" ? (interacOptions.deliveryFeeCents ?? 0) : 0,
+        })
+      : null;
+
+  const interacUnavailableReason = (() => {
+    if (totals.unpricedLines > 0) {
+      return t(
+        "An item in your order has no published price, so a final total cannot be shown.",
+        "Un article de votre commande n'a pas de prix publié : impossible d'afficher un total final.",
+        "Un artículo de tu pedido no tiene precio publicado, así que no se puede mostrar un total final.",
+      );
+    }
+    switch (interacOptions?.reason) {
+      case "delivery_fee_unknown":
+        return t(
+          "Pickup only for e-Transfer right now.",
+          "Cueillette seulement pour le virement pour l'instant.",
+          "Solo para recoger por ahora.",
+        );
+      case "not_configured":
+      case "not_enabled":
+      case "location_not_mapped":
+        return t(
+          "Not available at this restaurant yet.",
+          "Pas encore disponible à ce restaurant.",
+          "Aún no disponible en este restaurante.",
+        );
+      default:
+        return interacOptions
+          ? null
+          : t(
+              "Checking availability…",
+              "Vérification de la disponibilité…",
+              "Verificando disponibilidad…",
+            );
+    }
+  })();
+
   /**
    * Cart -> validate -> internal order -> provider. The browser sends ids and
-   * quantities only; every price and every decision happens on the server.
+   * quantities only; every price and every decision happens on the server. For Interac the browser also sends the
+   * all-inclusive total it displayed, so the server can refuse to send anything else.
    */
   const finishOrder = async () => {
     if (!(name.trim() || customer?.preferredName) || !phone.trim()) {
@@ -131,12 +238,12 @@ function CheckoutPage() {
     }
     setSubmitting(true);
     setOrderMessage(null);
-    track("checkout_finish_attempted", { mode, lines: cart.length });
+    track("checkout_finish_attempted", { mode, lines: cart.length, payment });
     try {
       const response = await submitOrderFn({
         data: {
           locationId: location?.id ?? "",
-          orderType: mode === "delivery" ? ("DELIVERY" as const) : ("PICKUP" as const),
+          orderType,
           lines: cart.map((line) => ({
             itemId: line.itemId,
             quantity: line.quantity,
@@ -149,10 +256,13 @@ function CheckoutPage() {
             name: name.trim() || (customer?.preferredName ?? null),
             phone: phone.trim() || null,
             email: customer?.email ?? null,
-            isGuest: identity === "guest",
+            isGuest: !customer,
           },
           deliveryAddress: mode === "delivery" ? address : null,
           notes: "",
+          payment,
+          displayedTotalCents: quote?.totalCents ?? null,
+          lang,
         },
       });
 
@@ -160,6 +270,21 @@ function CheckoutPage() {
         // Clover Hosted Checkout: the customer pays on Clover's page, then comes back to the order page.
         track("checkout_payment_redirect", { lines: cart.length });
         window.location.assign(response.order.paymentUrl);
+        return;
+      }
+      if (response.ok && response.order?.interac) {
+        // Food Hub holds the order until the restaurant confirms the transfer. The cart is done.
+        track("checkout_interac_held", { lines: cart.length });
+        setInteracConfirmation({
+          orderId: response.order.id,
+          orderNumber: response.order.orderNumber ?? response.order.id,
+          totalCents: response.order.total ?? quote?.totalCents ?? 0,
+          instructions: response.order.interac,
+        });
+        setOrderNumber(response.order.orderNumber ?? response.order.id);
+        setOrderMessage(null);
+        clearCart();
+        window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
       if (response.ok && response.order) {
@@ -204,6 +329,16 @@ function CheckoutPage() {
   const missingClass = "border-2 border-destructive";
   const missingHintClass = "mt-1 block text-xs font-semibold text-destructive";
 
+  const confirmLabel = submitting
+    ? t("Sending…", "Envoi…", "Enviando…")
+    : payment === "interac"
+      ? t(
+          "Confirm · Interac e-Transfer",
+          "Confirmer · Virement Interac",
+          "Confirmar · Interac e-Transfer",
+        )
+      : t("Pay with Clover", "Payer avec Clover", "Pagar con Clover");
+
   return (
     <div className="min-h-dvh bg-background">
       <PPPHeader />
@@ -212,7 +347,9 @@ function CheckoutPage() {
           {t("Checkout", "Paiement", "Pago")}
         </h1>
 
-        {cart.length === 0 ? (
+        {interacConfirmation ? (
+          <InteracHeldPanel confirmation={interacConfirmation} />
+        ) : cart.length === 0 ? (
           <div className="mt-6 border border-dashed border-border p-10 text-center">
             <ShoppingBag className="mx-auto h-8 w-8 text-muted-foreground" />
             <p className="mt-3 font-display text-2xl uppercase leading-none">
@@ -273,7 +410,7 @@ function CheckoutPage() {
                       </p>
                     ) : (
                       <DeliveryAddressForm
-                        authenticated={false}
+                        authenticated={Boolean(customer)}
                         onSubmit={(d) => {
                           setAddress(
                             [d.street, d.unit, d.city, d.province, d.postalCode]
@@ -300,166 +437,258 @@ function CheckoutPage() {
                 <SectionTitle n={2}>
                   {t("Who is ordering", "Qui commande", "Quién pide")}
                 </SectionTitle>
-                <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                  <button
-                    onClick={() => setIdentity("guest")}
-                    aria-pressed={identity === "guest"}
-                    className={`lift-btn border p-4 text-left focus-ppp ${
-                      identity === "guest" ? "border-primary" : "border-border"
-                    }`}
-                  >
-                    <span className="flex items-center gap-2 font-display text-lg uppercase leading-none">
-                      <UserRound className="h-4 w-4 text-primary" />
-                      {t("Continue as guest", "Continuer sans compte", "Continuar como invitado")}
-                    </span>
-                    <span className="mt-1.5 block text-xs text-muted-foreground">
-                      {t(
-                        "No account needed. Guest ordering always stays open.",
-                        "Aucun compte requis. La commande sans compte reste toujours possible.",
-                        "Sin cuenta. El pedido como invitado siempre está disponible.",
-                      )}
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => setIdentity("account")}
-                    aria-pressed={identity === "account"}
-                    className={`lift-btn border p-4 text-left focus-ppp ${
-                      identity === "account" ? "border-primary" : "border-border"
-                    }`}
-                  >
-                    <span className="flex items-center gap-2 font-display text-lg uppercase leading-none">
-                      <ShieldCheck className="h-4 w-4 text-primary" />
-                      {t("Sign in to PPP", "Se connecter à PPP", "Entrar a PPP")}
-                    </span>
-                    <span className="mt-1.5 block text-xs text-muted-foreground">
-                      {t(
-                        "Save your orders, favourites and addresses for next time.",
-                        "Gardez vos commandes, favoris et adresses pour la prochaine fois.",
-                        "Guarda tus pedidos, favoritos y direcciones para la próxima.",
-                      )}
-                    </span>
-                  </button>
-                </div>
 
-                {identity === "account" && (
-                  <div className="step-in mt-4 border border-border p-4">
-                    {accountsAvailable ? (
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <Link
-                          to="/account/sign-in"
-                          className="border border-border px-4 py-3 text-center font-display text-lg uppercase leading-none focus-ppp"
-                        >
-                          {t("Sign in", "Se connecter", "Entrar")}
-                        </Link>
-                        <Link
-                          to="/account/sign-up"
-                          className="bg-primary px-4 py-3 text-center font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
-                        >
-                          {t("Create account", "Créer un compte", "Crear cuenta")}
-                        </Link>
-                        {GOOGLE_SIGN_IN_ENABLED && (
-                          <div className="sm:col-span-2">
-                            <GoogleButton />
-                          </div>
+                {customer ? (
+                  <div className="mt-4 flex flex-wrap items-start justify-between gap-3 border border-primary p-4">
+                    <div>
+                      <p className="flex items-center gap-2 font-display text-lg uppercase leading-none">
+                        <ShieldCheck className="h-4 w-4 text-primary" />
+                        {t("Signed in to PPP", "Connecté à PPP", "Conectado a PPP")}
+                      </p>
+                      <p className="mt-1.5 text-xs text-muted-foreground">
+                        {customer.preferredName ? `${customer.preferredName} · ` : ""}
+                        {formatPhoneDisplay(customer.phone)} ·{" "}
+                        {t("verified number", "numéro vérifié", "número verificado")}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void signOut()}
+                      className="text-[0.65rem] font-bold uppercase tracking-widest text-muted-foreground underline focus-ppp"
+                    >
+                      {t("Not you? Sign out", "Pas vous ? Déconnexion", "¿No eres tú? Salir")}
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                      <button
+                        onClick={() => setIdentity("guest")}
+                        aria-pressed={identity === "guest"}
+                        className={`lift-btn border p-4 text-left focus-ppp ${
+                          identity === "guest" ? "border-primary" : "border-border"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2 font-display text-lg uppercase leading-none">
+                          <UserRound className="h-4 w-4 text-primary" />
+                          {t(
+                            "Continue as guest",
+                            "Continuer sans compte",
+                            "Continuar como invitado",
+                          )}
+                        </span>
+                        <span className="mt-1.5 block text-xs text-muted-foreground">
+                          {t(
+                            "No account needed. Guest ordering always stays open.",
+                            "Aucun compte requis. La commande sans compte reste toujours possible.",
+                            "Sin cuenta. El pedido como invitado siempre está disponible.",
+                          )}
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => setIdentity("account")}
+                        aria-pressed={identity === "account"}
+                        className={`lift-btn border p-4 text-left focus-ppp ${
+                          identity === "account" ? "border-primary" : "border-border"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2 font-display text-lg uppercase leading-none">
+                          <ShieldCheck className="h-4 w-4 text-primary" />
+                          {t(
+                            "Sign in with my number",
+                            "Me connecter avec mon numéro",
+                            "Entrar con mi número",
+                          )}
+                        </span>
+                        <span className="mt-1.5 block text-xs text-muted-foreground">
+                          {t(
+                            "A text code, no password. Keeps your orders, favourites and addresses.",
+                            "Un code par texto, aucun mot de passe. Garde vos commandes, favoris et adresses.",
+                            "Un código por SMS, sin contraseña. Guarda tus pedidos, favoritos y direcciones.",
+                          )}
+                        </span>
+                      </button>
+                    </div>
+
+                    {identity === "account" && (
+                      <div className="step-in mt-4">
+                        {accountsAvailable ? (
+                          <GuestVerifySheet
+                            initialPhone={phone}
+                            onCancel={() => setIdentity("guest")}
+                          />
+                        ) : (
+                          <p className="border border-border p-4 text-sm text-muted-foreground">
+                            {t(
+                              "Phone sign-in is not switched on yet. Finish as a guest today — nothing is lost.",
+                              "La connexion par téléphone n'est pas encore activée. Terminez sans compte aujourd'hui.",
+                              "El inicio de sesión por teléfono aún no está activo. Continúa como invitado hoy.",
+                            )}
+                          </p>
                         )}
                       </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">
-                        {t(
-                          "PPP accounts are not open yet. Finish as a guest today — nothing is lost.",
-                          "Les comptes PPP ne sont pas encore ouverts. Terminez sans compte aujourd'hui.",
-                          "Las cuentas PPP aún no están abiertas. Continúa como invitado hoy.",
-                        )}
-                      </p>
                     )}
+                  </>
+                )}
+
+                {(customer || identity === "guest") && (
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <label className="block">
+                      <span className={labelClass}>{t("Name", "Nom", "Nombre")}</span>
+                      <input
+                        ref={nameRef}
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        autoComplete="name"
+                        aria-invalid={nameMissing || undefined}
+                        aria-describedby={nameMissing ? "checkout-name-missing" : undefined}
+                        className={cn(inputClass, nameMissing && missingClass)}
+                      />
+                      {nameMissing && (
+                        <span id="checkout-name-missing" className={missingHintClass}>
+                          {t("Name required", "Nom obligatoire", "Nombre obligatorio")}
+                        </span>
+                      )}
+                    </label>
+                    <label className="block">
+                      <span className={labelClass}>
+                        {t("Phone number", "Numéro de téléphone", "Teléfono")}
+                      </span>
+                      <input
+                        ref={phoneRef}
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        inputMode="tel"
+                        autoComplete="tel"
+                        readOnly={Boolean(customer)}
+                        aria-invalid={phoneMissing || undefined}
+                        aria-describedby={phoneMissing ? "checkout-phone-missing" : undefined}
+                        className={cn(
+                          inputClass,
+                          phoneMissing && missingClass,
+                          customer && "text-muted-foreground",
+                        )}
+                      />
+                      {phoneMissing && (
+                        <span id="checkout-phone-missing" className={missingHintClass}>
+                          {t("Phone number required", "Numéro obligatoire", "Teléfono obligatorio")}
+                        </span>
+                      )}
+                    </label>
                   </div>
                 )}
 
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <label className="block">
-                    <span className={labelClass}>{t("Name", "Nom", "Nombre")}</span>
-                    <input
-                      ref={nameRef}
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      autoComplete="name"
-                      aria-invalid={nameMissing || undefined}
-                      aria-describedby={nameMissing ? "checkout-name-missing" : undefined}
-                      className={cn(inputClass, nameMissing && missingClass)}
-                    />
-                    {nameMissing && (
-                      <span id="checkout-name-missing" className={missingHintClass}>
-                        {t("Name required", "Nom obligatoire", "Nombre obligatorio")}
-                      </span>
-                    )}
-                  </label>
-                  <label className="block">
-                    <span className={labelClass}>
-                      {t("Phone number", "Numéro de téléphone", "Teléfono")}
-                    </span>
-                    <input
-                      ref={phoneRef}
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      inputMode="tel"
-                      autoComplete="tel"
-                      aria-invalid={phoneMissing || undefined}
-                      aria-describedby={phoneMissing ? "checkout-phone-missing" : undefined}
-                      className={cn(inputClass, phoneMissing && missingClass)}
-                    />
-                    {phoneMissing && (
-                      <span id="checkout-phone-missing" className={missingHintClass}>
-                        {t("Phone number required", "Numéro obligatoire", "Teléfono obligatorio")}
-                      </span>
-                    )}
-                  </label>
-                </div>
-
-                {/* SMS verification foundation — no code is sent until a provider exists */}
-                <div className="mt-3 flex flex-wrap items-center gap-3 border border-dashed border-border px-4 py-3">
-                  <button
-                    onClick={() => setVerifyState("unavailable")}
-                    className="border border-border px-4 py-2 text-[0.65rem] font-bold uppercase tracking-widest focus-ppp"
-                  >
-                    {t("Send verification code", "Envoyer un code", "Enviar código")}
-                  </button>
-                  <span className="text-xs text-muted-foreground">
-                    {verifyState === "unavailable"
-                      ? t(
-                          "Text verification is not switched on yet — the kitchen confirms by phone.",
-                          "La vérification par texto n'est pas activée — la cuisine confirme par téléphone.",
-                          "La verificación por SMS aún no está activa — la cocina confirma por teléfono.",
-                        )
-                      : t(
-                          "We use your number only to confirm the order.",
-                          "Nous utilisons votre numéro seulement pour confirmer la commande.",
-                          "Usamos tu número solo para confirmar el pedido.",
+                {!customer && identity === "guest" && (
+                  <div className="mt-3 border border-dashed border-border px-4 py-3">
+                    {showVerify && accountsAvailable ? (
+                      <GuestVerifySheet
+                        initialPhone={phone}
+                        className="border-0 p-0 sm:p-0"
+                        onCancel={() => setShowVerify(false)}
+                      />
+                    ) : (
+                      <div className="flex flex-wrap items-center gap-3">
+                        {accountsAvailable && (
+                          <button
+                            type="button"
+                            onClick={() => setShowVerify(true)}
+                            className="border border-border px-4 py-2 text-[0.65rem] font-bold uppercase tracking-widest focus-ppp"
+                          >
+                            {t(
+                              "Verify my number by text (optional)",
+                              "Vérifier mon numéro par texto (facultatif)",
+                              "Verificar mi número por SMS (opcional)",
+                            )}
+                          </button>
                         )}
-                  </span>
-                </div>
+                        <span className="text-xs text-muted-foreground">
+                          {accountsAvailable
+                            ? t(
+                                "A verified number becomes your PPP account — orders, favourites and addresses follow it.",
+                                "Un numéro vérifié devient votre compte PPP — commandes, favoris et adresses le suivent.",
+                                "Un número verificado se convierte en tu cuenta PPP — pedidos, favoritos y direcciones lo siguen.",
+                              )
+                            : t(
+                                "We use your number only to confirm the order.",
+                                "Nous utilisons votre numéro seulement pour confirmer la commande.",
+                                "Usamos tu número solo para confirmar el pedido.",
+                              )}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </section>
 
               {/* 3 — payment */}
               <section className="panel-in border border-border p-5">
                 <SectionTitle n={3}>{t("Payment", "Paiement", "Pago")}</SectionTitle>
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => cardAvailable && setPayment("card")}
+                    disabled={!cardAvailable}
+                    aria-pressed={payment === "card"}
+                    className={`lift-btn border p-4 text-left focus-ppp disabled:cursor-not-allowed disabled:opacity-60 ${
+                      payment === "card" ? "border-primary" : "border-border"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2 font-display text-lg uppercase leading-none">
+                      <CreditCard className="h-4 w-4 text-primary" />
+                      {t("Card (Clover)", "Carte (Clover)", "Tarjeta (Clover)")}
+                    </span>
+                    <span className="mt-1.5 block text-xs text-muted-foreground">
+                      {cardAvailable
+                        ? t(
+                            "Secure page by Clover. Taxes are added there. Pickup only.",
+                            "Page sécurisée de Clover. Les taxes s'ajoutent là. Cueillette seulement.",
+                            "Página segura de Clover. Los impuestos se suman allí. Solo para recoger.",
+                          )
+                        : t(
+                            "Online card payment is for pickup. For delivery, use Interac below, or Uber Eats, DoorDash or Skip.",
+                            "Le paiement par carte en ligne est pour la cueillette. Pour la livraison : Interac ci-dessous, ou Uber Eats, DoorDash ou Skip.",
+                            "El pago con tarjeta en línea es para recoger. Para entrega: Interac abajo, o Uber Eats, DoorDash o Skip.",
+                          )}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => interacAvailable && setPayment("interac")}
+                    disabled={!interacAvailable}
+                    aria-pressed={payment === "interac"}
+                    className={`lift-btn border p-4 text-left focus-ppp disabled:cursor-not-allowed disabled:opacity-60 ${
+                      payment === "interac" ? "border-primary" : "border-border"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2 font-display text-lg uppercase leading-none">
+                      <Banknote className="h-4 w-4 text-primary" />
+                      {t(
+                        "Interac e-Transfer (+ fee)",
+                        "Interac e-Transfer (+ frais)",
+                        "Interac e-Transfer (+ cargo)",
+                      )}
+                    </span>
+                    <span className="mt-1.5 block text-xs text-muted-foreground">
+                      {interacOptions && interacAvailable
+                        ? t(
+                            `Fee ${money(interacOptions.feeCents)} + taxes, shown in your total before you confirm. You send the transfer after confirming; the restaurant starts your order once it is received.`,
+                            `Frais de ${money(interacOptions.feeCents)} + taxes, inclus dans votre total avant de confirmer. Vous envoyez le virement après avoir confirmé; le restaurant lance votre commande dès réception.`,
+                            `Cargo de ${money(interacOptions.feeCents)} + impuestos, incluido en tu total antes de confirmar. Envías la transferencia después; el restaurante inicia tu pedido al recibirla.`,
+                          )
+                        : interacUnavailableReason}
+                    </span>
+                  </button>
+                </div>
                 <p className="mt-3 flex items-start gap-2 text-sm text-muted-foreground">
                   <Lock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  {paymentCopy}
-                </p>
-                <div className="mt-4 flex items-center gap-2 border border-dashed border-border px-4 py-3 text-xs uppercase tracking-widest text-muted-foreground">
-                  <CreditCard className="h-4 w-4" />
-                  {mode === "delivery"
+                  {payment === "interac"
                     ? t(
-                        "Online payment is for pickup. For delivery, use Uber Eats, DoorDash or Skip.",
-                        "Le paiement en ligne est pour la cueillette. Pour la livraison : Uber Eats, DoorDash ou Skip.",
-                        "El pago en línea es para recoger. Para entrega: Uber Eats, DoorDash o Skip.",
+                        "No card is entered here. You will get the recipient, the exact amount and the message to put on the transfer right after confirming — and by text message.",
+                        "Aucune carte n'est saisie ici. Vous recevrez le destinataire, le montant exact et le message à inscrire sur le virement tout de suite après la confirmation — et par texto.",
+                        "No se ingresa ninguna tarjeta aquí. Recibirás el destinatario, el monto exacto y el mensaje de la transferencia justo después de confirmar — y por SMS.",
                       )
-                    : t(
-                        "Card payment opens on Clover's secure page",
-                        "Le paiement par carte s'ouvre sur la page sécurisée de Clover",
-                        "El pago con tarjeta se abre en la página segura de Clover",
-                      )}
-                </div>
+                    : paymentCopy}
+                </p>
               </section>
             </div>
 
@@ -502,35 +731,75 @@ function CheckoutPage() {
                   </dt>
                   <dd>${totals.knownSubtotal.toFixed(2)}</dd>
                 </div>
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">{t("Taxes", "Taxes", "Impuestos")}</dt>
-                  <dd className="text-muted-foreground">
-                    {t(
-                      "Added on Clover's payment page",
-                      "Ajoutées sur la page de paiement Clover",
-                      "Se suman en la página de pago de Clover",
+                {quote ? (
+                  <>
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">
+                        {t(
+                          "Interac e-Transfer fee",
+                          "Frais Interac e-Transfer",
+                          "Cargo Interac e-Transfer",
+                        )}
+                      </dt>
+                      <dd>{money(quote.interacFeeCents)}</dd>
+                    </div>
+                    {quote.deliveryFeeCents > 0 && (
+                      <div className="flex justify-between">
+                        <dt className="text-muted-foreground">
+                          {t("Delivery", "Livraison", "Entrega")}
+                        </dt>
+                        <dd>{money(quote.deliveryFeeCents)}</dd>
+                      </div>
                     )}
-                  </dd>
-                </div>
-                <div className="flex items-baseline justify-between border-t border-border pt-3">
-                  <dt className="font-display text-lg uppercase leading-none">
-                    {t("Total", "Total", "Total")}
-                  </dt>
-                  <dd className="font-display text-2xl leading-none">
-                    ${totals.knownSubtotal.toFixed(2)}+
-                  </dd>
-                </div>
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">
+                        {t("Taxes (GST + QST)", "Taxes (TPS + TVQ)", "Impuestos (GST + QST)")}
+                      </dt>
+                      <dd>{money(quote.taxCents)}</dd>
+                    </div>
+                    <div className="flex items-baseline justify-between border-t border-border pt-3">
+                      <dt className="font-display text-lg uppercase leading-none">
+                        {t("Total", "Total", "Total")}
+                        <span className="ml-2 text-[0.6rem] tracking-widest text-muted-foreground">
+                          {t("all included", "tout inclus", "todo incluido")}
+                        </span>
+                      </dt>
+                      <dd className="font-display text-2xl leading-none">
+                        {money(quote.totalCents)}
+                      </dd>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">{t("Taxes", "Taxes", "Impuestos")}</dt>
+                      <dd className="text-muted-foreground">
+                        {t(
+                          "Added on Clover's payment page",
+                          "Ajoutées sur la page de paiement Clover",
+                          "Se suman en la página de pago de Clover",
+                        )}
+                      </dd>
+                    </div>
+                    <div className="flex items-baseline justify-between border-t border-border pt-3">
+                      <dt className="font-display text-lg uppercase leading-none">
+                        {t("Total", "Total", "Total")}
+                      </dt>
+                      <dd className="font-display text-2xl leading-none">
+                        ${totals.knownSubtotal.toFixed(2)}+
+                      </dd>
+                    </div>
+                  </>
+                )}
               </dl>
 
               <button
                 onClick={() => void finishOrder()}
-                disabled={submitting}
+                disabled={submitting || (payment === "card" && !cardAvailable)}
                 className="cta-motion mt-5 w-full bg-primary px-5 py-4 font-display text-xl uppercase leading-none text-primary-foreground focus-ppp disabled:opacity-60"
                 style={{ boxShadow: "var(--shadow-glow)" }}
               >
-                {submitting
-                  ? t("Sending…", "Envoi…", "Enviando…")
-                  : t("Pay with Clover", "Payer avec Clover", "Pagar con Clover")}
+                {confirmLabel}
               </button>
               {orderNumber ? (
                 <p className="mt-3 border border-primary px-4 py-3 text-center text-sm">
@@ -546,11 +815,17 @@ function CheckoutPage() {
                 </p>
               ) : (
                 <p className="mt-2 text-center text-[0.6rem] uppercase tracking-widest text-muted-foreground">
-                  {t(
-                    "Secure payment by Clover · pickup",
-                    "Paiement sécurisé par Clover · cueillette",
-                    "Pago seguro con Clover · para recoger",
-                  )}
+                  {payment === "interac"
+                    ? t(
+                        "Interac e-Transfer · held until received",
+                        "Virement Interac · en attente de réception",
+                        "Interac e-Transfer · en espera de recepción",
+                      )
+                    : t(
+                        "Secure payment by Clover · pickup",
+                        "Paiement sécurisé par Clover · cueillette",
+                        "Pago seguro con Clover · para recoger",
+                      )}
                 </p>
               )}
               {location?.links.phoneOrderNumber && (
@@ -569,5 +844,82 @@ function CheckoutPage() {
       <PPPFooter />
       <LocationSheet />
     </div>
+  );
+}
+
+/** After an Interac order: what to send, where, with which message — and what happens next. */
+function InteracHeldPanel({ confirmation }: { confirmation: InteracConfirmation }) {
+  const { t, lang } = usePPP();
+  const rows = interacInstructionRows(confirmation.instructions, lang);
+  const text = interacInstructionText(confirmation.instructions, lang);
+  return (
+    <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+      <div className="panel-in border border-primary bg-card p-6 sm:p-8">
+        <p className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-accent">
+          {t("Order", "Commande", "Pedido")} #{confirmation.orderNumber}
+        </p>
+        <h2 className="mt-2 flex items-center gap-3 font-display text-3xl uppercase leading-[0.9] sm:text-4xl">
+          <Banknote className="h-7 w-7 shrink-0 text-primary" />
+          {t("Waiting for your transfer", "En attente du virement", "Esperando tu transferencia")}
+        </h2>
+        <p className="mt-3 text-sm text-muted-foreground">
+          {t(
+            "Your order is held by the restaurant until the e-Transfer arrives. Send it now from your bank app with the details below; the restaurant starts your order once it is received and confirms by text message.",
+            "Votre commande est réservée par le restaurant jusqu'à l'arrivée du virement. Envoyez-le maintenant depuis votre application bancaire avec les détails ci-dessous; le restaurant lance votre commande dès réception et confirme par texto.",
+            "El restaurante retiene tu pedido hasta que llegue la transferencia. Envíala ahora desde tu app bancaria con los datos de abajo; el restaurante inicia tu pedido al recibirla y confirma por SMS.",
+          )}
+        </p>
+        <dl className="mt-5 grid gap-2 sm:grid-cols-2">
+          {rows.map((row) => (
+            <div key={row.key} className="border border-border p-4">
+              <dt className="text-[0.6rem] font-bold uppercase tracking-widest text-muted-foreground">
+                {row.label}
+              </dt>
+              <dd
+                className={cn(
+                  "mt-1 break-words",
+                  row.key === "amount" ? "font-display text-3xl leading-none" : "text-sm",
+                )}
+              >
+                {row.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        {text ? <p className="mt-4 text-sm text-muted-foreground">{text}</p> : null}
+        <p className="mt-4 text-xs text-muted-foreground">
+          {t(
+            "Not received in time? The restaurant cancels the order and lets you know by text. A late transfer is handled by a person, never kept silently.",
+            "Virement non reçu à temps ? Le restaurant annule la commande et vous prévient par texto. Un virement en retard est traité par une personne, jamais gardé en silence.",
+            "¿No llega a tiempo? El restaurante cancela el pedido y te avisa por SMS. Una transferencia tardía la atiende una persona, nunca se queda en silencio.",
+          )}
+        </p>
+      </div>
+      <aside className="panel-in border border-border p-5">
+        <h3 className="font-display text-2xl uppercase leading-none">
+          {t("Keep these details", "Gardez ces détails", "Guarda estos datos")}
+        </h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {t(
+            "They stay on your receipt page, and the restaurant texts them to you too.",
+            "Ils restent sur votre page de reçu, et le restaurant vous les texte aussi.",
+            "Quedan en tu página de recibo y el restaurante también te los envía por SMS.",
+          )}
+        </p>
+        <Link
+          to="/orders/$orderId"
+          params={{ orderId: confirmation.orderId }}
+          className="mt-4 block bg-primary px-5 py-3.5 text-center font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
+        >
+          {t("View my receipt", "Voir mon reçu", "Ver mi recibo")}
+        </Link>
+        <Link
+          to="/order"
+          className="mt-2 block border border-border px-5 py-3 text-center font-display text-lg uppercase leading-none focus-ppp hover:border-primary"
+        >
+          {t("Back to the menu", "Retour au menu", "Volver al menú")}
+        </Link>
+      </aside>
+    </section>
   );
 }

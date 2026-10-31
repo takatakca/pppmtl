@@ -5,7 +5,7 @@ import { deriveIdempotencyKey, claimOrderKey, resetIdempotencyForTests } from ".
 import { statusForEvent, statusForProviderStatus, normalizeEventName } from "../status-mapping";
 import { orderToUniversalDraft, draftToUniversalDraft } from "../order-mapping";
 import { classifyProviderFailure, orderError } from "../errors";
-import { mapDraftToUrbanPiperOrder } from "@/lib/integration/providers/urbanpiper/mapping";
+import { foodhubAdapters } from "@/lib/integration/providers/foodhub/bridge";
 import { createOrder, getOrderById, listCustomerOrders, validateOrder } from "../order-service";
 import { resetOrderStoreForTests, saveOrder } from "../order-store.server";
 import { menuItems } from "@/data/menu";
@@ -17,7 +17,7 @@ import type { InternalOrder } from "../types";
 const item = (over: Partial<OrderItem> = {}): OrderItem => ({
   lineId: "l1",
   productId: "pizza-pepperoni",
-  providerProductId: "UP-PEP",
+  providerProductId: "TEST-PEP",
   name: "Pepperoni",
   quantity: 2,
   unitPrice: 1499,
@@ -25,7 +25,7 @@ const item = (over: Partial<OrderItem> = {}): OrderItem => ({
     {
       groupId: "size",
       choiceId: "large",
-      providerModifierId: "UP-LG",
+      providerModifierId: "TEST-LG",
       label: "Size: Large",
       priceDelta: 300,
     },
@@ -314,8 +314,8 @@ describe("order mapping", () => {
     orderNumber: null,
     customerId: null,
     locationId: "ndg",
-    providerLocationId: "UP-NDG",
-    provider: "urbanpiper",
+    providerLocationId: "FH-TEST",
+    provider: "foodhub",
     orderType: "DELIVERY",
     items: [item()],
     subtotal: computeSubtotal([item()]),
@@ -336,22 +336,23 @@ describe("order mapping", () => {
 
   it("keeps provider product and modifier ids on every line", () => {
     const universal = orderToUniversalDraft(order);
-    expect(universal.lines[0]?.externalProductId).toBe("UP-PEP");
-    expect(universal.lines[0]?.modifiers[0]?.externalChoiceId).toBe("UP-LG");
+    expect(universal.lines[0]?.externalProductId).toBe("TEST-PEP");
+    expect(universal.lines[0]?.modifiers[0]?.externalChoiceId).toBe("TEST-LG");
   });
 
-  it("routes to the provider store id and the right fulfilment type", () => {
-    const payload = mapDraftToUrbanPiperOrder(orderToUniversalDraft(order), "UP-NDG");
-    expect(payload.store_ref_id).toBe("UP-NDG");
-    expect(payload.order_type).toBe("delivery");
-    expect(payload.address).toBe("6280 Av. Somerled");
-    expect(payload.items[0]?.ref_id).toBe("UP-PEP");
+  it("retains the PPP destination and delivery details without vendor payloads", () => {
+    const universal = orderToUniversalDraft(order);
+    expect(universal.locationId).toBe("ndg");
+    expect(universal.orderType).toBe("DELIVERY");
+    expect(universal.deliveryAddress).toBe("6280 Av. Somerled");
+    expect(universal.lines[0]?.externalProductId).toBe("TEST-PEP");
+    expect(foodhubAdapters.orders?.status("ndg").available).toBe(false);
   });
 
-  it("maps a pickup draft without an address", () => {
-    const payload = mapDraftToUrbanPiperOrder(draftToUniversalDraft(draft()), "UP-NDG");
-    expect(payload.order_type).toBe("pickup");
-    expect(payload.address).toBeNull();
+  it("normalizes a pickup draft without inventing an address", () => {
+    const universal = draftToUniversalDraft(draft());
+    expect(universal.orderType).toBe("PICKUP");
+    expect(universal.deliveryAddress).toBeNull();
   });
 });
 

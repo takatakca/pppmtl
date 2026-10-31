@@ -22,7 +22,11 @@ export type OrderErrorCode =
   | "payment_unavailable"
   | "duplicate_submission"
   | "order_not_found"
-  | "not_cancellable";
+  | "not_cancellable"
+  | "interac_unavailable"
+  | "interac_delivery_unavailable"
+  | "price_changed"
+  | "submit_unconfirmed";
 
 interface Message {
   en: string;
@@ -117,6 +121,26 @@ const MESSAGES: Record<OrderErrorCode, Message> = {
     fr: "Cette commande est déjà en cuisine et ne peut plus être annulée en ligne.",
     es: "Este pedido ya está en la cocina y no se puede cancelar en línea.",
   },
+  interac_unavailable: {
+    en: "Interac e-Transfer is not available right now. Pay by card or call us.",
+    fr: "Le virement Interac n'est pas disponible pour le moment. Payez par carte ou appelez-nous.",
+    es: "La transferencia Interac no está disponible ahora. Paga con tarjeta o llámanos.",
+  },
+  interac_delivery_unavailable: {
+    en: "Interac e-Transfer is for pickup orders for now. Choose pickup, or pay by card.",
+    fr: "Le virement Interac est réservé à la cueillette pour l'instant. Choisissez la cueillette ou payez par carte.",
+    es: "La transferencia Interac es solo para recoger por ahora. Elige recoger o paga con tarjeta.",
+  },
+  price_changed: {
+    en: "The total changed while you were ordering. Please review your order before confirming.",
+    fr: "Le total a changé pendant votre commande. Veuillez la revoir avant de confirmer.",
+    es: "El total cambió mientras pedías. Revisa tu pedido antes de confirmar.",
+  },
+  submit_unconfirmed: {
+    en: "We could not confirm your order with the restaurant yet. Press Confirm again: it will not be sent twice.",
+    fr: "Nous n'avons pas encore pu confirmer votre commande auprès du restaurant. Appuyez de nouveau sur Confirmer : elle ne sera pas envoyée deux fois.",
+    es: "Aún no pudimos confirmar tu pedido con el restaurante. Pulsa Confirmar otra vez: no se enviará dos veces.",
+  },
 };
 
 export interface OrderError {
@@ -131,7 +155,12 @@ export function orderError(code: OrderErrorCode): OrderError {
   return { code, messageEn: m.en, messageFr: m.fr, messageEs: m.es };
 }
 
-export type OrderResult<T> = { ok: true; data: T } | { ok: false; error: OrderError };
+/**
+ * `outcomeUnknown`: the provider may have created the order without confirming it (timeout, dropped connection,
+ * 5xx, an answer without the expected fields). The retry must resend the SAME order id, never a new one.
+ */
+export type OrderResult<T> =
+  { ok: true; data: T } | { ok: false; error: OrderError; outcomeUnknown?: boolean };
 
 export function orderFailure<T>(code: OrderErrorCode): OrderResult<T> {
   return { ok: false, error: orderError(code) };

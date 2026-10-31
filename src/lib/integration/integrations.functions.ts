@@ -1,30 +1,35 @@
 /**
- * Server functions exposing integration state to internal screens.
- * Provider modules are imported INSIDE handlers so credential-reading code
- * never enters the client bundle.
+ * Internal, read-only integration status snapshot.
+ * UrbanPiper has been retired by the owner. Nothing in this file can trigger
+ * a provider check, menu sync, test order, customer write or payment. The only
+ * network call is Food Hub's public GET /api/health (status words, no data).
  */
-
 import { createServerFn } from "@tanstack/react-start";
 import type { CapabilityStatus, IntegrationProviderId } from "./core/contracts";
-import type { ProviderHealthReport } from "./providers/urbanpiper/health.server";
 
-export type { ProviderHealthReport, HealthCheck } from "./providers/urbanpiper/health.server";
-
-export interface ConnectionCard {
-  locationId: string;
-  internalId: string;
-  name: string;
-  address: string;
-  inRollout: boolean;
-  connected: boolean;
-  environment: "sandbox" | "production" | "not set";
-  requirements: Array<{ label: string; met: boolean }>;
-  missingProviderFields: string[];
+export interface FoodhubSnapshot {
+  /** FOODHUB_URL and the Food Hub server secret are both set on this server. */
+  configured: boolean;
+  /** Hostname of FOODHUB_URL (never the secret). */
+  host: string | null;
+  /** GET /api/health answered (any status) — null when not configured, so nothing was pinged. */
+  reachable: boolean | null;
+  /** Food Hub's own overall status word from /api/health, when it answered. */
+  health: string | null;
+  interacEnabled: boolean;
+  /** Dollars, as shown to customers. */
+  interacFee: number;
+  /** PPP slug -> Food Hub location code (verified defaults, env override). */
+  locationCodes: Record<string, string>;
+  ingressPath: string;
+  message: string;
 }
 
 export interface IntegrationSnapshot {
   generatedAt: string;
   credentials: Record<string, boolean>;
+  /** Per provider plan id: the variables it needs and whether each is set (names come from the server only). */
+  requiredCredentials: Record<string, Array<{ key: string; present: boolean }>>;
   providers: Array<{
     provider: IntegrationProviderId;
     capabilities: CapabilityStatus[];
@@ -43,55 +48,53 @@ export interface IntegrationSnapshot {
     eventType: string;
     receivedAt: string;
     status: string;
-    payloadReference: string;
   }>;
-  menuSync: {
-    connected: boolean;
-    reason: string;
-    coverage: {
-      categoriesMapped: number;
-      categoriesTotal: number;
-      productsMapped: number;
-      modifiersMapped: number;
-    };
-    stores: Array<{
-      internalId: string;
-      name: string;
-      connected: boolean;
-      lastSyncAt: string | null;
-      lastStatus: string;
-      categoriesReceived: number;
-      productsReceived: number;
-      itemsUpdated: number;
-      errors: string[];
-    }>;
-  };
-  connection: ConnectionCard;
+  foodhub: FoodhubSnapshot;
 }
 
 export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
   async (): Promise<IntegrationSnapshot> => {
     const { requireAdmin } = await import("@/lib/security/admin.server");
     requireAdmin();
-    const { credentialPresence } = await import("./core/credentials.server");
+
+    const { credentialPresence, PROVIDER_REQUIRED_CREDENTIALS } =
+      await import("./core/credentials.server");
     const { providerHealth } = await import("./core/registry");
     const { recentIntegrationEvents } = await import("./core/logging");
-    const { locationIntegrationMappings } = await import("@/config/integration-locations");
-    const { mappingCoverage } = await import("@/config/integration-menu-map");
-    const { lastMenuSyncFor } = await import("./core/menu-sync-log");
-    const { urbanPiperMenuConfigured } = await import("./providers/urbanpiper/menu");
-    const { firstConnectionMapping } = await import("@/config/integration-locations");
-    const { urbanPiperReadiness, urbanPiperEnvironmentLabel } =
-      await import("./providers/urbanpiper/config.server");
+    const { locationIntegrationMappings, firstConnectionMapping } =
+      await import("@/config/integration-locations");
+    const { FOODHUB_WEBSITE_ORDER_INGRESS } = await import("./providers/foodhub/bridge");
+    const {
+      foodhubConfigured,
+      foodhubHost,
+      foodhubLocationCodes,
+      interacEnabled,
+      interacFeeCents,
+    } = await import("./providers/foodhub/config.server");
+    const { foodhubHealth } = await import("./providers/foodhub/client.server");
 
-    const target = firstConnectionMapping() ?? locationIntegrationMappings[0];
-    const primary = target?.locationId ?? "";
-    const readiness = urbanPiperReadiness(primary);
+    const pilot = firstConnectionMapping();
+    const configured = foodhubConfigured();
+    const health = configured ? await foodhubHealth() : null;
+    const message = !configured
+      ? "Not connected: set FOODHUB_URL and the Food Hub website-order secret on this service (Coolify). Phone sign-in and Interac e-Transfer stay closed until then."
+      : !health?.reachable
+        ? "Configured, but Food Hub's /api/health did not answer from this server. Phone sign-in and Interac orders will fail honestly until it does."
+        : interacEnabled()
+          ? `Connected (health: ${health.status ?? "answered"}). Phone sign-in is live; Interac e-Transfer orders are POSTed and held at Food Hub until the restaurant confirms the transfer.`
+          : `Connected (health: ${health.status ?? "answered"}). Phone sign-in is live; Interac e-Transfer stays off until FOODHUB_INTERAC_ENABLED=true (set it once Food Hub's Interac branch is deployed).`;
 
+    const presence = credentialPresence();
     return {
       generatedAt: new Date().toISOString(),
-      credentials: credentialPresence(),
-      providers: providerHealth(primary).map((p) => ({
+      credentials: presence,
+      requiredCredentials: Object.fromEntries(
+        Object.entries(PROVIDER_REQUIRED_CREDENTIALS).map(([planId, keys]) => [
+          planId,
+          keys.map((key) => ({ key, present: presence[key] === true })),
+        ]),
+      ),
+      providers: providerHealth(pilot?.locationId ?? "").map((p) => ({
         provider: p.provider,
         capabilities: p.capabilities,
       })),
@@ -103,174 +106,24 @@ export const getIntegrationSnapshot = createServerFn({ method: "GET" }).handler(
         orderingProvider: m.orderingProvider,
         providerLocationId: m.providerLocationId,
       })),
-      events: recentIntegrationEvents(15).map((e) => ({
-        id: e.id,
-        provider: e.provider,
-        eventType: e.eventType,
-        receivedAt: e.receivedAt,
-        status: e.status,
-        payloadReference: e.payloadReference,
+      events: recentIntegrationEvents(15).map((event) => ({
+        id: event.id,
+        provider: event.provider,
+        eventType: event.eventType,
+        receivedAt: event.receivedAt,
+        status: event.status,
       })),
-      menuSync: {
-        connected: locationIntegrationMappings.some((m) => urbanPiperMenuConfigured(m.locationId)),
-        reason:
-          "Menu sync activates per store once UrbanPiper credentials and that store's provider id exist.",
-        coverage: mappingCoverage(),
-        stores: locationIntegrationMappings.map((m) => {
-          const last = lastMenuSyncFor(m.locationId);
-          return {
-            internalId: m.internalId,
-            name: m.name,
-            connected: urbanPiperMenuConfigured(m.locationId),
-            lastSyncAt: last?.completedAt ?? last?.startedAt ?? null,
-            lastStatus: last?.status ?? "never run",
-            categoriesReceived: last?.categoriesReceived ?? 0,
-            productsReceived: last?.productsReceived ?? 0,
-            itemsUpdated: last?.itemsUpdated ?? 0,
-            errors: last?.errors ?? [],
-          };
-        }),
-      },
-      connection: {
-        locationId: primary,
-        internalId: target?.internalId ?? "",
-        name: target?.name ?? "",
-        address: target?.address ?? "",
-        inRollout: readiness.inRollout,
-        connected: readiness.connected,
-        environment: urbanPiperEnvironmentLabel(),
-        requirements: [
-          { label: "API url", met: readiness.apiUrlSet },
-          { label: "API key", met: readiness.apiKeySet },
-          { label: "Client id", met: readiness.clientIdSet },
-          { label: "Client secret", met: readiness.clientSecretSet },
-          { label: "Webhook secret", met: readiness.webhookSecretSet },
-          { label: "Store id", met: readiness.storeMapped },
-        ],
-        missingProviderFields: readiness.missingProviderFields,
+      foodhub: {
+        configured,
+        host: foodhubHost(),
+        reachable: health ? health.reachable : null,
+        health: health?.status ?? null,
+        interacEnabled: interacEnabled(),
+        interacFee: interacFeeCents() / 100,
+        locationCodes: foodhubLocationCodes(),
+        ingressPath: FOODHUB_WEBSITE_ORDER_INGRESS,
+        message,
       },
     };
   },
 );
-
-/** "Test Connection" — runs the real checks, never fakes a success. */
-export const testProviderConnection = createServerFn({ method: "POST" })
-  .inputValidator((input: { locationId: string }) => input)
-  .handler(
-    async ({ data }): Promise<{ ok: boolean; message: string; report: ProviderHealthReport }> => {
-      const { requireAdmin } = await import("@/lib/security/admin.server");
-      requireAdmin();
-      const { testUrbanPiperConnection } = await import("./providers/urbanpiper/health.server");
-      return testUrbanPiperConnection(data.locationId);
-    },
-  );
-
-/** Live health snapshot for one store. */
-export const getProviderHealth = createServerFn({ method: "POST" })
-  .inputValidator((input: { locationId: string }) => input)
-  .handler(async ({ data }): Promise<ProviderHealthReport> => {
-    const { requireAdmin } = await import("@/lib/security/admin.server");
-    requireAdmin();
-    const { urbanPiperHealth } = await import("./providers/urbanpiper/health.server");
-    return urbanPiperHealth(data.locationId);
-  });
-
-export interface MenuSyncRunResult {
-  ok: boolean;
-  message: string;
-  lastSyncAt: string | null;
-  categories: number;
-  products: number;
-  modifiers: number;
-}
-
-/** "Sync Menu Now" — blocked unless the store is mapped and credentials exist. */
-export const runMenuSyncNow = createServerFn({ method: "POST" })
-  .inputValidator((input: { locationId: string }) => input)
-  .handler(async ({ data }): Promise<MenuSyncRunResult> => {
-    const { requireAdmin } = await import("@/lib/security/admin.server");
-    requireAdmin();
-    const { urbanPiperConfigured } = await import("./providers/urbanpiper/config.server");
-    if (!urbanPiperConfigured(data.locationId)) {
-      return {
-        ok: false,
-        message: "Sync blocked: this store has no provider credentials or store id yet.",
-        lastSyncAt: null,
-        categories: 0,
-        products: 0,
-        modifiers: 0,
-      };
-    }
-    const { syncLocationMenu } = await import("./providers/urbanpiper/menu-sync");
-    const result = await syncLocationMenu(data.locationId);
-    if (!result.ok) {
-      return {
-        ok: false,
-        message: result.message,
-        lastSyncAt: null,
-        categories: 0,
-        products: 0,
-        modifiers: 0,
-      };
-    }
-    const menu = result.data.menu;
-    const modifiers = menu?.products.reduce((sum, p) => sum + p.modifierGroups.length, 0) ?? 0;
-    return {
-      ok: true,
-      message: "Menu synced.",
-      lastSyncAt: menu?.syncedAt ?? result.data.event.completedAt ?? null,
-      categories: menu?.categories.length ?? 0,
-      products: menu?.products.length ?? 0,
-      modifiers,
-    };
-  });
-
-export interface OrderTestPreview {
-  payload: string;
-  sent: boolean;
-  environment: string;
-  providerResponse: string | null;
-  errors: string[];
-}
-
-/** Order Test Mode — builds the exact payload; transmits only to a sandbox. */
-export const previewTestOrder = createServerFn({ method: "POST" })
-  .inputValidator((input: { locationId: string }) => input)
-  .handler(async ({ data }): Promise<OrderTestPreview> => {
-    const { requireAdmin } = await import("@/lib/security/admin.server");
-    requireAdmin();
-    const { runOrderTest } = await import("./providers/urbanpiper/test-order");
-    const result = await runOrderTest({
-      locationId: data.locationId,
-      orderType: "PICKUP",
-      items: [
-        {
-          lineId: "test-line-1",
-          productId: "test-product",
-          providerProductId: null,
-          name: "Connection test item",
-          quantity: 1,
-          unitPrice: null,
-          modifiers: [],
-          notes: "",
-        },
-      ],
-      customer: {
-        customerId: null,
-        takatakCustomerId: null,
-        name: "PPP Connection Test",
-        phone: "0000000000",
-        email: null,
-        isGuest: true,
-      },
-      deliveryAddress: null,
-      notes: "Order test mode — not a customer order.",
-    });
-    return {
-      payload: JSON.stringify(result.payload, null, 2),
-      sent: result.sent,
-      environment: result.environment,
-      providerResponse: result.providerResponse,
-      errors: result.errors,
-    };
-  });

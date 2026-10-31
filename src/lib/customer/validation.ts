@@ -40,11 +40,12 @@ export function passwordError(pw: string): string | null {
 }
 
 /** Only in-app routes may be returned to after sign-in — no open redirects. */
-const RETURN_ALLOWLIST = ["/", "/order", "/offers", "/account"];
+export type ReturnTo = "/" | "/order" | "/offers" | "/account" | "/checkout";
+const RETURN_ALLOWLIST: ReturnTo[] = ["/", "/order", "/offers", "/account", "/checkout"];
 
-export function safeReturnTo(raw: string | undefined): string {
+export function safeReturnTo(raw: string | undefined): ReturnTo {
   if (!raw) return "/account";
-  return RETURN_ALLOWLIST.includes(raw) ? raw : "/account";
+  return (RETURN_ALLOWLIST as string[]).includes(raw) ? (raw as ReturnTo) : "/account";
 }
 
 /** m•••@example.com — never echo the full address back after submission. */

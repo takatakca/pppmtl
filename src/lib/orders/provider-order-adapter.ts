@@ -1,13 +1,13 @@
 /**
  * Provider order contract.
  *
- * Any ordering engine (UrbanPiper today, Clover or a direct POS later)
+ * Any owner-approved engine (Food Hub, Clover or a direct POS later)
  * implements this. The order service knows nothing else about them.
  */
 
 import type { IntegrationProviderId, UniversalOrderDraft } from "@/lib/integration/core/contracts";
 import type { OrderResult } from "./errors";
-import type { OrderStatus } from "./types";
+import type { OrderFee, OrderInteracInstructions, OrderItem, OrderStatus } from "./types";
 
 export interface ProviderOrderRef {
   providerOrderId: string;
@@ -21,12 +21,23 @@ export interface ProviderOrderRef {
   total: number | null;
   /** Provider-hosted payment page the customer is sent to (Clover Hosted Checkout). */
   paymentUrl?: string;
+  /** Fees included in `total` (cents), e.g. the Interac e-Transfer fee. */
+  fees?: OrderFee[];
+  /** Interac e-Transfer instructions for an order held until the transfer is confirmed. */
+  interac?: OrderInteracInstructions;
 }
 
 /** What the order service knows about the order being sent. */
 export interface ProviderOrderContext {
   /** PPP order id (used in the provider's return links). */
   orderId: string;
+  /** Priced items with their names (the universal draft carries ids only). */
+  items?: OrderItem[];
+  /** Food Hub customer token from the signed-in customer's cookie; never stored on the order. */
+  customerToken?: string | null;
+  lang?: "fr" | "en" | "es";
+  /** All-inclusive total the customer was shown (cents): the provider refuses to send a different one. */
+  displayedTotalCents?: number | null;
 }
 
 export interface ProviderStatusRef {
