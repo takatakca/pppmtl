@@ -106,7 +106,7 @@ jobs:
           bun-version: latest
       - name: Install pinned dependencies
         run: bun install --frozen-lockfile
-      - name: Prove durable Clover orders on PostgreSQL as the limited role
+      - name: Prove durable Clover orders and courier dispatch on PostgreSQL as the limited role
         env:
           PPP_TEST_DATABASE_URL: postgres://ppp_ci_role:ppp-ci-tenant-test-password@127.0.0.1:5432/postgres
-        run: bunx vitest run src/lib/orders/__tests__/durable-orders.pg.test.ts
+        run: bunx vitest run src/lib/orders/__tests__/durable-orders.pg.test.ts src/lib/delivery/__tests__/dispatch.pg.test.ts
