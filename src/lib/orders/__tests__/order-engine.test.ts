@@ -210,14 +210,28 @@ describe("pre-launch checkout catalog isolation and bounded input", () => {
     expect(createOrder(request).ok).toBe(false);
   });
 
-  it("rejects Clover delivery before creating a checkout session", () => {
-    const request = {
+  it("takes Clover delivery only to a served postal code, before any checkout session", () => {
+    const delivery = (deliveryAddress: string | null) => ({
       ...requestFor(),
       orderType: "DELIVERY" as const,
-      deliveryAddress: "123 Test Street, Montreal",
-    };
-    expect(validateOrder(request).errors.map((e) => e.code)).toContain("unsupported_order_type");
-    expect(createOrder(request).ok).toBe(false);
+      deliveryAddress,
+    });
+    const codes = (address: string | null) =>
+      validateOrder(delivery(address)).errors.map((e) => e.code);
+    expect(codes("123 Test Street, Montreal")).toContain("outside_delivery_area");
+    expect(codes("1 rue Sainte-Catherine, Montréal, QC H2X 1Z4")).toContain(
+      "outside_delivery_area",
+    );
+    expect(codes(null)).toContain("missing_address");
+    expect(codes("5800 Av. Monkland, Montréal, QC H4A 1G1")).not.toContain("outside_delivery_area");
+    expect(createOrder(delivery("123 Test Street, Montreal")).ok).toBe(false);
+  });
+
+  it("refuses a malformed or excessive tip at the API boundary", () => {
+    for (const tip of [-1, 1.5, Number.NaN, 200_01, "500"]) {
+      const request = { ...requestFor(), tip } as unknown as Parameters<typeof validateOrder>[0];
+      expect(validateOrder(request).valid).toBe(false);
+    }
   });
 
   it("rejects oversized untrusted customer fields and modifier maps at the API boundary", () => {

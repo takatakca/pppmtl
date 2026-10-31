@@ -53,6 +53,8 @@ export function orderToUniversalDraft(order: InternalOrder): UniversalOrderDraft
     customer: mapCustomer(order),
     deliveryAddress: order.deliveryAddress,
     notes: order.notes,
+    ...(order.tip ? { tip: order.tip } : {}),
+    ...(order.deliveryFee ? { deliveryFee: order.deliveryFee } : {}),
   };
 }
 

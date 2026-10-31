@@ -675,7 +675,71 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
     expect(printed).toBe(1);
   });
 
-  it("refuses delivery through Clover (pickup only) before creating an order, and a forged webhook", async () => {
+  it("sends a delivery with its fee and the tip to Clover, and tickets it LIVRAISON", async () => {
+    const { createOrder, submitOrder } = await import("@/lib/orders/order-service");
+    const address = "5800 Av. Monkland, App. 3, Montréal, QC H4A 1G1 — Sonnez 302";
+    const created = createOrder({
+      locationId: "loc-ndg-somerled",
+      orderType: "DELIVERY",
+      lines: [{ itemId: PITA, quantity: 1, notes: "", selections: pitaCombo() }],
+      customer: {
+        customerId: null,
+        takatakCustomerId: null,
+        name: "Marie Tremblay",
+        phone: "5145550100",
+        email: "marie@example.com",
+        isGuest: true,
+      },
+      deliveryAddress: address,
+      notes: "",
+      tip: 202,
+    });
+    expect(created).toMatchObject({ ok: true, data: { deliveryFee: 500, tip: 202 } });
+    if (!created.ok) return;
+    const submitted = await submitOrder(created.data.id);
+    expect(submitted.ok).toBe(true);
+    const sent = JSON.parse(String(calls.find((c) => c.url.includes("/checkouts"))!.init!.body));
+    const [food, fee, tip] = sent.shoppingCart.lineItems;
+    expect(food).toMatchObject({ price: 1349, unitQty: 1 });
+    expect(fee).toMatchObject({ name: "Livraison / Delivery", price: 500, note: address });
+    expect(fee.taxRates).toHaveLength(2);
+    expect(tip).toEqual({ name: "Pourboire / Tip", price: 202, unitQty: 1 });
+    expect(sent.customer.email).toBe("marie@example.com");
+    // Taxes on food + delivery, never on the tip.
+    const taxes = taxesFor(1349 + 500, QUEBEC_TAX_RATES);
+    if (submitted.ok) {
+      expect(submitted.data).toMatchObject({ tax: taxes, total: 1349 + 500 + taxes + 202 });
+    }
+
+    vi.stubEnv("CLOVER_API_TOKEN", "rest_test");
+    const { handleCloverHostedCheckoutWebhook } =
+      await import("@/lib/integration/providers/clover/webhook");
+    const raw = JSON.stringify({
+      status: "APPROVED",
+      type: "PAYMENT",
+      id: "PAY1",
+      merchantId: "MTEST",
+      data: "SESSION1",
+    });
+    const t = Math.floor(Date.now() / 1000);
+    const sig = `t=${t},v1=${createHmac("sha256", "whsec_test").update(`${t}.${raw}`).digest("hex")}`;
+    await handleCloverHostedCheckoutWebhook(
+      new Request("https://pppmtl.com/api/public/webhooks/clover", {
+        method: "POST",
+        body: raw,
+        headers: { "clover-signature": sig },
+      }),
+    );
+    expect(title).toMatch(/^🌐 Site web · PPP-[A-Z0-9]{5} · Marie · LIVRAISON$/);
+    const titleCall = calls.find(
+      (c) => c.url.includes("/orders/ORDER1") && c.init?.method === "POST",
+    );
+    expect(JSON.parse(String(titleCall!.init!.body)).note).toContain(
+      `LIVRAISON / DELIVERY: ${address}`,
+    );
+  });
+
+  it("refuses delivery outside the served area before creating an order, and a forged webhook", async () => {
     const { createOrder } = await import("@/lib/orders/order-service");
     const created = createOrder({
       locationId: "loc-ndg-somerled",
@@ -689,10 +753,10 @@ describe("order -> Clover Hosted Checkout -> webhook (fetch mocked)", () => {
         email: null,
         isGuest: true,
       },
-      deliveryAddress: "1 rue Test",
+      deliveryAddress: "1 rue Test, Montréal, QC H2X 1Z4",
       notes: "",
     });
-    expect(created).toMatchObject({ ok: false, error: { code: "unsupported_order_type" } });
+    expect(created).toMatchObject({ ok: false, error: { code: "outside_delivery_area" } });
 
     const { handleCloverHostedCheckoutWebhook } =
       await import("@/lib/integration/providers/clover/webhook");

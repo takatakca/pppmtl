@@ -15,8 +15,9 @@
 | Options without prices, one choice per group | **Clover's option groups**: required ones first, min / max, several choices where Clover allows, option prices |
 | "Finish my order" → phone | **"Payer avec Clover"** → Clover's secure page → back to the order page |
 
-The layout, rails ("Most ordered", promos…), item sheet, cart and scroll are unchanged. Delivery stays on Uber Eats /
-DoorDash / Skip; online payment is for pickup.
+Checkout (2026-10-31): pickup or **website delivery** ($5 fee, served postal codes in `src/config/delivery.ts`), with a
+tip chosen on the site. Clover receives the food lines, then "Livraison / Delivery" (taxed, note = address) and
+"Pourboire / Tip" (not taxed).
 
 ## 2. Decisions (official Clover sources)
 

@@ -65,12 +65,17 @@ export async function confirmInClover(
   const firstName = order?.customer.name?.trim().split(/\s+/)[0] ?? facts.customerFirstName;
   const titled = await titleCloverOrder(
     facts.orderId,
-    websiteOrderTitle(order?.orderNumber ?? null, firstName ?? null),
+    websiteOrderTitle(
+      order?.orderNumber ?? null,
+      firstName ?? null,
+      order?.orderType === "DELIVERY",
+    ),
     websiteOrderNote({
       site: new URL(siteBaseUrl()).host,
       customerName: order?.customer.name ?? facts.customerFirstName,
       phone: order?.customer.phone ?? facts.customerPhone,
       notes: order?.notes?.trim() || null,
+      deliveryAddress: order?.orderType === "DELIVERY" ? order.deliveryAddress : null,
     }),
   );
   if (!titled)

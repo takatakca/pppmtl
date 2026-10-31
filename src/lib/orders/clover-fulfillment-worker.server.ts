@@ -106,12 +106,14 @@ async function reconcileWork(
   if (work.effect === "CLOVER_TITLE") {
     if (!isWebsiteTitled(provider.title)) {
       const name = order.customer.name?.trim().split(/\s+/)[0] ?? provider.customerFirstName;
-      const title = websiteOrderTitle(order.orderNumber, name ?? null);
+      const delivery = order.orderType === "DELIVERY";
+      const title = websiteOrderTitle(order.orderNumber, name ?? null, delivery);
       const note = websiteOrderNote({
         site: new URL(siteBaseUrl()).host,
         customerName: order.customer.name ?? provider.customerFirstName,
         phone: order.customer.phone ?? provider.customerPhone,
         notes: order.notes?.trim() || null,
+        deliveryAddress: delivery ? order.deliveryAddress : null,
       });
       if (!(await titleCloverOrder(provider.orderId, title, note))) {
         // Recheck Clover on the next claim; it may have titled before timeout.
