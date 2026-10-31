@@ -1,5 +1,28 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-10-31 — Courier dispatch for website delivery orders (Claude, branch `claude/courier-dispatch`, NOT on main)
+
+Restaurant-side "Find a driver" on the kitchen tablet: `/admin/dispatch` (admin session). For a PAID website
+DELIVERY order it quotes **DoorDash Drive** and **Uber Direct** side by side (fee, courier available now, pickup and
+drop-off ETA, CHEAPEST / FASTEST badges; CLOSEST only if a provider reports a courier distance — neither quote does),
+books the chosen quote (real delivery + tracking link), cancels, refreshes, and takes status webhooks at
+`/api/public/webhooks/doordash` (Authorization header = `DOORDASH_WEBHOOK_SECRET`) and `/api/public/webhooks/uber`
+(HMAC `x-uber-signature`, `UBER_DIRECT_WEBHOOK_SECRET`). **Skip** has no public courier API: manual "book in the Skip
+portal" card. **My driver**: no fee, saved list `PPP_OWN_DRIVERS`, optional Twilio text. Code: `src/lib/delivery/`,
+guide: `docs/integrations/couriers.md`. The dispatch record lives in `ppp.orders.order_document.dispatch` (row-locked
+update, one live courier per order): **no SQL / grant for the owner to run**. Reuses `src/config/delivery.ts`
+(RESTAURANT_COORDS, postalCodeOf, distanceKm, deliveryAddressLine). Also: the customer sign-up popup no longer opens
+on `/admin/*`; admin sign-in accepts `?next=/admin/dispatch`; CI database job also runs `dispatch.pg.test.ts`.
+
+**Verified:** build, typecheck, eslint (0 errors), vitest 223 passed; CI run 41207103691 on 9b7ee1c green, including
+real PostgreSQL 16 as the limited role (dispatch survives a restart, webhook lookup, tenant isolation, two tablets
+booking at once → one courier). Built server + Chromium at 1280×800 and 800×1280: board, Find a driver, own driver
+assigned, unpaid order refused. **NOT verified:** any real DoorDash/Uber/Twilio call or webhook (no keys yet).
+
+**Next:** lead reviews and merges the branch; owner opens DoorDash Drive (sandbox first) and Uber Direct (test mode),
+sets the env vars of `docs/integrations/couriers.md` §7 in Coolify, registers both webhook URLs, then books one test
+delivery per provider from `/admin/dispatch`.
+
 ## 2026-10-31 — Checkout revamp with tip and website delivery (Claude)
 
 New checkout (`src/routes/checkout.tsx` + `src/components/checkout/*`): pickup (Google embed map, directions, Locate me distance) or delivery (OpenStreetMap address search, Locate me, served-area check from `src/config/delivery.ts`, map preview), contact with email (passed to Clover), tip chips, exact totals (`src/lib/pricing.ts`), pinned mobile pay bar. Server: `CheckoutRequest.tip` (validated), `deliveryFee` set by the server ($5, taxed), Clover lines "Livraison / Delivery" (note = address) and "Pourboire / Tip" (untaxed), title "… · LIVRAISON" and note "LIVRAISON / DELIVERY: <address>". Idempotency key includes the tip. Delivery postal codes are a default list — owner to confirm. A second agent builds courier dispatch (DoorDash / Uber / Skip / own driver) on branch `claude/courier-dispatch` — review before merging. Next: Google via takatak.ca, Interac (Québec).
