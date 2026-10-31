@@ -350,7 +350,7 @@ export async function findDrivers(
         return {
           ok: false,
           availability: "not_connected",
-          reason: `${provider.label} is not connected.`,
+          reason: `No live price: add the ${provider.label} keys on the server (docs/integrations/couriers.md).`,
         };
       }
       if (!request.ok) return { ok: false, availability: "unavailable", reason: request.reason };
