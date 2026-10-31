@@ -32,6 +32,27 @@ export const INTEGRATION_ENV_KEYS = [
   "STRIPE_SECRET_KEY",
   "TWILIO_ACCOUNT_SID",
   "TWILIO_AUTH_TOKEN",
+  /** Twilio sender (E.164) for the optional text to the restaurant's own driver. */
+  "TWILIO_FROM_NUMBER",
+  /** DoorDash Drive access key (developer.doordash.com → Developer Portal → Credentials). */
+  "DOORDASH_DEVELOPER_ID",
+  "DOORDASH_KEY_ID",
+  "DOORDASH_SIGNING_SECRET",
+  /** "sandbox" while the access key is a sandbox key (labels quotes as test); empty for production. */
+  "DOORDASH_ENV",
+  /** The exact Authorization header value set on the DoorDash webhook (Developer Portal → Webhooks). */
+  "DOORDASH_WEBHOOK_SECRET",
+  /** Uber Direct (direct.uber.com → Developer): client credentials, customer id, webhook signing key. */
+  "UBER_DIRECT_CLIENT_ID",
+  "UBER_DIRECT_CLIENT_SECRET",
+  "UBER_DIRECT_CUSTOMER_ID",
+  "UBER_DIRECT_WEBHOOK_SECRET",
+  /** "test" while using Uber Direct test credentials (labels quotes as test); empty for live. */
+  "UBER_DIRECT_ENV",
+  /** Optional saved list of the restaurant's own drivers: "Name:+15145550100;Name 2:+15145550101". */
+  "PPP_OWN_DRIVERS",
+  /** Optional override of the SkipTheDishes restaurant portal link shown on the dispatch screen. */
+  "SKIP_PORTAL_URL",
 ] as const;
 
 export type IntegrationEnvKey = (typeof INTEGRATION_ENV_KEYS)[number];
