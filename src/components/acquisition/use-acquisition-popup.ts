@@ -6,8 +6,14 @@ const DISMISSED_KEY = "ppp.welcome.dismissed.v1";
 /** Survives the session so a second visit gets the returning-customer wording. */
 const SEEN_KEY = "ppp.welcome.seen.v1";
 
-/** Routes where a welcome interruption would get in the customer's way. */
-const SUPPRESSED = ["/account/sign-in", "/account/sign-up", "/account/forgot-password", "/dev"];
+/** Routes where a welcome interruption would get in the customer's way (and staff screens: the kitchen tablet). */
+const SUPPRESSED = [
+  "/account/sign-in",
+  "/account/sign-up",
+  "/account/forgot-password",
+  "/dev",
+  "/admin",
+];
 
 function isSuppressed(pathname: string) {
   return SUPPRESSED.some((p) => pathname === p || pathname.startsWith(`${p}/`));
