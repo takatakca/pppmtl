@@ -33,6 +33,7 @@ function draftSignature(draft: OrderDraft): string {
     draft.notes.trim(),
     // A different tip is a different payment: it must never reopen the earlier Clover page.
     String(draft.tip ?? 0),
+    draft.paymentMethod ?? "CARD",
     lines,
   ].join("::");
 }

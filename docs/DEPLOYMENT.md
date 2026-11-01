@@ -143,3 +143,10 @@ Latest tested source 762972778b989236279ef8447cd79de170339e9b passed CI 40740927
 ## 2026-10-29 — Production Clover checkout requirements
 
 Production checkout opens when ALL are set on the Coolify app (runtime, not build time): `DATABASE_URL` (limited role, see DB_ROLLOUT.md), `CLOVER_MERCHANT_ID`, `CLOVER_ECOMM_PRIVATE_KEY`, `CLOVER_WEBHOOK_SECRET`, `CLOVER_API_TOKEN`, `PPP_ORDER_ACCESS_SECRET`; `CLOVER_ENV` empty. Missing any one keeps "Pay with Clover" refusing with "temporarily unavailable". Enable scheduled backups on the Coolify database resource. After each deploy, look in the runtime logs for `[ppp-db]` errors; a paid order logs `[integration_events]` `payment.approved` with `kitchen done 2`.
+
+## 2026-11-01 — Optional switches (all off by default)
+
+- Interac e-Transfer: `INTERAC_REQUESTS_ENABLED=true`, `INTERAC_ALERT_PHONE`, `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM_NUMBER`; Clover REST token needs Orders write. See `docs/integrations/interac.md`.
+- Sign in with TAKATAK: `TAKATAK_OAUTH_CLIENT_ID`, `TAKATAK_OAUTH_CLIENT_SECRET` (redirect `https://pppmtl.com/auth/takatak/callback`).
+- Couriers: `docs/integrations/couriers.md` §7.
+- Coolify stopped deploying after 22206ee (owner: server down, 2026-10-31). Nothing after that commit is live until a deploy succeeds; confirm `/healthz` and the checkout page after it does.

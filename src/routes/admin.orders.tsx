@@ -74,6 +74,12 @@ function OrdersAdmin() {
             Courier dispatch
           </Link>
           <Link
+            to="/admin/interac"
+            className="inline-block bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-widest text-primary-foreground focus-ppp"
+          >
+            Interac orders
+          </Link>
+          <Link
             to="/admin/integrations"
             className="inline-block border border-border px-4 py-2 text-xs uppercase tracking-widest focus-ppp"
           >

@@ -104,6 +104,34 @@ export interface OrderDraft {
   notes: string;
   /** Cents, chosen by the customer at checkout. Never taxed. */
   tip?: number;
+  /** How the customer pays; card (Clover's page) when absent. */
+  paymentMethod?: OrderPaymentMethod;
+}
+
+/** Card / wallet on Clover's page, or an Interac e-Transfer requested by the restaurant. */
+export type OrderPaymentMethod = "CARD" | "INTERAC";
+
+/**
+ * Interac e-Transfer, manual (owner decision 2026-10-31): the restaurant sends "Request money" from its bank for
+ * `amount`, then marks the order paid on the tablet, which sends it to Clover and the kitchen.
+ */
+export interface InteracPayment {
+  status:
+    "awaiting_request" | "requested" | "paid" | "sent_to_kitchen" | "kitchen_failed" | "cancelled";
+  /** Cents to request: food + delivery + taxes + tip, priced from Clover when the order was placed. */
+  amount: number;
+  /** The lines the kitchen ticket shows, as priced at order time (cents). */
+  lines: Array<{ name: string; price: number; note?: string }>;
+  requestedAt?: string | null;
+  paidAt?: string | null;
+  cloverOrderId?: string | null;
+  /** The ticket lines were added to the Clover order. */
+  linesAdded?: boolean;
+  printed?: boolean;
+  /** Staff name typed on the tablet, for each step. */
+  by?: string | null;
+  error?: string | null;
+  updatedAt: string;
 }
 
 export interface InternalOrder {
@@ -142,6 +170,9 @@ export interface InternalOrder {
   tip?: number;
   /** Cents. Website delivery fee, set by the server (config/delivery.ts), taxed like the food. */
   deliveryFee?: number;
+  paymentMethod?: OrderPaymentMethod;
+  /** Set for Interac e-Transfer orders. */
+  interac?: InteracPayment;
   createdAt: string;
   updatedAt: string;
 }

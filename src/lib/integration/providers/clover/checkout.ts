@@ -235,6 +235,8 @@ export function websiteOrderNote(input: {
   notes: string | null;
   /** The delivery address, or null for a pickup. */
   deliveryAddress?: string | null;
+  /** How it was paid; Clover's page when absent. */
+  paidWith?: string;
 }): string {
   return cut(
     [
@@ -242,7 +244,7 @@ export function websiteOrderNote(input: {
       input.deliveryAddress
         ? `LIVRAISON / DELIVERY: ${input.deliveryAddress}`
         : "POUR EMPORTER / PICKUP",
-      "PAYÉ EN LIGNE / PAID ONLINE (Clover)",
+      `PAYÉ EN LIGNE / PAID ONLINE (${input.paidWith ?? "Clover"})`,
       input.customerName,
       input.phone,
       input.notes,

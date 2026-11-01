@@ -141,3 +141,10 @@ See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.m
 - **Address search** uses free OpenStreetMap services from the browser (Photon suggestions, one Nominatim reverse lookup per "Locate me" tap); maps are Google's key-less embed. No paid key needed.
 - **Google sign-in** must go through takatak.ca (TAKATAK auth) first, then the PPP account, then Clover checkout. Not built in this pass.
 - **Interac e-Transfer**: owner wants it (Québec); provider vs manual flow still to be decided.
+
+## 2026-11-01 — Interac e-Transfer: manual flow first
+
+- Owner gave no provider; built the **manual** flow (owner sends "Request money" from the bank app, taps Request sent / Paid on `/admin/interac`). Guide: `docs/integrations/interac.md`.
+- Same Clover pricing as a card order; the amount is frozen on the order. E-mail required. Kitchen gets nothing until Paid; Paid creates one open Clover order (title `… · INTERAC`, note with the amount) and prints once, under a row lock.
+- Off unless `INTERAC_REQUESTS_ENABLED=true` and the PostgreSQL order store is configured (orders wait hours for money). Texts via Twilio, best effort.
+- Google sign-in through takatak.ca is built on the PPP side (f955887), off until the TAKATAK OAuth client exists (`docs/IDENTITY_INTEGRATION.md`).

@@ -23,7 +23,7 @@ import {
   type VerifiedCloverPayment,
 } from "./postgres-transactions.server";
 import type { CloverFulfillmentBatchResult } from "./clover-fulfillment-worker.server";
-import type { InternalOrder } from "./types";
+import type { InteracPayment, InternalOrder } from "./types";
 
 /** A stored document as the rest of the site reads it: a paid order has no payment page left. */
 function fromStored(document: InternalOrder): InternalOrder {
@@ -231,4 +231,85 @@ export function startCloverFulfillmentLoop(): void {
       });
   }, LOOP_MS);
   loop.unref?.();
+}
+
+/** Interac: the priced, unpaid order now waits for the restaurant's money request. */
+export async function recordInteracPending(order: InternalOrder): Promise<void> {
+  const result = await withPppTenantTransaction(await pppDatabasePool(), pppTenantId(), (client) =>
+    client.query(
+      `UPDATE ppp.orders
+          SET order_status = 'SUBMITTED',
+              order_document = order_document || $2::jsonb,
+              updated_at = now()
+        WHERE id = $1
+          AND tenant_id = current_setting('ppp.tenant_id', true)
+          AND payment_status = 'UNPAID'
+          AND order_status IN ('CREATED', 'SUBMITTED')`,
+      [
+        order.id,
+        JSON.stringify({
+          status: "SUBMITTED",
+          providerStatus: order.providerStatus,
+          orderNumber: order.orderNumber,
+          subtotal: order.subtotal,
+          tax: order.tax,
+          total: order.total,
+          paymentMethod: "INTERAC",
+          interac: order.interac,
+        }),
+      ],
+    ),
+  );
+  if (!result.rowCount) throw new Error("Interac order could not be stored");
+}
+
+export type InteracChange =
+  | {
+      ok: true;
+      interac: InteracPayment;
+      /** Set when the money arrived (PAID + ACCEPTED) or the order is cancelled. */
+      outcome?: "paid" | "cancelled";
+    }
+  | { ok: false; error: string };
+
+export type InteracMutation =
+  { ok: true; order: InternalOrder } | { ok: false; error: string; notFound?: boolean };
+
+/** Change an Interac order under a row lock (SELECT … FOR UPDATE): two taps never send two tickets. */
+export async function mutateStoredInterac(
+  orderId: string,
+  change: (order: InternalOrder) => InteracChange,
+): Promise<InteracMutation> {
+  return withPppTenantTransaction(await pppDatabasePool(), pppTenantId(), async (client) => {
+    const read = await client.query<{ order_document: InternalOrder }>(
+      `SELECT order_document FROM ppp.orders
+        WHERE id = $1 AND tenant_id = current_setting('ppp.tenant_id', true)
+        FOR UPDATE`,
+      [orderId],
+    );
+    const order = read.rows[0]?.order_document;
+    if (!order) return { ok: false, error: "Order not found.", notFound: true };
+    const next = change(order);
+    if (!next.ok) return next;
+    const patch: Partial<InternalOrder> = {
+      interac: next.interac,
+      ...(next.outcome === "paid"
+        ? { paymentStatus: "PAID", status: "ACCEPTED", providerStatus: "interac_paid" }
+        : next.outcome === "cancelled"
+          ? { status: "CANCELLED", providerStatus: "interac_cancelled" }
+          : {}),
+    };
+    await client.query(
+      `UPDATE ppp.orders
+          SET order_document = order_document || $2::jsonb,
+              payment_status = CASE WHEN $3 = 'paid' THEN 'PAID' ELSE payment_status END,
+              order_status = CASE WHEN $3 = 'paid' THEN 'ACCEPTED'
+                                  WHEN $3 = 'cancelled' THEN 'CANCELLED'
+                                  ELSE order_status END,
+              updated_at = now()
+        WHERE id = $1 AND tenant_id = current_setting('ppp.tenant_id', true)`,
+      [orderId, JSON.stringify(patch), next.outcome ?? "none"],
+    );
+    return { ok: true, order: fromStored({ ...order, ...patch } as InternalOrder) };
+  });
 }

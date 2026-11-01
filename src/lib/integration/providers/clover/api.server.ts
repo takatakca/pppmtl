@@ -242,3 +242,45 @@ export function resetCloverCachesForTests(): void {
   inventoryCache = null;
   taxCache = null;
 }
+
+export type CreateOrderResult = { ok: true; orderId: string } | { ok: false; detail: string };
+
+/**
+ * A Clover order with custom lines, for an order paid outside Clover (Interac e-Transfer).
+ * POST /v3/merchants/{mId}/orders (state "open"), then POST …/orders/{id}/bulk_line_items (≤ 100 per call):
+ * https://docs.clover.com/dev/reference/ordercreateorder · https://docs.clover.com/dev/reference/orderbulkcreatelineitems
+ * Needs the REST token's Orders write permission.
+ */
+export async function createCloverOrder(input: {
+  title: string;
+  note: string;
+}): Promise<CreateOrderResult> {
+  const r = await rest("orders", {
+    method: "POST",
+    body: { title: input.title.slice(0, 127), note: input.note.slice(0, 255), state: "open" },
+  });
+  const id = r.json?.["id"];
+  return r.status === 200 && typeof id === "string"
+    ? { ok: true, orderId: id }
+    : { ok: false, detail: `create order HTTP ${r.status}` };
+}
+
+export async function addCloverLineItems(
+  orderId: string,
+  lines: Array<{ name: string; price: number; note?: string }>,
+): Promise<{ ok: true } | { ok: false; detail: string }> {
+  for (let i = 0; i < lines.length; i += 100) {
+    const r = await rest(`orders/${encodeURIComponent(orderId)}/bulk_line_items`, {
+      method: "POST",
+      body: {
+        items: lines.slice(i, i + 100).map((l) => ({
+          name: l.name.slice(0, 127),
+          price: l.price,
+          ...(l.note ? { note: l.note.slice(0, 255) } : {}),
+        })),
+      },
+    });
+    if (r.status !== 200) return { ok: false, detail: `line items HTTP ${r.status}` };
+  }
+  return { ok: true };
+}

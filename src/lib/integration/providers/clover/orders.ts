@@ -19,7 +19,10 @@ import { orderFailure, type OrderResult } from "@/lib/orders/errors";
 import { logIntegrationEvent } from "@/lib/integration/core/logging";
 import type { CloverInventory } from "./catalog";
 import {
+  DELIVERY_LINE_NAME,
+  TIP_LINE_NAME,
   buildHostedCheckoutRequest,
+  lineNote,
   priceCloverCart,
   taxesFor,
   type CheckoutLineInput,
@@ -142,6 +145,93 @@ export const cloverOrderAdapter: OrderAdapter = {
   }),
 };
 
+interface DraftPricing {
+  priced: Extract<ReturnType<typeof priceCloverCart>, { ok: true }>;
+  taxRates: CloverTaxRate[];
+  deliveryFee: number;
+  tip: number;
+  /** Cents: TPS + TVQ on the food and the delivery fee (never on the tip). */
+  tax: number;
+}
+
+/**
+ * Price a draft from Clover the way the customer pays it. Live inventory in production: never charge (or request)
+ * money for prices or availability Clover did not confirm; the committed snapshot is for development/sandbox.
+ */
+async function priceDraft(
+  draft: UniversalOrderDraft,
+  orderId: string,
+): Promise<OrderResult<DraftPricing>> {
+  const { inventory, source } = await inventoryForCheckout();
+  if (cloverEnvironment() === "production" && source !== "live") {
+    return orderFailure("provider_unavailable");
+  }
+  const priced = priceCloverCart(draftLines(draft), inventory, cloverSlotFor);
+  if (!priced.ok) {
+    // Which item or option the Clover menu no longer matches: the snapshot may need a refresh.
+    logIntegrationEvent({
+      provider: "clover",
+      eventType: `checkout.${priced.code}`,
+      status: "rejected",
+      payloadReference: orderId,
+      detail: `${source} menu: ${priced.detail}`,
+    });
+    return orderFailure(priced.code === "item_unavailable" ? "item_unavailable" : "menu_changed");
+  }
+  const taxRates = await taxRatesForCheckout();
+  const { deliveryFee, tip } = extrasFor(draft);
+  return {
+    ok: true,
+    data: {
+      priced,
+      taxRates,
+      deliveryFee,
+      tip,
+      tax: taxesFor(priced.subtotal + deliveryFee, taxRates),
+    },
+  };
+}
+
+export interface InteracPricing {
+  /** What the kitchen ticket shows once paid: one line per cart line, then delivery and tip (cents). */
+  lines: Array<{ name: string; price: number; note?: string }>;
+  subtotal: number;
+  tax: number;
+  /** The amount to request by Interac e-Transfer. */
+  total: number;
+}
+
+/** Interac e-Transfer: the same Clover pricing as a card payment, frozen as ticket lines and an amount. */
+export async function priceForInterac(
+  draft: UniversalOrderDraft,
+  orderId: string,
+): Promise<OrderResult<InteracPricing>> {
+  const pricing = await priceDraft(draft, orderId);
+  if (!pricing.ok) return pricing;
+  const { priced, deliveryFee, tip, tax } = pricing.data;
+  const lines: InteracPricing["lines"] = priced.lines.map((l) => {
+    const note = lineNote(l);
+    return {
+      name: l.quantity > 1 ? `${l.quantity} × ${l.name}` : l.name,
+      price: l.unitPrice * l.quantity,
+      ...(note ? { note } : {}),
+    };
+  });
+  if (deliveryFee > 0) {
+    lines.push({ name: DELIVERY_LINE_NAME, price: deliveryFee, note: draft.deliveryAddress ?? "" });
+  }
+  if (tip > 0) lines.push({ name: TIP_LINE_NAME, price: tip });
+  return {
+    ok: true,
+    data: {
+      lines,
+      subtotal: priced.subtotal,
+      tax,
+      total: priced.subtotal + deliveryFee + tax + tip,
+    },
+  };
+}
+
 function failureFor(reason: string) {
   if (reason === "timeout") return orderFailure<ProviderOrderRef>("timeout");
   if (reason === "not_configured") return orderFailure<ProviderOrderRef>("provider_unavailable");
@@ -159,26 +249,9 @@ export const cloverOrderSubmitAdapter: ProviderOrderAdapter = {
       return orderFailure("missing_address");
     }
     const orderId = context?.orderId ?? `ord_${Date.now().toString(36)}`;
-    const { inventory, source } = await inventoryForCheckout();
-    // A committed catalog snapshot is only suitable for development/sandbox.
-    // Never charge real cards using prices or availability that Clover did not confirm.
-    if (cloverEnvironment() === "production" && source !== "live") {
-      return orderFailure("provider_unavailable");
-    }
-    const priced = priceCloverCart(draftLines(draft), inventory, cloverSlotFor);
-    if (!priced.ok) {
-      // Which item or option the Clover menu no longer matches: the snapshot may need a refresh.
-      logIntegrationEvent({
-        provider: "clover",
-        eventType: `checkout.${priced.code}`,
-        status: "rejected",
-        payloadReference: orderId,
-        detail: `${source} menu: ${priced.detail}`,
-      });
-      return orderFailure(priced.code === "item_unavailable" ? "item_unavailable" : "menu_changed");
-    }
-    const taxRates = await taxRatesForCheckout();
-    const { deliveryFee, tip } = extrasFor(draft);
+    const pricing = await priceDraft(draft, orderId);
+    if (!pricing.ok) return orderFailure(pricing.error.code);
+    const { priced, taxRates, deliveryFee, tip, tax } = pricing.data;
     const site = siteBaseUrl();
     const session = await createHostedCheckout(
       buildHostedCheckoutRequest({
@@ -210,7 +283,6 @@ export const cloverOrderSubmitAdapter: ProviderOrderAdapter = {
       });
       return failureFor(session.reason);
     }
-    const tax = taxesFor(priced.subtotal + deliveryFee, taxRates);
     const ref: ProviderOrderRef = {
       providerOrderId: session.checkoutSessionId,
       orderNumber: websiteOrderNumber(orderId),

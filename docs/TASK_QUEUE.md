@@ -121,3 +121,11 @@ DONE: validate guest order read/history/cancel runtime JSON, limit malformed rec
 ## 2026-10-29 — #6 durable order store wired (1e57831)
 
 Source done and tested on real PostgreSQL (see AGENT_HANDOFF.md). Remaining: owner's first controlled real payment + refund on pppmtl.com, then close #6 with that evidence. #5 (TAKATAK identity/entitlements) still open; the tenant is server config for this single-merchant site.
+
+## 2026-11-01 — Owner switch-on steps (source done, off until set)
+
+1. Coolify server back up, redeploy main, confirm `/healthz` + checkout (tip, delivery) + one real pickup payment and refund.
+2. Interac: env vars + Twilio + Clover tender "Interac e-Transfer" + Orders write on the REST token (`docs/integrations/interac.md`); first order: compare the register total with the amount received.
+3. Sign in with TAKATAK: Google provider in TAKATAK Supabase, Google button on takatak.ca login (takatak-v1), OAuth client, env vars.
+4. Couriers: DoorDash Drive + Uber Direct keys and webhooks (`docs/integrations/couriers.md`).
+5. Confirm the delivery postal codes in `src/config/delivery.ts`.

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Bike, CreditCard, Lock, Phone, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Bike, CreditCard, Landmark, Lock, Phone, ShoppingBag } from "lucide-react";
 import { PPPHeader } from "@/components/layout/ppp-header";
 import { PPPFooter } from "@/components/layout/ppp-footer";
 import { LocationSheet } from "@/components/layout/location-sheet";
@@ -32,6 +32,7 @@ import {
   getCustomerSession,
   type CustomerSessionView,
 } from "@/lib/security/takatak-auth.functions";
+import { getInteracOption } from "@/lib/payments/interac.functions";
 import { cartTotals, selectionLabels } from "@/lib/cart";
 import { menuRepository } from "@/lib/menu-repository";
 import {
@@ -79,15 +80,29 @@ const formatPhone = (v: string) => {
 };
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-type Problem = "delivery_closed" | "address" | "outside" | "name" | "phone" | "email";
+type Problem =
+  "delivery_closed" | "address" | "outside" | "name" | "phone" | "email" | "email_needed";
 
 function CheckoutPage() {
-  const { cart, mode, setMode, lang, t, openLocationSheet, savedAddresses, addSavedAddress } =
-    usePPP();
+  const {
+    cart,
+    mode,
+    setMode,
+    lang,
+    t,
+    openLocationSheet,
+    savedAddresses,
+    addSavedAddress,
+    clearCart,
+  } = usePPP();
   const location = useSelectedLocation();
   const { accountsAvailable, customer } = useCustomerSession();
   const submitOrderFn = useServerFn(placeOrder);
   const sessionFn = useServerFn(getCustomerSession);
+  const interacFn = useServerFn(getInteracOption);
+  // Interac e-Transfer is offered only when the restaurant switched it on.
+  const [interacAvailable, setInteracAvailable] = useState(false);
+  const [payWith, setPayWith] = useState<"card" | "interac">("card");
   // "Sign in with TAKATAK" (Google, e-mail or phone on takatak.ca); null until the server answered.
   const [takatak, setTakatak] = useState<CustomerSessionView | null>(null);
 
@@ -126,6 +141,7 @@ function CheckoutPage() {
     ...(!(name.trim() || customer?.preferredName) ? (["name"] as const) : []),
     ...(phoneDigits(phone).length !== 10 ? (["phone"] as const) : []),
     ...(email.trim() && !EMAIL.test(email.trim()) ? (["email"] as const) : []),
+    ...(payWith === "interac" && !email.trim() ? (["email_needed"] as const) : []),
   ];
   const flagged = (p: Problem) => showMissing && problems.includes(p);
   const problemText = (p: Problem) => {
@@ -162,11 +178,19 @@ function CheckoutPage() {
           "Vérifiez votre adresse courriel.",
           "Revisa tu correo electrónico.",
         );
+      case "email_needed":
+        return errorText(orderError("missing_email"));
     }
   };
   // Follows the fields as they are fixed, so it never asks for something already entered.
   const statusMessage =
     (showMissing && problems[0] ? problemText(problems[0]) : null) ?? orderMessage;
+
+  useEffect(() => {
+    void interacFn()
+      .then((r) => setInteracAvailable(r.available))
+      .catch(() => setInteracAvailable(false));
+  }, [interacFn]);
 
   // Signed in with TAKATAK: fill the details the customer has not typed yet.
   useEffect(() => {
@@ -230,7 +254,7 @@ function CheckoutPage() {
           ? nameRef.current
           : first === "phone"
             ? phoneRef.current
-            : first === "email"
+            : first === "email" || first === "email_needed"
               ? emailRef.current
               : deliveryRef.current;
       target?.scrollIntoView({ block: "center", behavior: "smooth" });
@@ -262,6 +286,7 @@ function CheckoutPage() {
           deliveryAddress: delivery ? deliveryAddressLine(address) : null,
           notes: "",
           tip: totals.tip,
+          paymentMethod: payWith,
         },
       });
 
@@ -288,13 +313,24 @@ function CheckoutPage() {
         window.location.assign(response.order.paymentUrl);
         return;
       }
+      if (response.ok && response.order?.paymentMethod === "INTERAC") {
+        // Placed and priced; the restaurant now sends the Interac request. The receipt shows what to do.
+        track("checkout_interac_placed", { lines: cart.length, mode });
+        clearCart();
+        window.location.assign(`/orders/${encodeURIComponent(response.order.id)}`);
+        return;
+      }
       if (response.ok && response.order) {
         setOrderNumber(response.order.orderNumber ?? response.order.id);
       } else if (response.error) {
         if (
-          ["missing_name", "missing_phone", "missing_address", "outside_delivery_area"].includes(
-            response.error.code,
-          )
+          [
+            "missing_name",
+            "missing_phone",
+            "missing_address",
+            "outside_delivery_area",
+            "missing_email",
+          ].includes(response.error.code)
         ) {
           setShowMissing(true);
         }
@@ -566,9 +602,21 @@ function CheckoutPage() {
                       autoComplete="email"
                       inputMode="email"
                       placeholder={t("you@example.com", "nom@exemple.com", "tu@ejemplo.com")}
-                      aria-invalid={flagged("email") || undefined}
-                      className={cn(fieldClass, flagged("email") && missingClass)}
+                      aria-invalid={flagged("email") || flagged("email_needed") || undefined}
+                      className={cn(
+                        fieldClass,
+                        (flagged("email") || flagged("email_needed")) && missingClass,
+                      )}
                     />
+                    {flagged("email_needed") && (
+                      <span className={hintClass}>
+                        {t(
+                          "Email required for Interac",
+                          "Courriel obligatoire pour Interac",
+                          "Correo obligatorio para Interac",
+                        )}
+                      </span>
+                    )}
                   </label>
                 </div>
                 <p className="mt-3 text-xs text-muted-foreground">
@@ -596,25 +644,62 @@ function CheckoutPage() {
               {/* Payment */}
               <section className={cardClass}>
                 <h2 className={cardTitleClass}>{t("Payment", "Paiement", "Pago")}</h2>
-                <div className="mt-4 flex items-start gap-3 border-2 border-primary px-4 py-4">
-                  <CreditCard className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <div>
-                    <p className="font-semibold">
-                      {t(
-                        "Credit or debit card, or a mobile wallet",
-                        "Carte de crédit ou de débit, ou portefeuille mobile",
-                        "Tarjeta de crédito o débito, o billetera móvil",
-                      )}
-                    </p>
-                    <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Lock className="h-3.5 w-3.5" />
-                      {t(
-                        "On Clover's secure page, then you come back here. PPP never sees your card.",
-                        "Sur la page sécurisée de Clover, puis vous revenez ici. PPP ne voit jamais votre carte.",
-                        "En la página segura de Clover y vuelves aquí. PPP nunca ve tu tarjeta.",
-                      )}
-                    </p>
-                  </div>
+                <div role="radiogroup" className="mt-4 grid gap-3">
+                  {(interacAvailable ? (["card", "interac"] as const) : (["card"] as const)).map(
+                    (m) => {
+                      const selected = payWith === m || !interacAvailable;
+                      return (
+                        <button
+                          key={m}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                          onClick={() => setPayWith(m)}
+                          className={cn(
+                            "flex items-start gap-3 px-4 py-4 text-left focus-ppp",
+                            selected
+                              ? "border-2 border-primary"
+                              : "border border-border hover:border-primary",
+                          )}
+                        >
+                          {m === "card" ? (
+                            <CreditCard className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                          ) : (
+                            <Landmark className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                          )}
+                          <span>
+                            <span className="block font-semibold">
+                              {m === "card"
+                                ? t(
+                                    "Credit or debit card, or a mobile wallet",
+                                    "Carte de crédit ou de débit, ou portefeuille mobile",
+                                    "Tarjeta de crédito o débito, o billetera móvil",
+                                  )
+                                : t(
+                                    "Interac e-Transfer",
+                                    "Virement Interac",
+                                    "Transferencia Interac",
+                                  )}
+                            </span>
+                            <span className="mt-1 flex items-start gap-1.5 text-xs text-muted-foreground">
+                              <Lock className="mt-px h-3.5 w-3.5 shrink-0" />
+                              {m === "card"
+                                ? t(
+                                    "On Clover's secure page, then you come back here. PPP never sees your card.",
+                                    "Sur la page sécurisée de Clover, puis vous revenez ici. PPP ne voit jamais votre carte.",
+                                    "En la página segura de Clover y vuelves aquí. PPP nunca ve tu tarjeta.",
+                                  )
+                                : t(
+                                    "PPP sends you a money request by email for the exact total. Accept it in your bank app; we start your order when it's paid.",
+                                    "PPP vous envoie une demande de paiement par courriel pour le total exact. Acceptez-la dans votre application bancaire; nous préparons la commande dès le paiement reçu.",
+                                    "PPP te envía una solicitud de pago por correo por el total exacto. Acéptala en tu app bancaria; preparamos tu pedido al recibir el pago.",
+                                  )}
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    },
+                  )}
                 </div>
               </section>
             </div>

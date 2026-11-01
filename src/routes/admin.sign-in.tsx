@@ -13,7 +13,7 @@ export const Route = createFileRoute("/admin/sign-in")({
 });
 
 /** Where to go after sign-in: only known internal pages (?next=/admin/dispatch for the kitchen tablet). */
-const ADMIN_PAGES = ["/admin/orders", "/admin/dispatch", "/admin/integrations"];
+const ADMIN_PAGES = ["/admin/orders", "/admin/dispatch", "/admin/interac", "/admin/integrations"];
 function nextAdminPage(): string {
   const next = new URLSearchParams(window.location.search).get("next") ?? "";
   return ADMIN_PAGES.includes(next) ? next : "/admin/orders";

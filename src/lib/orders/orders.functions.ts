@@ -36,6 +36,7 @@ export interface PlaceOrderInput {
   notes: string;
   /** Cents; checked on the server (lib/pricing.ts). */
   tip?: number;
+  paymentMethod?: "card" | "interac";
 }
 
 /** Customer-safe view of an order: no provider ids, no internal codes. */
@@ -58,6 +59,9 @@ export interface OrderView {
   paymentStatus: InternalOrder["paymentStatus"];
   /** Clover's payment page while the order waits for payment; null otherwise. */
   paymentUrl: string | null;
+  paymentMethod: "CARD" | "INTERAC";
+  /** Interac e-Transfer: where the money request stands, and the amount (cents). */
+  interac: { status: string; amount: number } | null;
   items: Array<{
     productId: string;
     name: string;
@@ -92,6 +96,8 @@ function toView(order: InternalOrder): OrderView {
     notes: order.notes,
     paymentStatus: order.paymentStatus,
     paymentUrl: order.paymentStatus === "UNPAID" ? (order.paymentUrl ?? null) : null,
+    paymentMethod: order.paymentMethod ?? "CARD",
+    interac: order.interac ? { status: order.interac.status, amount: order.interac.amount } : null,
     items: order.items.map((i) => ({
       productId: i.productId,
       name: i.name,

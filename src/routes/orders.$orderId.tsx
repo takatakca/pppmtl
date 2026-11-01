@@ -56,10 +56,11 @@ function OrderReceiptPage() {
           if (!alive) return;
           if (result.order) {
             setOrder(result.order);
-            // Clover confirms the payment by webhook a few seconds after the customer comes back.
-            if (result.order.paymentStatus === "UNPAID" && tries < 30) {
+            // Clover confirms a card payment by webhook within seconds; an Interac e-Transfer can take a while.
+            const interac = result.order.paymentMethod === "INTERAC";
+            if (result.order.paymentStatus === "UNPAID" && tries < (interac ? 240 : 30)) {
               tries += 1;
-              timer = setTimeout(load, 4000);
+              timer = setTimeout(load, interac ? 15_000 : 4000);
             }
           } else setError(true);
         })
@@ -176,14 +177,51 @@ function OrderReceiptPage() {
           </p>
           {order.paymentStatus === "PAID" && (
             <p className="mt-2 text-sm text-primary">
-              {t(
-                "Paid online with Clover",
-                "Payée en ligne avec Clover",
-                "Pagado en línea con Clover",
-              )}
+              {order.paymentMethod === "INTERAC"
+                ? t(
+                    "Paid by Interac e-Transfer",
+                    "Payée par virement Interac",
+                    "Pagado con transferencia Interac",
+                  )
+                : t(
+                    "Paid online with Clover",
+                    "Payée en ligne avec Clover",
+                    "Pagado en línea con Clover",
+                  )}
             </p>
           )}
-          {order.paymentStatus === "UNPAID" && (
+          {order.paymentStatus === "UNPAID" && order.interac && order.status !== "CANCELLED" && (
+            <div className="mt-4 border-2 border-primary p-4 text-sm">
+              <p className="font-display text-xl uppercase leading-none">
+                {t(
+                  `Interac e-Transfer: $${(order.interac.amount / 100).toFixed(2)}`,
+                  `Virement Interac : ${(order.interac.amount / 100).toFixed(2).replace(".", ",")} $`,
+                  `Transferencia Interac: $${(order.interac.amount / 100).toFixed(2)}`,
+                )}
+              </p>
+              <p className="mt-2">
+                {order.interac.status === "requested"
+                  ? t(
+                      "PPP Pizzeria sent you the request. Accept it in your bank app or from the email.",
+                      "PPP Pizzeria vous a envoyé la demande. Acceptez-la dans votre application bancaire ou depuis le courriel.",
+                      "PPP Pizzeria te envió la solicitud. Acéptala en tu app bancaria o desde el correo.",
+                    )
+                  : t(
+                      "PPP Pizzeria is sending you an Interac e-Transfer request by email. Accept it in your bank app.",
+                      "PPP Pizzeria vous envoie une demande de virement Interac par courriel. Acceptez-la dans votre application bancaire.",
+                      "PPP Pizzeria te envía una solicitud de transferencia Interac por correo. Acéptala en tu app bancaria.",
+                    )}
+              </p>
+              <p className="mt-1 text-muted-foreground">
+                {t(
+                  "We start your order as soon as it is paid. This page updates by itself.",
+                  "Nous préparons votre commande dès le paiement reçu. Cette page se met à jour toute seule.",
+                  "Preparamos tu pedido en cuanto se pague. Esta página se actualiza sola.",
+                )}
+              </p>
+            </div>
+          )}
+          {order.paymentStatus === "UNPAID" && !order.interac && (
             <p className="mt-2 text-sm text-muted-foreground">
               {paidReturn
                 ? t(

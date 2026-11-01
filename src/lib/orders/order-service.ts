@@ -22,6 +22,7 @@ import { logIntegrationEvent } from "@/lib/integration/core/logging";
 import { cloverCheckoutConfigured } from "@/lib/integration/providers/clover/config.server";
 import { DELIVERY_FEE_CENTS, deliversTo, postalCodeOf, websiteDeliveryAt } from "@/config/delivery";
 import { isValidTip } from "@/lib/pricing";
+import { interacRequestsEnabled } from "@/lib/payments/interac-config.server";
 import { durableOrderStoreConfigured } from "./database.server";
 import type { ProviderOrderAdapter } from "./provider-order-adapter";
 import { orderError, orderFailure, type OrderErrorCode, type OrderResult } from "./errors";
@@ -63,6 +64,8 @@ export interface CheckoutRequest {
   notes: string;
   /** Cents. The server checks it; it is never taxed. */
   tip?: number;
+  /** Card on Clover's page (default) or an Interac e-Transfer request. */
+  paymentMethod?: "card" | "interac";
 }
 
 const toCents = (dollars: number | null): number | null =>
@@ -91,7 +94,10 @@ function hasCheckoutPayloadShape(value: unknown): value is CheckoutRequest {
     !limitedText(input.customer.email, 254) ||
     !limitedText(input.deliveryAddress, 500) ||
     !limitedText(input.notes, 480) ||
-    (input.tip != null && !isValidTip(input.tip))
+    (input.tip != null && !isValidTip(input.tip)) ||
+    (input.paymentMethod != null &&
+      input.paymentMethod !== "card" &&
+      input.paymentMethod !== "interac")
   ) {
     return false;
   }
@@ -200,6 +206,7 @@ function toDraft(request: CheckoutRequest, items: OrderItem[]): OrderDraft {
     deliveryAddress: request.orderType === "DELIVERY" ? request.deliveryAddress : null,
     notes: (request.notes ?? "").slice(0, 480),
     tip: request.tip ?? 0,
+    paymentMethod: request.paymentMethod === "interac" ? "INTERAC" : "CARD",
   };
 }
 
@@ -243,6 +250,14 @@ export function validateOrder(request: CheckoutRequest): ValidationReport {
         ? deliveryCheck(request)
         : null;
   if (delivery && !errors.some((e) => e.code === delivery)) errors.push(orderError(delivery));
+  // Interac: switched on, and an e-mail to send the request to.
+  if (request.paymentMethod === "interac") {
+    if (route.provider !== "clover" || !interacRequestsEnabled()) {
+      errors.push(orderError("interac_unavailable"));
+    } else if (!request.customer.email?.trim()) {
+      errors.push(orderError("missing_email"));
+    }
+  }
   return { valid: errors.length === 0, errors };
 }
 
@@ -290,6 +305,7 @@ export function createOrder(
     paymentStatus: route.provider === "clover" ? "UNPAID" : "PAY_AT_RESTAURANT",
     tip: draft.tip ?? 0,
     deliveryFee: request.orderType === "DELIVERY" ? DELIVERY_FEE_CENTS : 0,
+    paymentMethod: draft.paymentMethod ?? "CARD",
     status: "CREATED",
     providerStatus: null,
     providerOrderId: null,
@@ -384,6 +400,8 @@ export async function submitOrder(orderId: string): Promise<OrderResult<Internal
     }
   }
 
+  if (order.paymentMethod === "INTERAC") return submitInteracOrder(order, durable);
+
   const result = await adapter.createOrder(
     orderToUniversalDraft(order),
     providerLocationId,
@@ -412,6 +430,45 @@ export async function submitOrder(orderId: string): Promise<OrderResult<Internal
       return fail(updated, "provider_unavailable");
     }
   }
+  return { ok: true, data: updated };
+}
+
+/**
+ * Interac e-Transfer: no payment page. The order is priced from Clover now (the amount to request), stored, and the
+ * restaurant is alerted; it reaches Clover and the kitchen when staff mark it paid (payments/interac.server.ts).
+ */
+async function submitInteracOrder(
+  order: InternalOrder,
+  durable: boolean,
+): Promise<OrderResult<InternalOrder>> {
+  const { priceForInterac, websiteOrderNumber } =
+    await import("@/lib/integration/providers/clover/orders");
+  const priced = await priceForInterac(orderToUniversalDraft(order), order.id);
+  if (!priced.ok) return fail(order, priced.error.code);
+  const updated = updateOrder(order.id, {
+    status: "SUBMITTED",
+    providerStatus: "awaiting_interac",
+    orderNumber: websiteOrderNumber(order.id),
+    subtotal: priced.data.subtotal,
+    tax: priced.data.tax,
+    total: priced.data.total,
+    interac: {
+      status: "awaiting_request",
+      amount: priced.data.total,
+      lines: priced.data.lines,
+      updatedAt: new Date().toISOString(),
+    },
+  });
+  if (!updated) return orderFailure("order_not_found");
+  if (durable) {
+    try {
+      await (await durableOrders()).recordInteracPending(updated);
+    } catch {
+      return fail(updated, "provider_unavailable");
+    }
+  }
+  const { announceInteracOrder } = await import("@/lib/payments/interac.server");
+  await announceInteracOrder(updated).catch(() => undefined);
   return { ok: true, data: updated };
 }
 

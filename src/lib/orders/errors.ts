@@ -14,6 +14,8 @@ export type OrderErrorCode =
   | "missing_phone"
   | "missing_address"
   | "outside_delivery_area"
+  | "missing_email"
+  | "interac_unavailable"
   | "unsupported_order_type"
   | "item_unavailable"
   | "menu_changed"
@@ -66,6 +68,16 @@ const MESSAGES: Record<OrderErrorCode, Message> = {
     en: "Add a delivery address.",
     fr: "Ajoutez une adresse de livraison.",
     es: "Agrega una dirección de entrega.",
+  },
+  missing_email: {
+    en: "Add your email: the Interac e-Transfer request is sent there.",
+    fr: "Ajoutez votre courriel : la demande de virement Interac y est envoyée.",
+    es: "Agrega tu correo: la solicitud de transferencia Interac se envía ahí.",
+  },
+  interac_unavailable: {
+    en: "Interac e-Transfer is not available right now. Pay by card.",
+    fr: "Le virement Interac n'est pas disponible pour le moment. Payez par carte.",
+    es: "La transferencia Interac no está disponible ahora. Paga con tarjeta.",
   },
   outside_delivery_area: {
     en: "We don't deliver to this address yet. Choose pickup, or order delivery on Uber Eats, DoorDash or Skip.",
