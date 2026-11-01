@@ -17,6 +17,7 @@ import {
   attachCloverCheckoutSession,
   persistGuestOrderOnce,
   persistVerifiedCloverPayment,
+  persistVerifiedCustomerOrderOnce,
   withPppTenantTransaction,
   type RecordedPayment,
   type VerifiedCloverPayment,
@@ -39,7 +40,31 @@ function fromStored(document: InternalOrder): InternalOrder {
 
 /** Insert once. Returns the stored order: a different id means this cart was already ordered. */
 export async function persistNewOrder(order: InternalOrder): Promise<InternalOrder> {
-  return fromStored(await persistGuestOrderOnce(await pppDatabasePool(), pppTenantId(), order));
+  const pool = await pppDatabasePool();
+  // A non-guest order only exists when placeOrder took the TAKATAK id from the verified session.
+  const ref = order.customer.isGuest ? null : order.customer.takatakCustomerId;
+  return fromStored(
+    ref
+      ? await persistVerifiedCustomerOrderOnce(pool, pppTenantId(), order, ref)
+      : await persistGuestOrderOnce(pool, pppTenantId(), order),
+  );
+}
+
+/** A signed-in TAKATAK customer's orders (customer_ref), newest first. */
+export async function listDurableOrdersForCustomer(
+  customerRef: string,
+  limit = 20,
+): Promise<InternalOrder[]> {
+  const result = await withPppTenantTransaction(await pppDatabasePool(), pppTenantId(), (client) =>
+    client.query<{ order_document: InternalOrder }>(
+      `SELECT order_document FROM ppp.orders
+        WHERE tenant_id = current_setting('ppp.tenant_id', true) AND customer_ref = $1
+        ORDER BY created_at DESC
+        LIMIT $2`,
+      [customerRef, limit],
+    ),
+  );
+  return result.rows.map((row) => fromStored(row.order_document));
 }
 
 /** Link the Clover session (and Clover's prices) to the stored order before the customer is redirected. */

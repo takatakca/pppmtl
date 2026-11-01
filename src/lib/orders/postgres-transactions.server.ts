@@ -123,6 +123,45 @@ export interface CheckoutSessionDetails {
   providerStatus: string | null;
 }
 
+/**
+ * Same as persistGuestOrderOnce for a customer signed in with TAKATAK: `verifiedCustomerRef` is the TAKATAK user id
+ * from the server-verified session and becomes ppp.orders.customer_ref (their order history on any device).
+ */
+export async function persistVerifiedCustomerOrderOnce(
+  pool: PppSqlPool,
+  verifiedServerTenantId: string,
+  order: InternalOrder,
+  verifiedCustomerRef: string,
+): Promise<InternalOrder> {
+  if (
+    order.customer.isGuest ||
+    order.customerId ||
+    order.customer.customerId ||
+    !verifiedCustomerRef ||
+    order.customer.takatakCustomerId !== verifiedCustomerRef
+  ) {
+    throw new Error("Order identity does not match the verified TAKATAK customer");
+  }
+  return withPppTenantTransaction(pool, verifiedServerTenantId, async (client) => {
+    const result = await client.query<PersistedPppOrder>(
+      "SELECT id, order_document FROM ppp.create_order_once($1,$2,$3,$4,$5::jsonb,$6::text)",
+      [
+        order.id,
+        order.locationId,
+        order.provider,
+        order.idempotencyKey,
+        JSON.stringify(order),
+        verifiedCustomerRef,
+      ],
+    );
+    const persisted = result.rows[0];
+    if (!persisted || persisted.id !== persisted.order_document.id) {
+      throw new Error("Durable order write did not return a matching document");
+    }
+    return persisted.order_document;
+  });
+}
+
 /** A checkout session must be durably associated with the pending order before redirect. */
 export async function attachCloverCheckoutSession(
   pool: PppSqlPool,

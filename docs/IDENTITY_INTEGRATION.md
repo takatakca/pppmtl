@@ -26,3 +26,14 @@ Verified from the currently accessible repositories on 2026-10-15.
 ## Cutover
 
 Enable authenticated PPPMTL accounts only when TAKATAK's scoped API, server-side authorization and tenant-safe durable order storage are deployed and tested. Retire the temporary admin access token once the authorized TAKATAK administrator roles are available. **There is no live TAKATAK SSO connection in PPPMTL at this handoff.**
+
+## 2026-10-31 — "Sign in with TAKATAK" built on the PPP side (off until configured)
+
+Owner decision: the customer goes to takatak.ca first (TAKATAK auth, Google there), then the account exists on pppmtl.com, then Clover checkout.
+
+- TAKATAK's Supabase Auth (project `pcjfahhlozsseqqevimi`) is already an OAuth 2.1 / OIDC provider (discovery at `/auth/v1/.well-known/openid-configuration`, scopes openid email profile phone, PKCE S256) with its consent page at takatak.ca/oauth/consent.
+- PPP is a confidential client (`src/lib/security/takatak-auth.server.ts`): `/auth/takatak/start` (state, nonce, PKCE S256, signed short-lived flow cookie) → TAKATAK authorize → `/auth/takatak/callback` (code exchange with client_secret_basic, ID token verified against TAKATAK's JWKS: issuer, audience, expiry, nonce; userinfo fallback for contact claims) → signed HttpOnly `ppp_customer` cookie (TAKATAK `sub`, name, e-mail, phone; 30 days). `/auth/signout` clears it.
+- `placeOrder` takes the TAKATAK id ONLY from that cookie (`verifiedCheckoutCustomer`); browser-claimed ids are still dropped. Signed-in orders are stored with `ppp.orders.customer_ref = sub`; "My orders" and the order page also open for that customer on any device.
+- Tests: `src/lib/security/__tests__/takatak-auth.test.ts` (forged key, wrong audience, replayed nonce, wrong state, cancelled consent), real-PostgreSQL customer_ref test, and a browser round trip against a stand-in provider.
+
+Owner steps to switch it on: (1) TAKATAK Supabase → Authentication → Sign In / Providers → Google (Google Cloud OAuth client); (2) a "Continue with Google" button on takatak.ca's login page (repo takatakca/takatak-v1 — today it offers e-mail and SMS only); (3) Authentication → OAuth Server → add client, redirect `https://pppmtl.com/auth/takatak/callback`; (4) Coolify: `TAKATAK_OAUTH_CLIENT_ID`, `TAKATAK_OAUTH_CLIENT_SECRET`, redeploy.

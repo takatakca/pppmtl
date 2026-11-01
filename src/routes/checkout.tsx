@@ -28,9 +28,12 @@ import { TipPicker } from "@/components/checkout/tip-picker";
 import { usePPP, useSelectedLocation } from "@/context/ppp-store";
 import { placeOrder } from "@/lib/orders/orders.functions";
 import { useCustomerSession } from "@/lib/customer/session";
+import {
+  getCustomerSession,
+  type CustomerSessionView,
+} from "@/lib/security/takatak-auth.functions";
 import { cartTotals, selectionLabels } from "@/lib/cart";
 import { menuRepository } from "@/lib/menu-repository";
-import { GOOGLE_SIGN_IN_ENABLED } from "@/config/auth-flags";
 import {
   DELIVERY_FEE_CENTS,
   deliveryAddressLine,
@@ -84,6 +87,9 @@ function CheckoutPage() {
   const location = useSelectedLocation();
   const { accountsAvailable, customer } = useCustomerSession();
   const submitOrderFn = useServerFn(placeOrder);
+  const sessionFn = useServerFn(getCustomerSession);
+  // "Sign in with TAKATAK" (Google, e-mail or phone on takatak.ca); null until the server answered.
+  const [takatak, setTakatak] = useState<CustomerSessionView | null>(null);
 
   const [name, setName] = useState(customer?.preferredName ?? "");
   const [phone, setPhone] = useState("");
@@ -162,8 +168,32 @@ function CheckoutPage() {
   const statusMessage =
     (showMissing && problems[0] ? problemText(problems[0]) : null) ?? orderMessage;
 
-  // Back from Clover's payment page without paying: the cart is still here.
+  // Signed in with TAKATAK: fill the details the customer has not typed yet.
   useEffect(() => {
+    void sessionFn()
+      .then((view) => {
+        setTakatak(view);
+        const who = view.customer;
+        if (!who) return;
+        setName((v) => v || who.name || "");
+        setEmail((v) => v || who.email || "");
+        setPhone((v) => v || (who.phone ? formatPhone(who.phone) : ""));
+      })
+      .catch(() => setTakatak(null));
+  }, [sessionFn]);
+
+  // Back from Clover's payment page without paying (the cart is still here), or back from takatak.ca.
+  useEffect(() => {
+    const signin = new URLSearchParams(window.location.search).get("signin");
+    if (signin === "failed" || signin === "unavailable") {
+      setOrderMessage(
+        t(
+          "TAKATAK sign-in did not finish. You can order as a guest.",
+          "La connexion TAKATAK n'a pas abouti. Vous pouvez commander sans compte.",
+          "El inicio de sesión TAKATAK no terminó. Puedes pedir como invitado.",
+        ),
+      );
+    }
     const payment = new URLSearchParams(window.location.search).get("payment");
     if (payment === "cancelled") {
       setOrderMessage(
@@ -442,11 +472,40 @@ function CheckoutPage() {
                     </Link>
                   )}
                 </div>
-                {GOOGLE_SIGN_IN_ENABLED && !customer && (
+                {takatak?.customer ? (
+                  <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                    <span>
+                      {t(
+                        "Signed in with TAKATAK",
+                        "Connecté avec TAKATAK",
+                        "Conectado con TAKATAK",
+                      )}
+                      {" · "}
+                      <span className="font-semibold">
+                        {takatak.customer.name || takatak.customer.email}
+                      </span>
+                    </span>
+                    <a
+                      href="/auth/signout?next=/checkout"
+                      className="text-xs uppercase tracking-widest text-muted-foreground underline-offset-4 hover:underline focus-ppp"
+                    >
+                      {t("Sign out", "Se déconnecter", "Salir")}
+                    </a>
+                  </p>
+                ) : takatak?.available && !customer ? (
                   <div className="mt-4">
-                    <GoogleButton />
+                    <GoogleButton
+                      onClick={() => window.location.assign("/auth/takatak/start?next=/checkout")}
+                    />
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {t(
+                        "Secure sign-in on takatak.ca. Your details and orders follow you. Or just order as a guest below.",
+                        "Connexion sécurisée sur takatak.ca. Vos coordonnées et commandes vous suivent. Ou commandez sans compte ci-dessous.",
+                        "Inicio de sesión seguro en takatak.ca. Tus datos y pedidos te siguen. O pide como invitado abajo.",
+                      )}
+                    </p>
                   </div>
-                )}
+                ) : null}
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <label className="block">
                     <span className={labelClass}>{t("Name", "Nom", "Nombre")}</span>

@@ -501,6 +501,18 @@ export async function getOrderById(orderId: string): Promise<InternalOrder | nul
   return readOrder(orderId);
 }
 
+/** A signed-in TAKATAK customer's orders: the stored ones (any device), else this process's copies. */
+export async function listOrdersOfTakatakCustomer(takatakSub: string): Promise<InternalOrder[]> {
+  if (durableOrderStoreConfigured()) {
+    try {
+      return await (await durableOrders()).listDurableOrdersForCustomer(takatakSub);
+    } catch {
+      // Database briefly unreachable: fall back to this process's copies.
+    }
+  }
+  return listAllOrders(500).filter((o) => o.customer.takatakCustomerId === takatakSub);
+}
+
 export function listCustomerOrders(customerId: string | null, phone: string | null) {
   return listOrdersForCustomer(customerId, phone);
 }

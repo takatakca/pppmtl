@@ -135,12 +135,18 @@ export const placeOrder = createServerFn({ method: "POST" })
       return { ok: false, order: null, error: validation.errors[0] ?? orderError("menu_changed") };
     }
 
-    const { unverifiedCheckoutCustomer } = await import("@/lib/security/guest-identity");
-    const guestRequest: PlaceOrderInput = {
+    const { unverifiedCheckoutCustomer, verifiedCheckoutCustomer } =
+      await import("@/lib/security/guest-identity");
+    // The TAKATAK id comes only from the signed sign-in cookie; anything the browser claims is dropped.
+    const { currentTakatakCustomer } = await import("@/lib/security/takatak-auth.server");
+    const signedIn = currentTakatakCustomer();
+    const request: PlaceOrderInput = {
       ...data,
-      customer: unverifiedCheckoutCustomer(data.customer),
+      customer: signedIn
+        ? verifiedCheckoutCustomer(data.customer, signedIn.sub)
+        : unverifiedCheckoutCustomer(data.customer),
     };
-    const created = createOrder(guestRequest, checkoutBrowserNonce());
+    const created = createOrder(request, checkoutBrowserNonce());
     if (!created.ok) return { ok: false, order: null, error: created.error };
 
     // The cookie is issued before redirecting off-domain to Clover, even if the provider errors.
@@ -178,11 +184,19 @@ export const listMyOrders = createServerFn({ method: "POST" })
     if (!isGuestOrderListInput(data)) return { orders: [] };
     // A phone is only an additional filter. It NEVER authorizes an order by itself.
     const { readableOrderIds } = await import("@/lib/security/order-access.server");
-    const { getOrderById: findOrder } = await import("./order-service");
+    const { getOrderById: findOrder, listOrdersOfTakatakCustomer } =
+      await import("./order-service");
+    const { currentTakatakCustomer } = await import("@/lib/security/takatak-auth.server");
     const phone = data.phone?.replace(/\D/g, "") ?? "";
-    const orders = (await Promise.all(readableOrderIds().map(findOrder)))
-      .filter((o): o is InternalOrder => o !== null)
-      .filter((o) => !phone || (o.customer.phone ?? "").replace(/\D/g, "") === phone);
+    // This browser's receipts, plus every order of the signed-in TAKATAK customer (any device).
+    const signedIn = currentTakatakCustomer();
+    const byId = new Map<string, InternalOrder>();
+    for (const o of await Promise.all(readableOrderIds().map(findOrder))) if (o) byId.set(o.id, o);
+    if (signedIn)
+      for (const o of await listOrdersOfTakatakCustomer(signedIn.sub)) byId.set(o.id, o);
+    const orders = [...byId.values()].filter(
+      (o) => !phone || (o.customer.phone ?? "").replace(/\D/g, "") === phone,
+    );
     return { orders: orders.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(toView) };
   });
 
@@ -191,10 +205,19 @@ export const getOrderById = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<{ order: OrderView | null }> => {
     if (!isGuestOrderReadInput(data)) return { order: null };
     const { canReadOrder } = await import("@/lib/security/order-access.server");
-    if (!canReadOrder(data.orderId)) return { order: null };
+    const { currentTakatakCustomer } = await import("@/lib/security/takatak-auth.server");
+    const signedIn = currentTakatakCustomer();
+    if (!canReadOrder(data.orderId) && !signedIn) return { order: null };
     const { getOrderById: findOrder } = await import("./order-service");
     const order = await findOrder(data.orderId);
-    return { order: order ? toView(order) : null };
+    // Without this browser's receipt, only the TAKATAK customer who placed it may read it.
+    if (
+      !order ||
+      (!canReadOrder(data.orderId) && order.customer.takatakCustomerId !== signedIn?.sub)
+    ) {
+      return { order: null };
+    }
+    return { order: toView(order) };
   });
 
 export interface AdminOrderRow {

@@ -14,3 +14,16 @@ export function unverifiedCheckoutCustomer(input: OrderCustomer): OrderCustomer 
     isGuest: true,
   };
 }
+
+/**
+ * A customer signed in with TAKATAK: the TAKATAK user id comes ONLY from the server-verified session
+ * (takatak-auth.server.ts), never from the browser. Contact fields stay what the customer typed.
+ */
+export function verifiedCheckoutCustomer(input: OrderCustomer, takatakSub: string): OrderCustomer {
+  return {
+    ...input,
+    customerId: null,
+    takatakCustomerId: takatakSub,
+    isGuest: false,
+  };
+}

@@ -13,7 +13,13 @@ import { defaultSelections, toggleChoice } from "@/lib/modifiers";
 import { closePppDatabaseForTests, pppDatabasePool, pppTenantId } from "../database.server";
 import { loadDurableOrder, runCloverFulfillment } from "../durable-orders.server";
 import { resetIdempotencyForTests } from "../idempotency";
-import { createOrder, getOrderById, submitOrder } from "../order-service";
+import {
+  createOrder,
+  getOrderById,
+  listOrdersOfTakatakCustomer,
+  submitOrder,
+} from "../order-service";
+import { verifiedCheckoutCustomer } from "@/lib/security/guest-identity";
 import { resetOrderStoreForTests } from "../order-store.server";
 import { withPppTenantTransaction } from "../postgres-transactions.server";
 
@@ -230,6 +236,33 @@ describe.skipIf(!databaseUrl)("durable Clover orders (real PostgreSQL)", () => {
     expect(await runCloverFulfillment()).toMatchObject({ done: 2, manualReview: 0 });
     expect(printed).toBe(1);
     expect(await runCloverFulfillment()).toMatchObject({ claimed: 0 });
+  });
+
+  it("stores a signed-in TAKATAK customer's order under their account, visible only to them", async () => {
+    const sub = `takatak-${randomUUID()}`;
+    const created = createOrder({
+      locationId: "loc-ndg-somerled",
+      orderType: "PICKUP",
+      lines: [{ itemId: PITA, quantity: 1, notes: "", selections: pitaCombo() }],
+      customer: verifiedCheckoutCustomer(
+        {
+          customerId: null,
+          takatakCustomerId: null,
+          name: "Marie Tremblay",
+          phone: "5145550100",
+          email: "marie@example.com",
+          isGuest: true,
+        },
+        sub,
+      ),
+      deliveryAddress: null,
+      notes: "",
+    });
+    if (!created.ok) throw new Error(created.error.code);
+    expect(await submitOrder(created.data.id)).toMatchObject({ ok: true });
+    restart();
+    expect((await listOrdersOfTakatakCustomer(sub)).map((o) => o.id)).toEqual([created.data.id]);
+    expect(await listOrdersOfTakatakCustomer(`takatak-${randomUUID()}`)).toEqual([]);
   });
 
   it("ignores a signed payment for a checkout this site never opened", async () => {
