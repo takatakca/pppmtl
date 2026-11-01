@@ -1,5 +1,29 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-11-01 — Interac e-Transfer (manual) + Sign in with TAKATAK, both OFF until configured (Claude, main b57381b)
+
+**Interac (b57381b):** checkout offers "Interac e-Transfer" only when `INTERAC_REQUESTS_ENABLED=true` AND the
+PostgreSQL store is set (or Clover sandbox). E-mail required. `submitInteracOrder` (order-service.ts) prices via
+`priceForInterac` (same Clover pricing as card), stores the order unpaid with `interac {status, amount, lines}`,
+texts `INTERAC_ALERT_PHONE` + the customer (Twilio, `src/lib/notifications/sms.server.ts`). Tablet
+`/admin/interac` (requireAdmin): Request sent → Paid (row-locked `mutateStoredInterac`; one open Clover order via
+`createCloverOrder` + `addCloverLineItems`, title `… · INTERAC`, one print) → `sent_to_kitchen`, or `kitchen_failed`
+with "Send to kitchen again" (resumes from the failed step). Cancel only before Paid. Owner guide:
+`docs/integrations/interac.md`.
+
+**Sign in with TAKATAK (f955887):** Continue with Google → takatak.ca (OAuth 2.1/OIDC, PKCE + nonce, JWKS-verified)
+→ signed HttpOnly session → prefilled checkout; orders keyed by TAKATAK `sub`. Off until `TAKATAK_OAUTH_CLIENT_ID` /
+`SECRET` exist (`docs/IDENTITY_INTEGRATION.md`).
+
+**Verified:** 248 tests incl. real PostgreSQL as `ppp_app` (two simultaneous Paid → one Clover order); build,
+typecheck, eslint 0 errors; built server + Chromium: e-mail required, order page shows the amount, tablet shows
+"Paid · NOT in the kitchen" + retry (Clover 401 with fake keys, expected). **NOT verified:** real Twilio text, real
+Clover order/lines/print via the REST token, how the register taxes these custom lines, anything live — Coolify has
+not deployed since 22206ee (owner: server down).
+
+**Next:** owner's server back → redeploy main → `/healthz` + checkout; then the switch-on list in
+`docs/TASK_QUEUE.md` (2026-11-01).
+
 ## 2026-10-31 — Courier dispatch for website delivery orders (Claude, branch `claude/courier-dispatch`, NOT on main)
 
 Restaurant-side "Find a driver" on the kitchen tablet: `/admin/dispatch` (admin session). For a PAID website
