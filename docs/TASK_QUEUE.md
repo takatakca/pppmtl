@@ -129,3 +129,7 @@ Source done and tested on real PostgreSQL (see AGENT_HANDOFF.md). Remaining: own
 3. Sign in with TAKATAK: Google provider in TAKATAK Supabase, Google button on takatak.ca login (takatak-v1), OAuth client, env vars.
 4. Couriers: DoorDash Drive + Uber Direct keys and webhooks (`docs/integrations/couriers.md`).
 5. Confirm the delivery postal codes in `src/config/delivery.ts`.
+
+## 2026-11-02 — BMO keys (owner)
+
+Follow `docs/integrations/interac.md` › Monday checklist: BMO app redirect + push URL + our public key, Coolify `BMO_*` variables, migration 0004 + grant, Connect BMO on `/admin/interac`, one sandbox request. Then: choose the ID-verification provider for cash (`docs/integrations/cash-verified-accounts.md`).

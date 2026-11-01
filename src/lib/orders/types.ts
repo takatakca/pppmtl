@@ -132,6 +132,23 @@ export interface InteracPayment {
   by?: string | null;
   error?: string | null;
   updatedAt: string;
+  /** The money request sent automatically through BMO Instant Payments (src/lib/payments/bmo). */
+  bmo?: BmoMoneyRequest;
+}
+
+export interface BmoMoneyRequest {
+  /** Our reference, sent as the ISO end-to-end id and returned in every BMO status. */
+  endToEndId: string;
+  messageId: string;
+  /** "sending" while the call runs, then BMO's ISO status (ACTC, ACSP, ACSC, ACCC, RJCT, CANC…) or "error". */
+  status: string;
+  sentAt: string;
+  updatedAt: string;
+  reason?: string | null;
+  /** Interac's payment page for this request, when BMO returns it. */
+  gatewayUrl?: string | null;
+  reference?: string | null;
+  error?: string | null;
 }
 
 export interface InternalOrder {

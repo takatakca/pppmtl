@@ -16,7 +16,7 @@ export const getInteracOption = createServerFn({ method: "GET" }).handler(
 );
 
 const ORDER_ID = /^ord_[A-Za-z0-9_-]{5,80}$/;
-type Action = "requested" | "paid" | "retry" | "cancel";
+type Action = "requested" | "paid" | "retry" | "cancel" | "bmo";
 
 function parse(input: unknown): { orderId: string; action: Action; by: string } | null {
   if (!input || typeof input !== "object" || Array.isArray(input)) return null;
@@ -27,17 +27,38 @@ function parse(input: unknown): { orderId: string; action: Action; by: string } 
     (o["action"] === "requested" ||
       o["action"] === "paid" ||
       o["action"] === "retry" ||
-      o["action"] === "cancel")
+      o["action"] === "cancel" ||
+      o["action"] === "bmo")
     ? { orderId: o["orderId"], action: o["action"], by: by || "staff" }
     : null;
 }
 
+export interface BmoBoardStatus {
+  /** All BMO settings are present. */
+  configured: boolean;
+  /** The restaurant authorized PPP at BMO and the token is still valid. */
+  connected: boolean;
+  /** Setting names still missing (names only, never values). */
+  missing: string[];
+  refreshExpiresAt: string | null;
+}
+
 export const getInteracBoard = createServerFn({ method: "GET" }).handler(
-  async (): Promise<{ generatedAt: string; orders: InteracBoardRow[] }> => {
+  async (): Promise<{ generatedAt: string; orders: InteracBoardRow[]; bmo: BmoBoardStatus }> => {
     const { requireAdmin } = await import("@/lib/security/admin.server");
     requireAdmin();
     const { interacBoard } = await import("./interac.server");
-    return { generatedAt: new Date().toISOString(), orders: await interacBoard() };
+    const { bmoMissing } = await import("./bmo/config.server");
+    const missing = bmoMissing();
+    const connection =
+      missing.length === 0
+        ? await (await import("./bmo/oauth.server")).bmoConnection()
+        : { connected: false, refreshExpiresAt: null };
+    return {
+      generatedAt: new Date().toISOString(),
+      orders: await interacBoard(),
+      bmo: { configured: missing.length === 0, missing, ...connection },
+    };
   },
 );
 
@@ -54,6 +75,8 @@ export const updateInteracOrder = createServerFn({ method: "POST" })
       paid: s.markInteracPaid,
       retry: s.retryInteracKitchen,
       cancel: s.cancelInterac,
+      bmo: async (id, by) =>
+        (await import("./bmo/requests.server")).requestInteracViaBmo(id, by, { resend: true }),
     };
     const result = await run[request.action](request.orderId, request.by);
     return result.ok ? { ok: true, error: null } : { ok: false, error: result.error };

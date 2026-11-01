@@ -17,6 +17,10 @@ if (typeof process !== "undefined" && process.env?.["DATABASE_URL"]) {
   void import("./lib/orders/durable-orders.server")
     .then((m) => m.startCloverFulfillmentLoop())
     .catch((error: unknown) => console.error("[ppp-db] kitchen outbox loop not started:", error));
+  // Interac requests sent through BMO: status checked every 60 s (push notifications are the fast path).
+  void import("./lib/payments/bmo/requests.server")
+    .then((m) => m.startBmoPolling())
+    .catch((error: unknown) => console.error("[bmo] status loop not started:", error));
 }
 
 let serverEntryPromise: Promise<ServerEntry> | undefined;

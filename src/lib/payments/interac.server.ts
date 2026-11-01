@@ -29,9 +29,22 @@ const money = (cents: number) => `${(cents / 100).toFixed(2).replace(".", ",")} 
 /** A "Paid" whose kitchen step never finished (crash, timeout) may be retried after this. */
 const STUCK_MS = 2 * 60_000;
 
-/** Step 1: tell the restaurant (and the customer) what to request. Best effort; never blocks the order. */
+/**
+ * Step 1: with BMO connected, the money request goes out at once (bmo/requests.server.ts); then the restaurant and
+ * the customer are texted. Best effort; never blocks the order.
+ */
 export async function announceInteracOrder(order: InternalOrder): Promise<void> {
   const amount = order.interac?.amount ?? order.total ?? 0;
+  let viaBmo: { ok: boolean; error?: string } | null = null;
+  const { bmoConfigured } = await import("./bmo/config.server");
+  if (bmoConfigured()) {
+    const { requestInteracViaBmo } = await import("./bmo/requests.server");
+    const r = await requestInteracViaBmo(order.id).catch((e: unknown) => ({
+      ok: false as const,
+      error: e instanceof Error ? e.message : "BMO error",
+    }));
+    viaBmo = r.ok ? { ok: true } : { ok: false, error: r.error };
+  }
   const who = [order.customer.name, order.customer.email, order.customer.phone]
     .filter(Boolean)
     .join(" · ");
@@ -49,7 +62,10 @@ export async function announceInteracOrder(order: InternalOrder): Promise<void> 
     alert
       ? sendSms(
           alert,
-          `PPP — Virement Interac à demander : ${order.orderNumber} · ${money(amount)} · ${who}. ` +
+          (viaBmo?.ok
+            ? `PPP — Demande Interac envoyée par BMO : ${order.orderNumber} · ${money(amount)} · ${who}. `
+            : `PPP — Virement Interac à demander${viaBmo ? " (BMO n'a pas pu l'envoyer)" : ""} : ` +
+              `${order.orderNumber} · ${money(amount)} · ${who}. `) +
             `${order.orderType === "DELIVERY" ? "LIVRAISON. " : ""}Tablette : ${site}/admin/interac`,
         )
       : Promise.resolve(false),
@@ -65,7 +81,8 @@ export async function announceInteracOrder(order: InternalOrder): Promise<void> 
   ]);
 }
 
-async function mutate(
+/** One locked change of an order's Interac block (row lock in PostgreSQL, synchronous in memory). */
+export async function mutateInteracOrder(
   orderId: string,
   change: (o: InternalOrder) => InteracChange,
 ): Promise<InteracMutation> {
@@ -96,7 +113,9 @@ async function mutate(
     : { ok: false, error: "Order not found.", notFound: true };
 }
 
-function interacOf(order: InternalOrder): InteracPayment | null {
+const mutate = mutateInteracOrder;
+
+export function interacOf(order: InternalOrder): InteracPayment | null {
   return order.paymentMethod === "INTERAC" && order.interac ? order.interac : null;
 }
 

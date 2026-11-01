@@ -212,6 +212,15 @@ function OrderReceiptPage() {
                       "PPP Pizzeria te envía una solicitud de transferencia Interac por correo. Acéptala en tu app bancaria.",
                     )}
               </p>
+              {order.interac.payUrl && (
+                <a
+                  href={order.interac.payUrl}
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-flex min-h-12 items-center justify-center bg-primary px-5 py-3 font-semibold uppercase tracking-wide text-primary-foreground focus-ppp"
+                >
+                  {t("Pay with Interac", "Payer avec Interac", "Pagar con Interac")}
+                </a>
+              )}
               <p className="mt-1 text-muted-foreground">
                 {t(
                   "We start your order as soon as it is paid. This page updates by itself.",

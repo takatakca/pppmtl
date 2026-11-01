@@ -95,3 +95,16 @@ export function requireAdmin(): void {
   if (adminSessionActive()) return;
   throw Object.assign(new Error("Administrator authentication required"), { statusCode: 401 });
 }
+
+/** Route handlers (raw Request, no h3 helpers): true when the request carries a valid admin session. */
+export function adminRequestAuthorized(request: Request): boolean {
+  const config = secrets();
+  if (!config) return false;
+  for (const part of (request.headers.get("cookie") ?? "").split(";")) {
+    const i = part.indexOf("=");
+    if (i > 0 && part.slice(0, i).trim() === COOKIE) {
+      return verifyAdminSession(part.slice(i + 1).trim(), config.signing);
+    }
+  }
+  return false;
+}

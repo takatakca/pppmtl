@@ -148,3 +148,9 @@ See `docs/integrations/clover.md`, `docs/brands.md`, `AGENTS.md`, and `WORKLOG.m
 - Same Clover pricing as a card order; the amount is frozen on the order. E-mail required. Kitchen gets nothing until Paid; Paid creates one open Clover order (title `… · INTERAC`, note with the amount) and prints once, under a row lock.
 - Off unless `INTERAC_REQUESTS_ENABLED=true` and the PostgreSQL order store is configured (orders wait hours for money). Texts via Twilio, best effort.
 - Google sign-in through takatak.ca is built on the PPP side (f955887), off until the TAKATAK OAuth client exists (`docs/IDENTITY_INTEGRATION.md`).
+
+## 2026-11-01 — Interac through BMO; cash only for verified accounts
+
+- **Interac replaces debit** (no card machines for drivers). PPP **requests** the money from its **BMO** business account through the BMO Instant Payments API (owner applied for the developer account; keys expected Monday 2026-11-02). Built: `src/lib/payments/bmo/` (request, push + 60 s poll, auto-Paid for the exact amount, one Clover ticket). Manual buttons stay as fallback. Food Hub's Interac (customer sends to an e-mail) is not used for pppmtl.com.
+- **pppmtl.com checkout goes straight to Clover** (Clover Hosted Checkout — not Stripe); Food Hub stays for delivery operations. Sending pppmtl orders through Food Hub to Clover is acceptable to the owner but not needed now.
+- **Cash: delivery only, verified accounts only** (phone verified + government ID + liveness selfie through a Canadian provider first). Plan and provider shortlist: `docs/integrations/cash-verified-accounts.md`. Not built.

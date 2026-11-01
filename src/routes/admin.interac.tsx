@@ -5,6 +5,7 @@ import { signOutAdmin } from "@/lib/security/admin.functions";
 import {
   getInteracBoard,
   updateInteracOrder,
+  type BmoBoardStatus,
   type InteracBoardRow,
 } from "@/lib/payments/interac.functions";
 
@@ -47,6 +48,25 @@ const STATUS: Record<InteracBoardRow["interac"]["status"], { label: string; tone
   cancelled: { label: "Cancelled", tone: "border-border text-muted-foreground" },
 };
 
+/** BMO's ISO status in words for the tablet. */
+const BMO_STATUS: Record<string, string> = {
+  sending: "sending…",
+  ACTC: "request sent to the customer",
+  ACSP: "payment in progress",
+  ACSC: "money received",
+  ACCC: "money received",
+  RJCT: "refused",
+  CANC: "cancelled or expired",
+  error: "not sent",
+};
+
+const CONNECT_MESSAGES: Record<string, string> = {
+  connected: "BMO connected: Interac requests now go out automatically.",
+  cancelled: "BMO connection cancelled.",
+  failed: "BMO connection failed. Try again, or check the BMO settings.",
+  not_configured: "BMO settings are missing in Coolify (see the list above).",
+};
+
 function staffName(): string {
   try {
     return window.localStorage.getItem(STAFF_KEY) ?? "";
@@ -57,6 +77,8 @@ function staffName(): string {
 
 function InteracScreen() {
   const [orders, setOrders] = useState<InteracBoardRow[] | null>(null);
+  const [bmo, setBmo] = useState<BmoBoardStatus | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [denied, setDenied] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -65,10 +87,16 @@ function InteracScreen() {
     try {
       const board = await getInteracBoard();
       setOrders(board.orders);
+      setBmo(board.bmo);
       setDenied(false);
     } catch {
       setDenied(true);
     }
+  }, []);
+
+  useEffect(() => {
+    const outcome = new URLSearchParams(window.location.search).get("bmo");
+    if (outcome && CONNECT_MESSAGES[outcome]) setNotice(CONNECT_MESSAGES[outcome]);
   }, []);
 
   useEffect(() => {
@@ -77,7 +105,10 @@ function InteracScreen() {
     return () => clearInterval(t);
   }, [load]);
 
-  const act = async (order: InteracBoardRow, action: "requested" | "paid" | "retry" | "cancel") => {
+  const act = async (
+    order: InteracBoardRow,
+    action: "requested" | "paid" | "retry" | "cancel" | "bmo",
+  ) => {
     if (
       action === "paid" &&
       !window.confirm(`Confirm ${money(order.interac.amount)} received for ${order.orderNumber}?`)
@@ -85,6 +116,13 @@ function InteracScreen() {
       return;
     }
     if (action === "cancel" && !window.confirm(`Cancel ${order.orderNumber}? (Not paid.)`)) return;
+    if (
+      action === "bmo" &&
+      order.interac.bmo?.status === "sending" &&
+      !window.confirm("BMO may already have sent this request. Check BMO first. Send another one?")
+    ) {
+      return;
+    }
     setBusy(order.id);
     setMessage(null);
     try {
@@ -126,6 +164,30 @@ function InteracScreen() {
           Sign out
         </button>
       </header>
+
+      {bmo && (
+        <section className="mt-3 flex flex-wrap items-center gap-3 border border-border bg-card p-4">
+          <p className="mr-auto text-lg">
+            <span className="font-semibold">BMO automatic requests: </span>
+            {!bmo.configured
+              ? `off — missing ${bmo.missing.join(", ")}`
+              : bmo.connected
+                ? "on (requests go out by themselves; Paid is automatic)"
+                : "not connected"}
+          </p>
+          {bmo.configured && (
+            <a href="/auth/bmo/connect" className={`${BTN_OUTLINE} min-h-12 text-sm`}>
+              {bmo.connected ? "Reconnect BMO" : "Connect BMO"}
+            </a>
+          )}
+        </section>
+      )}
+
+      {notice && (
+        <p role="status" className="mt-3 border-2 border-primary bg-card p-4 text-lg">
+          {notice}
+        </p>
+      )}
 
       {denied && (
         <p className="mt-3 flex items-center gap-2 border border-border bg-card p-4 text-lg">
@@ -202,6 +264,13 @@ function InteracScreen() {
                   ))}
                 </ul>
               </details>
+              {o.interac.bmo && (
+                <p className="mt-2 text-sm">
+                  <span className="text-muted-foreground">BMO: </span>
+                  {BMO_STATUS[o.interac.bmo.status] ?? o.interac.bmo.status}
+                  {o.interac.bmo.reason ? ` (${o.interac.bmo.reason})` : ""}
+                </p>
+              )}
               {o.interac.error && (
                 <p className="mt-2 text-sm text-destructive">{o.interac.error}</p>
               )}
@@ -211,6 +280,21 @@ function InteracScreen() {
                 {o.interac.by && `by ${o.interac.by}`}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
+                {open &&
+                  bmo?.configured &&
+                  bmo.connected &&
+                  (!o.interac.bmo ||
+                    ["error", "RJCT", "CANC", "sending"].includes(o.interac.bmo.status)) && (
+                    <button
+                      type="button"
+                      disabled={busy === o.id}
+                      onClick={() => void act(o, "bmo")}
+                      className={BTN_PRIMARY}
+                    >
+                      <Send className="h-5 w-5" />{" "}
+                      {o.interac.bmo ? "Send BMO request again" : "Send BMO request"}
+                    </button>
+                  )}
                 {o.interac.status === "awaiting_request" && (
                   <button
                     type="button"

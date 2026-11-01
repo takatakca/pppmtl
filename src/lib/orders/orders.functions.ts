@@ -15,6 +15,16 @@ import {
 import type { OrderError } from "./errors";
 import type { InternalOrder, OrderStatus, OrderType } from "./types";
 
+/** Interac's payment page from BMO, only as an https link (never a script or another scheme). */
+function safePayUrl(url: string | null | undefined): string | null {
+  try {
+    const u = new URL(url ?? "");
+    return u.protocol === "https:" ? u.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
 export interface PlaceOrderInput {
   locationId: string;
   orderType: OrderType;
@@ -61,7 +71,7 @@ export interface OrderView {
   paymentUrl: string | null;
   paymentMethod: "CARD" | "INTERAC";
   /** Interac e-Transfer: where the money request stands, and the amount (cents). */
-  interac: { status: string; amount: number } | null;
+  interac: { status: string; amount: number; payUrl: string | null; viaBmo: boolean } | null;
   items: Array<{
     productId: string;
     name: string;
@@ -97,7 +107,14 @@ function toView(order: InternalOrder): OrderView {
     paymentStatus: order.paymentStatus,
     paymentUrl: order.paymentStatus === "UNPAID" ? (order.paymentUrl ?? null) : null,
     paymentMethod: order.paymentMethod ?? "CARD",
-    interac: order.interac ? { status: order.interac.status, amount: order.interac.amount } : null,
+    interac: order.interac
+      ? {
+          status: order.interac.status,
+          amount: order.interac.amount,
+          payUrl: safePayUrl(order.interac.bmo?.gatewayUrl),
+          viaBmo: Boolean(order.interac.bmo && order.interac.bmo.status !== "error"),
+        }
+      : null,
     items: order.items.map((i) => ({
       productId: i.productId,
       name: i.name,
