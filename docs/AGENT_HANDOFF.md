@@ -1,5 +1,24 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-11-01 (later) — Interac through BMO Instant Payments, ready for keys (Claude, main 47f8c94)
+
+Owner: Interac replaces debit; PPP **requests** the money from its **BMO** business account via BMO's API (dev
+account applied, keys Monday 2026-11-02). Built in `src/lib/payments/bmo/` against BMO's published spec (Instant
+Payments - CA 4.3.1, Push Notifications 1.1.0): pain.013 request at order time (`requests.server.ts`), AES-256-GCM +
+RSA-OAEP payload encryption (`crypto.ts`), OAuth code flow "Connect BMO" (`/auth/bmo/connect` admin only →
+`/auth/bmo/callback`), tokens sealed in `ppp.integration_tokens` (migration **0004**, owner must apply + grant), push
+`/api/public/webhooks/bmo` (`BMO_PUSH_SECRET`) + 60 s poll from `src/server.ts`; settled ACSC/ACCC for the exact
+amount → `markInteracPaid` (one Clover order). Tablet `/admin/interac`: BMO banner, status, "Send BMO request again".
+Manual buttons unchanged. Food Hub's Interac (customer-push) is NOT used for pppmtl.com (owner, 2026-11-01).
+
+**Verified:** 262 tests incl. 14 BMO (fake BMO with real encryption both ways) and 2 BMO on real PostgreSQL as
+`ppp_app`; build, typecheck, eslint 0 errors; built server: routes answer (connect without admin → sign-in, forged
+callback → failed, push GET 405, push without secret 503), tablet shows the BMO banner. **NOT verified:** any real
+BMO call; open points listed in `docs/integrations/interac.md` › "To confirm on the sandbox".
+
+**Next:** owner follows the Monday checklist in `docs/integrations/interac.md`; first sandbox request, then fix any
+format detail BMO reports. Cash for verified accounts: plan only (`docs/integrations/cash-verified-accounts.md`).
+
 ## 2026-11-01 — Interac e-Transfer (manual) + Sign in with TAKATAK, both OFF until configured (Claude, main b57381b)
 
 **Interac (b57381b):** checkout offers "Interac e-Transfer" only when `INTERAC_REQUESTS_ENABLED=true` AND the
