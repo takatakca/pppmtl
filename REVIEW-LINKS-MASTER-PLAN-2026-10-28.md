@@ -60,10 +60,25 @@ Po Poulet | Cylex Saint-Léonard | https://www.cylex-canada.ca/company/po-poulet
 Po Poulet | TripAdvisor | TO-VERIFY | TO-VERIFY | Creations submitted 2026-10-26, in review per fiche, no verified URL yet — do not create a duplicate
 Po Poulet | DoorDash | TO-VERIFY | TO-VERIFY | Stores 27982486, 41946420, 34494017 — do not touch without a Matt/DoorDash decision
 
+## Pi Pita — www.pipita.ca@gmail.com — https://pipita.ca — 450-999-4999
+# Saint-Léonard: 5839 rue Jean-Talon E, Montréal, QC H1S 1M4, hours UNVERIFIED (do not publish)
+# NDG: 6280 av. Somerled, Montréal, QC H3X 2B6, hours UNVERIFIED — CONFLICT: YP + TripAdvisor show 11h-23h, Google Maps + Apple Maps show 16h-3h
+Pi Pita | Yellow Pages NDG | https://www.yellowpages.ca/bus/Quebec/Montreal/Pi-Pita-NDG/104502788.html | VERIFIED | Listing LIVE, verified 2026-11-05 (read-only): 'Pi Pita - NDG', 6280 Av Somerled H3X 2B6, 450-999-4999, hours shown Mon-Sun 11h-23h (UNVERIFIED as true hours); website link points to https://pppmtl.com/marques/pipita, NOT pipita.ca — wrong link, fix later
+Pi Pita | Yellow Pages Saint-Léonard | https://www.yellowpages.ca/bus/Quebec/Montreal/Pi-Pita-Saint-Leonard/105498742.html | VERIFIED | Listing LIVE, verified 2026-11-05 (read-only): 'Pi Pita - Saint-Léonard', 5839 Rue Jean-Talon E H1S 1M4, 450-999-4999, hours shown 11h-23h (UNVERIFIED); website link points to https://pppmtl.com/marques/pipita, NOT pipita.ca — wrong link, fix later
+Pi Pita | TripAdvisor NDG | https://www.tripadvisor.ca/Restaurant_Review-g155032-d34761165-Reviews-Pi_Pita_Notre_Dame_de_Grace-Montreal_Quebec.html | VERIFIED (live, Claimed) | Listing EXISTS, LIVE, CLAIMED, verified 2026-11-05 (read-only): locationId 34761165, 'Pi Pita Notre-Dame-de-Grâce', 6280 Avenue Somerled H3X 2B6, +1 450-999-4999, pipita.ca, hours shown daily 11h-23h (UNVERIFIED), 0 reviews, 0 photos; the 2026-10-26 'in review' creation is now live
+Pi Pita | TripAdvisor Saint-Léonard | TO-VERIFY (absent — no listing found) | TO-VERIFY | SL listing NOT FOUND, verified 2026-11-05 (read-only, 3 searches); the 2026-10-26 SL creation is not live/findable — do not create a duplicate without checking the Business side first
+Pi Pita | Google Maps NDG | https://www.google.com/maps/place/Pi+Pita+Montreal+NOTRE+DAME+DE+GRACE/@45.4706363,-73.6353467,17z | VERIFIED | NDG EXISTS, verified 2026-11-05 (read-only): 6280 Av. Somerled H3X 2B6, (450) 999-4999, website shown clover.com NOT pipita.ca, hours shown daily 16h-3h (UNVERIFIED), 2.3 stars 3 reviews, owner-managed: owner post Oct 23 2026 + owner replies incl. code TAKATAK10
+Pi Pita | Google Maps Saint-Léonard | TO-VERIFY (absent — address pin only) | TO-VERIFY | SL ABSENT — address pin only, no business listing, verified 2026-11-05 (read-only)
+Pi Pita | Apple Maps NDG | https://maps.apple.com/place?place-id=I90B6D6F7B3BA745C | VERIFIED | NDG EXISTS, verified 2026-11-05 (read-only): 6280 Av Somerled H3X 2B6, +1 (450) 999-4999, pipita.ca, hours shown Every Day 16h-3h 'Open' (UNVERIFIED); 'Claim This Place' button shown, NOT clicked
+Pi Pita | Apple Maps Saint-Léonard | TO-VERIFY (absent — bare address pin only) | TO-VERIFY | SL ABSENT — bare address pin only, verified 2026-11-05 (read-only)
+Pi Pita | Foursquare | TO-VERIFY (absent both locations) | TO-VERIFY | No Pi Pita page found, verified 2026-11-05 (read-only, name + address searches incl. 6284)
+Pi Pita | Bing | TO-VERIFY (absent both locations) | TO-VERIFY | No public listing either location, verified 2026-11-05 (read-only): bare address pins only; Bing Maps shows SL postal H1S 0B2 vs verified H1S 1M4; third-party mentions only; pipita.ca top organic result
+Pi Pita | Yelp | TO-VERIFY (public search blocked) | TO-VERIFY | Yelp public search BLOCKED by DataDome on both attempts 2026-11-05 — unverified, do not loop, retry later
+
 ## Other restaurant brands — TO COMPLETE, one brand at a time, same format
 # Do NOT copy PPP links onto another brand. Each brand below gets its OWN
 # verified review links, filled only from live verification or a verified report.
-# Pi Pita — www.pipita.ca@gmail.com — https://pipita.ca
+# Pi Pita — rows filed above 2026-11-05 — www.pipita.ca@gmail.com — https://pipita.ca
 # Bin Molle Bin Dure — bmbd.ca@gmail.com — https://bmbd.ca
 # Café Bolon — boloncafe.ca@gmail.com — site canonical unverified (bolon.ca vs boloncafe.ca)
 # Viennoise / Gâteau Montréal — viennoise.ca@gmail.com — https://viennoise.ca
