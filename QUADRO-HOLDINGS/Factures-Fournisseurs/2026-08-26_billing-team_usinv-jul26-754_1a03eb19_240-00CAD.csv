@@ -1,0 +1,30 @@
+"UrbanPiper Technology USA, INC. — Billing breakdown"
+Invoice,USINV/JUL26/754
+Customer,Quadro holding ltee
+Service period,July 2026 (01 Jul – 31 Jul 2026)
+
+BILLED SUMMARY
+Line,Qty,Unit price (CAD),Amount (CAD)
+HUB - Usage (Physical Location),2,120.00,240.00
+Total,,,240.00
+
+PER-LOCATION DETAIL   ·   HUB - Usage (Physical Location) $120.00/outlet
+Location,Brand,Platforms,Orders (Jul),HUB - Usage (Physical Location) billed (CAD),Total (CAD)
+"3583 Rue Sainte-Catherine E, Montréal, QC H1W 3E4, Canada",Bin molle & Bin Dure,ubereats,1,120.00,120.00
+"3583 Rue Sainte-Catherine E, Montréal, QC H1W 3E4, Canada",Poulet Poulet,doordash,2,,0.00
+"3583 Rue Sainte-Catherine E, Montréal, QC H1W 3E4, Canada",Mythos 2 Go,ubereats,11,,0.00
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Nutrition Shake,skipthedishes,1,120.00,120.00
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Pita Labanais,doordash,4,,0.00
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Poulet Poulet,doordash,24,,0.00
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Pi Pita,ubereats,8,,0.00
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Taco Mexican,doordash,18,,0.00
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Cafe Bolon,ubereats,7,,0.00
+"6280 Av. Somerled, Montréal, QC H4B 2V5",PPP Pizzeria,doordash+skipthedishes+ubereats,27,,0.00
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Bin molle & Bin Dure,ubereats,25,,0.00
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Gateau Montreal,doordash+ubereats,12,,0.00
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Pizza Intime,doordash,6,,0.00
+"6280 Av. Somerled, Montréal, QC H4B 2V5",OOuef,doordash,11,,0.00
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Pizza Algerie,ubereats,9,,0.00
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Crèmerie Bin Molle Bin Dure,skipthedishes,2,,0.00
+"6280 Av. Somerled, Montréal, QC H4B 2V5",OOeuf Supreme,doordash,1,,0.00
+TOTAL,,,,240.00,240.00

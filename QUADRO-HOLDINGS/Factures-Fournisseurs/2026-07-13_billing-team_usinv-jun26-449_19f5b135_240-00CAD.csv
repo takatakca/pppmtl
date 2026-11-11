@@ -1,0 +1,20 @@
+Invoice USINV/JUN26/449  |  Quadro holding ltee  |  Service period June 2026
+
+Billed line,Qty,Unit price (USD),Amount (USD)
+Hub - Physical Locations,2,120,240.00
+Hub - Additional Brand Locations,0,10,0.00
+
+12 active brand-outlets  ·  10 covered by free allowance (not charged)
+Outlet (location),Brand,Platforms,Orders (Jun),Billed as
+"3583 Rue Sainte-Catherine E, Montréal, QC H1W 3E4, Canada",Gateau Montreal,doordash+ubereats,2,Physical
+"3583 Rue Sainte-Catherine E, Montréal, QC H1W 3E4, Canada",Mythos 2 Go,ubereats,2,Free
+"3583 Rue Sainte-Catherine E, Montréal, QC H1W 3E4, Canada",PPP Pizzeria,doordash,1,Free
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Bin molle & Bin Dure,ubereats,1,Physical
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Cafe Bolon,ubereats,1,Free
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Gateau Montreal,ubereats,3,Free
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Nutrition Shake,ubereats,1,Free
+"6280 Av. Somerled, Montréal, QC H4B 2V5",PPP Pizzeria,doordash+ubereats,5,Free
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Pi Pita,ubereats,3,Free
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Pizza Algerie,ubereats,2,Free
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Po Poulet,doordash,3,Free
+"6280 Av. Somerled, Montréal, QC H4B 2V5",Poulet Poulet,doordash,6,Free

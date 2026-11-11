@@ -1,0 +1,32 @@
+"UrbanPiper Technology USA, Inc. — Billing breakup"
+Invoice,US/INV/AUG26/565
+Customer,Quadro holding ltee
+Service period,August 2026 (01 Aug – 31 Aug 2026)
+
+BILLED SUMMARY
+Line,Qty,Unit price (CAD),Amount (CAD)
+Hub — Physical Location,2,120.00,240.00
+Subtotal excl. sales tax,,,240.00
+Sales tax,,,0.00
+Total (CAD),,,240.00
+
+STORES
+biz_id,biz_name,site_id,location_id,location_name,HUB - Usage (Physical Location) · 2 × 120.00 = 240.00 (CAD),HUB - Usage (Virtual Location) · 0 × 0.00 = 0.00 (CAD),Total (CAD),reason
+81979780,Quadro holding ltee,181508,181515,"3583 Rue Sainte-Catherine E, Montréal, QC H1W 3E4, Canada",120.00,0.00,120.00,
+81979780,Quadro holding ltee,181508,181516,"3583 Rue Sainte-Catherine E, Montréal, QC H1W 3E4, Canada",0.00,0.00,0.00,
+81979780,Quadro holding ltee,181508,181524,"3583 Rue Sainte-Catherine E, Montréal, QC H1W 3E4, Canada",0.00,0.00,0.00,
+81979780,Quadro holding ltee,182296,182297,"6280 Av. Somerled, Montréal, QC H4B 2V5",120.00,0.00,120.00,
+81979780,Quadro holding ltee,182296,182302,"6280 Av. Somerled, Montréal, QC H4B 2V5",0.00,0.00,0.00,
+81979780,Quadro holding ltee,182296,182303,"6280 Av. Somerled, Montréal, QC H4B 2V5",0.00,0.00,0.00,
+81979780,Quadro holding ltee,182296,182304,"6280 Av. Somerled, Montréal, QC H4B 2V5",0.00,0.00,0.00,
+81979780,Quadro holding ltee,182296,182306,"6280 Av. Somerled, Montréal, QC H4B 2V5",0.00,0.00,0.00,
+81979780,Quadro holding ltee,182296,182307,"6280 Av. Somerled, Montréal, QC H4B 2V5",0.00,0.00,0.00,
+81979780,Quadro holding ltee,182296,182309,"6280 Av. Somerled, Montréal, QC H4B 2V5",0.00,0.00,0.00,
+81979780,Quadro holding ltee,182296,182310,"6280 Av. Somerled, Montréal, QC H4B 2V5",0.00,0.00,0.00,
+81979780,Quadro holding ltee,182296,182311,"6280 Av. Somerled, Montréal, QC H4B 2V5",0.00,0.00,0.00,
+81979780,Quadro holding ltee,182296,186900,"6280 Av. Somerled, Montréal, QC H4B 2V5",0.00,0.00,0.00,
+81979780,Quadro holding ltee,182296,186906,"6280 Av. Somerled, Montréal, QC H4B 2V5",0.00,0.00,0.00,
+81979780,Quadro holding ltee,182296,187222,"6280 Av. Somerled, Montréal, QC H4B 2V5",0.00,0.00,0.00,
+81979780,Quadro holding ltee,182296,188341,"6280 Av. Somerled, Montréal, QC H4B 2V5",0.00,0.00,0.00,
+,,,,HUB - Usage (Virtual Location) · 0 × 0.00 = 0.00 (invoice level),0.00,0.00,0.00,free allowance applied to the invoice
+TOTAL,,,,,240.00,0.00,240.00,
