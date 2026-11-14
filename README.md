@@ -8,7 +8,7 @@ The source repository for **[pppmtl.com](https://pppmtl.com)** and the related f
 - **One shared menu/cart:** PPP and franchise brands use one catalog and Clover item mapping. The hostname determines the storefront; see [franchise documentation](docs/brands.md).
 - **Checkout:** server-side Clover Hosted Checkout for **pickup** orders. Prices and availability are verified by the server. Card details must never pass through PPPMTL code. **Real production checkout opens only with the PostgreSQL order store** (`DATABASE_URL`, migrations 0001–0003, limited role) and the Clover REST token; without either it stays fail-closed. See `src/lib/orders/durable-orders.server.ts`.
 - **Webhook:** `POST /api/public/webhooks/clover` verifies Clover's signature. Only a verified payment event may mark an order paid.
-- **Integrations:** Clover, with UrbanPiper and other marketplaces separately tracked. See [Clover integration](docs/integrations/clover.md) and [UrbanPiper notes](docs/integrations/urbanpiper.md).
+- **Integrations:** Clover (POS/menu/payment) and first-party TAKATAK Food Hub (future internal order engine), with Uber Eats, DoorDash and Skip storefront links retained. UrbanPiper was retired by the owner; its API and webhooks are not supported. See [Clover](docs/integrations/clover.md) and [Food Hub migration](docs/integrations/foodhub.md). Food Hub order transport and real checkout remain disabled pending security gates #5/#6/#13.
 - **Ownership:** TAKATAK is the customer identity/data authority where shared customer services are subsequently connected; tenant data must remain isolated.
 
 ## Development

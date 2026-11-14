@@ -7,7 +7,7 @@ Updated: 2026-10-15 · branch: `main` · [repository](https://github.com/takatak
 - PPP Pizzeria Montreal and franchise storefronts share a TanStack Start / React 19 / TypeScript / Tailwind application.
 - Main experience, category rails, cart, order customization, brand-by-host routing, SEO / sitemaps / llms.txt and multi-language copy already exist.
 - Clover real-menu overlay with mapping, option pricing, real product photography, server-side pickup checkout, signed payment webhook handling and restaurant register/KDS title/print workflow exist in source code.
-- UrbanPiper integrations are prepared but depend on provider credentials/mappings; third-party delivery remains through external marketplaces.
+- Owner decision 2026-10-28: UrbanPiper integration retired in draft PR #23; modules and credential handling removed, legacy webhook 410. Non-Clover stores point to first-party TAKATAK Food Hub **as intent only**, no active order transport. Marketplace storefront links are preserved. See `docs/integrations/foodhub.md`; no production merge/deploy verified.
 - Business facts from PR #4 were merged: NDG 16:00–03:00, Saint-Léonard 10:00–23:00, Hochelaga listed across brands with hours unpublished until confirmed.
 - On 2026-10-14 the payment return screen was corrected not to treat `?paid=1` as proof of payment, order quantities/modifiers were hardened, and an authenticated operations/guest-receipt security seam was added.
 

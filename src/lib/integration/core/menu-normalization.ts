@@ -1,38 +1,16 @@
 /**
- * URBANPIPER MENU SYNCHRONISATION ENGINE — SERVER ONLY
- *
- * Pipeline:
- *   authenticate -> retrieve -> transform -> validate -> store
- *
- * Nothing is connected yet: with no credentials and no provider store id, the
- * engine reports `not_configured` and records a FAILED sync event. It never
- * fabricates a menu and never publishes a partially broken one.
- *
- * The customer website never imports this file. It reads the PPP menu
- * repository, which is why UrbanPiper stays invisible to customers.
+ * PPP-owned provider-neutral menu validation and normalization.
+ * Food Hub can reuse these rules without adopting a third-party schema.
+ * No credentials, web requests, or changes to the published Clover catalog.
  */
-
 import type {
-  IntegrationResult,
+  IntegrationProviderId,
   UniversalCategory,
   UniversalMenu,
   UniversalProduct,
-} from "@/lib/integration/core/contracts";
-import { notConfigured } from "@/lib/integration/core/contracts";
-import { imageRepository } from "@/lib/integration/core/images";
-import {
-  completeMenuSync,
-  startMenuSync,
-  type MenuSyncEvent,
-} from "@/lib/integration/core/menu-sync-log";
-import { mappingForLocation } from "@/config/integration-locations";
+} from "./contracts";
+import { imageRepository } from "./images";
 import { pppCategoryForProviderRef, pppProductForProviderRef } from "@/config/integration-menu-map";
-import { urbanPiperMenuAdapter, urbanPiperMenuConfigured } from "./menu";
-
-const NOT_CONNECTED_EN =
-  "UrbanPiper menu sync is not connected for this store yet. The verified in-house catalog is live.";
-
-/* ------------------------------------------------------------- validation */
 
 export interface MenuValidationIssue {
   entity: "category" | "product" | "modifier";
@@ -46,15 +24,12 @@ export interface MenuValidationResult {
   issues: MenuValidationIssue[];
 }
 
-/**
- * Reject anything that would render a broken menu: missing name, missing or
- * negative price, impossible modifier bounds, duplicate ids, orphan category.
- */
+/** Never publish orphaned, duplicate, unavailable-to-price or invalid menu lines. */
 export function validateProviderMenu(menu: UniversalMenu): MenuValidationResult {
   const issues: MenuValidationIssue[] = [];
-
   const categories: UniversalCategory[] = [];
   const seenCategories = new Set<string>();
+
   for (const category of menu.categories) {
     if (!category.id) {
       issues.push({ entity: "category", id: "(missing id)", reason: "Missing id" });
@@ -87,7 +62,7 @@ export function validateProviderMenu(menu: UniversalMenu): MenuValidationResult 
       issues.push({ entity: "product", id: product.id, reason: "Missing name" });
       continue;
     }
-    if (product.price === null || product.price < 0) {
+    if (!Number.isSafeInteger(product.price) || product.price === null || product.price < 0) {
       issues.push({ entity: "product", id: product.id, reason: "Missing or invalid price" });
       continue;
     }
@@ -96,17 +71,23 @@ export function validateProviderMenu(menu: UniversalMenu): MenuValidationResult 
       continue;
     }
 
-    let modifiersOk = true;
+    let validModifiers = true;
     for (const group of product.modifierGroups) {
       const min = group.minSelections;
       const max = group.maxSelections;
-      if (min < 0 || max < min || group.choices.length === 0) {
+      if (
+        !Number.isSafeInteger(min) ||
+        !Number.isSafeInteger(max) ||
+        min < 0 ||
+        max < min ||
+        group.choices.length === 0
+      ) {
         issues.push({
           entity: "modifier",
           id: `${product.id}:${group.id}`,
           reason: "Invalid selection rules",
         });
-        modifiersOk = false;
+        validModifiers = false;
         break;
       }
       if (group.required && min < 1) {
@@ -115,34 +96,29 @@ export function validateProviderMenu(menu: UniversalMenu): MenuValidationResult 
           id: `${product.id}:${group.id}`,
           reason: "Required group with no minimum",
         });
-        modifiersOk = false;
+        validModifiers = false;
         break;
       }
-      if (min > group.choices.filter((c) => c.available).length) {
+      if (min > group.choices.filter((choice) => choice.available).length) {
         issues.push({
           entity: "modifier",
           id: `${product.id}:${group.id}`,
           reason: "Minimum exceeds available options",
         });
-        modifiersOk = false;
+        validModifiers = false;
         break;
       }
     }
-    if (!modifiersOk) continue;
 
+    if (!validModifiers) continue;
     seenProducts.add(product.id);
     products.push(product);
   }
-
   return { categories, products, issues };
 }
 
-/* ------------------------------------------------------------ normalising */
-
 export interface NormalizedProduct extends UniversalProduct {
-  /** Permanent PPP id when a mapping exists, otherwise the provider ref. */
   pppProductId: string;
-  /** Always retained for future order submission. */
   providerProductId: string;
   pppCategoryId: string;
   displayImageUrl: string;
@@ -151,13 +127,18 @@ export interface NormalizedProduct extends UniversalProduct {
 
 export interface NormalizedMenu {
   locationId: string;
-  provider: "urbanpiper";
-  categories: Array<UniversalCategory & { pppCategoryId: string; providerCategoryId: string }>;
+  provider: IntegrationProviderId;
+  categories: Array<
+    UniversalCategory & {
+      pppCategoryId: string;
+      providerCategoryId: string;
+    }
+  >;
   products: NormalizedProduct[];
   syncedAt: string;
 }
 
-/** Provider shapes -> PPP shapes, with stable ids and PPP-controlled images. */
+/** Stable PPP IDs and approved-first imagery; no untrusted CDN hotlinking. */
 export function normalizeMenu(
   menu: UniversalMenu,
   validated: MenuValidationResult,
@@ -165,7 +146,7 @@ export function normalizeMenu(
 ): NormalizedMenu {
   return {
     locationId,
-    provider: "urbanpiper",
+    provider: menu.provider,
     categories: validated.categories.map((c) => ({
       ...c,
       pppCategoryId: pppCategoryForProviderRef(c.externalId ?? c.id) ?? c.id,
@@ -189,64 +170,4 @@ export function normalizeMenu(
     }),
     syncedAt: menu.syncedAt ?? new Date().toISOString(),
   };
-}
-
-/* ----------------------------------------------------------------- engine */
-
-export interface MenuSyncOutcome {
-  event: MenuSyncEvent;
-  menu: NormalizedMenu | null;
-}
-
-/**
- * Run one synchronisation for one store. Every store syncs independently:
- * availability, products and pricing can differ per location.
- */
-export async function syncLocationMenu(
-  locationId: string,
-): Promise<IntegrationResult<MenuSyncOutcome>> {
-  const event = startMenuSync("urbanpiper", locationId);
-
-  const mapping = mappingForLocation(locationId);
-  if (!mapping) {
-    completeMenuSync(event, { status: "FAILED", errors: ["Unknown PPP location"] });
-    return { ok: false, code: "invalid_request", message: "Unknown PPP location" };
-  }
-
-  if (!urbanPiperMenuConfigured(locationId)) {
-    completeMenuSync(event, {
-      status: "FAILED",
-      errors: ["Provider credentials or store id not set"],
-    });
-    return notConfigured(NOT_CONNECTED_EN);
-  }
-
-  const fetched = await urbanPiperMenuAdapter.fetchMenu(locationId);
-  if (!fetched.ok) {
-    completeMenuSync(event, { status: "FAILED", errors: [fetched.message] });
-    return fetched;
-  }
-
-  const validated = validateProviderMenu(fetched.data);
-  const normalized = normalizeMenu(fetched.data, validated, locationId);
-
-  completeMenuSync(event, {
-    status: "SUCCESS",
-    categoriesReceived: fetched.data.categories.length,
-    productsReceived: fetched.data.products.length,
-    itemsUpdated: normalized.products.length,
-    itemsRejected: validated.issues.filter((i) => i.entity === "product").length,
-    errors: validated.issues.map((i) => `${i.entity} ${i.id}: ${i.reason}`).slice(0, 20),
-  });
-
-  return { ok: true, data: { event, menu: normalized } };
-}
-
-/** Sync every mapped store; unmapped stores fail fast and stay on the local catalog. */
-export async function syncAllLocationMenus(locationIds: string[]) {
-  const results = [];
-  for (const id of locationIds) {
-    results.push({ locationId: id, result: await syncLocationMenu(id) });
-  }
-  return results;
 }

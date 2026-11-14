@@ -3,7 +3,7 @@
  *
  * Today: the menu comes from the verified local catalog; order submission and
  * order history have no provider, so they report `available: false`. Swapping
- * in UrbanPiper / Ordermark / Clover later means providing new adapters here —
+ * in Food Hub / Clover later means providing new adapters here —
  * no screen changes.
  */
 

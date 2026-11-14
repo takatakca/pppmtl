@@ -37,7 +37,7 @@ export function statusForEvent(raw: string): OrderStatus | null {
   return event ? EVENT_MAP[event] : null;
 }
 
-/** UrbanPiper's own status vocabulary, mapped into ours. */
+/** Generic kitchen status vocabulary, usable by first-party Food Hub adapters. */
 const PROVIDER_STATUS_MAP: Record<string, OrderStatus> = {
   placed: "SUBMITTED",
   acknowledged: "ACCEPTED",

@@ -1,6 +1,9 @@
 # PPPMTL — engineering decisions
 
-Updated: 2026-10-15. Supersede only with documented owner approval and clear migration plan.
+Updated: 2026-10-28. Supersede only with documented owner approval and clear migration plan.
+
+**New owner directive (2026-10-28):** Remove UrbanPiper entirely from PPP; no outbound orders, menu synchronization, credential reads, webhook ingestion or vendor onboarding. Prefer existing `takatakca/foodhubca` for first-party kitchen, order and marketplace operations; preserve Clover POS and genuine PPP images. Draft PR #23 is not a live integration. Do not enable Food Hub website-order ingress or real Clover checkout until signed tenant/merchant identity, trustworthy server prices and durable payment/inbox/outbox invariants pass security gate #5/#6/#13. Any current external POS routing requires a separately verified, reversible cutover.
+
 
 | Decision | Rationale | Consequence |
 |---|---|---|

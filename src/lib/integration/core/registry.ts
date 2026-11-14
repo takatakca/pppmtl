@@ -7,11 +7,7 @@
 import type { ProviderAdapterSet } from "./adapter";
 import type { CapabilityStatus, IntegrationProviderId } from "./contracts";
 import { mappingForLocation } from "@/config/integration-locations";
-import { urbanPiperMenuAdapter } from "@/lib/integration/providers/urbanpiper/menu";
-import { urbanPiperOrderAdapter } from "@/lib/integration/providers/urbanpiper/orders";
-import { urbanPiperCustomerAdapter } from "@/lib/integration/providers/urbanpiper/customers";
-import { urbanPiperLocationAdapter } from "@/lib/integration/providers/urbanpiper/locations";
-import { urbanPiperWebhookAdapter } from "@/lib/integration/providers/urbanpiper/webhook";
+import { foodhubAdapters } from "@/lib/integration/providers/foodhub/bridge";
 import { cloverMenuAdapter } from "@/lib/integration/providers/clover/menu";
 import { cloverOrderAdapter } from "@/lib/integration/providers/clover/orders";
 import { cloverPaymentAdapter } from "@/lib/integration/providers/clover/payments";
@@ -19,15 +15,6 @@ import { cloverWebhookAdapter } from "@/lib/integration/providers/clover/webhook
 import { uberEatsChannel } from "@/lib/integration/providers/marketplaces/uber";
 import { doorDashChannel } from "@/lib/integration/providers/marketplaces/doordash";
 import { skipChannel } from "@/lib/integration/providers/marketplaces/skip";
-
-export const urbanPiperAdapters: ProviderAdapterSet = {
-  provider: "urbanpiper",
-  menu: urbanPiperMenuAdapter,
-  orders: urbanPiperOrderAdapter,
-  customers: urbanPiperCustomerAdapter,
-  locations: urbanPiperLocationAdapter,
-  webhooks: urbanPiperWebhookAdapter,
-};
 
 /** NDG's ordering engine: real Clover menu, Clover Hosted Checkout, order titled + printed in Clover. */
 export const cloverAdapters: ProviderAdapterSet = {
@@ -39,7 +26,7 @@ export const cloverAdapters: ProviderAdapterSet = {
 };
 
 const REGISTRY: Partial<Record<IntegrationProviderId, ProviderAdapterSet>> = {
-  urbanpiper: urbanPiperAdapters,
+  foodhub: foodhubAdapters,
   clover: cloverAdapters,
 };
 

@@ -1,7 +1,7 @@
 /**
  * INTERNAL PPP ORDER MODEL
  *
- * PPP owns the order. Providers (UrbanPiper today, others later) are a
+ * PPP owns the order. The first-party Food Hub and POS providers are a
  * downstream destination, never the source of truth for the customer record.
  *
  * All money is stored in CENTS to avoid floating point drift. `null` means

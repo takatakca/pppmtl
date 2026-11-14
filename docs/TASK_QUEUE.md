@@ -4,6 +4,9 @@ Updated: 2026-10-15 · GitHub is the source of truth.
 
 ## P0 — mandatory before enabling production payments
 
+**Owner migration directive, 2026-10-28:** Replace UrbanPiper with own TAKATAK Food Hub; track PPP draft PR #23 and `docs/integrations/foodhub.md`. Before any production switch, compare with security PR #22 (legacy webhook overlap), merge/retest on the final SHA, validate Clover→Food Hub order mirror and a reversible external marketplace routing plan. No automatic Food Hub transmission, payments, or vendor cancellation actions from this source change.
+
+
 1. **#6 Durable order store:** choose a production PostgreSQL service or TAKATAK tenant-scoped order API; implement schema/migrations, atomic order/payment transactions, unique provider checkout+payment ids, outbox for Clover title/print retries, durable webhook delivery claims, backup/restore; no duplicate charges or tickets. Tests must exercise parallel workers, restarts, duplicate callbacks, declined payments and refunds. Status: open, not implemented.
 2. **#5 Verified identity and permissions:** replace temporary PPP admin credential with authenticated TAKATAK roles, tenant scope and entitlements; authorize customer order access with verified TAKATAK identity and/or signed guest grants. Status: *temporary server gate and cookie grants committed*, permanent integration open.
 3. **Clover live credential onboarding:** configure merchant ID, Hosted Checkout private key, webhook signing secret, REST token, taxes and webhook URL on verified backend host. Confirm production merchant and HTTPS before payment test. Status: external access required.

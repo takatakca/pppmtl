@@ -36,7 +36,7 @@ export interface ModifierMapping {
 
 /**
  * PPP category registry with room for the provider's own naming.
- * Example: UrbanPiper "Fast Food" -> PPP "Combos". Operators edit the
+ * Example: Food Hub "Fast Food" -> PPP "Combos". Operators edit the
  * provider side; the customer side never moves.
  */
 export const categoryMappings: CategoryMapping[] = [
