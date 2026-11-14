@@ -5,14 +5,22 @@ Signé : SOCIO, Agent Lévesque.
 ## Résultat
 
 - **Pi Pita Montréal-Nord : 91 %** (compteur Yelp, vérifié après rechargement complet de la page) — pas 100 %.
+- **Pi Pita NDG : 91 %** (compteur Yelp, vérifié après rechargement) — réclamée et remplie le 14 novembre 2026 à 13:39. Pas 100 %.
 - Travail fait par le navigateur, le 14 novembre 2026, dans le compte Yelp for Business **www.pipita.ca@gmail.com**.
-- Aucune fiche créée, aucune fiche fermée ou supprimée, aucun surclassement payant acheté.
+- Aucune fiche créée, aucune fiche fermée ou supprimée, aucun surclassement payant acheté. L'essai gratuit de 30 jours de Yelp Ads a été refusé deux fois (page des offres de réclamation et fenêtre modale).
 
-## Inventaire — ce compte ne contient qu'UNE seule fiche
+## NDG — réclamée et remplie (13:39)
+
+- La recherche « Ajouter un autre emplacement » a trouvé une fiche Pi Pita EXISTANTE, non réclamée, au **6280 Av. Somerled, Montréal, QC H4B 2V5, Canada**, téléphone (450) 999-4999, catégories Sandwiches, Salad, Burgers. Elle a été réclamée au lieu de créer un doublon — aucun doublon n'a été créé.
+- Vérification de la réclamation : Yelp exigeait un courriel de travail @pipita.ca (aucune boîte à ce domaine n'existe, aucune adresse devinée) ; le propriétaire a choisi l'appel téléphonique. Yelp a appelé le 450-999-4999, le propriétaire a répondu et tapé le code **5466** affiché sur la page. La réclamation est confirmée : le compte contient maintenant 2 emplacements.
+- **Pi Pita NDG — 91 %**, biz ID kvUAThrZWZXPXgnWRbeybg, vérifié après rechargement : adresse 6280 Av. Somerled, Montréal, QC H4B 2V5, Canada (Yelp indique H4B 2V5, pas H3X 2B6 comme dans le dossier de référence) ; téléphone (450) 999-4999 ; site web https://pipita.ca (déjà correct sur la fiche) ; heures 16 h–3 h tous les jours (4:00 PM–3:00 AM, changées de l'ancienne ouverture 17 h, vérifiées persistantes après rechargement) ; catégories conservées Sandwiches, Salad, Burgers ; spécialités réglées au même texte À propos que Saint-Léonard (« Bienvenue chez Pipita.ca, le paradis de la cuisine libanaise authentique. Notre spécialité, c'est le chishtaouk, une explosion de saveurs. »), vérifiées persistantes après rechargement ; 20 photos téléversées et vérifiées dans la grille après rechargement (les mêmes 20 photos du menu PPP) ; 0 avis ; menu 0/198.
+- Menu NDG : 0/198 — Yelp for Business n'a pas d'éditeur de menu par article et le site public yelp.ca est bloqué par DataDome depuis ce réseau ; le menu doit être saisi depuis un réseau non bloqué ou l'application Yelp.
+
+## Inventaire — ce compte ne contenait qu'UNE seule fiche (état avant 13:39)
 
 - **Pi Pita Montréal-Nord, 6241 Bd Léger, Montréal, QC H1G 3P3** — biz ID hEUJYa0BaBSn_6arfk5dhA.
 - L'aperçu n'a pas de sélecteur « Voir tous les emplacements » et ne montre que cette fiche ; les réglages du compte n'offrent que « Ajouter un autre emplacement ».
-- Les fiches attendues **Saint-Léonard (5839 rue Jean-Talon E)** et **NDG (6280 av. Somerled)** ne sont PAS dans ce compte. NDG est absente — signalé, pas créé, donc aucun doublon n'existe. (Les fiches Pi Pita étaient auparavant associées à TWILO ; seul le travail sur la fiche de ce compte connecté a été fait.)
+- Les fiches attendues **Saint-Léonard (5839 rue Jean-Talon E)** et **NDG (6280 av. Somerled)** n'étaient PAS dans ce compte au début du travail. **Depuis 13:39, NDG est dans ce compte (réclamée, voir section NDG ci-dessus) ; le compte contient maintenant 2 emplacements.** Saint-Léonard reste absente — la fiche Montréal-Nord doit y être transférée, ce qui est bloqué par le pays (voir ci-dessous). (Les fiches Pi Pita étaient auparavant associées à TWILO ; seul le travail sur la fiche de ce compte connecté a été fait.)
 
 ## Transfert tenté mais BLOQUÉ — 6241 Bd Léger → Saint-Léonard (5839 rue Jean-Talon E, H1S 1M4)
 
@@ -51,5 +59,5 @@ Signé : SOCIO, Agent Lévesque.
 
 1. Demander au soutien Yelp (ou au propriétaire, via Yelp) de corriger le pays de cette fiche de United States à Canada ; seulement alors l'adresse pourra être transférée au 5839 rue Jean-Talon E, Saint-Léonard, et les modifications nom/téléphone/site web/heures deviendront en direct — toutes ces modifications sont déjà soumises et en attente de révision Yelp.
 2. Installer l'application Yelp for Business sur le téléphone du propriétaire pour atteindre 100 % sur la liste de vérification Yelp.
-3. Saisir le menu maître de 198 articles depuis un réseau non bloqué ou l'application Yelp, sur cette fiche (et sur la fiche NDG si/quand elle est ajoutée à ce compte — NDG est actuellement absente de ce compte et ne doit pas être créée en doublon).
+3. Saisir le menu maître de 198 articles depuis un réseau non bloqué ou l'application Yelp, sur les deux fiches (Montréal-Nord et NDG, toutes deux à 0/198).
 4. Le sondage du propriétaire sur l'aperçu (« Are these still your business hours? » — actuellement Open 24 hours) a été laissé sans réponse ; il ne faut pas répondre « Oui » tant que les heures sont fausses.
