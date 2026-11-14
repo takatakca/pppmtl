@@ -52,7 +52,20 @@ export const Route = createFileRoute("/api/public/webhooks/provider")({
           return new Response("Webhook not configured", { status: 503 });
         }
 
-        const rawBody = await request.text();
+        // UrbanPiper is a public HMAC endpoint: reject oversized bodies before
+        // allocating a full string, verifying HMAC, or JSON parsing. The same
+        // streaming limit already protects the dedicated Clover webhook.
+        const { readBoundedWebhookBody, WebhookBodyTooLargeError } =
+          await import("@/lib/integration/core/webhook-body.server");
+        let rawBody: string;
+        try {
+          rawBody = await readBoundedWebhookBody(request);
+        } catch (error) {
+          return new Response("Invalid webhook body", {
+            status: error instanceof WebhookBodyTooLargeError ? 413 : 400,
+            headers: { "cache-control": "no-store" },
+          });
+        }
         const signature =
           request.headers.get("x-webhook-signature") ??
           request.headers.get("x-up-signature") ??
@@ -127,6 +140,7 @@ export const Route = createFileRoute("/api/public/webhooks/provider")({
           const { applyProviderStatusUpdate } = await import("@/lib/orders/order-service");
           applied = Boolean(
             applyProviderStatusUpdate(
+              provider,
               parsed.data.externalOrderId,
               status,
               parsed.data.status ?? parsed.data.eventType,
