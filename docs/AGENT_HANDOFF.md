@@ -1,20 +1,127 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
-## 2026-10-28 ~20:20 EDT — Controlled source security audit / PR #21 DRAFT / CI GREEN
+## 2026-11-01 (later) — Interac through BMO Instant Payments, ready for keys (Claude, main 47f8c94)
 
-**Owner request:** Authorized non-destructive PPP security assessment; no production exploit, brute force, traffic surge, real checkout, Clover/UrbanPiper call or DNS/server write. Public "/" and "/menu" returned readable SSR text (175 menu items / 17 categories). "/healthz", "/dev/menu-audit" and "/admin/sign-in" could not be retrieved by the web client; container DNS returned HTTP 000 for all attempted routes. Connected browser lacked originating session. These are **tool/access limitations**, NOT a production outage or live security weakness. Do not claim a verified live penetration-test result.
+Owner: Interac replaces debit; PPP **requests** the money from its **BMO** business account via BMO's API (dev
+account applied, keys Monday 2026-11-02). Built in `src/lib/payments/bmo/` against BMO's published spec (Instant
+Payments - CA 4.3.1, Push Notifications 1.1.0): pain.013 request at order time (`requests.server.ts`), AES-256-GCM +
+RSA-OAEP payload encryption (`crypto.ts`), OAuth code flow "Connect BMO" (`/auth/bmo/connect` admin only →
+`/auth/bmo/callback`), tokens sealed in `ppp.integration_tokens` (migration **0004**, owner must apply + grant), push
+`/api/public/webhooks/bmo` (`BMO_PUSH_SECRET`) + 60 s poll from `src/server.ts`; settled ACSC/ACCC for the exact
+amount → `markInteracPaid` (one Clover order). Tablet `/admin/interac`: BMO banner, status, "Send BMO request again".
+Manual buttons unchanged. Food Hub's Interac (customer-push) is NOT used for pppmtl.com (owner, 2026-11-01).
 
-**Finding in source only:** Main src/server.ts did not apply a central security header policy. Native Coolify/proxy might already provide headers; edge status is unverified. New independent **draft PR #21** https://github.com/takatakca/pppmtl/pull/21 applies conservative X-Frame-Options SAMEORIGIN, CSP frame-ancestors self, X-Content-Type-Options nosniff, and Referrer-Policy strict-origin-when-cross-origin. It enforces Cache-Control no-store on private/account/admin/checkout/orders/track/dev/API/write/Set-Cookie/error responses and X-Robots-Tag noindex on private paths; preserves redirects, cookies and stronger pre-existing CSP. Deliberately avoids global script/style CSP and HSTS, which require approved live browser/TLS checks. Six Vitest suites test clickjacking policies, cache behavior, URL-encoded path aliases, cookies, existing CSP and immutable redirects. No code merged, no server updated.
+**Verified:** 262 tests incl. 14 BMO (fake BMO with real encryption both ways) and 2 BMO on real PostgreSQL as
+`ppp_app`; build, typecheck, eslint 0 errors; built server: routes answer (connect without admin → sign-in, forged
+callback → failed, push GET 405, push without secret 503), tablet shows the BMO banner. **NOT verified:** any real
+BMO call; open points listed in `docs/integrations/interac.md` › "To confirm on the sandbox".
 
-**Exact source CI:** https://github.com/takatakca/pppmtl/actions/runs/40793223598 = completed SUCCESS on code SHA ff1024b954125d70c421074bbd0ac0d811a329e9, both jobs green (Nitro TypeScript lint tests + PostgreSQL 16 tenant/RLS atomic payments/outbox). First CI run failed on only two Prettier formatting issues, subsequently fixed. Doc-only commits follow; recheck HEAD CI before merge. Base main was c6aacee9f180c1bc0849cf86b3e708c8f4ed2057.
+**Next:** owner follows the Monday checklist in `docs/integrations/interac.md`; first sandbox request, then fix any
+format detail BMO reports. Cash for verified accounts: plan only (`docs/integrations/cash-verified-accounts.md`).
 
-**Coordination:** UX PR #19 remains independent; concurrent other-agent security PR #22 (https://github.com/takatakca/pppmtl/pull/22) covers bounded Clover/UrbanPiper callbacks and cross-provider ID isolation. DO NOT redo that work, force-push or merge either PR blindly. Handoff issue https://github.com/takatakca/pppmtl/issues/20 should receive current SHA, CI and production proof.
+## 2026-11-01 — Interac e-Transfer (manual) + Sign in with TAKATAK, both OFF until configured (Claude, main b57381b)
 
-**Tak Tak to verify:** In native Coolify app uuid r13hz1mmbi4eeoc6ssxbvxnv, read-only inspect running SHA, logs/proxy headers, TLS, healthz, public pages, anonymous /dev 401, redirect/cookie behavior, Google Maps iframe and sign-in integrations. Make only a few GET/HEAD requests, not a destructive pentest or scripted login. Confirm X-Frame/CSP frame-ancestors, nosniff, referrer policy, non-cacheability of private pages and unchanged checkout disablement. Do not enable Actions deploy alongside native Coolify. Obtain release authorization and green exact-SHA CI before any merge/deployment.
+**Interac (b57381b):** checkout offers "Interac e-Transfer" only when `INTERAC_REQUESTS_ENABLED=true` AND the
+PostgreSQL store is set (or Clover sandbox). E-mail required. `submitInteracOrder` (order-service.ts) prices via
+`priceForInterac` (same Clover pricing as card), stores the order unpaid with `interac {status, amount, lines}`,
+texts `INTERAC_ALERT_PHONE` + the customer (Twilio, `src/lib/notifications/sms.server.ts`). Tablet
+`/admin/interac` (requireAdmin): Request sent → Paid (row-locked `mutateStoredInterac`; one open Clover order via
+`createCloverOrder` + `addCloverLineItems`, title `… · INTERAC`, one print) → `sent_to_kitchen`, or `kitchen_failed`
+with "Send to kitchen again" (resumes from the failed step). Cancel only before Paid. Owner guide:
+`docs/integrations/interac.md`.
 
-**Live payment NO-GO:** src/lib/orders/order-store.server.ts still says ordersPersistAcrossRestarts=false. Issues #5/#6/#13 require production PostgreSQL, TAKATAK tenant-scoped identity, merchant-matched signed Clover webhooks, durable outbox/worker proven after restart/replay. No real payment, order, refund, DNS or secret write authorized.
+**Sign in with TAKATAK (f955887):** Continue with Google → takatak.ca (OAuth 2.1/OIDC, PKCE + nonce, JWKS-verified)
+→ signed HttpOnly session → prefilled checkout; orders keyed by TAKATAK `sub`. Off until `TAKATAK_OAUTH_CLIENT_ID` /
+`SECRET` exist (`docs/IDENTITY_INTEGRATION.md`).
+
+**Verified:** 248 tests incl. real PostgreSQL as `ppp_app` (two simultaneous Paid → one Clover order); build,
+typecheck, eslint 0 errors; built server + Chromium: e-mail required, order page shows the amount, tablet shows
+"Paid · NOT in the kitchen" + retry (Clover 401 with fake keys, expected). **NOT verified:** real Twilio text, real
+Clover order/lines/print via the REST token, how the register taxes these custom lines, anything live — Coolify has
+not deployed since 22206ee (owner: server down).
+
+**Next:** owner's server back → redeploy main → `/healthz` + checkout; then the switch-on list in
+`docs/TASK_QUEUE.md` (2026-11-01).
+
+## 2026-10-31 — Courier dispatch for website delivery orders (Claude, branch `claude/courier-dispatch`, NOT on main)
+
+Restaurant-side "Find a driver" on the kitchen tablet: `/admin/dispatch` (admin session). For a PAID website
+DELIVERY order it quotes **DoorDash Drive** and **Uber Direct** side by side (fee, courier available now, pickup and
+drop-off ETA, CHEAPEST / FASTEST badges; CLOSEST only if a provider reports a courier distance — neither quote does),
+books the chosen quote (real delivery + tracking link), cancels, refreshes, and takes status webhooks at
+`/api/public/webhooks/doordash` (Authorization header = `DOORDASH_WEBHOOK_SECRET`) and `/api/public/webhooks/uber`
+(HMAC `x-uber-signature`, `UBER_DIRECT_WEBHOOK_SECRET`). **Skip** has no public courier API: manual "book in the Skip
+portal" card. **My driver**: no fee, saved list `PPP_OWN_DRIVERS`, optional Twilio text. Code: `src/lib/delivery/`,
+guide: `docs/integrations/couriers.md`. The dispatch record lives in `ppp.orders.order_document.dispatch` (row-locked
+update, one live courier per order): **no SQL / grant for the owner to run**. Reuses `src/config/delivery.ts`
+(RESTAURANT_COORDS, postalCodeOf, distanceKm, deliveryAddressLine). Also: the customer sign-up popup no longer opens
+on `/admin/*`; admin sign-in accepts `?next=/admin/dispatch`; CI database job also runs `dispatch.pg.test.ts`.
+
+**Verified:** build, typecheck, eslint (0 errors), vitest 223 passed; CI run 41207103691 on 9b7ee1c green, including
+real PostgreSQL 16 as the limited role (dispatch survives a restart, webhook lookup, tenant isolation, two tablets
+booking at once → one courier). Built server + Chromium at 1280×800 and 800×1280: board, Find a driver, own driver
+assigned, unpaid order refused. **NOT verified:** any real DoorDash/Uber/Twilio call or webhook (no keys yet).
+
+**Next:** lead reviews and merges the branch; owner opens DoorDash Drive (sandbox first) and Uber Direct (test mode),
+sets the env vars of `docs/integrations/couriers.md` §7 in Coolify, registers both webhook URLs, then books one test
+delivery per provider from `/admin/dispatch`.
+
+## 2026-10-31 — Checkout revamp with tip and website delivery (Claude)
+
+New checkout (`src/routes/checkout.tsx` + `src/components/checkout/*`): pickup (Google embed map, directions, Locate me distance) or delivery (OpenStreetMap address search, Locate me, served-area check from `src/config/delivery.ts`, map preview), contact with email (passed to Clover), tip chips, exact totals (`src/lib/pricing.ts`), pinned mobile pay bar. Server: `CheckoutRequest.tip` (validated), `deliveryFee` set by the server ($5, taxed), Clover lines "Livraison / Delivery" (note = address) and "Pourboire / Tip" (untaxed), title "… · LIVRAISON" and note "LIVRAISON / DELIVERY: <address>". Idempotency key includes the tip. Delivery postal codes are a default list — owner to confirm. A second agent builds courier dispatch (DoorDash / Uber / Skip / own driver) on branch `claude/courier-dispatch` — review before merging. Next: Google via takatak.ca, Interac (Québec).
+
+## 2026-10-29 (latest) — Clover payment page opens on pppmtl.com (Claude)
+
+"We could not send your order to the kitchen" = Clover refused every Hosted Checkout session with HTTP 400 "Please provide either itemRefUuid or name, price." Lines now send name + price (+ note, taxes), no `itemRefUuid`; `User-Agent` sent on all Clover calls; refusals are logged as `checkout.session_refused` with Clover's masked reason (`cloverRefusalDetail`). Verified with Playwright on the live site: Clover's page opens with the right item, $14.99 + $2.25 tax = CA$17.24. NOT verified: a real payment, webhook, title + print, refund. Clover's page is branded "On2GO.CA" (merchant setting in Clover).
+
+## 2026-10-29 (later) — "Something changed with your order" fixed (Claude)
+
+Cause: the site's menu was the Oct 7 Clover **export** snapshot; production checkout re-prices every cart on the **live** Clover API menu, and the owner had reorganised Clover since (144 of 175 items: "Boisson incluse" → required "Breuvage incluse", new Duo/Trio/Combo groups, price changes). Every changed item was refused with `menu_changed`.
+
+Fix: `GET /api/public/clover-menu` (live menu, snapshot format, public menu data only); `npm run clover:snapshot -- --url https://pppmtl.com/api/public/clover-menu` refreshes the snapshot and keeps mapped items Clover removed as unavailable (`cheesecake-chocolat-chips`, `clean-water` — owner to remap or remove); 11 `cloverName` updated; refused carts now log `checkout.menu_changed` with the exact mismatch. Verified: all 173 orderable site items, built as the browser builds them, price on the downloaded live menu with site price = Clover price; 165 tests pass incl. 6 real-PostgreSQL.
+
+**Rule for every agent:** after any Clover menu edit, refresh the snapshot as above or checkout breaks for the changed items. Still NOT verified: a real paid order + refund.
+
+## 2026-10-29 — Durable Clover checkout wired (Claude, 1e57831)
+
+**What changed:** `ordersPersistAcrossRestarts` is gone. With `DATABASE_URL` set, Clover orders use PostgreSQL (`src/lib/orders/database.server.ts` pool, `durable-orders.server.ts` operations, existing `postgres-transactions.server.ts` + `clover-fulfillment-worker.server.ts`). Order stored before Clover's page opens; session linked before redirect (either failure refuses checkout); signed webhook → `ppp.record_verified_clover_payment` → 200 once stored; kitchen outbox titles then prints once; `src/server.ts` starts a 30 s retry loop. Production gate is now `DATABASE_URL` + `CLOVER_API_TOKEN` + merchant/ecomm/webhook keys.
+
+**Database (owner, 2026-10-29):** Coolify PostgreSQL 17 resource on vps2 (container `mfcs2guqflcf1o9sfgonrznd`), database `pppmtl`, migrations 0001–0003 applied, runtime role `ppp_app` (NOSUPERUSER NOBYPASSRLS, grants in DB_ROLLOUT.md), `DATABASE_URL` set on the app. Tenant id = `PPP_TENANT_ID` or `pppmtl` (server config, never the browser).
+
+**Verified:** locally on PostgreSQL 16 as the limited role: 165/165 tests incl. `durable-orders.pg.test.ts` (restart survival, one ticket across redeliveries, Clover-outage retry, unknown session ignored, unlinkable session refused, DB down refuses before Clover, retry after failure). Built Nitro server tested: `/healthz`, signed webhook stored payment as PAID, background loop retried the title. CI database job now runs the same test.
+
+**NOT verified:** a real Clover payment, the live Hosted Checkout request against production Clover, the REST token's permissions, printing on the real printer. Next: owner redeploys, places one small pickup order, checks the `🌐 Site web · PPP-…` ticket, refunds in Clover; read Coolify runtime logs for `[integration_events]`.
+## 2026-10-28 ~20:12 EDT — PPP product photo recovery / gift-card UX: CI GREEN; Tak Tak next
+
+**Scope:** Safe, reviewed source changes appended to existing draft [PR #19](https://github.com/takatakca/pppmtl/pull/19) on branch `fix/franchise-truthful-status-gifts-20261028`. No merge, production deployment, DNS, secrets, real payments, provider calls or server commands. Base `main` remained `c6aacee9f180c1bc0849cf86b3e708c8f4ed2057` with full CI [40786387653](https://github.com/takatakca/pppmtl/actions/runs/40786387653) success.
+
+**New proven UI bug + fix:** `src/components/menu/menu-item-image.tsx` previously held one persistent `broken`/`loaded` status even when a reusable product card received a new `src`. Once an old image failed, the component hid its `img`, leaving the next product's valid URL permanently blocked. New `src/components/menu/image-load-state.ts` scopes load status to the current source; three unit cases in `image-load-state.test.ts` cover failed-old/new-success, loaded-old/new-loading/null, and unchanged-source stability. A product's new photo can now load. No product art, Clover photo URLs, Canva designs or menu price data modified.
+
+**Gift-card accessibility/functionality:** `src/routes/gift-cards.tsx` had a prominent "Call PPP" button that merely set `sent=true` and revealed the phone number; it did not actually call anyone. Replaced it with an actual `tel:` link to the verified business phone from `pppBusiness.phone.href`; no gift card is sold or issued. Preview now reflects sender and note already typed in the unused fields, bounds recipient/sender to 40 chars and uses `aria-pressed` for selected denomination buttons. This is a safe visual-only/non-transactional change.
+
+**CI exact:** [PPPMTL CI 40792139824](https://github.com/takatakca/pppmtl/actions/runs/40792139824) = **completed SUCCESS for source SHA `e76326c2ba2a4ddf97b9d1b6054f4a3fff16573a`**, both quality (Nitro build, TS, ESLint, Vitest) and PostgreSQL 16 (tenant isolation/RLS, atomic payments, outbox leases) jobs green. Additional WORKLOG/handoff-only commits followed: recheck latest HEAD CI before concluding release readiness.
+
+**Image inventory evidence:** GitHub `public/menu/clover/` currently has **336 WebP files**, 168 pairs of 400px/1200px Clover item images. `src/data/clover/overlay.ts` prefers `/menu/clover/{id}-1200.webp` if a photo ID exists, otherwise falls back to `src/data/catalog.generated.ts` generic category files. This is **not** evidence that Clover files are the owner's 158 verified **yellow finished Canva JPGs**. Do not bulk overwrite. Issue [#18](https://github.com/takatakca/pppmtl/issues/18) and its manifests are authoritative; 175 public menu entries, 198 master Canva entries and reported 179 Clover menu entries must be reconciled by stable ID / exact product name before attaching new art.
+
+**Tak Tak server handoff:** [issue #20](https://github.com/takatakca/pppmtl/issues/20); review PR #19, verify exact latest CI, real FR/EN/ES/mobile/keyboard QA, approved location statuses, then read-only native Coolify running SHA and rollback on app `r13hz1mmbi4eeoc6ssxbvxnv`. Public /menu crawler currently shows 17 categories/175 products; HTTP health and private routes could not be independently read via this session's browser tools. Never infer running SHA from a public page or successful CI. Actions deploy skip remains intentional. **Live Clover checkout NO-GO**: `ordersPersistAcrossRestarts=false` and #5/#6/#13 not proven in production. Google Docs PPP project and TAKATAK journal to receive these exact CI and handoff updates in place.
 
 ---
+
+
+## 2026-10-28 ~19:55 EDT — RELAIS TAK TAK / franchise copy / PR #19 (DRAFT)
+
+**Owner request:** Continue safe PPP franchise-level UX/brand cleanup and delegate native Coolify validation to the server-capable agent **Tak Tak**. The handoff ticket is [issue #20](https://github.com/takatakca/pppmtl/issues/20); the actual fix is [draft PR #19](https://github.com/takatakca/pppmtl/pull/19), branch `fix/franchise-truthful-status-gifts-20261028`, based on verified main `c6aacee9f180c1bc0849cf86b3e708c8f4ed2057`. Main [CI 40786387653](https://github.com/takatakca/pppmtl/actions/runs/40786387653) SUCCESS for this exact SHA (quality + PostgreSQL 16), while Actions Coolify alternative SKIPPED intentionally (native Coolify only). Zero open PRs at start; this draft PR is new and deliberately **not merged**. Existing agent SOCIO changes preserved.
+
+**Demonstrated content defects:** home `story-band.tsx` hard-coded Sainte-Catherine E as open and Saint-Léonard as upcoming, contradicting `src/config/locations.ts` (`temporarily_closed` / `open`). Draft PR now derives story timeline states/labels from that registry via `story-timeline.ts` with three Vitest tests; no store lifecycle facts changed. Gift-card previews falsely promised instantaneous email, unsupported terms ("never expires"), and buying while online processing is not implemented. Draft PR makes its non-transactional status visible before user input, uses existing official PPP logo, changes the homepage gift card link, and aligns FAQ and member copy (no gift-card purchase or email triggered).
+
+**Test evidence and remaining gate:** First PR Actions [40790238039](https://github.com/takatakca/pppmtl/actions/runs/40790238039) had PostgreSQL job SUCCESS, quality job FAILED only at ESLint/Prettier (5 formatting errors); source build and TypeScript succeeded. Formatting was repaired on the same draft branch in `8ec9a433` and `a6d20fcb`. **Check final PR HEAD CI after subsequent handoff/WORKLOG commits**; do not call it green without both job results. No direct local runner or active Coolify browser session was available.
+
+**Server handoff to Tak Tak:** native Coolify PPP app UUID `r13hz1mmbi4eeoc6ssxbvxnv`: read actual live SHA, health, rollback and HTTP smoke proofs; compare exact target to CI. Central TAKATAK Drive journal reports `/healthz 200` around 19:29 EDT, **but liveness is not deployed-SHA proof**, and this session cannot independently validate it. Keep GitHub Actions fallback off. Before any publish, review PR #19, verify operational location statuses and FR/EN/ES mobile, keyboard/accessibility. Official Canva yellow export manifest #18: 158 verified, 13 plain-only, 27 missing out of 198 master records; site currently advertises 175 items and Clover journal reports 179, which requires a source-ID reconciliation rather than assuming a defect or faking missing photos. Never use AI food photos, "PayP" or "Sweet Shack"; the brand is **PPP Pizzeria with its actual gold logo**.
+
+**Absolute payment NO-GO:** `src/lib/orders/order-store.server.ts` still sets `ordersPersistAcrossRestarts=false`; production PostgreSQL, canonical TAKATAK tenant identity, signed merchant-matched Clover webhook and durable outbox/worker are unproven (#5/#6/#13). Do not enable a live payment, modify DNS/server secrets or trigger refunds/orders. No SSH, DNS, Coolify deploy or financial action performed in this review. Preserve all other agents' edits; use ordinary commits only.
+
+---
+
 
 
 ## 2026-10-28 ~14 h EDT — Guest-order runtime security, CI GREEN and Drive sync
