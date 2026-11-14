@@ -9,9 +9,12 @@
  *    pickup / paid note, then ONE print on the order printer (and the KDS set as order printer). An order that
  *    already carries the title is left alone, so a repeated webhook never prints a second ticket. The Food Hub
  *    kitchen tablet recognises website orders by that title.
+ * A signed payment must match a tracked PPP Clover checkout before Clover orders are modified.
+ * Missing local linkage is retryable, not permission to title/print a merchant order.
  * With DATABASE_URL (always, for real cards) steps 2–3 are durable instead: the payment is recorded in
  * PostgreSQL with its title task in one transaction, and the kitchen outbox titles then prints once, retrying
  * across Clover outages and restarts (handleDurablePayment). Without it, a sandbox uses this process's memory.
+
  */
 import { createHash } from "node:crypto";
 import type { WebhookAdapter, WebhookEvent } from "@/lib/integration/core/adapter";
@@ -165,6 +168,22 @@ export async function handleCloverHostedCheckoutWebhook(request: Request): Promi
   try {
     const { applyCloverPayment } = await import("@/lib/orders/order-service");
     order = applyCloverPayment(event.checkoutSessionId, event.paymentId, approved);
+    // A valid Clover signature and merchant id do not prove that the payment
+    // belongs to a PPP website checkout. A signed event for another Clover
+    // session must not label or print an unrelated merchant order.
+    if (!order) {
+      releaseWebhookDelivery(key);
+      logIntegrationEvent({
+        provider: "clover",
+        eventType: "payment.checkout_unmatched",
+        status: "error",
+        payloadReference: event.checkoutSessionId,
+      });
+      return new Response("Checkout session not linked to a PPP order", {
+        status: 503,
+        headers: { "Retry-After": "30", "Cache-Control": "no-store" },
+      });
+    }
     confirmation = approved ? await confirmInClover(event.paymentId, order) : null;
   } catch {
     // A transient exception after claiming a delivery is not a completed
