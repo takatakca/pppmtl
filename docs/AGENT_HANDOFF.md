@@ -134,6 +134,24 @@ Fix: `GET /api/public/clover-menu` (live menu, snapshot format, public menu data
 
 **Tak Tak / handoff:** See [issue #20](https://github.com/takatakca/pppmtl/issues/20) and the detailed report in this PR. Verify latest CI and conflicts with PR #21, review branch and tests, then perform strictly read-only/native Coolify and authorized staging checks. No two deployment mechanisms simultaneously. Keep real checkout disabled until launch gates are demonstrated. Update both existing Google Docs (PPP technical and TAKATAK journal) with exact CI and running SHA only once verified.
 
+## 2026-10-28 ~21:40 EDT — SECURITY RECONCILIATION ON FOOD HUB PR #23
+
+Reconciled Clover-specific safety guards from draft PR #22 on existing draft PR #23 **without restoring UrbanPiper**. Provider-scoped external IDs, immutable payment association, terminal-status refusal, retryable 503 on unmatched signed Clover checkout **before** REST title/print; added Food Hub-vs-Clover collision test and signed unrelated-payment regression test. Code-and-test SHA `9173cbabbd74218346a7146d2f0ee8dfaf21f4ce`. See [technical note](agent-notes/2026-10-28-foodhub-clover-reconciliation.md). Latest exact-HEAD CI and native Coolify proof **pending**, no merge/deploy, no live payment or Food Hub order transport. Next: CI and Prettier review, reconcile PR #21/#22/#19, owner staging review; Food Hub issue #103 gates remain NO-GO.
+
+---
+
+## 2026-10-28 — OWNER DIRECTIVE: URBANPIPER RETIRED; FIRST-PARTY FOOD HUB PR #23
+
+**Owner explicitly cancelled UrbanPiper.** Source-only implementation: [draft PPP PR #23](https://github.com/takatakca/pppmtl/pull/23), branch `refactor/ppp-retire-urbanpiper-foodhub-20261028`, base main `c6aacee9f180c1bc0849cf86b3e708c8f4ed2057`. Another security PR #22 touches the same provider webhook and order-service files; MUST reconcile or adapt its still-relevant Clover safeguards in the merged SHA. Existing PRs #19/#21/#22 preserved.
+
+**Actual code work (not deployed):** removed all 11 `src/lib/integration/providers/urbanpiper/*.ts` modules and obsolete API/credential request docs; `POST /api/public/webhooks/provider?provider=urbanpiper` now **410 before reading request bytes**, no sign-in, no test order/sync, no outgoing adapter; vendor no longer in registry, route mappings, environment credential inventory, dashboard or order dispatch. All non-Clover PPP stores now have `orderingProvider:"foodhub"` intent, no verified Food Hub store id, merchant code or active transport. NDG Clover POS/cart, merchant-signed webhook, real catalog and official Canva art untouched. Uber/Skip/DoorDash links are still only their actual customer storefront links. Admin integrations is a read-only status/architecture page. Reusable menu validation, image policy and status mappings moved into PPP generic core with tests. See new [Food Hub architecture](../integrations/foodhub.md) and the migration tests `src/lib/integration/__tests__/retired-urbanpiper.test.ts` (410, obsolete env vars don't activate, registry absent, Food Hub disconnected).
+
+**Cross-repo reality:** Existing first-party [Food Hub](https://github.com/takatakca/foodhubca) already offers direct marketplaces/kitchen, a Clover website-order mirror, and an optional authenticated website-order endpoint. [Food Hub issue #103](https://github.com/takatakca/foodhubca/issues/103) records secure PPP connectivity acceptance requirements, **not a direct payment connection**. Food Hub `lib/foodhub/delivery/website.ts` currently accepts bearer-authenticated JSON-supplied `paid`, line `price`, `brand`, `location`: **DO NOT send PPP live orders there** until server-authoritative catalog/pricing/payment state, explicit tenant/store mapping, signed/replay-protected identity and durable transaction/outbox are implemented and tested in BOTH repos. Prefer already-designed Clover payment → Clover kitchen → Food Hub read-only order mirror to avoid double tickets, pending verification.
+
+**Quality evidence:** Initial CI on this extensive deletion/refactor failed **TypeScript** (legacy health.server import with removed types) and later **Prettier-only** (29 then 4 errors). The obsolete module and docs were removed, tests migrated and all Prettier fixes committed. [PPPMTL CI 40796371110](https://github.com/takatakca/pppmtl/actions/runs/40796371110) shows **both jobs SUCCESS** on source SHA `d986c0cf9906c743bb7ea295eda0fd43ff1287d7` (Nitro build, TS, ESLint, Vitest + PostgreSQL 16 tenant/RLS/atomic payment/worker tests). Handoff/WORKLOG documentation commits follow; check exact latest HEAD CI independently. Do not misreport earlier cancelled interim CI runs as a security failure.
+
+**Operational safety / Tak Tak actions:** No source branch has been merged or deployed. Native Coolify running SHA and external provider channel routing are NOT verified. Do NOT disable a currently delivering marketplace or revoke keys blindly: operator must audit Uber Eats, DoorDash, Skip and Clover merchant admin panels, ensure tablets/direct integrations deliver orders, document rollback then retire vendor platform credentials and webhook registrations in secrets console (not git). Require explicit owner-approved change window if affecting real orders. Check native Coolify for both applications, exact running SHA, `/healthz`, route 410 after authorized deployment, Clover signed webhook 405 on GET and live order print path in staging. Record verified evidence and rollback in [Tak Tak issue #20](https://github.com/takatakca/pppmtl/issues/20) and Food Hub #103. Keep GitHub Actions deploy skipped (native Coolify only). **NO REAL CHECKOUT** until durable PostgreSQL and backup/recovery, TAKATAK tenant RBAC, signed merchant-correlated Clover webhook, transactional inbox/outbox/worker and failure tests #5/#6/#13 proven; `ordersPersistAcrossRestarts=false`. No image edits, DNS, secrets, merchant orders, refunds, or live payment writes were performed.
+
 
 ---
 
@@ -151,6 +169,7 @@ Fix: `GET /api/public/clover-menu` (live menu, snapshot format, public menu data
 **Absolute payment NO-GO:** `src/lib/orders/order-store.server.ts` still sets `ordersPersistAcrossRestarts=false`; production PostgreSQL, canonical TAKATAK tenant identity, signed merchant-matched Clover webhook and durable outbox/worker are unproven (#5/#6/#13). Do not enable a live payment, modify DNS/server secrets or trigger refunds/orders. No SSH, DNS, Coolify deploy or financial action performed in this review. Preserve all other agents' edits; use ordinary commits only.
 
 ---
+
 
 
 

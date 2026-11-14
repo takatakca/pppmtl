@@ -330,14 +330,11 @@ export function createOrder(
 }
 
 async function adapterFor(order: InternalOrder): Promise<ProviderOrderAdapter | null> {
-  if (order.provider === "clover") {
-    const { cloverOrderSubmitAdapter } = await import("@/lib/integration/providers/clover/orders");
-    return cloverOrderSubmitAdapter;
-  }
-  if (order.provider !== "urbanpiper") return null;
-  const { urbanPiperOrderSubmitAdapter } =
-    await import("@/lib/integration/providers/urbanpiper/order-submit");
-  return urbanPiperOrderSubmitAdapter;
+  // Owner retired UrbanPiper. Food Hub is not yet linked with signed, durable
+  // first-party order transmission; no fallback third-party transport is allowed.
+  if (order.provider !== "clover") return null;
+  const { cloverOrderSubmitAdapter } = await import("@/lib/integration/providers/clover/orders");
+  return cloverOrderSubmitAdapter;
 }
 
 /** Clover orders live in PostgreSQL when DATABASE_URL is set; other providers stay in memory. */
@@ -476,6 +473,7 @@ async function submitInteracOrder(
  * Clover's Hosted Checkout webhook said the payment for this checkout session went through (or was declined).
  * Null when the linked Clover checkout is unknown (another instance, restart,
  * or an unrelated provider). The webhook must fail closed without touching Clover.
+
  */
 export function applyCloverPayment(
   checkoutSessionId: string,
@@ -487,6 +485,7 @@ export function applyCloverPayment(
   // A cancelled/failed checkout cannot be resurrected by a late callback,
   // and one checkout cannot silently switch to a different Clover payment.
   // Both conditions require explicit merchant review, not automatic printing.
+
   if (order.status === "CANCELLED" || order.status === "FAILED") return null;
   if (
     approved &&

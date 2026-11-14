@@ -15,6 +15,7 @@
  * PostgreSQL with its title task in one transaction, and the kitchen outbox titles then prints once, retrying
  * across Clover outages and restarts (handleDurablePayment). Without it, a sandbox uses this process's memory.
 
+
  */
 import { createHash } from "node:crypto";
 import type { WebhookAdapter, WebhookEvent } from "@/lib/integration/core/adapter";
@@ -171,6 +172,7 @@ export async function handleCloverHostedCheckoutWebhook(request: Request): Promi
     // A valid Clover signature and merchant id do not prove that the payment
     // belongs to a PPP website checkout. A signed event for another Clover
     // session must not label or print an unrelated merchant order.
+
     if (!order) {
       releaseWebhookDelivery(key);
       logIntegrationEvent({
