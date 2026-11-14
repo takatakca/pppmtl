@@ -20,9 +20,13 @@ import { checkSelections, chosenOptions } from "@/lib/modifiers";
 import type { IntegrationProviderId } from "@/lib/integration/core/contracts";
 import { logIntegrationEvent } from "@/lib/integration/core/logging";
 import { cloverCheckoutConfigured } from "@/lib/integration/providers/clover/config.server";
+import { DELIVERY_FEE_CENTS, deliversTo, postalCodeOf, websiteDeliveryAt } from "@/config/delivery";
+import { isValidTip } from "@/lib/pricing";
+import { interacRequestsEnabled } from "@/lib/payments/interac-config.server";
+import { durableOrderStoreConfigured } from "./database.server";
 import type { ProviderOrderAdapter } from "./provider-order-adapter";
 import { orderError, orderFailure, type OrderErrorCode, type OrderResult } from "./errors";
-import { claimOrderKey, deriveIdempotencyKey } from "./idempotency";
+import { claimOrderKey, deriveIdempotencyKey, releaseOrderKey } from "./idempotency";
 import { orderToUniversalDraft } from "./order-mapping";
 import { validateOrderDraft, type ValidationReport } from "./validation";
 import {
@@ -58,6 +62,10 @@ export interface CheckoutRequest {
   customer: OrderCustomer;
   deliveryAddress: string | null;
   notes: string;
+  /** Cents. The server checks it; it is never taxed. */
+  tip?: number;
+  /** Card on Clover's page (default) or an Interac e-Transfer request. */
+  paymentMethod?: "card" | "interac";
 }
 
 const toCents = (dollars: number | null): number | null =>
@@ -85,7 +93,11 @@ function hasCheckoutPayloadShape(value: unknown): value is CheckoutRequest {
     !limitedText(input.customer.phone, 40) ||
     !limitedText(input.customer.email, 254) ||
     !limitedText(input.deliveryAddress, 500) ||
-    !limitedText(input.notes, 480)
+    !limitedText(input.notes, 480) ||
+    (input.tip != null && !isValidTip(input.tip)) ||
+    (input.paymentMethod != null &&
+      input.paymentMethod !== "card" &&
+      input.paymentMethod !== "interac")
   ) {
     return false;
   }
@@ -191,9 +203,19 @@ function toDraft(request: CheckoutRequest, items: OrderItem[]): OrderDraft {
     orderType: request.orderType,
     items,
     customer: request.customer,
-    deliveryAddress: request.deliveryAddress,
+    deliveryAddress: request.orderType === "DELIVERY" ? request.deliveryAddress : null,
     notes: (request.notes ?? "").slice(0, 480),
+    tip: request.tip ?? 0,
+    paymentMethod: request.paymentMethod === "interac" ? "INTERAC" : "CARD",
   };
+}
+
+/** Website delivery: from a delivering store, to a served postal-code area (config/delivery.ts). */
+function deliveryCheck(request: CheckoutRequest): OrderErrorCode | null {
+  if (request.orderType !== "DELIVERY") return null;
+  if (!websiteDeliveryAt(request.locationId)) return "unsupported_order_type";
+  if (!request.deliveryAddress?.trim()) return "missing_address";
+  return deliversTo(postalCodeOf(request.deliveryAddress)) ? null : "outside_delivery_area";
 }
 
 /** 1 — VALIDATE. Pure inputs in, human errors out. */
@@ -217,14 +239,24 @@ export function validateOrder(request: CheckoutRequest): ValidationReport {
   if (dropped > 0 && !errors.some((e) => e.code === "menu_changed")) {
     errors.push(orderError("menu_changed"));
   }
-  // This merchant's Clover Hosted Checkout is pickup-only; reject unsupported
-  // fulfilment before an order id, payment session, or guest grant is created.
-  if (
+  // Clover takes pickup, and delivery only where the website delivers; reject anything else
+  // before an order id, payment session, or guest grant is created.
+  const delivery =
     route.provider === "clover" &&
     request.orderType !== "PICKUP" &&
-    !errors.some((e) => e.code === "unsupported_order_type")
-  ) {
-    errors.push(orderError("unsupported_order_type"));
+    request.orderType !== "DELIVERY"
+      ? "unsupported_order_type"
+      : route.provider === "clover"
+        ? deliveryCheck(request)
+        : null;
+  if (delivery && !errors.some((e) => e.code === delivery)) errors.push(orderError(delivery));
+  // Interac: switched on, and an e-mail to send the request to.
+  if (request.paymentMethod === "interac") {
+    if (route.provider !== "clover" || !interacRequestsEnabled()) {
+      errors.push(orderError("interac_unavailable"));
+    } else if (!request.customer.email?.trim()) {
+      errors.push(orderError("missing_email"));
+    }
   }
   return { valid: errors.length === 0, errors };
 }
@@ -271,12 +303,15 @@ export function createOrder(
     total: null,
     // Clover orders are paid online on Clover's page before the kitchen gets them.
     paymentStatus: route.provider === "clover" ? "UNPAID" : "PAY_AT_RESTAURANT",
+    tip: draft.tip ?? 0,
+    deliveryFee: request.orderType === "DELIVERY" ? DELIVERY_FEE_CENTS : 0,
+    paymentMethod: draft.paymentMethod ?? "CARD",
     status: "CREATED",
     providerStatus: null,
     providerOrderId: null,
     idempotencyKey,
     customer: request.customer,
-    deliveryAddress: request.deliveryAddress,
+    deliveryAddress: draft.deliveryAddress,
     notes: draft.notes,
     failureCode: null,
     createdAt: now,
@@ -295,15 +330,34 @@ export function createOrder(
 }
 
 async function adapterFor(order: InternalOrder): Promise<ProviderOrderAdapter | null> {
-  // Owner retired UrbanPiper. Food Hub is not yet linked with signed, durable
-  // first-party order transmission; no fallback third-party transport is allowed.
-  if (order.provider !== "clover") return null;
-  const { cloverOrderSubmitAdapter } = await import("@/lib/integration/providers/clover/orders");
-  return cloverOrderSubmitAdapter;
+  if (order.provider === "clover") {
+    const { cloverOrderSubmitAdapter } = await import("@/lib/integration/providers/clover/orders");
+    return cloverOrderSubmitAdapter;
+  }
+  if (order.provider !== "urbanpiper") return null;
+  const { urbanPiperOrderSubmitAdapter } =
+    await import("@/lib/integration/providers/urbanpiper/order-submit");
+  return urbanPiperOrderSubmitAdapter;
 }
 
-function fail(order: InternalOrder, code: OrderErrorCode): OrderResult<InternalOrder> {
-  updateOrder(order.id, { status: "FAILED", failureCode: code });
+/** Clover orders live in PostgreSQL when DATABASE_URL is set; other providers stay in memory. */
+function isDurable(order: InternalOrder): boolean {
+  return order.provider === "clover" && durableOrderStoreConfigured();
+}
+
+const durableOrders = () => import("./durable-orders.server");
+
+async function fail(
+  order: InternalOrder,
+  code: OrderErrorCode,
+): Promise<OrderResult<InternalOrder>> {
+  const failed = updateOrder(order.id, { status: "FAILED", failureCode: code });
+  // Every failure here happens before a payment page reaches the customer, so "Pay" again is a new order.
+  releaseOrderKey(order.idempotencyKey);
+  if (failed && isDurable(failed)) {
+    // Best effort: a stored order that never got a payment page cannot be paid either way.
+    await (await durableOrders()).recordUnpaidOutcome(failed).catch(() => undefined);
+  }
   logIntegrationEvent({
     provider: order.provider,
     eventType: "order.submit_failed",
@@ -316,20 +370,41 @@ function fail(order: InternalOrder, code: OrderErrorCode): OrderResult<InternalO
 
 /** 3 — SUBMIT. Idempotent by construction; refuses rather than pretends. */
 export async function submitOrder(orderId: string): Promise<OrderResult<InternalOrder>> {
-  const order = readOrder(orderId);
+  let order = readOrder(orderId);
   if (!order) return orderFailure("order_not_found");
+  // Never answer a retry with an earlier failed attempt as if it had been placed.
+  if (order.status === "FAILED") return orderFailure("provider_unavailable");
   if (order.status !== "CREATED") return { ok: true, data: order };
 
-  if (!order.providerLocationId) return fail(order, "location_not_mapped");
+  const providerLocationId = order.providerLocationId;
+  if (!providerLocationId) return fail(order, "location_not_mapped");
 
   const adapter = await adapterFor(order);
   if (!adapter || !adapter.isConfigured(order.locationId)) {
     return fail(order, "provider_unavailable");
   }
 
+  // The order is stored before Clover is asked for a payment page: no money without a durable order.
+  const durable = isDurable(order);
+  if (durable) {
+    let stored: InternalOrder;
+    try {
+      stored = await (await durableOrders()).persistNewOrder(order);
+    } catch {
+      return fail(order, "provider_unavailable");
+    }
+    if (stored.id !== order.id) {
+      // Same browser, same cart, same window, across a restart: continue the first order.
+      order = saveOrder(stored);
+      if (order.status !== "CREATED") return { ok: true, data: order };
+    }
+  }
+
+  if (order.paymentMethod === "INTERAC") return submitInteracOrder(order, durable);
+
   const result = await adapter.createOrder(
     orderToUniversalDraft(order),
-    order.providerLocationId,
+    providerLocationId,
     order.idempotencyKey,
     { orderId: order.id },
   );
@@ -345,13 +420,62 @@ export async function submitOrder(orderId: string): Promise<OrderResult<Internal
     total: result.data.total,
     ...(result.data.paymentUrl ? { paymentUrl: result.data.paymentUrl } : {}),
   });
-  return updated ? { ok: true, data: updated } : orderFailure("order_not_found");
+  if (!updated) return orderFailure("order_not_found");
+
+  // The customer is only sent to Clover once the session is linked to the stored order.
+  if (durable) {
+    try {
+      await (await durableOrders()).linkCheckoutSession(updated);
+    } catch {
+      return fail(updated, "provider_unavailable");
+    }
+  }
+  return { ok: true, data: updated };
+}
+
+/**
+ * Interac e-Transfer: no payment page. The order is priced from Clover now (the amount to request), stored, and the
+ * restaurant is alerted; it reaches Clover and the kitchen when staff mark it paid (payments/interac.server.ts).
+ */
+async function submitInteracOrder(
+  order: InternalOrder,
+  durable: boolean,
+): Promise<OrderResult<InternalOrder>> {
+  const { priceForInterac, websiteOrderNumber } =
+    await import("@/lib/integration/providers/clover/orders");
+  const priced = await priceForInterac(orderToUniversalDraft(order), order.id);
+  if (!priced.ok) return fail(order, priced.error.code);
+  const updated = updateOrder(order.id, {
+    status: "SUBMITTED",
+    providerStatus: "awaiting_interac",
+    orderNumber: websiteOrderNumber(order.id),
+    subtotal: priced.data.subtotal,
+    tax: priced.data.tax,
+    total: priced.data.total,
+    interac: {
+      status: "awaiting_request",
+      amount: priced.data.total,
+      lines: priced.data.lines,
+      updatedAt: new Date().toISOString(),
+    },
+  });
+  if (!updated) return orderFailure("order_not_found");
+  if (durable) {
+    try {
+      await (await durableOrders()).recordInteracPending(updated);
+    } catch {
+      return fail(updated, "provider_unavailable");
+    }
+  }
+  const { announceInteracOrder } = await import("@/lib/payments/interac.server");
+  await announceInteracOrder(updated).catch(() => undefined);
+  return { ok: true, data: updated };
 }
 
 /**
  * Clover's Hosted Checkout webhook said the payment for this checkout session went through (or was declined).
- * Null if the checkout is not associated with a tracked PPP Clover order.
- * The webhook must not modify Clover merchant orders without this linkage.
+ * Null when the linked Clover checkout is unknown (another instance, restart,
+ * or an unrelated provider). The webhook must fail closed without touching Clover.
  */
 export function applyCloverPayment(
   checkoutSessionId: string,
@@ -360,8 +484,9 @@ export function applyCloverPayment(
 ): InternalOrder | null {
   const order = findOrderByProviderId("clover", checkoutSessionId);
   if (!order) return null;
-  // Do not revive terminal orders or silently replace an attached payment.
-  // An unknown/mismatched payment must be reconciled by the merchant instead.
+  // A cancelled/failed checkout cannot be resurrected by a late callback,
+  // and one checkout cannot silently switch to a different Clover payment.
+  // Both conditions require explicit merchant review, not automatic printing.
   if (order.status === "CANCELLED" || order.status === "FAILED") return null;
   if (
     approved &&
@@ -382,7 +507,7 @@ export async function cancelOrder(
   orderId: string,
   reason: string,
 ): Promise<OrderResult<InternalOrder>> {
-  const order = readOrder(orderId);
+  const order = await getOrderById(orderId);
   if (!order) return orderFailure("order_not_found");
   if (order.status === "CANCELLED" || order.status === "FAILED") return { ok: true, data: order };
   if (order.status === "READY" || order.status === "COMPLETED") {
@@ -396,12 +521,16 @@ export async function cancelOrder(
   }
 
   const updated = applyStatus(order.id, "CANCELLED");
+  if (updated) releaseOrderKey(updated.idempotencyKey);
+  if (updated && isDurable(updated)) {
+    await (await durableOrders()).recordUnpaidOutcome(updated).catch(() => undefined);
+  }
   return updated ? { ok: true, data: updated } : orderFailure("order_not_found");
 }
 
 /** 5 — STATUS. Reads the provider when one exists, otherwise our own record. */
 export async function getOrderStatus(orderId: string): Promise<OrderResult<OrderStatus>> {
-  const order = readOrder(orderId);
+  const order = await getOrderById(orderId);
   if (!order) return orderFailure("order_not_found");
   if (!order.providerOrderId) return { ok: true, data: order.status };
 
@@ -426,14 +555,46 @@ export function applyProviderStatusUpdate(
   return applyStatus(order.id, status, providerStatus);
 }
 
-export function getOrderById(orderId: string): InternalOrder | null {
+/** The stored copy when there is one (it survives restarts), refreshed into this process; else memory. */
+export async function getOrderById(orderId: string): Promise<InternalOrder | null> {
+  if (durableOrderStoreConfigured()) {
+    try {
+      const stored = await (await durableOrders()).loadDurableOrder(orderId);
+      if (stored) return saveOrder(stored);
+    } catch {
+      // Database briefly unreachable: this process's copy is the best answer.
+    }
+  }
   return readOrder(orderId);
+}
+
+/** A signed-in TAKATAK customer's orders: the stored ones (any device), else this process's copies. */
+export async function listOrdersOfTakatakCustomer(takatakSub: string): Promise<InternalOrder[]> {
+  if (durableOrderStoreConfigured()) {
+    try {
+      return await (await durableOrders()).listDurableOrdersForCustomer(takatakSub);
+    } catch {
+      // Database briefly unreachable: fall back to this process's copies.
+    }
+  }
+  return listAllOrders(500).filter((o) => o.customer.takatakCustomerId === takatakSub);
 }
 
 export function listCustomerOrders(customerId: string | null, phone: string | null) {
   return listOrdersForCustomer(customerId, phone);
 }
 
-export function listRecentOrders(limit = 50) {
-  return listAllOrders(limit);
+export async function listRecentOrders(limit = 50): Promise<InternalOrder[]> {
+  const local = listAllOrders(limit);
+  if (!durableOrderStoreConfigured()) return local;
+  let stored: InternalOrder[];
+  try {
+    stored = await (await durableOrders()).listDurableOrders(limit);
+  } catch {
+    return local;
+  }
+  const ids = new Set(stored.map((o) => o.id));
+  return [...stored, ...local.filter((o) => !ids.has(o.id))]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, limit);
 }
