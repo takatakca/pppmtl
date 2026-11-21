@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retour à MontrealHub · Back to MontrealHub</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0a0a0a;color:#f5f5f5;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;text-align:center}
+main{max-width:420px;padding:32px 20px}
+.k{color:#ffc400;font-size:.75rem;letter-spacing:.25em;text-transform:uppercase;font-weight:700}
+h1{font-size:1.9rem;line-height:1.1;text-transform:uppercase;margin:.4em 0 .3em;letter-spacing:.01em}
+p{color:#bbb;margin:.4em 0}
+a.b{display:block;margin-top:24px;padding:16px;background:#d61f1f;color:#fff;font-weight:800;text-decoration:none;text-transform:uppercase;letter-spacing:.06em;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<div class="k">MontrealHub · PPP</div>
+<h1 id="t">Retour à l’app</h1>
+<p id="fr">Vous pouvez revenir à l’application MontrealHub pour suivre votre commande.</p>
+<p id="en" lang="en">You can go back to the MontrealHub app to follow your order.</p>
+<a class="b" id="go" href="montrealhub://orders">Ouvrir MontrealHub · Open the app</a>
+</main>
+<script>
+// Clover's payment page sends the customer here after paying (or cancelling) an order placed in the phone app.
+// The order id only opens the app's own receipt screen; nothing about the order is read or shown on this page.
+(function () {
+  var q = new URLSearchParams(location.search);
+  var id = q.get("order") || "";
+  var paid = q.get("paid") === "1";
+  var status = q.get("payment") || "";
+  var safe = /^ord_[A-Za-z0-9_-]{5,80}$/.test(id);
+  var target = "montrealhub://" + (safe ? "order/" + encodeURIComponent(id) + "?" + (paid ? "paid=1" : "payment=" + encodeURIComponent(status.slice(0, 20))) : "orders");
+  document.getElementById("go").setAttribute("href", target);
+  if (paid) {
+    document.getElementById("t").textContent = "Paiement reçu";
+    document.getElementById("fr").textContent = "Merci ! Votre commande part à la cuisine. Revenez à l’app pour la suivre.";
+    document.getElementById("en").textContent = "Thank you! Your order is on its way to the kitchen. Go back to the app to follow it.";
+  } else if (status) {
+    document.getElementById("t").textContent = "Paiement non terminé";
+    document.getElementById("fr").textContent = "Aucun montant n’a été prélevé. Revenez à l’app pour réessayer.";
+    document.getElementById("en").textContent = "Nothing was charged. Go back to the app to try again.";
+  }
+  setTimeout(function () { location.href = target; }, 300);
+})();
+</script>
+</body>
+</html>

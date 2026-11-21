@@ -366,7 +366,10 @@ async function fail(
 }
 
 /** 3 — SUBMIT. Idempotent by construction; refuses rather than pretends. */
-export async function submitOrder(orderId: string): Promise<OrderResult<InternalOrder>> {
+export async function submitOrder(
+  orderId: string,
+  options: { returnTo?: "web" | "app" } = {},
+): Promise<OrderResult<InternalOrder>> {
   let order = readOrder(orderId);
   if (!order) return orderFailure("order_not_found");
   // Never answer a retry with an earlier failed attempt as if it had been placed.
@@ -403,7 +406,7 @@ export async function submitOrder(orderId: string): Promise<OrderResult<Internal
     orderToUniversalDraft(order),
     providerLocationId,
     order.idempotencyKey,
-    { orderId: order.id },
+    { orderId: order.id, ...(options.returnTo ? { returnTo: options.returnTo } : {}) },
   );
   if (!result.ok) return fail(order, result.error.code);
 

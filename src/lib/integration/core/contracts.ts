@@ -21,7 +21,6 @@ export type IntegrationProviderId =
   /** Uber Direct courier API (not the Uber Eats marketplace). */
   | "uber_direct";
 
-
 export type IntegrationCapability =
   "menu" | "orders" | "customers" | "locations" | "payments" | "webhooks";
 
