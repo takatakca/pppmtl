@@ -3,6 +3,9 @@
       "target": {
         "namespace": "android_app",
         "package_name": "com.pppmtl.montrealhub",
-        "sha256_cert_fingerprints": ["D0:06:91:DC:D3:A5:A3:9C:AC:C2:E5:3E:70:03:96:03:36:AB:B1:4C:10:35:3C:84:38:53:E9:2F:48:E8:22:88"]
+        "sha256_cert_fingerprints": [
+          "D0:06:91:DC:D3:A5:A3:9C:AC:C2:E5:3E:70:03:96:03:36:AB:B1:4C:10:35:3C:84:38:53:E9:2F:48:E8:22:88",
+          "12:9A:5A:29:C7:5C:B8:62:26:0C:86:BF:81:44:57:41:87:B7:B3:C5:BE:9F:0C:EA:9A:4C:C4:EF:E2:B4:BA:17"
+        ]
       }
     }]
