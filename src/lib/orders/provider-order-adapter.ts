@@ -27,6 +27,8 @@ export interface ProviderOrderRef {
 export interface ProviderOrderContext {
   /** PPP order id (used in the provider's return links). */
   orderId: string;
+  /** "app": the order comes from the MontrealHub phone app; payment pages return to it (public/app-return.html). */
+  returnTo?: "web" | "app";
 }
 
 export interface ProviderStatusRef {

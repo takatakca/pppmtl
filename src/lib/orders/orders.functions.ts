@@ -88,7 +88,7 @@ export interface PlaceOrderResponse {
   error: OrderError | null;
 }
 
-function toView(order: InternalOrder): OrderView {
+export function toView(order: InternalOrder): OrderView {
   return {
     id: order.id,
     orderNumber: order.orderNumber,

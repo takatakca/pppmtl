@@ -74,7 +74,6 @@ describe("signed provider callback cannot cross a provider boundary", () => {
     expect(getOrder("ord_clover_one")?.paymentStatus).toBe("PAID");
     expect(getOrder("ord_hub_two")?.paymentStatus).toBe("PAY_AT_RESTAURANT");
     expect(getOrder("ord_hub_two")?.status).toBe("CREATED");
-
   });
 
   it("rejects replacing an already linked Clover payment with a different payment", () => {
@@ -110,6 +109,5 @@ describe("signed provider callback cannot cross a provider boundary", () => {
     expect(applyCloverPayment("FOODHUB_ONLY", "PAY_UNRELATED", true)).toBeNull();
     expect(applyProviderStatusUpdate("foodhub", "MISSING", "ACCEPTED", "accepted")).toBeNull();
     expect(getOrder("ord_hub_only")?.status).toBe("CREATED");
-
   });
 });

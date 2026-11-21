@@ -25,7 +25,6 @@ export const Route = createFileRoute("/api/public/webhooks/provider")({
         const { handleCloverHostedCheckoutWebhook } =
           await import("@/lib/integration/providers/clover/webhook");
         return handleCloverHostedCheckoutWebhook(request);
-
       },
       GET: async () => new Response("Method not allowed", { status: 405 }),
     },

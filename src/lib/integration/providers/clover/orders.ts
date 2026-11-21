@@ -238,6 +238,19 @@ function failureFor(reason: string) {
   return orderFailure<ProviderOrderRef>("provider_error");
 }
 
+/**
+ * Payment-page return links for an order placed in the MontrealHub phone app: a static page that hands the customer
+ * back to the app (montrealhub://order/<id>). The web receipt page would not know this phone (no browser cookie).
+ */
+export function appReturnUrls(site: string, orderId: string) {
+  const id = encodeURIComponent(orderId);
+  return {
+    success: `${site}/app-return.html?order=${id}&paid=1`,
+    failure: `${site}/app-return.html?order=${id}&payment=failed`,
+    cancel: `${site}/app-return.html?order=${id}&payment=cancelled`,
+  };
+}
+
 /** The order-service adapter: the cart becomes a Clover Hosted Checkout session. */
 export const cloverOrderSubmitAdapter: ProviderOrderAdapter = {
   provider: "clover",
@@ -262,11 +275,14 @@ export const cloverOrderSubmitAdapter: ProviderOrderAdapter = {
           email: draft.customer.email,
         },
         taxRates,
-        urls: {
-          success: `${site}/orders/${encodeURIComponent(orderId)}?paid=1`,
-          failure: `${site}/checkout?payment=failed`,
-          cancel: `${site}/checkout?payment=cancelled`,
-        },
+        urls:
+          context?.returnTo === "app"
+            ? appReturnUrls(site, orderId)
+            : {
+                success: `${site}/orders/${encodeURIComponent(orderId)}?paid=1`,
+                failure: `${site}/checkout?payment=failed`,
+                cancel: `${site}/checkout?payment=cancelled`,
+              },
         delivery:
           deliveryFee > 0 ? { fee: deliveryFee, address: draft.deliveryAddress ?? "" } : null,
         tip,

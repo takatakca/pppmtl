@@ -1,0 +1,75 @@
+{
+  "expo": {
+    "name": "MontrealHub",
+    "slug": "montrealhub",
+    "scheme": "montrealhub",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0a0a0a",
+    "primaryColor": "#d90000",
+    "description": "PPP Pizzeria et ses restaurants de Montréal : commandez pour emporter ou en livraison, payez et suivez votre commande.",
+    "ios": {
+      "bundleIdentifier": "com.pppmtl.montrealhub",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "CFBundleDevelopmentRegion": "fr_CA",
+        "CFBundleAllowMixedLocalizations": true,
+        "LSApplicationQueriesSchemes": ["tel"]
+      }
+    },
+    "android": {
+      "package": "com.pppmtl.montrealhub",
+      "versionCode": 100,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-foreground.png",
+        "backgroundImage": "./assets/adaptive-background.png",
+        "monochromeImage": "./assets/adaptive-monochrome.png",
+        "backgroundColor": "#0a0a0a"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "permissions": [],
+      "blockedPermissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-web-browser",
+      "expo-font",
+      "expo-localization",
+      "expo-image",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "backgroundColor": "#0a0a0a"
+        }
+      ],
+      "expo-status-bar"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "extra": {
+      "siteOrigin": "https://pppmtl.com"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

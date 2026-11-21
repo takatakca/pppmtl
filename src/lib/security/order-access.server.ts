@@ -68,6 +68,24 @@ export function verifyOrderGrant(
   }
 }
 
+/**
+ * Same signed grant as the cookie, handed to the MontrealHub phone app as a receipt token (it has no browser
+ * cookie). Pure: the app sends it back in a header and `verifyOrderGrant` checks it like the cookie.
+ */
+export function signOrderGrant(ids: string[], key: string, now = Date.now()): string {
+  const grant: Grant = {
+    ids: ids.slice(-MAX_ORDER_IDS),
+    exp: Math.floor(now / 1000) + LIFETIME_SECONDS,
+  };
+  const payload = Buffer.from(JSON.stringify(grant)).toString("base64url");
+  return `${payload}.${mac(payload, key)}`;
+}
+
+/** The signing key for phone receipt tokens, or null when ordering is not configured. */
+export function orderAccessKey(): string | null {
+  return secret();
+}
+
 export function readableOrderIds(): string[] {
   const key = secret();
   return key ? verifyOrderGrant(getCookie(COOKIE), key) : [];

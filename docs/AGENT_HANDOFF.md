@@ -1,5 +1,18 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-11-21 (later) — Native MontrealHub app in mobile/ (Claude, branch claude/montrealhub-native)
+
+Real native app (Expo SDK 57, React Native) for iOS + Android in `mobile/`, same recipe as BesoinAvocat's
+`mobile/`. Same package `com.pppmtl.montrealhub`, version 2.0.0 / versionCode 100, so it can later REPLACE the
+PWABuilder wrapper as an update. Do NOT upload it while the wrapper is in review at Google Play / Amazon.
+Site side (needs a deploy of main): `src/routes/api/mobile/v1/` (catalog GET; orders check/place/status/cancel POST),
+`src/lib/mobile/*.server.ts`, `public/app-return.html` (Clover sends the customer back to `montrealhub://order/<id>`).
+Orders go through the same `order-service` (`submitOrder(id, { returnTo: "app" })`), guest only, each one guarded by
+an HMAC token (`signOrderGrant`, `PPP_ORDER_ACCESS_SECRET`) kept in the phone's secure store. When Clover keys or the
+secret are missing, the catalog says `onlineOrdering: false` and the app offers phone / delivery apps.
+CI: `.github/workflows/mobile.yml` builds `MontrealHub-native-test.apk` + unsigned AAB + iOS simulator build (free).
+Root eslint/prettier ignore `mobile/`. Signing for the stores: owner's PC only (mobile/README.md). Apple: needs account.
+
 ## 2026-11-21 — MontrealHub store app (Claude, branch claude/foodhub-android-app)
 
 Owner named the pppmtl.com store app **MontrealHub** (not "FoodHub": a UK Foodhub app already exists).

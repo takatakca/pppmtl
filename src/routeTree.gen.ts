@@ -35,9 +35,12 @@ import { Route as TrackRouteImport } from './routes/track'
 import { Route as AccountForgotPasswordRouteImport } from './routes/account_.forgot-password'
 import { Route as AccountSignInRouteImport } from './routes/account_.sign-in'
 import { Route as AccountSignUpRouteImport } from './routes/account_.sign-up'
+import { Route as AdminDispatchRouteImport } from './routes/admin.dispatch'
 import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
+import { Route as AdminInteracRouteImport } from './routes/admin.interac'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminSignInRouteImport } from './routes/admin.sign-in'
+import { Route as AuthSignoutRouteImport } from './routes/auth.signout'
 import { Route as DevMenuAuditRouteImport } from './routes/dev.menu-audit'
 import { Route as LocationsIndexRouteImport } from './routes/locations.index'
 import { Route as LocationsSlugRouteImport } from './routes/locations.$slug'
@@ -47,10 +50,21 @@ import { Route as OrdersIndexRouteImport } from './routes/orders.index'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 import { Route as SupportIndexRouteImport } from './routes/support.index'
 import { Route as SupportOrderRouteImport } from './routes/support.order'
-import { Route as ApiPublicCloverCheckoutStatusRouteImport } from './routes/api/public/clover-checkout-status'
 import { Route as ApiPublicCloverMenuRouteImport } from './routes/api/public/clover-menu'
+import { Route as AuthBmoCallbackRouteImport } from './routes/auth.bmo.callback'
+import { Route as AuthBmoConnectRouteImport } from './routes/auth.bmo.connect'
+import { Route as AuthTakatakCallbackRouteImport } from './routes/auth.takatak.callback'
+import { Route as AuthTakatakStartRouteImport } from './routes/auth.takatak.start'
+import { Route as ApiMobileV1CatalogRouteImport } from './routes/api/mobile/v1/catalog'
+import { Route as ApiPublicWebhooksBmoRouteImport } from './routes/api/public/webhooks/bmo'
 import { Route as ApiPublicWebhooksCloverRouteImport } from './routes/api/public/webhooks/clover'
+import { Route as ApiPublicWebhooksDoordashRouteImport } from './routes/api/public/webhooks/doordash'
 import { Route as ApiPublicWebhooksProviderRouteImport } from './routes/api/public/webhooks/provider'
+import { Route as ApiPublicWebhooksUberRouteImport } from './routes/api/public/webhooks/uber'
+import { Route as ApiMobileV1OrdersCancelRouteImport } from './routes/api/mobile/v1/orders/cancel'
+import { Route as ApiMobileV1OrdersCheckRouteImport } from './routes/api/mobile/v1/orders/check'
+import { Route as ApiMobileV1OrdersPlaceRouteImport } from './routes/api/mobile/v1/orders/place'
+import { Route as ApiMobileV1OrdersStatusRouteImport } from './routes/api/mobile/v1/orders/status'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -182,9 +196,19 @@ const AccountSignUpRoute = AccountSignUpRouteImport.update({
   path: '/account/sign-up',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminDispatchRoute = AdminDispatchRouteImport.update({
+  id: '/admin/dispatch',
+  path: '/admin/dispatch',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIntegrationsRoute = AdminIntegrationsRouteImport.update({
   id: '/admin/integrations',
   path: '/admin/integrations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminInteracRoute = AdminInteracRouteImport.update({
+  id: '/admin/interac',
+  path: '/admin/interac',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminOrdersRoute = AdminOrdersRouteImport.update({
@@ -195,6 +219,11 @@ const AdminOrdersRoute = AdminOrdersRouteImport.update({
 const AdminSignInRoute = AdminSignInRouteImport.update({
   id: '/admin/sign-in',
   path: '/admin/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignoutRoute = AuthSignoutRouteImport.update({
+  id: '/auth/signout',
+  path: '/auth/signout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DevMenuAuditRoute = DevMenuAuditRouteImport.update({
@@ -242,15 +271,39 @@ const SupportOrderRoute = SupportOrderRouteImport.update({
   path: '/order',
   getParentRoute: () => SupportRoute,
 } as any)
-const ApiPublicCloverCheckoutStatusRoute =
-  ApiPublicCloverCheckoutStatusRouteImport.update({
-    id: '/api/public/clover-checkout-status',
-    path: '/api/public/clover-checkout-status',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicCloverMenuRoute = ApiPublicCloverMenuRouteImport.update({
   id: '/api/public/clover-menu',
   path: '/api/public/clover-menu',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthBmoCallbackRoute = AuthBmoCallbackRouteImport.update({
+  id: '/auth/bmo/callback',
+  path: '/auth/bmo/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthBmoConnectRoute = AuthBmoConnectRouteImport.update({
+  id: '/auth/bmo/connect',
+  path: '/auth/bmo/connect',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthTakatakCallbackRoute = AuthTakatakCallbackRouteImport.update({
+  id: '/auth/takatak/callback',
+  path: '/auth/takatak/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthTakatakStartRoute = AuthTakatakStartRouteImport.update({
+  id: '/auth/takatak/start',
+  path: '/auth/takatak/start',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMobileV1CatalogRoute = ApiMobileV1CatalogRouteImport.update({
+  id: '/api/mobile/v1/catalog',
+  path: '/api/mobile/v1/catalog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicWebhooksBmoRoute = ApiPublicWebhooksBmoRouteImport.update({
+  id: '/api/public/webhooks/bmo',
+  path: '/api/public/webhooks/bmo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicWebhooksCloverRoute = ApiPublicWebhooksCloverRouteImport.update({
@@ -258,12 +311,43 @@ const ApiPublicWebhooksCloverRoute = ApiPublicWebhooksCloverRouteImport.update({
   path: '/api/public/webhooks/clover',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWebhooksDoordashRoute =
+  ApiPublicWebhooksDoordashRouteImport.update({
+    id: '/api/public/webhooks/doordash',
+    path: '/api/public/webhooks/doordash',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicWebhooksProviderRoute =
   ApiPublicWebhooksProviderRouteImport.update({
     id: '/api/public/webhooks/provider',
     path: '/api/public/webhooks/provider',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicWebhooksUberRoute = ApiPublicWebhooksUberRouteImport.update({
+  id: '/api/public/webhooks/uber',
+  path: '/api/public/webhooks/uber',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMobileV1OrdersCancelRoute = ApiMobileV1OrdersCancelRouteImport.update({
+  id: '/api/mobile/v1/orders/cancel',
+  path: '/api/mobile/v1/orders/cancel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMobileV1OrdersCheckRoute = ApiMobileV1OrdersCheckRouteImport.update({
+  id: '/api/mobile/v1/orders/check',
+  path: '/api/mobile/v1/orders/check',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMobileV1OrdersPlaceRoute = ApiMobileV1OrdersPlaceRouteImport.update({
+  id: '/api/mobile/v1/orders/place',
+  path: '/api/mobile/v1/orders/place',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMobileV1OrdersStatusRoute = ApiMobileV1OrdersStatusRouteImport.update({
+  id: '/api/mobile/v1/orders/status',
+  path: '/api/mobile/v1/orders/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -292,9 +376,12 @@ export interface FileRoutesByFullPath {
   '/account/forgot-password': typeof AccountForgotPasswordRoute
   '/account/sign-in': typeof AccountSignInRoute
   '/account/sign-up': typeof AccountSignUpRoute
+  '/admin/dispatch': typeof AdminDispatchRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
+  '/admin/interac': typeof AdminInteracRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/sign-in': typeof AdminSignInRoute
+  '/auth/signout': typeof AuthSignoutRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
   '/marques/$brandId': typeof MarquesBrandIdRoute
@@ -304,10 +391,21 @@ export interface FileRoutesByFullPath {
   '/marques/': typeof MarquesIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/support/': typeof SupportIndexRoute
-  '/api/public/clover-checkout-status': typeof ApiPublicCloverCheckoutStatusRoute
   '/api/public/clover-menu': typeof ApiPublicCloverMenuRoute
+  '/auth/bmo/callback': typeof AuthBmoCallbackRoute
+  '/auth/bmo/connect': typeof AuthBmoConnectRoute
+  '/auth/takatak/callback': typeof AuthTakatakCallbackRoute
+  '/auth/takatak/start': typeof AuthTakatakStartRoute
+  '/api/mobile/v1/catalog': typeof ApiMobileV1CatalogRoute
+  '/api/public/webhooks/bmo': typeof ApiPublicWebhooksBmoRoute
   '/api/public/webhooks/clover': typeof ApiPublicWebhooksCloverRoute
+  '/api/public/webhooks/doordash': typeof ApiPublicWebhooksDoordashRoute
   '/api/public/webhooks/provider': typeof ApiPublicWebhooksProviderRoute
+  '/api/public/webhooks/uber': typeof ApiPublicWebhooksUberRoute
+  '/api/mobile/v1/orders/cancel': typeof ApiMobileV1OrdersCancelRoute
+  '/api/mobile/v1/orders/check': typeof ApiMobileV1OrdersCheckRoute
+  '/api/mobile/v1/orders/place': typeof ApiMobileV1OrdersPlaceRoute
+  '/api/mobile/v1/orders/status': typeof ApiMobileV1OrdersStatusRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -334,9 +432,12 @@ export interface FileRoutesByTo {
   '/account/forgot-password': typeof AccountForgotPasswordRoute
   '/account/sign-in': typeof AccountSignInRoute
   '/account/sign-up': typeof AccountSignUpRoute
+  '/admin/dispatch': typeof AdminDispatchRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
+  '/admin/interac': typeof AdminInteracRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/sign-in': typeof AdminSignInRoute
+  '/auth/signout': typeof AuthSignoutRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
   '/marques/$brandId': typeof MarquesBrandIdRoute
@@ -346,10 +447,21 @@ export interface FileRoutesByTo {
   '/marques': typeof MarquesIndexRoute
   '/orders': typeof OrdersIndexRoute
   '/support': typeof SupportIndexRoute
-  '/api/public/clover-checkout-status': typeof ApiPublicCloverCheckoutStatusRoute
   '/api/public/clover-menu': typeof ApiPublicCloverMenuRoute
+  '/auth/bmo/callback': typeof AuthBmoCallbackRoute
+  '/auth/bmo/connect': typeof AuthBmoConnectRoute
+  '/auth/takatak/callback': typeof AuthTakatakCallbackRoute
+  '/auth/takatak/start': typeof AuthTakatakStartRoute
+  '/api/mobile/v1/catalog': typeof ApiMobileV1CatalogRoute
+  '/api/public/webhooks/bmo': typeof ApiPublicWebhooksBmoRoute
   '/api/public/webhooks/clover': typeof ApiPublicWebhooksCloverRoute
+  '/api/public/webhooks/doordash': typeof ApiPublicWebhooksDoordashRoute
   '/api/public/webhooks/provider': typeof ApiPublicWebhooksProviderRoute
+  '/api/public/webhooks/uber': typeof ApiPublicWebhooksUberRoute
+  '/api/mobile/v1/orders/cancel': typeof ApiMobileV1OrdersCancelRoute
+  '/api/mobile/v1/orders/check': typeof ApiMobileV1OrdersCheckRoute
+  '/api/mobile/v1/orders/place': typeof ApiMobileV1OrdersPlaceRoute
+  '/api/mobile/v1/orders/status': typeof ApiMobileV1OrdersStatusRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -379,9 +491,12 @@ export interface FileRoutesById {
   '/account_/forgot-password': typeof AccountForgotPasswordRoute
   '/account_/sign-in': typeof AccountSignInRoute
   '/account_/sign-up': typeof AccountSignUpRoute
+  '/admin/dispatch': typeof AdminDispatchRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
+  '/admin/interac': typeof AdminInteracRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/sign-in': typeof AdminSignInRoute
+  '/auth/signout': typeof AuthSignoutRoute
   '/dev/menu-audit': typeof DevMenuAuditRoute
   '/locations/$slug': typeof LocationsSlugRoute
   '/marques/$brandId': typeof MarquesBrandIdRoute
@@ -391,10 +506,21 @@ export interface FileRoutesById {
   '/marques/': typeof MarquesIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/support/': typeof SupportIndexRoute
-  '/api/public/clover-checkout-status': typeof ApiPublicCloverCheckoutStatusRoute
   '/api/public/clover-menu': typeof ApiPublicCloverMenuRoute
+  '/auth/bmo/callback': typeof AuthBmoCallbackRoute
+  '/auth/bmo/connect': typeof AuthBmoConnectRoute
+  '/auth/takatak/callback': typeof AuthTakatakCallbackRoute
+  '/auth/takatak/start': typeof AuthTakatakStartRoute
+  '/api/mobile/v1/catalog': typeof ApiMobileV1CatalogRoute
+  '/api/public/webhooks/bmo': typeof ApiPublicWebhooksBmoRoute
   '/api/public/webhooks/clover': typeof ApiPublicWebhooksCloverRoute
+  '/api/public/webhooks/doordash': typeof ApiPublicWebhooksDoordashRoute
   '/api/public/webhooks/provider': typeof ApiPublicWebhooksProviderRoute
+  '/api/public/webhooks/uber': typeof ApiPublicWebhooksUberRoute
+  '/api/mobile/v1/orders/cancel': typeof ApiMobileV1OrdersCancelRoute
+  '/api/mobile/v1/orders/check': typeof ApiMobileV1OrdersCheckRoute
+  '/api/mobile/v1/orders/place': typeof ApiMobileV1OrdersPlaceRoute
+  '/api/mobile/v1/orders/status': typeof ApiMobileV1OrdersStatusRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -425,9 +551,12 @@ export interface FileRouteTypes {
     | '/account/forgot-password'
     | '/account/sign-in'
     | '/account/sign-up'
+    | '/admin/dispatch'
     | '/admin/integrations'
+    | '/admin/interac'
     | '/admin/orders'
     | '/admin/sign-in'
+    | '/auth/signout'
     | '/dev/menu-audit'
     | '/locations/$slug'
     | '/marques/$brandId'
@@ -437,10 +566,21 @@ export interface FileRouteTypes {
     | '/marques/'
     | '/orders/'
     | '/support/'
-    | '/api/public/clover-checkout-status'
     | '/api/public/clover-menu'
+    | '/auth/bmo/callback'
+    | '/auth/bmo/connect'
+    | '/auth/takatak/callback'
+    | '/auth/takatak/start'
+    | '/api/mobile/v1/catalog'
+    | '/api/public/webhooks/bmo'
     | '/api/public/webhooks/clover'
+    | '/api/public/webhooks/doordash'
     | '/api/public/webhooks/provider'
+    | '/api/public/webhooks/uber'
+    | '/api/mobile/v1/orders/cancel'
+    | '/api/mobile/v1/orders/check'
+    | '/api/mobile/v1/orders/place'
+    | '/api/mobile/v1/orders/status'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -467,9 +607,12 @@ export interface FileRouteTypes {
     | '/account/forgot-password'
     | '/account/sign-in'
     | '/account/sign-up'
+    | '/admin/dispatch'
     | '/admin/integrations'
+    | '/admin/interac'
     | '/admin/orders'
     | '/admin/sign-in'
+    | '/auth/signout'
     | '/dev/menu-audit'
     | '/locations/$slug'
     | '/marques/$brandId'
@@ -479,10 +622,21 @@ export interface FileRouteTypes {
     | '/marques'
     | '/orders'
     | '/support'
-    | '/api/public/clover-checkout-status'
     | '/api/public/clover-menu'
+    | '/auth/bmo/callback'
+    | '/auth/bmo/connect'
+    | '/auth/takatak/callback'
+    | '/auth/takatak/start'
+    | '/api/mobile/v1/catalog'
+    | '/api/public/webhooks/bmo'
     | '/api/public/webhooks/clover'
+    | '/api/public/webhooks/doordash'
     | '/api/public/webhooks/provider'
+    | '/api/public/webhooks/uber'
+    | '/api/mobile/v1/orders/cancel'
+    | '/api/mobile/v1/orders/check'
+    | '/api/mobile/v1/orders/place'
+    | '/api/mobile/v1/orders/status'
   id:
     | '__root__'
     | '/'
@@ -511,9 +665,12 @@ export interface FileRouteTypes {
     | '/account_/forgot-password'
     | '/account_/sign-in'
     | '/account_/sign-up'
+    | '/admin/dispatch'
     | '/admin/integrations'
+    | '/admin/interac'
     | '/admin/orders'
     | '/admin/sign-in'
+    | '/auth/signout'
     | '/dev/menu-audit'
     | '/locations/$slug'
     | '/marques/$brandId'
@@ -523,10 +680,21 @@ export interface FileRouteTypes {
     | '/marques/'
     | '/orders/'
     | '/support/'
-    | '/api/public/clover-checkout-status'
     | '/api/public/clover-menu'
+    | '/auth/bmo/callback'
+    | '/auth/bmo/connect'
+    | '/auth/takatak/callback'
+    | '/auth/takatak/start'
+    | '/api/mobile/v1/catalog'
+    | '/api/public/webhooks/bmo'
     | '/api/public/webhooks/clover'
+    | '/api/public/webhooks/doordash'
     | '/api/public/webhooks/provider'
+    | '/api/public/webhooks/uber'
+    | '/api/mobile/v1/orders/cancel'
+    | '/api/mobile/v1/orders/check'
+    | '/api/mobile/v1/orders/place'
+    | '/api/mobile/v1/orders/status'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -556,18 +724,32 @@ export interface RootRouteChildren {
   AccountForgotPasswordRoute: typeof AccountForgotPasswordRoute
   AccountSignInRoute: typeof AccountSignInRoute
   AccountSignUpRoute: typeof AccountSignUpRoute
+  AdminDispatchRoute: typeof AdminDispatchRoute
   AdminIntegrationsRoute: typeof AdminIntegrationsRoute
+  AdminInteracRoute: typeof AdminInteracRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
   AdminSignInRoute: typeof AdminSignInRoute
+  AuthSignoutRoute: typeof AuthSignoutRoute
   DevMenuAuditRoute: typeof DevMenuAuditRoute
   LocationsSlugRoute: typeof LocationsSlugRoute
   MarquesBrandIdRoute: typeof MarquesBrandIdRoute
   LocationsIndexRoute: typeof LocationsIndexRoute
   MarquesIndexRoute: typeof MarquesIndexRoute
-  ApiPublicCloverCheckoutStatusRoute: typeof ApiPublicCloverCheckoutStatusRoute
   ApiPublicCloverMenuRoute: typeof ApiPublicCloverMenuRoute
+  AuthBmoCallbackRoute: typeof AuthBmoCallbackRoute
+  AuthBmoConnectRoute: typeof AuthBmoConnectRoute
+  AuthTakatakCallbackRoute: typeof AuthTakatakCallbackRoute
+  AuthTakatakStartRoute: typeof AuthTakatakStartRoute
+  ApiMobileV1CatalogRoute: typeof ApiMobileV1CatalogRoute
+  ApiPublicWebhooksBmoRoute: typeof ApiPublicWebhooksBmoRoute
   ApiPublicWebhooksCloverRoute: typeof ApiPublicWebhooksCloverRoute
+  ApiPublicWebhooksDoordashRoute: typeof ApiPublicWebhooksDoordashRoute
   ApiPublicWebhooksProviderRoute: typeof ApiPublicWebhooksProviderRoute
+  ApiPublicWebhooksUberRoute: typeof ApiPublicWebhooksUberRoute
+  ApiMobileV1OrdersCancelRoute: typeof ApiMobileV1OrdersCancelRoute
+  ApiMobileV1OrdersCheckRoute: typeof ApiMobileV1OrdersCheckRoute
+  ApiMobileV1OrdersPlaceRoute: typeof ApiMobileV1OrdersPlaceRoute
+  ApiMobileV1OrdersStatusRoute: typeof ApiMobileV1OrdersStatusRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -754,11 +936,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountSignUpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/dispatch': {
+      id: '/admin/dispatch'
+      path: '/admin/dispatch'
+      fullPath: '/admin/dispatch'
+      preLoaderRoute: typeof AdminDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/integrations': {
       id: '/admin/integrations'
       path: '/admin/integrations'
       fullPath: '/admin/integrations'
       preLoaderRoute: typeof AdminIntegrationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/interac': {
+      id: '/admin/interac'
+      path: '/admin/interac'
+      fullPath: '/admin/interac'
+      preLoaderRoute: typeof AdminInteracRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/orders': {
@@ -773,6 +969,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/sign-in'
       fullPath: '/admin/sign-in'
       preLoaderRoute: typeof AdminSignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/signout': {
+      id: '/auth/signout'
+      path: '/auth/signout'
+      fullPath: '/auth/signout'
+      preLoaderRoute: typeof AuthSignoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dev/menu-audit': {
@@ -838,18 +1041,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SupportOrderRouteImport
       parentRoute: typeof SupportRoute
     }
-    '/api/public/clover-checkout-status': {
-      id: '/api/public/clover-checkout-status'
-      path: '/api/public/clover-checkout-status'
-      fullPath: '/api/public/clover-checkout-status'
-      preLoaderRoute: typeof ApiPublicCloverCheckoutStatusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/clover-menu': {
       id: '/api/public/clover-menu'
       path: '/api/public/clover-menu'
       fullPath: '/api/public/clover-menu'
       preLoaderRoute: typeof ApiPublicCloverMenuRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/bmo/callback': {
+      id: '/auth/bmo/callback'
+      path: '/auth/bmo/callback'
+      fullPath: '/auth/bmo/callback'
+      preLoaderRoute: typeof AuthBmoCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/bmo/connect': {
+      id: '/auth/bmo/connect'
+      path: '/auth/bmo/connect'
+      fullPath: '/auth/bmo/connect'
+      preLoaderRoute: typeof AuthBmoConnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/takatak/callback': {
+      id: '/auth/takatak/callback'
+      path: '/auth/takatak/callback'
+      fullPath: '/auth/takatak/callback'
+      preLoaderRoute: typeof AuthTakatakCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/takatak/start': {
+      id: '/auth/takatak/start'
+      path: '/auth/takatak/start'
+      fullPath: '/auth/takatak/start'
+      preLoaderRoute: typeof AuthTakatakStartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mobile/v1/catalog': {
+      id: '/api/mobile/v1/catalog'
+      path: '/api/mobile/v1/catalog'
+      fullPath: '/api/mobile/v1/catalog'
+      preLoaderRoute: typeof ApiMobileV1CatalogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/webhooks/bmo': {
+      id: '/api/public/webhooks/bmo'
+      path: '/api/public/webhooks/bmo'
+      fullPath: '/api/public/webhooks/bmo'
+      preLoaderRoute: typeof ApiPublicWebhooksBmoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/webhooks/clover': {
@@ -859,11 +1097,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhooksCloverRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/webhooks/doordash': {
+      id: '/api/public/webhooks/doordash'
+      path: '/api/public/webhooks/doordash'
+      fullPath: '/api/public/webhooks/doordash'
+      preLoaderRoute: typeof ApiPublicWebhooksDoordashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/webhooks/provider': {
       id: '/api/public/webhooks/provider'
       path: '/api/public/webhooks/provider'
       fullPath: '/api/public/webhooks/provider'
       preLoaderRoute: typeof ApiPublicWebhooksProviderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/webhooks/uber': {
+      id: '/api/public/webhooks/uber'
+      path: '/api/public/webhooks/uber'
+      fullPath: '/api/public/webhooks/uber'
+      preLoaderRoute: typeof ApiPublicWebhooksUberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mobile/v1/orders/cancel': {
+      id: '/api/mobile/v1/orders/cancel'
+      path: '/api/mobile/v1/orders/cancel'
+      fullPath: '/api/mobile/v1/orders/cancel'
+      preLoaderRoute: typeof ApiMobileV1OrdersCancelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mobile/v1/orders/check': {
+      id: '/api/mobile/v1/orders/check'
+      path: '/api/mobile/v1/orders/check'
+      fullPath: '/api/mobile/v1/orders/check'
+      preLoaderRoute: typeof ApiMobileV1OrdersCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mobile/v1/orders/place': {
+      id: '/api/mobile/v1/orders/place'
+      path: '/api/mobile/v1/orders/place'
+      fullPath: '/api/mobile/v1/orders/place'
+      preLoaderRoute: typeof ApiMobileV1OrdersPlaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mobile/v1/orders/status': {
+      id: '/api/mobile/v1/orders/status'
+      path: '/api/mobile/v1/orders/status'
+      fullPath: '/api/mobile/v1/orders/status'
+      preLoaderRoute: typeof ApiMobileV1OrdersStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -922,18 +1202,32 @@ const rootRouteChildren: RootRouteChildren = {
   AccountForgotPasswordRoute: AccountForgotPasswordRoute,
   AccountSignInRoute: AccountSignInRoute,
   AccountSignUpRoute: AccountSignUpRoute,
+  AdminDispatchRoute: AdminDispatchRoute,
   AdminIntegrationsRoute: AdminIntegrationsRoute,
+  AdminInteracRoute: AdminInteracRoute,
   AdminOrdersRoute: AdminOrdersRoute,
   AdminSignInRoute: AdminSignInRoute,
+  AuthSignoutRoute: AuthSignoutRoute,
   DevMenuAuditRoute: DevMenuAuditRoute,
   LocationsSlugRoute: LocationsSlugRoute,
   MarquesBrandIdRoute: MarquesBrandIdRoute,
   LocationsIndexRoute: LocationsIndexRoute,
   MarquesIndexRoute: MarquesIndexRoute,
-  ApiPublicCloverCheckoutStatusRoute: ApiPublicCloverCheckoutStatusRoute,
   ApiPublicCloverMenuRoute: ApiPublicCloverMenuRoute,
+  AuthBmoCallbackRoute: AuthBmoCallbackRoute,
+  AuthBmoConnectRoute: AuthBmoConnectRoute,
+  AuthTakatakCallbackRoute: AuthTakatakCallbackRoute,
+  AuthTakatakStartRoute: AuthTakatakStartRoute,
+  ApiMobileV1CatalogRoute: ApiMobileV1CatalogRoute,
+  ApiPublicWebhooksBmoRoute: ApiPublicWebhooksBmoRoute,
   ApiPublicWebhooksCloverRoute: ApiPublicWebhooksCloverRoute,
+  ApiPublicWebhooksDoordashRoute: ApiPublicWebhooksDoordashRoute,
   ApiPublicWebhooksProviderRoute: ApiPublicWebhooksProviderRoute,
+  ApiPublicWebhooksUberRoute: ApiPublicWebhooksUberRoute,
+  ApiMobileV1OrdersCancelRoute: ApiMobileV1OrdersCancelRoute,
+  ApiMobileV1OrdersCheckRoute: ApiMobileV1OrdersCheckRoute,
+  ApiMobileV1OrdersPlaceRoute: ApiMobileV1OrdersPlaceRoute,
+  ApiMobileV1OrdersStatusRoute: ApiMobileV1OrdersStatusRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
