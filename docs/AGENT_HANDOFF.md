@@ -1,5 +1,14 @@
 # PPPMTL — AGENT HANDOFF (read first)
 
+## 2026-11-21 — MontrealHub store app (Claude, branch claude/foodhub-android-app)
+
+Owner named the pppmtl.com store app **MontrealHub** (not "FoodHub": a UK Foodhub app already exists).
+Android package `com.pppmtl.montrealhub` generated with PWABuilder (Trusted Web Activity of https://pppmtl.com/).
+Signing keystore + passwords stay ONLY on the owner's PC (never in Git/Drive). Static files added:
+`public/.well-known/assetlinks.json` (upload key D0:06:91:…:22:88), `public/privacy.html`, `public/data-deletion.html`.
+Next: once Google Play App Signing is on, append Google's app-signing SHA-256 to `sha256_cert_fingerprints`, then
+verify https://pppmtl.com/.well-known/assetlinks.json. Store listings: Google Play + Amazon (Groupe TAKATAK accounts).
+
 ## 2026-11-01 (later) — Interac through BMO Instant Payments, ready for keys (Claude, main 47f8c94)
 
 Owner: Interac replaces debit; PPP **requests** the money from its **BMO** business account via BMO's API (dev

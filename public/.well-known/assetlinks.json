@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.pppmtl.montrealhub",
+        "sha256_cert_fingerprints": ["D0:06:91:DC:D3:A5:A3:9C:AC:C2:E5:3E:70:03:96:03:36:AB:B1:4C:10:35:3C:84:38:53:E9:2F:48:E8:22:88"]
+      }
+    }]
