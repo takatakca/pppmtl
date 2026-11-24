@@ -45,19 +45,15 @@ Le flux `.github/workflows/mobile.yml` tourne à chaque modification de `mobile/
 Les fichiers Android du flux sont signés avec la clé de test publique d'Android : bons pour essayer, **pas pour Google
 Play**.
 
-## Publier sur Google Play (plus tard, après les soumissions en cours)
+## Version 2 pour Google Play et Amazon (signée sur le PC du propriétaire)
 
-Ne rien changer tant que la version PWABuilder est en examen chez Google et Amazon. Ensuite, la clé de téléversement
-reste **sur le PC du propriétaire** (fichier PWABuilder) et ne va jamais sur GitHub ni sur Drive :
-
-```sh
-# une fois : Java 17 installé (il fournit jarsigner)
-jarsigner -keystore signing.keystore -signedjar MontrealHub-2.0.0.aab \
-  MontrealHub-native-unsigned-for-play.aab my-key-alias
-```
-
-Le nom d'alias et le mot de passe sont dans `signing-key-info.txt` du ZIP PWABuilder, sur le PC. Ensuite, téléverser
-`MontrealHub-2.0.0.aab` comme nouvelle version de l'app existante. Amazon accepte l'APK signé de la même clé.
+Ne rien changer tant que la version PWABuilder est en examen chez Google et Amazon.
+Ensuite, le flux publie aussi `montrealhub-store-kit` : le `.aab` et le `.apk` à signer,
+`apksigner.jar` (outil officiel d'Android), `SIGNER.bat`, `SIGNER.ps1` et `LISEZ-MOI.txt`
+(sources dans `store-kit/`). Le propriétaire décompresse le ZIP, y copie `signing.keystore`
+et `signing-key-info.txt` du ZIP PWABuilder de MontrealHub, puis double-clique sur
+`SIGNER.bat`. Il obtient `MontrealHub-v2-google-play.aab` et `MontrealHub-v2-amazon.apk`.
+La clé et son mot de passe ne quittent jamais le PC : ils ne vont ni sur GitHub ni sur Drive.
 
 ## Apple (en dernier)
 
