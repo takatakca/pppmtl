@@ -119,7 +119,10 @@ describe("signed cookie values", () => {
     const value = signValue({ sub: "a", exp }, k);
     expect(verifyValue<{ sub: string; exp: number }>(value, k)?.sub).toBe("a");
     expect(verifyValue(value, "z".repeat(40))).toBeNull();
-    expect(verifyValue(`${value.slice(0, -1)}0`, k)).toBeNull();
+    // Flip the last hex digit to a DIFFERENT one: the old "replace it with 0"
+    // was a no-op whenever the HMAC already ended in "0" (1 run in 16).
+    const tampered = `${value.slice(0, -1)}${value.endsWith("0") ? "1" : "0"}`;
+    expect(verifyValue(tampered, k)).toBeNull();
     const forged = `${Buffer.from(JSON.stringify({ sub: "b", exp })).toString("base64url")}.${value.split(".")[1]}`;
     expect(verifyValue(forged, k)).toBeNull();
     expect(verifyValue(signValue({ sub: "a", exp: exp - 120 }, k), k)).toBeNull();

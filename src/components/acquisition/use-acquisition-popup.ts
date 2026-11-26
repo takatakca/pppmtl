@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { usePPP } from "@/context/ppp-store";
+import { backendEnabled } from "@/lib/customer/repositories";
 
 const DISMISSED_KEY = "ppp.welcome.dismissed.v1";
 /** Survives the session so a second visit gets the returning-customer wording. */
@@ -52,7 +53,12 @@ export function useAcquisitionPopup() {
   }, [pathname]);
 
   const blocked =
-    isSuppressed(pathname) || searchOpen || locationSheetOpen || orderSheetOpen || cartOpen;
+    !backendEnabled ||
+    isSuppressed(pathname) ||
+    searchOpen ||
+    locationSheetOpen ||
+    orderSheetOpen ||
+    cartOpen;
 
   useEffect(() => {
     if (open || blocked || alreadyDismissed()) return undefined;

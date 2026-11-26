@@ -5,7 +5,7 @@ import { GoogleButton } from "@/components/auth/google-button";
 import { GOOGLE_SIGN_IN_ENABLED } from "@/config/auth-flags";
 import { Field, PasswordField } from "@/components/account/field";
 import { usePPP } from "@/context/ppp-store";
-import { authRepository } from "@/lib/customer/repositories";
+import { authRepository, backendEnabled } from "@/lib/customer/repositories";
 import { emailError, safeReturnTo } from "@/lib/customer/validation";
 import { canonicalUrl } from "@/config/site";
 
@@ -51,6 +51,32 @@ function SignInPage() {
     setPending(false);
     setPassword("");
     if (!result.ok) setNotice(result.message);
+  }
+
+  // Accounts are not open yet (TAKATAK identity API pending). Never show a
+  // form that cannot succeed: point people to guest ordering instead.
+  if (!backendEnabled) {
+    return (
+      <AuthShell
+        eyebrow={t("PPP customer account", "Compte client PPP")}
+        title={t("Accounts open soon", "Comptes bientôt ouverts")}
+      >
+        <div className="rise-in border border-border bg-card p-5">
+          <p className="text-sm text-muted-foreground">
+            {t(
+              "You don't need an account: ordering, pickup and delivery all work right now as a guest.",
+              "Pas besoin de compte : la commande, la cueillette et la livraison fonctionnent déjà sans compte.",
+            )}
+          </p>
+          <Link
+            to="/order"
+            className="press-tap mt-4 inline-flex bg-primary px-5 py-3 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp"
+          >
+            {t("Order now", "Commander")}
+          </Link>
+        </div>
+      </AuthShell>
+    );
   }
 
   return (

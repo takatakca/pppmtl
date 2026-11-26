@@ -3,10 +3,14 @@ import { Clock, Heart, MapPin, Star, UserPlus, Zap } from "lucide-react";
 import { usePPP } from "@/context/ppp-store";
 import { Reveal } from "@/components/motion/reveal";
 import { GoogleButton } from "@/components/auth/google-button";
+import { backendEnabled } from "@/lib/customer/repositories";
 
 /** Homepage entry point into the PPP customer account (create / sign in). */
 export function AccountModule() {
   const { t } = usePPP();
+  // Accounts are not open yet (TAKATAK identity API pending): show nothing
+  // rather than a sign-up that cannot succeed (store reviewers flagged it).
+  if (!backendEnabled) return null;
 
   const perks = [
     { icon: Zap, label: t("Order faster", "Commandez plus vite") },
