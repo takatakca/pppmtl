@@ -15,6 +15,7 @@ import {
   Zap,
 } from "lucide-react";
 import { usePPP } from "@/context/ppp-store";
+import { backendEnabled } from "@/lib/customer/repositories";
 import { menuRepository } from "@/lib/menu-repository";
 import { localizedName } from "@/lib/search";
 import { MenuImage } from "@/components/menu/menu-item-image";
@@ -193,12 +194,14 @@ export function AppPreview() {
                 ? t("Add PPP to your phone", "Ajouter PPP à votre téléphone")
                 : t("Start an order", "Commencer une commande")}
             </button>
-            <Link
-              to="/account/sign-up"
-              className="press-tap inline-flex items-center border border-border px-5 py-3 font-display text-lg uppercase leading-none focus-ppp"
-            >
-              {t("Create account", "Créer un compte")}
-            </Link>
+            {backendEnabled && (
+              <Link
+                to="/account/sign-up"
+                className="press-tap inline-flex items-center border border-border px-5 py-3 font-display text-lg uppercase leading-none focus-ppp"
+              >
+                {t("Create account", "Créer un compte")}
+              </Link>
+            )}
           </div>
         </div>
 

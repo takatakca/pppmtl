@@ -7,6 +7,7 @@ import { KITCHENS } from "@/config/brands";
 import { trackExternalOrder, trackSocialLink } from "@/lib/analytics";
 import { pppSocials } from "@/components/home/follow-ppp";
 import { PPPLogo } from "@/components/brand/ppp-logo";
+import { backendEnabled } from "@/lib/customer/repositories";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { trackSupportRouted } from "@/lib/analytics";
 
@@ -182,15 +183,17 @@ export function PPPHeader() {
               <span className="hidden lg:inline">{t("Search food", "Chercher", "Buscar")}</span>
               <Mic className="hidden h-4 w-4 text-primary lg:inline" />
             </button>
-            <Link
-              to="/account/sign-in"
-              search={{ returnTo: "/account" }}
-              aria-label={tr("common.signIn")}
-              className="hidden h-10 items-center gap-2 border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp lg:inline-flex"
-            >
-              <User className="h-4 w-4" />
-              {tr("common.signIn")}
-            </Link>
+            {backendEnabled && (
+              <Link
+                to="/account/sign-in"
+                search={{ returnTo: "/account" }}
+                aria-label={tr("common.signIn")}
+                className="hidden h-10 items-center gap-2 border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground focus-ppp lg:inline-flex"
+              >
+                <User className="h-4 w-4" />
+                {tr("common.signIn")}
+              </Link>
+            )}
             <button
               onClick={openOrderSheet}
               className="hidden h-10 items-center bg-primary px-5 font-display text-lg uppercase leading-none text-primary-foreground focus-ppp lg:inline-flex"
